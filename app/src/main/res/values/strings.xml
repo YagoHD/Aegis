@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">Aegis</string>
+    <string name="label_mass">Masa</string> <string name="label_body_fat">Grasa</string>
+    <string name="label_bmi">IMC</string>
+    <string name="label_girths">Medidas (cm)</string>
+    <string name="label_biometrics">BIOMETRÍA</string>
+    <string name="label_discipline_day">DÍAS DE DISCIPLINA %1$d</string>
+    <string name="label_key_girths">MEDIDAS CLAVE (CM)</string>
+    <string name="label_chest">Pecho</string>
+    <string name="label_waist">Cintura</string>
+    <string name="label_arms">Brazos</string>
+    <string name="label_visual_log">LOG VISUAL</string>
+    <string name="label_add">Añadir</string>
+    <string name="label_base">BASE</string>
+    <string name="label_actual">ACTUAL</string>
+    <string name="label_today">HOY</string>
+    <string name="date_placeholder">%1$s</string>
+    <string name="profile_title">Perfil</string>
+    <string name="settings_title_interface">PERSONALIZAR INTERFAZ</string>
+    <string name="settings_title_manage_measures">GESTIONAR MEDIDAS</string>
+    <string name="settings_title_add_metric">AÑADIR NUEVA MÉTRICA</string>
+    <string name="settings_label_body_fat">Mostrar Grasa Corporal</string>
+    <string name="settings_label_bmi">Mostrar IMC (BMI)</string>
+    <string name="settings_label_visual_log">Mostrar Log Visual</string>
+    <string name="settings_hint_new_measure">Nombre (ej: Cuádriceps)</string>
+    <string name="settings_desc_delete">Borrar medida</string>
+    <string name="settings_desc_add">Añadir medida</string>
+</resources>
