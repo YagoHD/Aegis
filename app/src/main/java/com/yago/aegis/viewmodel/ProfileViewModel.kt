@@ -1,69 +1,123 @@
 package com.yago.aegis.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
-import com.yago.aegis.data.UserProfile
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.yago.aegis.data.BodyMeasure
 import com.yago.aegis.data.PhotoType
+import com.yago.aegis.data.UserProfile
+import com.yago.aegis.data.UserRepository
+import kotlinx.coroutines.launch
 
-class ProfileViewModel : ViewModel() {
+class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
+
+    // 1. Estado del Usuario (Carga desde el repositorio)
     var user by mutableStateOf(
         UserProfile(
-            name = "Yago Ramos",
+            name = "Cargando...",
             disciplineDay = 0,
-            currentMass = "98.0", // Mejor empezar con un valor para que el BMI no sea 0
-            height = 1.84,
-            bodyFat = "11.4",
+            currentMass = "0.0",
+            height = 1.0,
+            bodyFat = "0.0",
             goal = "BULK"
-            // Borramos chest, waist y arms de aquí
         )
     )
+        private set
 
-    // 2. Esta es tu fuente de verdad para todas las medidas corporales
+    // 2. Estados de la Interfaz (Persistentes)
+    var showBMI by mutableStateOf(true)
+        private set
+    var showBodyFat by mutableStateOf(true)
+        private set
+    var showVisualLog by mutableStateOf(true)
+        private set
+    var showGirths by mutableStateOf(true)
+        private set
+
+    // 3. Medidas personalizadas (Memoria temporal)
     var customMeasures by mutableStateOf<List<BodyMeasure>>(listOf(
         BodyMeasure("CHEST", "Pecho", "112.5"),
         BodyMeasure("WAIST", "Cintura", "78.2"),
         BodyMeasure("ARMS", "Brazo", "42.5")
     ))
 
-    // Función para actualizar el valor de una medida específica
-    fun updateMeasureValue(id: String, newValue: String) {
-        customMeasures = customMeasures.map {
-            if (it.id == id) it.copy(value = newValue) else it
+    init {
+        // --- ESCUCHAR CAMBIOS DEL REPOSITORIO (LECTURA) ---
+
+        viewModelScope.launch {
+            repository.userName.collect { nuevoNombre ->
+                user = user.copy(name = nuevoNombre)
+            }
+        }
+
+        viewModelScope.launch {
+            repository.avatarUri.collect { uri ->
+                user = user.copy(profilePhotoUri = uri)
+            }
+        }
+
+        viewModelScope.launch {
+            repository.showBMI.collect { showBMI = it }
+        }
+
+        viewModelScope.launch {
+            repository.showBodyFat.collect { showBodyFat = it }
+        }
+
+        viewModelScope.launch {
+            repository.showVisualLog.collect { showVisualLog = it }
+        }
+
+        viewModelScope.launch {
+            repository.showGirths.collect { showGirths = it }
         }
     }
 
-    // Función "mágica" para añadir nuevas medidas (cuádriceps, cuello, etc.)
-    fun addMeasure(name: String) {
-        val newId = name.uppercase().replace(" ", "_")
-        customMeasures = customMeasures + BodyMeasure(newId, name, "0.0")
+    // --- FUNCIONES DE ACTUALIZACIÓN (ESCRITURA EN DISCO) ---
+
+    fun updateName(newName: String) {
+        viewModelScope.launch {
+            repository.updateName(newName)
+        }
     }
 
-    // Función para eliminar una medida si el usuario ya no la quiere
-    fun removeMeasure(id: String) {
-        customMeasures = customMeasures.filter { it.id != id }
+    fun updateAvatar(uri: String) {
+        viewModelScope.launch {
+            repository.updateAvatar(uri)
+        }
     }
+
+    fun toggleBMI(enabled: Boolean) {
+        viewModelScope.launch {
+            repository.toggleBMI(enabled)
+        }
+    }
+
+    fun toggleBodyFat(enabled: Boolean) {
+        viewModelScope.launch {
+            repository.toggleBodyFat(enabled)
+        }
+    }
+
+    fun toggleVisualLog(enabled: Boolean) {
+        viewModelScope.launch {
+            repository.toggleVisualLog(enabled)
+        }
+    }
+
+    fun toggleGirths(enabled: Boolean) {
+        viewModelScope.launch {
+            repository.toggleGirths(enabled)
+        }
+    }
+
+    // --- FUNCIONES DE LÓGICA Y CÁLCULOS ---
 
     fun calcularBMI(): Double {
-        // toDoubleOrNull() evita que la app explote si el campo está vacío
         val mass = user.currentMass.toDoubleOrNull() ?: 0.0
         return if (mass > 0) mass / (user.height * user.height) else 0.0
-    }
-
-    fun daysToMilestone(targetDay: Int): Int {
-        return targetDay - user.disciplineDay
-    }
-
-    fun getWeightStatus() : String{
-        return if (user.goal == "BULK") {
-            "Bulk Mode"
-        } else "Cutting Mode"
-    }
-
-    fun incrementDisciplineDay() {
-        user = user.copy(disciplineDay = user.disciplineDay + 1)
     }
 
     fun updateMass(newMass: String) {
@@ -81,14 +135,20 @@ class ProfileViewModel : ViewModel() {
         }
     }
 
-    var showBodyFat by mutableStateOf(true)
-    var showBMI by mutableStateOf(true)
-    var showVisualLog by mutableStateOf(true)
-    var showGirths by mutableStateOf(true)
+    // --- GESTIÓN DE MEDIDAS (TEMPORAL) ---
 
-    // Funciones para cambiar los estados
-    fun toggleBodyFat(enabled: Boolean) { showBodyFat = enabled }
-    fun toggleBMI(enabled: Boolean) { showBMI = enabled }
-    fun toggleVisualLog(enabled: Boolean) { showVisualLog = enabled }
-    fun toggleGirths(enabled: Boolean) { showGirths = enabled }
+    fun updateMeasureValue(id: String, newValue: String) {
+        customMeasures = customMeasures.map {
+            if (it.id == id) it.copy(value = newValue) else it
+        }
+    }
+
+    fun addMeasure(name: String) {
+        val newId = name.uppercase().replace(" ", "_")
+        customMeasures = customMeasures + BodyMeasure(newId, name, "0.0")
+    }
+
+    fun removeMeasure(id: String) {
+        customMeasures = customMeasures.filter { it.id != id }
+    }
 }

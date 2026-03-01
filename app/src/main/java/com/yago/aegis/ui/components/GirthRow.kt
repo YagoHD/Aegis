@@ -46,7 +46,7 @@ fun GirthRow(label: String, value: String, onValueChange: (String) -> Unit) {
                 textStyle = TextStyle(
                     color = AegisWhite,
                     fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center // Centramos el número en su cajita
+                    textAlign = TextAlign.Center
                 ),
                 cursorBrush = SolidColor(AegisBronze),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),

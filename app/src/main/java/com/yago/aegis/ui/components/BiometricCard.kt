@@ -25,7 +25,7 @@ fun BiometricCard(
     label: String,
     value: String,
     unit: String,
-    onValueChange: ((String) -> Unit)? = null // Nueva función para avisar del cambio
+    onValueChange: ((String) -> Unit)? = null
 ) {
     Column(
         modifier = Modifier
@@ -45,20 +45,19 @@ fun BiometricCard(
             overflow = TextOverflow.Ellipsis
         )
         Row(verticalAlignment = Alignment.Bottom) {
-            // Sustituimos el Text por BasicTextField
             BasicTextField(
                 value = value,
-                onValueChange = { onValueChange?.invoke(it) }, // Solo se ejecuta si no es null
-                enabled = onValueChange != null, // SI ES NULL, NO ES CLICABLE
-                readOnly = onValueChange == null, // Evita que salga el cursor
+                onValueChange = { onValueChange?.invoke(it) },
+                enabled = onValueChange != null,
+                readOnly = onValueChange == null,
                 textStyle = TextStyle(
                     color = AegisWhite,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Black
                 ),
-                cursorBrush = SolidColor(AegisBronze), // El palito del cursor será bronce
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), // Teclado con números y coma
-                modifier = Modifier.width(IntrinsicSize.Min) // Para que el cursor esté pegado al número
+                cursorBrush = SolidColor(AegisBronze),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                modifier = Modifier.width(IntrinsicSize.Min)
             )
 
             if (unit.isNotEmpty()) {
@@ -67,7 +66,7 @@ fun BiometricCard(
                     text = unit,
                     color = Color.Gray,
                     fontSize = 12.sp,
-                    modifier = Modifier.padding(bottom = 2.dp) // Alineación fina con el número
+                    modifier = Modifier.padding(bottom = 2.dp)
                 )
             }
         }

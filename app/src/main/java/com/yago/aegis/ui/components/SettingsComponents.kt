@@ -1,5 +1,7 @@
 package com.yago.aegis.ui.components
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -7,6 +9,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,39 +19,101 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.yago.aegis.R
 import com.yago.aegis.ui.theme.AegisBronze
 import com.yago.aegis.viewmodel.ProfileViewModel
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
+import androidx.compose.ui.focus.onFocusChanged
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsMenu(viewModel: ProfileViewModel) {
     var newMeasureName by remember { mutableStateOf("") }
+    val user = viewModel.user
     val scrollState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope() // Necesario para mover el scroll
+
+    val avatarLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let { viewModel.updateAvatar(it.toString()) }
+    }
 
     Column(
         modifier = Modifier
-            .padding(16.dp)
-            .fillMaxWidth()
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
             .verticalScroll(scrollState)
-            .padding(bottom = 32.dp)
     ) {
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // --- SECCIÓN 1: DATOS PERSONALES ---
+        Text(
+            text = "DATOS DE USUARIO",
+            color = AegisBronze,
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            FilledIconButton(
+                onClick = { avatarLauncher.launch("image/*") },
+                colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color(0xFF252525)),
+                modifier = Modifier.size(56.dp)
+            ) {
+                Icon(Icons.Default.Person, contentDescription = null, tint = Color.White)
+            }
+
+            OutlinedTextField(
+                value = user.name,
+                onValueChange = { viewModel.updateName(it) },
+                label = { Text("Nombre", color = Color.Gray) },
+                modifier = Modifier.weight(1f),
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = AegisBronze,
+                    unfocusedBorderColor = Color.DarkGray,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White
+                )
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+        HorizontalDivider(color = Color.DarkGray, thickness = 0.5.dp)
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // --- SECCIÓN 2: INTERFAZ ---
         Text(
             text = stringResource(R.string.settings_title_interface),
             color = AegisBronze,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp
         )
         Spacer(modifier = Modifier.height(16.dp))
 
         SettingsRow(stringResource(R.string.settings_label_body_fat), viewModel.showBodyFat) { viewModel.toggleBodyFat(it) }
         SettingsRow(stringResource(R.string.settings_label_bmi), viewModel.showBMI) { viewModel.toggleBMI(it) }
         SettingsRow(stringResource(R.string.settings_label_visual_log), viewModel.showVisualLog) { viewModel.toggleVisualLog(it) }
+        SettingsRow(stringResource(R.string.settings_label_girths), viewModel.showGirths) { viewModel.toggleGirths(it) }
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // --- SECCIÓN 3: GESTIÓN DE MEDIDAS ---
         Text(
             text = stringResource(R.string.settings_title_manage_measures),
             color = AegisBronze,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp
         )
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -60,32 +125,48 @@ fun SettingsMenu(viewModel: ProfileViewModel) {
             ) {
                 Text(measure.name, color = Color.White)
                 IconButton(onClick = { viewModel.removeMeasure(measure.id) }) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = stringResource(R.string.settings_desc_delete),
-                        tint = Color.Red.copy(alpha = 0.7f)
-                    )
+                    Icon(Icons.Default.Delete, contentDescription = null, tint = Color.Red.copy(alpha = 0.7f))
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
+        // --- SECCIÓN 4: AÑADIR NUEVA MEDIDA (FOCO CORREGIDO) ---
         Text(
             text = stringResource(R.string.settings_title_add_metric),
             color = AegisBronze,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp
         )
         Spacer(modifier = Modifier.height(8.dp))
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             OutlinedTextField(
                 value = newMeasureName,
                 onValueChange = { newMeasureName = it },
                 label = { Text(stringResource(R.string.settings_hint_new_measure), color = Color.Gray) },
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .onFocusChanged { focusState ->
+                        if (focusState.isFocused) {
+                            coroutineScope.launch {
+                                delay(300)
+                                scrollState.animateScrollTo(scrollState.maxValue)
+                            }
+                        }
+                    },
                 singleLine = true,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = AegisBronze,
+                    unfocusedBorderColor = Color.DarkGray,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White
+                )
             )
             IconButton(onClick = {
                 if (newMeasureName.isNotBlank()) {
@@ -93,21 +174,22 @@ fun SettingsMenu(viewModel: ProfileViewModel) {
                     newMeasureName = ""
                 }
             }) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = stringResource(R.string.settings_desc_add),
-                    tint = AegisBronze
-                )
+                Icon(Icons.Default.Add, contentDescription = null, tint = AegisBronze)
             }
         }
-        Spacer(modifier = Modifier.height(250.dp))
+
+        Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.ime))
+
+        Spacer(modifier = Modifier.height(50.dp))
     }
 }
 
 @Composable
 fun SettingsRow(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(label, color = Color.White, modifier = Modifier.weight(1f))

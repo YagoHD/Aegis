@@ -1,6 +1,6 @@
 package com.yago.aegis.ui.components
 
-import android.net.Uri // Añade este import
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -23,16 +23,15 @@ import com.yago.aegis.R
 import com.yago.aegis.ui.theme.AegisBronze
 import com.yago.aegis.ui.theme.AegisCard
 import com.yago.aegis.ui.theme.AegisWhite
-import coil3.compose.AsyncImage // Si falla, prueba: import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 
 @Composable
 fun VisualLogSection(
-    baseUri: Uri?,      // Nueva prop
-    actualUri: Uri?,    // Nueva prop
+    baseUri: Uri?,
+    actualUri: Uri?,
     onAddClick: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        // ... (Header de la sección igual) ...
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -54,7 +53,7 @@ fun VisualLogSection(
                 ProgressPhotoCard(
                     label = stringResource(R.string.label_base),
                     date = "OCT 12",
-                    photoUri = baseUri // Pasamos la URI
+                    photoUri = baseUri
                 )
             }
 
@@ -67,7 +66,7 @@ fun VisualLogSection(
                 ProgressPhotoCard(
                     label = stringResource(R.string.label_actual),
                     date = stringResource(R.string.label_today),
-                    photoUri = actualUri // Pasamos la URI
+                    photoUri = actualUri
                 )
             }
         }
@@ -89,7 +88,7 @@ fun ProgressPhotoCard(label: String, date: String, photoUri: Uri?) {
                 model = photoUri,
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop // Importado arriba
+                contentScale = ContentScale.Crop
             )
         } else {
             Box(modifier = Modifier.fillMaxSize().background(Color(0xFF1A1A1A)))
