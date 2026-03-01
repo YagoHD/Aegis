@@ -24,7 +24,6 @@ import com.yago.aegis.ui.theme.AegisBronze
 import com.yago.aegis.ui.theme.AegisCard
 import com.yago.aegis.ui.theme.AegisWhite
 import coil3.compose.AsyncImage
-//TEST
 @Composable
 fun VisualLogSection(
     baseUri: Uri?,
