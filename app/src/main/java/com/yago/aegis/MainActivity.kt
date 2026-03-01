@@ -15,17 +15,17 @@ import com.yago.aegis.ui.screens.MainProfileScreen
 import com.yago.aegis.ui.screens.SettingsScreen
 import com.yago.aegis.ui.theme.AegisTheme
 import com.yago.aegis.viewmodel.ProfileViewModel
-import com.yago.aegis.viewmodel.ProfileViewModelFactory // Asegúrate de importar esto
+import com.yago.aegis.viewmodel.ProfileViewModelFactory
+import android.content.Intent
 
 class MainActivity : ComponentActivity() {
+
+    private val settingsStore by lazy { SettingsStore(applicationContext) }
+    private val userRepository by lazy { UserRepository(settingsStore) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 1. Preparamos las piezas del "motor"
-        val settingsStore = SettingsStore(applicationContext)
-        val userRepository = UserRepository(settingsStore)
-
-        // 2. Creamos el ViewModel usando la Factory para pasarle el repositorio
         val viewModel: ProfileViewModel by viewModels {
             ProfileViewModelFactory(userRepository)
         }
@@ -33,7 +33,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             AegisTheme {
                 val navController = rememberNavController()
-
                 NavHost(
                     navController = navController,
                     startDestination = "profile"
@@ -57,6 +56,16 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+    private fun takePersistableUriPermission(uri: android.net.Uri) {
+        try {
+            contentResolver.takePersistableUriPermission(
+                uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }

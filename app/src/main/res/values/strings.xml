@@ -26,4 +26,7 @@
     <string name="settings_desc_delete">Borrar medida</string>
     <string name="settings_desc_add">Añadir medida</string>
     <string name="settings_label_girths">Mostrar medidas corporales</string>
+    <string name="label_height">Altura</string>
+    <string name="hint_height">Ej: 1.75</string>
+    <string name="unit_meters">m</string>
 </resources>

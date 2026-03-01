@@ -28,7 +28,9 @@ import coil3.compose.AsyncImage
 fun VisualLogSection(
     baseUri: Uri?,
     actualUri: Uri?,
-    onAddClick: () -> Unit
+    onAddClick: () -> Unit,
+    actualDate: String?,
+    baseDate: String?
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -48,10 +50,10 @@ fun VisualLogSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Foto BASE
-            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.weight(1f)) {
                 ProgressPhotoCard(
                     label = stringResource(R.string.label_base),
-                    date = "OCT 12",
+                    date = baseDate ?: "-- --",
                     photoUri = baseUri
                 )
             }
@@ -60,11 +62,10 @@ fun VisualLogSection(
                 Icon(imageVector = Icons.Default.ArrowForward, contentDescription = null, modifier = Modifier.size(20.dp), tint = AegisBronze)
             }
 
-            // Foto ACTUAL
-            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.weight(1f)) {
                 ProgressPhotoCard(
                     label = stringResource(R.string.label_actual),
-                    date = stringResource(R.string.label_today),
+                    date = actualDate ?: "-- --",
                     photoUri = actualUri
                 )
             }

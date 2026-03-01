@@ -1,5 +1,6 @@
 package com.yago.aegis.ui.components
 
+import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
@@ -10,23 +11,23 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.R
 import com.yago.aegis.ui.theme.AegisBronze
 import com.yago.aegis.viewmodel.ProfileViewModel
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.windowInsetsBottomHeight
-import androidx.compose.ui.focus.onFocusChanged
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -35,12 +36,29 @@ fun SettingsMenu(viewModel: ProfileViewModel) {
     var newMeasureName by remember { mutableStateOf("") }
     val user = viewModel.user
     val scrollState = rememberScrollState()
-    val coroutineScope = rememberCoroutineScope() // Necesario para mover el scroll
+    val coroutineScope = rememberCoroutineScope()
 
+    // Estado local para la altura (evita que el cursor salte al guardar en DataStore)
+    var tempHeight by remember(user.height) { mutableStateOf(user.height.toString()) }
+
+    val context = LocalContext.current // Necesario para el permiso
     val avatarLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
-        uri?.let { viewModel.updateAvatar(it.toString()) }
+        uri?.let {
+            try {
+                // ✅ ESTO ES LO QUE HACE QUE LA FOTO NO SE BORRE AL CERRAR
+                context.contentResolver.takePersistableUriPermission(
+                    it,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            // Guardamos en el ViewModel
+            viewModel.updateAvatar(it.toString())
+        }
     }
 
     Column(
@@ -88,6 +106,33 @@ fun SettingsMenu(viewModel: ProfileViewModel) {
             )
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // --- CAMPO DE ALTURA ---
+        OutlinedTextField(
+            value = tempHeight,
+            onValueChange = { newValue ->
+                tempHeight = newValue
+                newValue.toDoubleOrNull()?.let { viewModel.updateHeight(it) }
+            },
+            label = { Text(stringResource(R.string.label_height), color = Color.Gray) },
+            placeholder = { Text(stringResource(R.string.hint_height), color = Color.DarkGray) },
+            modifier = Modifier.fillMaxWidth(),
+            leadingIcon = { Icon(Icons.Default.Straighten, contentDescription = null, tint = AegisBronze) },
+            suffix = { Text(stringResource(R.string.unit_meters), color = AegisBronze, fontWeight = FontWeight.Bold) },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Decimal,
+                imeAction = ImeAction.Next
+            ),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = AegisBronze,
+                unfocusedBorderColor = Color.DarkGray,
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White
+            )
+        )
+
         Spacer(modifier = Modifier.height(24.dp))
         HorizontalDivider(color = Color.DarkGray, thickness = 0.5.dp)
         Spacer(modifier = Modifier.height(24.dp))
@@ -132,7 +177,7 @@ fun SettingsMenu(viewModel: ProfileViewModel) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- SECCIÓN 4: AÑADIR NUEVA MEDIDA (FOCO CORREGIDO) ---
+        // --- SECCIÓN 4: AÑADIR NUEVA MEDIDA ---
         Text(
             text = stringResource(R.string.settings_title_add_metric),
             color = AegisBronze,
@@ -179,7 +224,6 @@ fun SettingsMenu(viewModel: ProfileViewModel) {
         }
 
         Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.ime))
-
         Spacer(modifier = Modifier.height(50.dp))
     }
 }

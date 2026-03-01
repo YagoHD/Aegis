@@ -1,6 +1,7 @@
 package com.yago.aegis.ui.screens
 
 import BiometricCard
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -16,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -56,13 +58,27 @@ fun ProfileContent(viewModel: ProfileViewModel) {
     val user = viewModel.user
     val imc = viewModel.calcularBMI()
     val scrollState = rememberScrollState()
+    val context = LocalContext.current // Contexto dentro de la función correcta
+
     var showDialog by remember { mutableStateOf(false) }
     var photoTypeTarget by remember { mutableStateOf(PhotoType.BASE) }
 
+    // ✅ ESTE ES EL LAUNCHER CORRECTO CON PERMISOS PERSISTENTES
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        uri?.let { viewModel.updatePhoto(uri = it.toString(), type = photoTypeTarget) }
+        uri?.let {
+            try {
+                // Pedimos permiso para que la imagen no desaparezca al cerrar la app
+                context.contentResolver.takePersistableUriPermission(
+                    it,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            } catch (e: Exception) {
+                // Algunos selectores no permiten persistencia, se ignora el error
+            }
+            viewModel.updatePhoto(uri = it.toString(), type = photoTypeTarget)
+        }
     }
 
     Column(
@@ -134,8 +150,10 @@ fun ProfileContent(viewModel: ProfileViewModel) {
         // --- LOG VISUAL ---
         if (viewModel.showVisualLog) {
             VisualLogSection(
-                user.basePhotoUri?.let { Uri.parse(it) },
-                user.actualPhotoUri?.let { Uri.parse(it) },
+                baseUri = user.basePhotoUri?.let { Uri.parse(it) },
+                baseDate = user.basePhotoDate,
+                actualUri = user.actualPhotoUri?.let { Uri.parse(it) },
+                actualDate = user.actualPhotoDate,
                 onAddClick = { showDialog = true }
             )
         }

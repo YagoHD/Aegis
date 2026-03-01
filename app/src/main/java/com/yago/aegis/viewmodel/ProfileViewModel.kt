@@ -10,23 +10,26 @@ import com.yago.aegis.data.PhotoType
 import com.yago.aegis.data.UserProfile
 import com.yago.aegis.data.UserRepository
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
 
-    // 1. Estado del Usuario (Carga desde el repositorio)
+    // 1. Estado del Usuario (Sincronizado con DataStore)
     var user by mutableStateOf(
         UserProfile(
             name = "Cargando...",
             disciplineDay = 0,
             currentMass = "0.0",
-            height = 1.0,
+            height = 1.70,
             bodyFat = "0.0",
             goal = "BULK"
         )
     )
         private set
 
-    // 2. Estados de la Interfaz (Persistentes)
+    // 2. Estados de la Interfaz (Sincronizados con DataStore)
     var showBMI by mutableStateOf(true)
         private set
     var showBodyFat by mutableStateOf(true)
@@ -36,119 +39,150 @@ class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
     var showGirths by mutableStateOf(true)
         private set
 
-    // 3. Medidas personalizadas (Memoria temporal)
-    var customMeasures by mutableStateOf<List<BodyMeasure>>(listOf(
-        BodyMeasure("CHEST", "Pecho", "112.5"),
-        BodyMeasure("WAIST", "Cintura", "78.2"),
-        BodyMeasure("ARMS", "Brazo", "42.5")
-    ))
+    // 3. Medidas personalizadas (Sincronizadas con DataStore vía JSON)
+    var customMeasures by mutableStateOf<List<BodyMeasure>>(emptyList())
+        private set
 
     init {
-        // --- ESCUCHAR CAMBIOS DEL REPOSITORIO (LECTURA) ---
+        // --- ESCUCHAR CAMBIOS DEL REPOSITORIO (LECTURA EN TIEMPO REAL) ---
 
         viewModelScope.launch {
-            repository.userName.collect { nuevoNombre ->
-                user = user.copy(name = nuevoNombre)
+            repository.userName.collect { user = user.copy(name = it) }
+        }
+        viewModelScope.launch {
+            repository.currentMass.collect { user = user.copy(currentMass = it) }
+        }
+        viewModelScope.launch {
+            repository.height.collect { user = user.copy(height = it) }
+        }
+        viewModelScope.launch {
+            repository.bodyFat.collect { user = user.copy(bodyFat = it) }
+        }
+        viewModelScope.launch {
+            repository.avatarUri.collect { uri -> user = user.copy(profilePhotoUri = uri) }
+        }
+        viewModelScope.launch {
+            repository.basePhotoUri.collect { uri ->
+                user = user.copy(basePhotoUri = uri)
+            }
+        }
+        viewModelScope.launch {
+            repository.actualPhotoUri.collect { uri ->
+                user = user.copy(actualPhotoUri = uri)
             }
         }
 
+        viewModelScope.launch { repository.showBMI.collect { showBMI = it } }
+        viewModelScope.launch { repository.showBodyFat.collect { showBodyFat = it } }
+        viewModelScope.launch { repository.showVisualLog.collect { showVisualLog = it } }
+        viewModelScope.launch { repository.showGirths.collect { showGirths = it } }
+
+        viewModelScope.launch {
+            repository.customMeasures.collect { customMeasures = it }
+        }
+
+        viewModelScope.launch {
+            repository.basePhotoDate.collect { date ->
+                user = user.copy(basePhotoDate = date)
+            }
+        }
+
+        viewModelScope.launch {
+            repository.actualPhotoDate.collect { date ->
+                user = user.copy(actualPhotoDate = date)
+            }
+        }
         viewModelScope.launch {
             repository.avatarUri.collect { uri ->
                 user = user.copy(profilePhotoUri = uri)
             }
-        }
-
-        viewModelScope.launch {
-            repository.showBMI.collect { showBMI = it }
-        }
-
-        viewModelScope.launch {
-            repository.showBodyFat.collect { showBodyFat = it }
-        }
-
-        viewModelScope.launch {
-            repository.showVisualLog.collect { showVisualLog = it }
-        }
-
-        viewModelScope.launch {
-            repository.showGirths.collect { showGirths = it }
         }
     }
 
     // --- FUNCIONES DE ACTUALIZACIÓN (ESCRITURA EN DISCO) ---
 
     fun updateName(newName: String) {
-        viewModelScope.launch {
-            repository.updateName(newName)
-        }
+        val validated = if (newName.isBlank()) "Guerrero Aegis" else newName
+        viewModelScope.launch { repository.updateName(validated) }
+    }
+
+    fun updateMass(newMass: String) {
+        viewModelScope.launch { repository.updateMass(newMass) }
+    }
+
+    fun updateBodyFat(newFat: String) {
+        viewModelScope.launch { repository.updateBodyFat(newFat) }
     }
 
     fun updateAvatar(uri: String) {
+        user = user.copy(profilePhotoUri = uri)
+
         viewModelScope.launch {
             repository.updateAvatar(uri)
         }
     }
 
-    fun toggleBMI(enabled: Boolean) {
-        viewModelScope.launch {
-            repository.toggleBMI(enabled)
-        }
-    }
+    // Toggles persistentes
+    fun toggleBMI(enabled: Boolean) = viewModelScope.launch { repository.toggleBMI(enabled) }
+    fun toggleBodyFat(enabled: Boolean) = viewModelScope.launch { repository.toggleBodyFat(enabled) }
+    fun toggleVisualLog(enabled: Boolean) = viewModelScope.launch { repository.toggleVisualLog(enabled) }
+    fun toggleGirths(enabled: Boolean) = viewModelScope.launch { repository.toggleGirths(enabled) }
 
-    fun toggleBodyFat(enabled: Boolean) {
-        viewModelScope.launch {
-            repository.toggleBodyFat(enabled)
-        }
-    }
-
-    fun toggleVisualLog(enabled: Boolean) {
-        viewModelScope.launch {
-            repository.toggleVisualLog(enabled)
-        }
-    }
-
-    fun toggleGirths(enabled: Boolean) {
-        viewModelScope.launch {
-            repository.toggleGirths(enabled)
-        }
-    }
-
-    // --- FUNCIONES DE LÓGICA Y CÁLCULOS ---
-
-    fun calcularBMI(): Double {
-        val mass = user.currentMass.toDoubleOrNull() ?: 0.0
-        return if (mass > 0) mass / (user.height * user.height) else 0.0
-    }
-
-    fun updateMass(newMass: String) {
-        user = user.copy(currentMass = newMass)
-    }
-
-    fun updateBodyFat(newFat: String) {
-        user = user.copy(bodyFat = newFat)
-    }
-
-    fun updatePhoto(uri: String, type: PhotoType) {
-        user = when (type) {
-            PhotoType.BASE -> user.copy(basePhotoUri = uri)
-            PhotoType.ACTUAL -> user.copy(actualPhotoUri = uri)
-        }
-    }
-
-    // --- GESTIÓN DE MEDIDAS (TEMPORAL) ---
+    // --- GESTIÓN DE MEDIDAS (PERSISTENCIA DE LISTAS) ---
 
     fun updateMeasureValue(id: String, newValue: String) {
-        customMeasures = customMeasures.map {
+        val updatedList = customMeasures.map {
             if (it.id == id) it.copy(value = newValue) else it
         }
+        viewModelScope.launch { repository.updateMeasures(updatedList) }
     }
 
     fun addMeasure(name: String) {
         val newId = name.uppercase().replace(" ", "_")
-        customMeasures = customMeasures + BodyMeasure(newId, name, "0.0")
+        val newList = customMeasures + BodyMeasure(newId, name, "0.0")
+        viewModelScope.launch { repository.updateMeasures(newList) }
     }
 
     fun removeMeasure(id: String) {
-        customMeasures = customMeasures.filter { it.id != id }
+        val newList = customMeasures.filter { it.id != id }
+        viewModelScope.launch { repository.updateMeasures(newList) }
     }
+
+    fun calcularBMI(): Double {
+        val mass = user.currentMass.toDoubleOrNull() ?: 0.0
+        return if (mass > 0 && user.height > 0) mass / (user.height * user.height) else 0.0
+    }
+
+    fun updatePhoto(uri: String, type: PhotoType) {
+        // 1. Generamos la fecha del momento exacto del cambio
+        val formatter = DateTimeFormatter.ofPattern("dd MMMM", Locale("es", "ES"))
+        val todayDate = LocalDate.now().format(formatter).uppercase()
+
+        // 2. Actualizamos la UI inmediatamente
+        user = when (type) {
+            PhotoType.BASE -> user.copy(basePhotoUri = uri, basePhotoDate = todayDate)
+            PhotoType.ACTUAL -> user.copy(actualPhotoUri = uri, actualPhotoDate = todayDate)
+        }
+
+        // 3. Guardamos en el DataStore (Permanencia)
+        viewModelScope.launch {
+            when (type) {
+                PhotoType.BASE -> {
+                    repository.updateBasePhoto(uri)
+                    repository.updateBasePhotoDate(todayDate)
+                }
+                PhotoType.ACTUAL -> {
+                    repository.updateActualPhoto(uri)
+                    repository.updateActualPhotoDate(todayDate)
+                }
+            }
+        }
+    }
+
+    fun updateHeight(newHeight: Double) {
+        viewModelScope.launch {
+            repository.updateHeight(newHeight)
+        }
+    }
+
 }
