@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
             AegisTheme {
                 // Solo llamamos al componente de navegación global
                 // Él se encargará de decidir qué pantalla mostrar
-                AegisNavigation(viewModel = viewModel)
+                AegisNavigation(profileViewModel = viewModel)
             }
         }
     }

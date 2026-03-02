@@ -9,6 +9,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -17,12 +20,23 @@ import com.yago.aegis.ui.components.AegisBottomBar
 import com.yago.aegis.ui.components.SettingsMenu
 import com.yago.aegis.ui.screens.*
 import com.yago.aegis.viewmodel.ProfileViewModel
+import com.yago.aegis.viewmodel.RoutinesViewModel
 
 @Composable
-fun AegisNavigation(viewModel: ProfileViewModel) {
+fun AegisNavigation(profileViewModel: ProfileViewModel) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    // ✅ EXTRAEMOS EL REPOSITORIO Y CREAMOS EL ROUTINESVIEWMODEL CON FACTORY
+    val repository = profileViewModel.repository
+    val routinesViewModel: RoutinesViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return RoutinesViewModel(repository) as T
+            }
+        }
+    )
 
     // No mostramos la barra en settings para que la configuración ocupe toda la pantalla
     val showBottomBar = currentRoute != "settings"
@@ -39,6 +53,7 @@ fun AegisNavigation(viewModel: ProfileViewModel) {
             startDestination = "profile",
             modifier = Modifier.padding(paddingValues)
         ) {
+            // 🏋️ PANTALLA DE MIS RUTINAS
             composable(
                 route = "routine",
                 enterTransition = {
@@ -55,17 +70,17 @@ fun AegisNavigation(viewModel: ProfileViewModel) {
                 }
             ) {
                 RoutineScreen(
-                    viewModel = viewModel,
-                    onNavigateToSettings = { navController.navigate("settings") } // ✅ Añade esto para corregir el error
+                    routinesViewModel = routinesViewModel,
+                    onNavigateToSettings = { navController.navigate("settings") }
                 )
             }
 
-            // Pantalla de Disciplina Semanal (Próximamente)
+            // 📅 PANTALLA DE DISCIPLINA SEMANAL
             composable("weekly") {
-                // WeeklyScreen(viewModel)
+                // WeeklyScreen(profileViewModel)
             }
 
-            // Tu pantalla de Perfil actual
+            // 👤 PANTALLA DE PERFIL
             composable(
                 route = "profile",
                 enterTransition = {
@@ -82,25 +97,24 @@ fun AegisNavigation(viewModel: ProfileViewModel) {
                 }
             ) {
                 MainProfileScreen(
-                    viewModel = viewModel,
-                    // ✅ ESTA LÍNEA ES LA QUE HACE QUE EL BOTÓN FUNCIONE:
+                    viewModel = profileViewModel,
                     onNavigateToSettings = { navController.navigate("settings") }
                 )
             }
 
-            // Pantalla de Estadísticas/Gráficas (Próximamente)
+            // 📊 PANTALLA DE ESTADÍSTICAS
             composable("stats") {
-                // StatsScreen(viewModel)
+                // StatsScreen(profileViewModel)
             }
 
-            // Pantalla de Ajustes con animaciones premium
+            // ⚙️ PANTALLA DE AJUSTES
             composable(
                 route = "settings",
                 enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
                 exitTransition = { slideOutHorizontally(targetOffsetX = { it }) }
             ) {
                 SettingsMenu(
-                    viewModel = viewModel,
+                    viewModel = profileViewModel,
                 )
             }
         }

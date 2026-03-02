@@ -14,7 +14,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
+class ProfileViewModel(val repository: UserRepository) : ViewModel() {
 
     // 1. Estado del Usuario (Sincronizado con DataStore)
     var user by mutableStateOf(

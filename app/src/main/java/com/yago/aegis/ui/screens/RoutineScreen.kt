@@ -27,8 +27,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -40,16 +43,64 @@ import com.yago.aegis.viewmodel.ProfileViewModel
 import com.yago.aegis.R
 import com.yago.aegis.ui.components.RoutineCard
 import com.yago.aegis.ui.theme.AegisBronze
+import com.yago.aegis.viewmodel.RoutinesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RoutineScreen(viewModel: ProfileViewModel, onNavigateToSettings: () -> Unit) {
-    // Lista de ejemplo (Luego vendrá del ViewModel)
-    val routines = remember {
-        mutableStateListOf(
-            Routine(1, "LEGS", 6, 0),
-            Routine(2, "PULL", 8, 0),
-            Routine(3, "PUSH", 7, 0)
+fun RoutineScreen(
+    routinesViewModel: RoutinesViewModel, // ✅ Usamos el nuevo ViewModel
+    onNavigateToSettings: () -> Unit
+) {
+    // ESTADOS PARA EL DIÁLOGO
+    var showDialog by remember { mutableStateOf(false) }
+    var textState by remember { mutableStateOf("") }
+    var routineToEdit by remember { mutableStateOf<Routine?>(null) }
+
+    // --- DIÁLOGO DE CREAR / EDITAR ---
+    if (showDialog) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showDialog = false },
+            containerColor = Color(0xFF161616),
+            title = {
+                Text(
+                    text = if (routineToEdit == null) "NUEVA RUTINA" else "EDITAR RUTINA",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                androidx.compose.material3.OutlinedTextField(
+                    value = textState,
+                    onValueChange = { textState = it },
+                    label = { Text("Nombre de la rutina", color = Color.Gray) },
+                    singleLine = true,
+                    colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = AegisBronze,
+                        unfocusedBorderColor = Color.DarkGray,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White
+                    )
+                )
+            },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    if (textState.isNotBlank()) {
+                        if (routineToEdit == null) {
+                            routinesViewModel.addRoutine(textState)
+                        } else {
+                            routinesViewModel.updateRoutine(routineToEdit!!.id, textState)
+                        }
+                        showDialog = false
+                    }
+                }) {
+                    Text("GUARDAR", color = AegisBronze, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { showDialog = false }) {
+                    Text("CANCELAR", color = Color.Gray)
+                }
+            }
         )
     }
 
@@ -60,7 +111,7 @@ fun RoutineScreen(viewModel: ProfileViewModel, onNavigateToSettings: () -> Unit)
                 windowInsets = WindowInsets(0, 0, 0, 0),
                 title = {
                     Text(
-                        stringResource(R.string.routine_title),
+                        stringResource(R.string.routine_title).uppercase(),
                         color = Color.White,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
@@ -77,27 +128,32 @@ fun RoutineScreen(viewModel: ProfileViewModel, onNavigateToSettings: () -> Unit)
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            // Lista de Rutinas
             LazyColumn(
-                modifier = Modifier.weight(1f), // Toma el espacio disponible
+                modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(routines) { routine ->
+                // ✅ Leemos la lista del ViewModel
+                items(routinesViewModel.routines) { routine ->
                     RoutineCard(
                         routine = routine,
-                        onEdit = { /* Lógica editar */ },
-                        onDelete = { routines.remove(routine) }
+                        onEdit = {
+                            routineToEdit = routine
+                            textState = routine.name
+                            showDialog = true
+                        },
+                        onDelete = { routinesViewModel.removeRoutine(routine) }
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Botón Crear Nueva Rutina
+            // BOTÓN CREAR
             Button(
                 onClick = {
-                    // Ejemplo: Añadir una nueva al pulsar
-                    routines.add(Routine(routines.size + 1, "NEW", 0, 0))
+                    routineToEdit = null
+                    textState = ""
+                    showDialog = true
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -108,7 +164,11 @@ fun RoutineScreen(viewModel: ProfileViewModel, onNavigateToSettings: () -> Unit)
             ) {
                 Icon(Icons.Default.Add, contentDescription = null, tint = AegisBronze)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(stringResource(R.string.btn_create_routine), color = AegisBronze, fontWeight = FontWeight.Bold)
+                Text(
+                    text = stringResource(R.string.btn_create_routine).uppercase(),
+                    color = AegisBronze,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }

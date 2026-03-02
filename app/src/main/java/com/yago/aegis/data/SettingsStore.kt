@@ -1,6 +1,7 @@
 package com.yago.aegis.data
 
 import android.content.Context
+import androidx.datastore.dataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -29,6 +30,7 @@ class SettingsStore(private val context: Context) {
         val ACTUAL_PHOTO_URI = stringPreferencesKey("actual_photo_uri")
         val BASE_PHOTO_DATE = stringPreferencesKey("base_photo_date")
         val ACTUAL_PHOTO_DATE = stringPreferencesKey("actual_photo_date")
+        private val ROUTINES_KEY = stringPreferencesKey("routines_list")
     }
 
     // --- LECTURA (READ) ---
@@ -45,7 +47,14 @@ class SettingsStore(private val context: Context) {
     val actualPhotoUri: Flow<String?> = context.dataStore.data.map { it[ACTUAL_PHOTO_URI] }
     val basePhotoDate: Flow<String?> = context.dataStore.data.map { it[BASE_PHOTO_DATE] }
     val actualPhotoDate: Flow<String?> = context.dataStore.data.map { it[ACTUAL_PHOTO_DATE] }
-
+    val routines: Flow<List<Routine>> = context.dataStore.data.map { prefs ->
+        val json = prefs[ROUTINES_KEY] ?: ""
+        if (json.isEmpty()) emptyList()
+        else {
+            val type = object : TypeToken<List<Routine>>() {}.type
+            gson.fromJson(json, type)
+        }
+    }
     // --- ESCRITURA (WRITE) ---
     suspend fun saveName(name: String) {
         context.dataStore.edit { it[USER_NAME] = name }
@@ -118,5 +127,10 @@ class SettingsStore(private val context: Context) {
     }
     suspend fun saveActualPhotoDate(date: String) {
         context.dataStore.edit { it[ACTUAL_PHOTO_DATE] = date }
+    }
+
+    suspend fun saveRoutines(list: List<Routine>) {
+        val json = gson.toJson(list)
+        context.dataStore.edit { it[ROUTINES_KEY] = json }
     }
 }

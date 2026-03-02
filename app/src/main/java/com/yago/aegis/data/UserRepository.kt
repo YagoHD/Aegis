@@ -1,5 +1,7 @@
 package com.yago.aegis.data
 
+import kotlinx.coroutines.flow.Flow
+
 class UserRepository(private val settingsStore: SettingsStore) {
 
     val userName = settingsStore.userName
@@ -12,7 +14,7 @@ class UserRepository(private val settingsStore: SettingsStore) {
     val height = settingsStore.height
     val bodyFat = settingsStore.bodyFat
     val customMeasures = settingsStore.customMeasures
-
+    val routines: Flow<List<Routine>> = settingsStore.routines
     val basePhotoUri = settingsStore.basePhotoUri
     val basePhotoDate = settingsStore.basePhotoDate
     val actualPhotoUri = settingsStore.actualPhotoUri
@@ -28,6 +30,7 @@ class UserRepository(private val settingsStore: SettingsStore) {
     suspend fun updateHeight(h: Double) = settingsStore.saveHeight(h)
     suspend fun updateBodyFat(fat: String) = settingsStore.saveBodyFat(fat)
     suspend fun updateMeasures(list: List<BodyMeasure>) = settingsStore.saveCustomMeasures(list)
+    suspend fun updateRoutines(list: List<Routine>) = settingsStore.saveRoutines(list)
 
     // Fotos y sus fechas (Escritura)
     suspend fun updateBasePhoto(uri: String) = settingsStore.saveBasePhotoUri(uri)
