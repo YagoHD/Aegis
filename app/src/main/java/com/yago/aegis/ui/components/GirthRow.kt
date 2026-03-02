@@ -20,9 +20,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.ui.theme.AegisBronze
 import com.yago.aegis.ui.theme.AegisWhite
+import androidx.compose.runtime.*
 
 @Composable
 fun GirthRow(label: String, value: String, onValueChange: (String) -> Unit) {
+    // ✅ Estado local para que el teclado fluya sin saltos
+    var tempValue by remember(value) { mutableStateOf(value) }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -41,16 +45,24 @@ fun GirthRow(label: String, value: String, onValueChange: (String) -> Unit) {
             contentAlignment = Alignment.Center
         ) {
             BasicTextField(
-                value = value,
-                onValueChange = onValueChange,
+                value = tempValue,
+                onValueChange = { newValue ->
+                    // ✅ Filtro: Solo permitimos números y un punto decimal
+                    if (newValue.isEmpty() || newValue.matches(Regex("^\\d*\\.?\\d*$"))) {
+                        tempValue = newValue
+                        onValueChange(newValue) // Actualiza el ViewModel/DataStore
+                    }
+                },
                 textStyle = TextStyle(
                     color = AegisWhite,
                     fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    fontSize = 16.sp
                 ),
                 cursorBrush = SolidColor(AegisBronze),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                singleLine = true
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }

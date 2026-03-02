@@ -22,7 +22,7 @@ class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
             name = "Cargando...",
             disciplineDay = 0,
             currentMass = "0.0",
-            height = 1.70,
+            height = 170,
             bodyFat = "0.0",
             goal = "BULK"
         )
@@ -53,7 +53,7 @@ class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
             repository.currentMass.collect { user = user.copy(currentMass = it) }
         }
         viewModelScope.launch {
-            repository.height.collect { user = user.copy(height = it) }
+            repository.height.collect { user = user.copy(height = it.toInt()) }
         }
         viewModelScope.launch {
             repository.bodyFat.collect { user = user.copy(bodyFat = it) }
@@ -150,7 +150,13 @@ class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
 
     fun calcularBMI(): Double {
         val mass = user.currentMass.toDoubleOrNull() ?: 0.0
-        return if (mass > 0 && user.height > 0) mass / (user.height * user.height) else 0.0
+        val heightInMeters = user.height / 100.0
+
+        return if (mass > 0 && heightInMeters > 0) {
+            mass / (heightInMeters * heightInMeters)
+        } else {
+            0.0
+        }
     }
 
     fun updatePhoto(uri: String, type: PhotoType) {
@@ -179,9 +185,9 @@ class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
-    fun updateHeight(newHeight: Double) {
+    fun updateHeight(newHeight: Int) {
         viewModelScope.launch {
-            repository.updateHeight(newHeight)
+            repository.updateHeight(newHeight.toDouble())
         }
     }
 

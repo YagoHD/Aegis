@@ -28,5 +28,8 @@
     <string name="settings_label_girths">Mostrar medidas corporales</string>
     <string name="label_height">Altura</string>
     <string name="hint_height">Ej: 1.75</string>
-    <string name="unit_meters">m</string>
+    <string name="unit_meters">cm</string>
+    <string name="routine_title">Rutinas</string>
+    <string name="btn_create_routine">CREAR NUEVA RUTINA</string>
+    <string name="exercises_suffix">Ejercicios</string>
 </resources>

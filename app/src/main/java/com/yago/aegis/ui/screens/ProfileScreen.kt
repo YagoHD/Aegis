@@ -34,19 +34,30 @@ fun MainProfileScreen(viewModel: ProfileViewModel, onNavigateToSettings: () -> U
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
+                modifier = Modifier.height(48.dp),
+                windowInsets = WindowInsets(0, 0, 0, 0), // ✅ CLAVE: Elimina el espacio extra superior
                 title = {
-                    Text(stringResource(R.string.profile_title), color = AegisWhite, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        stringResource(R.string.profile_title),
+                        color = AegisWhite,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 },
                 actions = {
                     IconButton(onClick = onNavigateToSettings) {
-                        Icon(Icons.Default.Settings, contentDescription = "Ajustes", tint = AegisWhite)
+                        Icon(Icons.Default.Settings, contentDescription = "Ajustes", tint = AegisWhite, modifier = Modifier.size(20.dp))
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Black)
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color.Black,
+                    scrolledContainerColor = Color.Black
+                )
             )
         },
         containerColor = Color(0xFF0A0A0A)
     ) { paddingValues ->
+        // Importante: paddingValues aquí contendrá el alto de la TopBar (48.dp)
         Box(modifier = Modifier.padding(paddingValues)) {
             ProfileContent(viewModel)
         }
@@ -85,6 +96,8 @@ fun ProfileContent(viewModel: ProfileViewModel) {
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
+            // ✅ Añadimos esto para que el contenido "flote" sobre el teclado
+            .imePadding()
             .verticalScroll(scrollState)
     ) {
         ProfileHeader(
@@ -158,7 +171,6 @@ fun ProfileContent(viewModel: ProfileViewModel) {
             )
         }
     }
-
     if (showDialog) {
         PhotoSourceDialog(
             onDismiss = { showDialog = false },

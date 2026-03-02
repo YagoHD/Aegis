@@ -4,7 +4,7 @@ data class UserProfile(
     val name: String,
     val disciplineDay: Int,
     val currentMass: String,
-    val height: Double,
+    val height: Int,
     val bodyFat: String,
     val goal: String,
     val basePhotoUri: String? = null,

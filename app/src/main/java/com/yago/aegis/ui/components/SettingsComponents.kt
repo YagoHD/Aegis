@@ -112,17 +112,19 @@ fun SettingsMenu(viewModel: ProfileViewModel) {
         OutlinedTextField(
             value = tempHeight,
             onValueChange = { newValue ->
-                tempHeight = newValue
-                newValue.toDoubleOrNull()?.let { viewModel.updateHeight(it) }
+                if (newValue.all { it.isDigit() }) {
+                    tempHeight = newValue
+                    newValue.toIntOrNull()?.let { viewModel.updateHeight(it) }
+                }
             },
             label = { Text(stringResource(R.string.label_height), color = Color.Gray) },
-            placeholder = { Text(stringResource(R.string.hint_height), color = Color.DarkGray) },
+            placeholder = { Text("185", color = Color.DarkGray) },
             modifier = Modifier.fillMaxWidth(),
             leadingIcon = { Icon(Icons.Default.Straighten, contentDescription = null, tint = AegisBronze) },
             suffix = { Text(stringResource(R.string.unit_meters), color = AegisBronze, fontWeight = FontWeight.Bold) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Decimal,
+                keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Next
             ),
             colors = OutlinedTextFieldDefaults.colors(
