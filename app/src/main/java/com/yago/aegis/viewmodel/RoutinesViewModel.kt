@@ -117,4 +117,10 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
     fun clearTempExercises() {
         tempExercises.clear()
     }
+
+    fun moveExercise(from: Int, to: Int) {
+        tempExercises.apply {
+            add(to, removeAt(from))
+        }
+    }
 }

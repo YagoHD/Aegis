@@ -28,33 +28,67 @@ import com.yago.aegis.data.Exercise
 import com.yago.aegis.ui.theme.AegisBronze
 
 @Composable
-fun ExerciseEditCard(exercise: Exercise, onDelete: () -> Unit) {
+fun ExerciseEditCard(
+    exercise: Exercise,
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier // Recibimos el modificador externo
+) {
     Row(
-        modifier = Modifier
+        // ✅ APLICADO: Ahora el Row usa el modifier que permite el arrastre
+        modifier = modifier
             .fillMaxWidth()
             .background(Color(0xFF161616), RoundedCornerShape(12.dp))
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Icono cuadrado oscuro
+        // Icono cuadrado oscuro con el icono del ejercicio
         Box(
-            modifier = Modifier.size(40.dp).background(Color(0xFF0A0A0A), RoundedCornerShape(8.dp)),
+            modifier = Modifier
+                .size(40.dp)
+                .background(Color(0xFF0A0A0A), RoundedCornerShape(8.dp)),
             contentAlignment = Alignment.Center
         ) {
-            Icon(Icons.Default.FitnessCenter, contentDescription = null, tint = AegisBronze, modifier = Modifier.size(20.dp))
+            Icon(
+                Icons.Default.FitnessCenter,
+                contentDescription = null,
+                tint = AegisBronze,
+                modifier = Modifier.size(20.dp)
+            )
         }
 
         Spacer(modifier = Modifier.width(16.dp))
 
+        // Información del ejercicio
         Column(modifier = Modifier.weight(1f)) {
-            Text(exercise.name, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-            Text("${exercise.type} • ${exercise.muscleGroup}", color = Color.Gray, fontSize = 12.sp)
+            Text(
+                text = exercise.name,
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp
+            )
+            Text(
+                text = "${exercise.type} • ${exercise.muscleGroup}",
+                color = Color.Gray,
+                fontSize = 12.sp
+            )
         }
 
-        // Acciones: Borrar y Reordenar
+        // Acciones: Borrar
         IconButton(onClick = onDelete) {
-            Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.DarkGray, modifier = Modifier.size(20.dp))
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Delete",
+                tint = Color.DarkGray,
+                modifier = Modifier.size(20.dp)
+            )
         }
-        Icon(Icons.Default.DragHandle, contentDescription = "Reorder", tint = Color.DarkGray, modifier = Modifier.size(20.dp))
+
+        // Icono visual de "Reordenar" (las rayitas)
+        Icon(
+            imageVector = Icons.Default.DragHandle,
+            contentDescription = "Reorder",
+            tint = Color.DarkGray,
+            modifier = Modifier.size(20.dp)
+        )
     }
 }

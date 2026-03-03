@@ -1,10 +1,12 @@
 package com.yago.aegis.ui.screens
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items // ✅ Importante: Asegúrate de este import
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -23,6 +25,8 @@ import com.yago.aegis.data.Exercise
 import com.yago.aegis.ui.theme.AegisBronze
 import com.yago.aegis.viewmodel.RoutinesViewModel
 import com.yago.aegis.ui.components.ExerciseEditCard
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyColumnState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -132,36 +136,41 @@ fun EditRoutineScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            val lazyListState = rememberLazyListState()
+            val reorderableLazyColumnState = rememberReorderableLazyColumnState(
+                lazyListState = lazyListState
+            ) { from, to ->
+                routinesViewModel.moveExercise(from.index, to.index)
+            }
             LazyColumn(
+                state = lazyListState, // Conectamos el estado
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // ✅ USAMOS LA LISTA DEL VIEWMODEL:
-                // Usamos 'items = ' explícitamente para evitar errores de compilación
-                items(items = routinesViewModel.tempExercises) { exercise ->
-                    ExerciseEditCard(
-                        exercise = exercise,
-                        onDelete = {
-                            // Borramos directamente de la lista reactiva del ViewModel
-                            routinesViewModel.tempExercises.remove(exercise)
-                        }
-                    )
-                }
+                items(
+                    items = routinesViewModel.tempExercises,
+                    key = { it.name + it.hashCode() } // ✅ OBLIGATORIO: Cada item necesita una llave única
+                ) { exercise ->
+                    // 3. Envolvemos cada tarjeta en un 'ReorderableItem'
+                    ReorderableItem(
+                        reorderableLazyColumnState,
+                        key = exercise.name + exercise.hashCode()
+                    ) { isDragging ->
+                        // Efecto de elevación mientras arrastramos
+                        val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp)
 
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedButton(
-                        onClick = { navController.navigate("add_exercise") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(1.dp, Color.DarkGray),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = AegisBronze)
-                    ) {
-                        Icon(Icons.Default.Add, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.btn_add_exercise), fontWeight = FontWeight.Bold)
+                        Surface(
+                            shadowElevation = elevation,
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        ) {
+                            ExerciseEditCard(
+                                exercise = exercise,
+                                // ✅ Ahora este parámetro ya no dará error
+                                modifier = Modifier.draggableHandle(),
+                                onDelete = { routinesViewModel.tempExercises.remove(exercise) }
+                            )
+                        }
                     }
                 }
             }
