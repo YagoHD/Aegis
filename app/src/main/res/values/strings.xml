@@ -48,4 +48,15 @@
     <string name="nav_routine">Rutinas</string>
     <string name="nav_weekly">Semana</string>
     <string name="nav_stats">Estadísticas</string>
+    <string name="title_new_exercise">NUEVO EJERCICIO</string>
+    <string name="label_exercise_name">NOMBRE DEL EJERCICIO</string>
+    <string name="hint_exercise_name">ej. Press de Banca Inclinado</string>
+    <string name="label_tags_categories">TAGS Y CATEGORÍAS</string>
+    <string name="label_visual_reference">REFERENCIA VISUAL</string>
+    <string name="label_notes_optional">NOTAS (OPCIONAL)</string>
+    <string name="hint_notes">ej. Enfócate en el tempo y aprieta arriba</string>
+    <string name="btn_create_exercise">CREAR EJERCICIO</string>
+    <string name="label_or_select_library">O SELECCIONA DE LA LIBRERÍA</string>
+    <string name="select_library">O SELECCIONALO DE LA LIBRERIA</string>
+
 </resources>

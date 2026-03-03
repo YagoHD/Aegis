@@ -130,13 +130,25 @@ fun AegisNavigation(profileViewModel: ProfileViewModel) {
                     }
                 )
             ) { backStackEntry ->
-                // Extraemos el ID que viene en la URL de la navegación
                 val routineId = backStackEntry.arguments?.getInt("routineId") ?: -1
 
                 EditRoutineScreen(
                     routineId = routineId,
                     routinesViewModel = routinesViewModel,
+                    navController = navController,
                     onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(route = "add_exercise") {
+                AddExerciseScreen(
+                    routinesViewModel = routinesViewModel,
+                    onNavigateBack = { navController.popBackStack() },
+                    onExerciseCreated = { newExercise ->
+                        // Aquí es donde el ejercicio vuelve a la pantalla de edición.
+                        // Como estamos usando el mismo routinesViewModel,
+                        // el ejercicio se guardará correctamente.
+                    }
                 )
             }
         }

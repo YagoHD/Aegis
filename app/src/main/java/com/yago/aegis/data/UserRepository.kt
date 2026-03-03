@@ -19,6 +19,8 @@ class UserRepository(private val settingsStore: SettingsStore) {
     val basePhotoDate = settingsStore.basePhotoDate
     val actualPhotoUri = settingsStore.actualPhotoUri
     val actualPhotoDate = settingsStore.actualPhotoDate
+    val exerciseLibrary: Flow<List<Exercise>> = settingsStore.exerciseLibrary
+    val globalTags: Flow<List<String>> = settingsStore.globalTags
 
     suspend fun updateName(name: String) = settingsStore.saveName(name)
     suspend fun toggleBMI(enabled: Boolean) = settingsStore.saveShowBMI(enabled)
@@ -31,6 +33,8 @@ class UserRepository(private val settingsStore: SettingsStore) {
     suspend fun updateBodyFat(fat: String) = settingsStore.saveBodyFat(fat)
     suspend fun updateMeasures(list: List<BodyMeasure>) = settingsStore.saveCustomMeasures(list)
     suspend fun updateRoutines(list: List<Routine>) = settingsStore.saveRoutines(list)
+    suspend fun updateExerciseLibrary(list: List<Exercise>) = settingsStore.saveExerciseLibrary(list)
+    suspend fun updateGlobalTags(tags: List<String>) = settingsStore.saveGlobalTags(tags)
 
     // Fotos y sus fechas (Escritura)
     suspend fun updateBasePhoto(uri: String) = settingsStore.saveBasePhotoUri(uri)

@@ -31,6 +31,8 @@ class SettingsStore(private val context: Context) {
         val BASE_PHOTO_DATE = stringPreferencesKey("base_photo_date")
         val ACTUAL_PHOTO_DATE = stringPreferencesKey("actual_photo_date")
         private val ROUTINES_KEY = stringPreferencesKey("routines_list")
+        private val EXERCISES_LIBRARY_KEY = stringPreferencesKey("exercises_library")
+        private val GLOBAL_TAGS_KEY = stringPreferencesKey("global_tags")
     }
 
     // --- LECTURA (READ) ---
@@ -55,6 +57,25 @@ class SettingsStore(private val context: Context) {
             gson.fromJson(json, type)
         }
     }
+
+    val exerciseLibrary: Flow<List<Exercise>> = context.dataStore.data.map { prefs ->
+        val json = prefs[EXERCISES_LIBRARY_KEY] ?: ""
+        if (json.isEmpty()) emptyList()
+        else {
+            val type = object : TypeToken<List<Exercise>>() {}.type
+            gson.fromJson(json, type)
+        }
+    }
+
+    val globalTags: Flow<List<String>> = context.dataStore.data.map { prefs ->
+        val json = prefs[GLOBAL_TAGS_KEY] ?: ""
+        if (json.isEmpty()) listOf("COMPOUND", "ISOLATION", "CHEST", "LEGS")
+        else {
+            val type = object : TypeToken<List<String>>() {}.type
+            gson.fromJson(json, type)
+        }
+    }
+
     // --- ESCRITURA (WRITE) ---
     suspend fun saveName(name: String) {
         context.dataStore.edit { it[USER_NAME] = name }
@@ -106,6 +127,16 @@ class SettingsStore(private val context: Context) {
             val type = object : TypeToken<List<BodyMeasure>>() {}.type
             gson.fromJson(json, type)
         }
+    }
+
+    suspend fun saveExerciseLibrary(list: List<Exercise>) {
+        val json = gson.toJson(list)
+        context.dataStore.edit { it[EXERCISES_LIBRARY_KEY] = json }
+    }
+
+    suspend fun saveGlobalTags(tags: List<String>) {
+        val json = gson.toJson(tags)
+        context.dataStore.edit { it[GLOBAL_TAGS_KEY] = json }
     }
 
     // Guardar la lista: Convierte List<BodyMeasure> a un solo String JSON

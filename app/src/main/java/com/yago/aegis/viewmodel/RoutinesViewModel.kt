@@ -6,14 +6,22 @@ import androidx.lifecycle.viewModelScope
 import com.yago.aegis.data.Exercise
 import com.yago.aegis.data.Routine
 import com.yago.aegis.data.UserRepository
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
-
+    var tempExercises = mutableStateListOf<Exercise>()
+        private set
     // ✅ La lista empieza vacía y se llena desde el disco
     var routines = mutableStateListOf<Routine>()
         private set
+    val exerciseLibrary: StateFlow<List<Exercise>> = repository.exerciseLibrary
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    val globalTags: StateFlow<List<String>> = repository.globalTags
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), listOf("COMPOUND", "CHEST"))
     init {
         // Al arrancar, "escuchamos" las rutinas guardadas en el repositorio
         viewModelScope.launch {
@@ -61,5 +69,52 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
 
             persistChanges()
         }
+    }
+    fun addNewExerciseToLibrary(exercise: Exercise) {
+        viewModelScope.launch {
+            val currentList = exerciseLibrary.value.toMutableList()
+            if (!currentList.any { it.name == exercise.name }) { // Evita duplicados
+                currentList.add(exercise)
+                repository.updateExerciseLibrary(currentList)
+            }
+        }
+    }
+
+    fun addGlobalTag(tag: String) {
+        viewModelScope.launch {
+            val currentTags = globalTags.value.toMutableList()
+            if (!currentTags.contains(tag)) {
+                currentTags.add(tag)
+                repository.updateGlobalTags(currentTags)
+            }
+        }
+    }
+
+    fun removeExerciseFromLibrary(exercise: Exercise) {
+        viewModelScope.launch {
+            val currentList = exerciseLibrary.value.toMutableList()
+            currentList.removeAll { it.name == exercise.name }
+            repository.updateExerciseLibrary(currentList)
+        }
+    }
+
+    fun removeGlobalTags(tagsToRemove: List<String>) {
+        viewModelScope.launch {
+            val currentTags = globalTags.value.toMutableList()
+            currentTags.removeAll(tagsToRemove)
+            repository.updateGlobalTags(currentTags)
+        }
+    }
+    fun setTempExercises(exercises: List<Exercise>?) {
+        tempExercises.clear()
+        exercises?.let { tempExercises.addAll(it) }
+    }
+
+    fun addExerciseToTemp(exercise: Exercise) {
+        tempExercises.add(exercise)
+    }
+
+    fun clearTempExercises() {
+        tempExercises.clear()
     }
 }
