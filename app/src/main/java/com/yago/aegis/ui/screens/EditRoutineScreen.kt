@@ -41,6 +41,7 @@ fun EditRoutineScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
+                windowInsets = WindowInsets(0, 0, 0, 0),
                 title = {
                     Text(
                         tempName.uppercase(),
