@@ -69,13 +69,13 @@ fun RoutineCard(
 
             Column {
                 Text(
-                    text = routine.name.uppercase(), // ✅ Ahora esto funciona
+                    text = routine.name.uppercase(),
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )
                 Text(
-                    text = "${routine.exerciseCount} ${stringResource(R.string.exercises_suffix)}", // ✅ Y esto también
+                    text = "${(routine.exercises ?: emptyList()).size} ${stringResource(R.string.exercises_suffix)}",
                     color = Color.Gray,
                     fontSize = 12.sp
                 )

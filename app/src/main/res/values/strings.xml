@@ -32,4 +32,20 @@
     <string name="routine_title">Rutinas</string>
     <string name="btn_create_routine">CREAR NUEVA RUTINA</string>
     <string name="exercises_suffix">Ejercicios</string>
+    <string name="dialog_new_routine">NUEVA RUTINA</string>
+    <string name="dialog_routine_name_label">Nombre de la rutina</string>
+    <string name="btn_save">GUARDAR</string>
+    <string name="btn_cancel">CANCELAR</string>
+    <string name="content_desc_back">Atrás</string>
+    <string name="content_desc_delete">Borrar</string>
+    <string name="content_desc_reorder">Reordenar</string>
+    <string name="label_routine_name">NOMBRE DE LA RUTINA</string>
+    <string name="label_exercises">EJERCICIOS</string>
+    <string name="label_added_suffix">AÑADIDOS</string>
+    <string name="btn_add_exercise">AÑADIR EJERCICIO</string>
+    <string name="btn_save_routine">GUARDAR RUTINA</string>
+    <string name="nav_profile">Perfil</string>
+    <string name="nav_routine">Rutinas</string>
+    <string name="nav_weekly">Semana</string>
+    <string name="nav_stats">Estadísticas</string>
 </resources>

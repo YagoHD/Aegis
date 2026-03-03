@@ -71,7 +71,10 @@ fun AegisNavigation(profileViewModel: ProfileViewModel) {
             ) {
                 RoutineScreen(
                     routinesViewModel = routinesViewModel,
-                    onNavigateToSettings = { navController.navigate("settings") }
+                    onNavigateToSettings = { navController.navigate("settings") },
+                    onNavigateToEditRoutine = { id ->
+                        navController.navigate("edit_routine/$id")
+                    }
                 )
             }
 
@@ -115,6 +118,25 @@ fun AegisNavigation(profileViewModel: ProfileViewModel) {
             ) {
                 SettingsMenu(
                     viewModel = profileViewModel,
+                )
+            }
+
+            // ✏️ PANTALLA DE EDICIÓN DE RUTINA
+            composable(
+                route = "edit_routine/{routineId}",
+                arguments = listOf(
+                    androidx.navigation.navArgument("routineId") {
+                        type = androidx.navigation.NavType.IntType
+                    }
+                )
+            ) { backStackEntry ->
+                // Extraemos el ID que viene en la URL de la navegación
+                val routineId = backStackEntry.arguments?.getInt("routineId") ?: -1
+
+                EditRoutineScreen(
+                    routineId = routineId,
+                    routinesViewModel = routinesViewModel,
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
         }

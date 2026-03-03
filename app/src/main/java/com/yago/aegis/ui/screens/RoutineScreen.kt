@@ -48,8 +48,9 @@ import com.yago.aegis.viewmodel.RoutinesViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoutineScreen(
-    routinesViewModel: RoutinesViewModel, // ✅ Usamos el nuevo ViewModel
-    onNavigateToSettings: () -> Unit
+    routinesViewModel: RoutinesViewModel,
+    onNavigateToSettings: () -> Unit,
+    onNavigateToEditRoutine: (Int) -> Unit
 ) {
     // ESTADOS PARA EL DIÁLOGO
     var showDialog by remember { mutableStateOf(false) }
@@ -137,9 +138,8 @@ fun RoutineScreen(
                     RoutineCard(
                         routine = routine,
                         onEdit = {
-                            routineToEdit = routine
-                            textState = routine.name
-                            showDialog = true
+                            // ✅ En lugar de abrir el diálogo, navegamos a la pantalla completa
+                            onNavigateToEditRoutine(routine.id)
                         },
                         onDelete = { routinesViewModel.removeRoutine(routine) }
                     )
