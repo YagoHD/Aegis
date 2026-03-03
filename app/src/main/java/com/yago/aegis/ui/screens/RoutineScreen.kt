@@ -34,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -43,6 +44,7 @@ import com.yago.aegis.viewmodel.ProfileViewModel
 import com.yago.aegis.R
 import com.yago.aegis.ui.components.RoutineCard
 import com.yago.aegis.ui.theme.AegisBronze
+import com.yago.aegis.ui.theme.BackgroundBlackGrey
 import com.yago.aegis.viewmodel.RoutinesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,7 +58,6 @@ fun RoutineScreen(
     var showDialog by remember { mutableStateOf(false) }
     var textState by remember { mutableStateOf("") }
     var routineToEdit by remember { mutableStateOf<Routine?>(null) }
-
     // --- DIÁLOGO DE CREAR / EDITAR ---
     if (showDialog) {
         androidx.compose.material3.AlertDialog(
@@ -121,7 +122,7 @@ fun RoutineScreen(
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Black)
             )
         },
-        containerColor = Color.Black
+        containerColor = BackgroundBlackGrey
     ) { paddingValues ->
         Column(
             modifier = Modifier

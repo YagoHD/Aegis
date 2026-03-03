@@ -26,6 +26,7 @@ import com.yago.aegis.R
 import com.yago.aegis.data.PhotoType
 import com.yago.aegis.ui.components.*
 import com.yago.aegis.ui.theme.AegisWhite
+import com.yago.aegis.ui.theme.BackgroundBlackGrey
 import com.yago.aegis.viewmodel.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,7 +56,7 @@ fun MainProfileScreen(viewModel: ProfileViewModel, onNavigateToSettings: () -> U
                 )
             )
         },
-        containerColor = Color(0xFF0A0A0A)
+        containerColor = BackgroundBlackGrey
     ) { paddingValues ->
         // Importante: paddingValues aquí contendrá el alto de la TopBar (48.dp)
         Box(modifier = Modifier.padding(paddingValues)) {

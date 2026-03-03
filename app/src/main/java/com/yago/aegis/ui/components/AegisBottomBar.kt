@@ -34,7 +34,7 @@ fun AegisBottomBar(navController: NavHostController) {
     NavigationBar(
         containerColor = Color.Black,
         tonalElevation = 0.dp,
-        modifier = Modifier.height(56.dp),
+        modifier = Modifier.height(80.dp),
         windowInsets = WindowInsets(0, 0, 0, 0)
     ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
