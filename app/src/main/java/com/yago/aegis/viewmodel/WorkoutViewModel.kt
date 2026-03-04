@@ -4,7 +4,6 @@ import android.R
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import com.yago.aegis.data.*
-import kotlinx.coroutines.flow.Flow
 import java.util.concurrent.TimeUnit
 import androidx.lifecycle.ViewModelProvider
 import com.yago.aegis.data.SettingsStore
@@ -109,8 +108,8 @@ class WorkoutViewModel(private val settingsStore: SettingsStore) : ViewModel() {
         }
     }
     fun getSafeRoutine(routine: Routine): Routine {
-        return if (routine.iconRes <= 0) {
-            routine.copy(iconRes = R.drawable.ic_btn_speak_now)
+        return if (routine.iconName.isBlank()) {
+            routine.copy(iconName = "dumbbell")
         } else {
             routine
         }

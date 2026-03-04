@@ -31,17 +31,18 @@ import com.yago.aegis.data.Screen
 import com.yago.aegis.ui.theme.AegisBronze
 import com.yago.aegis.R
 import com.yago.aegis.data.Routine
+import com.yago.aegis.data.getExerciseIcon
 
 @Composable
 fun RoutineCard(
-    routine: Routine, // ✅ Ahora usa tu Data Class
+    routine: Routine,
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .padding(vertical = 4.dp) // Bajé un poco el padding vertical para que no ocupe tanto
             .clip(RoundedCornerShape(12.dp))
             .background(Color(0xFF161616))
             .padding(16.dp),
@@ -49,7 +50,6 @@ fun RoutineCard(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            // Contenedor del icono (el cuadradito negro de la imagen)
             Box(
                 modifier = Modifier
                     .size(48.dp)
@@ -57,8 +57,9 @@ fun RoutineCard(
                     .background(Color(0xFF0A0A0A)),
                 contentAlignment = Alignment.Center
             ) {
+                // ✅ CAMBIO CLAVE: Usamos el icono que viene en la rutina
                 Icon(
-                    imageVector = Icons.Default.FitnessCenter,
+                    imageVector = getExerciseIcon(routine.iconName),
                     contentDescription = null,
                     tint = AegisBronze,
                     modifier = Modifier.size(24.dp)
@@ -75,14 +76,13 @@ fun RoutineCard(
                     fontSize = 16.sp
                 )
                 Text(
-                    text = "${(routine.exercises ?: emptyList()).size} ${stringResource(R.string.exercises_suffix)}",
+                    text = "${routine.exercises.size} ${stringResource(R.string.exercises_suffix)}",
                     color = Color.Gray,
                     fontSize = 12.sp
                 )
             }
         }
 
-        // Iconos de acción (Lápiz y Papelera)
         Row {
             IconButton(onClick = onEdit) {
                 Icon(Icons.Default.Edit, contentDescription = null, tint = Color.White.copy(alpha = 0.6f))

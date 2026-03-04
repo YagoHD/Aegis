@@ -206,18 +206,6 @@ fun EditExerciseScreen(
 }
 
 // --- COMPONENTES DE DISEÑO EXCLUSIVOS ---
-
-@Composable
-fun EditLabel(text: String) {
-    Text(
-        text = text,
-        color = Color(0xFF8B7355), // Color tierra/bronce suave de la foto
-        fontSize = 12.sp,
-        fontWeight = FontWeight.Bold,
-        letterSpacing = 0.5.sp
-    )
-}
-
 @Composable
 fun EditInput(value: String, onValueChange: (String) -> Unit, placeholder: String) {
     OutlinedTextField(
@@ -237,24 +225,7 @@ fun EditInput(value: String, onValueChange: (String) -> Unit, placeholder: Strin
     )
 }
 
-@Composable
-fun EditTagChip(text: String, isSelected: Boolean, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(if (isSelected) Color(0xFF9E7E4F) else Color(0xFF1F1D1B))
-            .border(1.dp, if (isSelected) Color(0xFF9E7E4F) else Color(0xFF33302E), RoundedCornerShape(8.dp))
-            .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 10.dp)
-    ) {
-        Text(
-            text = text,
-            color = if (isSelected) Color.White else Color(0xFFB9B9B9),
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
+
 
 @Composable
 fun EditIconBox(icon: ImageVector, isSelected: Boolean, onClick: () -> Unit) {
@@ -277,19 +248,5 @@ fun EditIconBox(icon: ImageVector, isSelected: Boolean, onClick: () -> Unit) {
             tint = if (isSelected) AegisBronze else Color.DarkGray,
             modifier = Modifier.size(30.dp)
         )
-    }
-}
-
-@Composable
-fun RoundActionBtn(icon: ImageVector, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .size(32.dp)
-            .clip(CircleShape)
-            .background(Color(0xFF252321))
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(icon, null, tint = Color.Gray, modifier = Modifier.size(16.dp))
     }
 }

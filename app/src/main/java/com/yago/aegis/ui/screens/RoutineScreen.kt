@@ -3,6 +3,8 @@ package com.yago.aegis.ui.screens
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.data.Routine
 import com.yago.aegis.R
+import com.yago.aegis.data.globalExerciseIcons
 import com.yago.aegis.ui.components.AegisAlertDialog
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.RoutineCard
@@ -45,64 +48,79 @@ import com.yago.aegis.ui.theme.AegisBronze
 import com.yago.aegis.ui.theme.BackgroundBlackGrey
 import com.yago.aegis.viewmodel.RoutinesViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun RoutineScreen(
     routinesViewModel: RoutinesViewModel,
     onNavigateToSettings: () -> Unit,
     onNavigateToEditRoutine: (Int) -> Unit
 ) {
-    // ESTADOS PARA EL DIÁLOGO
     var showDialog by remember { mutableStateOf(false) }
     var textState by remember { mutableStateOf("") }
-    var routineToEdit by remember { mutableStateOf<Routine?>(null) }
+    // Estado para el icono seleccionado en el diálogo
+    var selectedIconName by remember { mutableStateOf("dumbbell") }
 
+    var routineToEdit by remember { mutableStateOf<Routine?>(null) }
     var routineToDelete by remember { mutableStateOf<Routine?>(null) }
-    // --- DIÁLOGO DE CREAR / EDITAR ---
+
+    // --- DIÁLOGO DE CREAR ---
     if (showDialog) {
         AegisAlertDialog(
-            title = if (routineToEdit == null) "NUEVA RUTINA" else "EDITAR RUTINA",
+            title = "NUEVA RUTINA",
             confirmText = "GUARDAR",
             dismissText = "CANCELAR",
             onDismiss = { showDialog = false },
             onConfirm = {
                 if (textState.isNotBlank()) {
-                    if (routineToEdit == null) {
-                        routinesViewModel.addRoutine(textState)
-                    } else {
-                        routinesViewModel.updateRoutine(routineToEdit!!.id, textState)
-                    }
+                    // ✅ Pasamos el nombre Y el icono seleccionado
+                    routinesViewModel.addRoutine(textState, selectedIconName)
                     showDialog = false
                 }
             },
             content = {
-                // ✅ Solo nos preocupamos por lo que hay "dentro"
-                OutlinedTextField(
-                    value = textState,
-                    onValueChange = { textState = it },
-                    label = { Text("Nombre de la rutina", color = Color.Gray) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = AegisBronze,
-                        unfocusedBorderColor = Color.DarkGray,
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        cursorColor = AegisBronze
-                    ),
-                    shape = RoundedCornerShape(8.dp)
-                )
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        value = textState,
+                        onValueChange = { textState = it },
+                        label = { Text("Nombre de la rutina", color = Color.Gray) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = AegisBronze,
+                            unfocusedBorderColor = Color.DarkGray,
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text("Selecciona un icono", color = Color.Gray, fontSize = 12.sp)
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // ✅ Selector de iconos dentro del diálogo
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        globalExerciseIcons.forEach { (name, icon) ->
+                            EditIconBox(
+                                icon = icon,
+                                isSelected = selectedIconName == name,
+                                onClick = { selectedIconName = name }
+                            )
+                        }
+                    }
+                }
             }
         )
     }
 
     Scaffold(
-        topBar = {
-            // ✅ Sustitución por el componente unificado
-            AegisTopBar(
-                title = stringResource(R.string.routine_title)
-            )
-        },
+        topBar = { AegisTopBar(title = stringResource(R.string.routine_title)) },
         containerColor = BackgroundBlackGrey
     ) { paddingValues ->
         Column(
@@ -113,16 +131,13 @@ fun RoutineScreen(
         ) {
             LazyColumn(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp) // Un poco más de espacio
             ) {
-                // ✅ Leemos la lista del ViewModel
                 items(routinesViewModel.routines) { routine ->
+                    // Asegúrate de que RoutineCard use getExerciseIcon(routine.iconName)
                     RoutineCard(
                         routine = routine,
-                        onEdit = {
-                            // ✅ En lugar de abrir el diálogo, navegamos a la pantalla completa
-                            onNavigateToEditRoutine(routine.id)
-                        },
+                        onEdit = { onNavigateToEditRoutine(routine.id) },
                         onDelete = { routineToDelete = routine }
                     )
                 }
@@ -130,11 +145,10 @@ fun RoutineScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // BOTÓN CREAR
             Button(
                 onClick = {
-                    routineToEdit = null
                     textState = ""
+                    selectedIconName = "dumbbell" // Reset al icono por defecto
                     showDialog = true
                 },
                 modifier = Modifier

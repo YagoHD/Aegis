@@ -62,9 +62,17 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
     }
 
     // --- GESTIÓN DE RUTINAS ---
-    fun addRoutine(name: String) {
+    fun addRoutine(name: String, iconName: String = "dumbbell") {
         val newId = (routines.maxOfOrNull { it.id } ?: 0) + 1
-        routines.add(Routine(newId, name.uppercase(), emptyList(), 0))
+
+        routines.add(
+            Routine(
+                id = newId,
+                name = name.uppercase(),
+                exercises = emptyList(),
+                iconName = iconName
+            )
+        )
         persistChanges()
     }
 
@@ -73,12 +81,13 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
         persistChanges()
     }
 
-    fun updateRoutineFull(id: Int, newName: String, newExercises: List<Exercise>) {
+    fun updateRoutineFull(id: Int, newName: String, newExercises: List<Exercise>, newIconName: String) {
         val index = routines.indexOfFirst { it.id == id }
         if (index != -1) {
             routines[index] = routines[index].copy(
                 name = newName.uppercase(),
-                exercises = newExercises
+                exercises = newExercises,
+                iconName = newIconName // Actualizamos el nombre del icono
             )
             persistChanges()
         }

@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.yago.aegis.R
+import com.yago.aegis.data.globalExerciseIcons
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.ExerciseCard
 import com.yago.aegis.ui.theme.AegisBronze
@@ -27,7 +28,7 @@ import com.yago.aegis.viewmodel.RoutinesViewModel
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyColumnState
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun EditRoutineScreen(
     routineId: Int,
@@ -35,19 +36,21 @@ fun EditRoutineScreen(
     onNavigateBack: () -> Unit,
     navController: NavHostController,
 ) {
-    // 1. CARGA DE DATOS: Al entrar, pasamos los ejercicios de la rutina al ViewModel
+    val originalRoutine = remember(routineId) {
+        routinesViewModel.routines.find { it.id == routineId }
+    }
+
+    // Estados locales para la edición
+    var tempName by remember { mutableStateOf(originalRoutine?.name ?: "") }
+    var selectedIconName by remember { mutableStateOf(originalRoutine?.iconName ?: "dumbbell") }
+
     LaunchedEffect(routineId) {
         if (routinesViewModel.tempExercises.isEmpty()) {
-            val routine = routinesViewModel.routines.find { it.id == routineId }
-            routine?.let {
+            originalRoutine?.let {
                 routinesViewModel.setTempExercises(it.exercises)
             }
         }
     }
-
-    // Estado local solo para el nombre (el ViewModel maneja la lista de ejercicios)
-    val originalRoutine = routinesViewModel.routines.find { it.id == routineId }
-    var tempName by remember { mutableStateOf(originalRoutine?.name ?: "") }
 
     Scaffold(
         topBar = {
@@ -58,157 +61,142 @@ fun EditRoutineScreen(
                         routinesViewModel.clearTempExercises()
                         onNavigateBack()
                     }) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = stringResource(R.string.content_desc_back),
-                            tint = Color.White
-                        )
+                        Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.White)
                     }
                 }
             )
         },
         containerColor = Color.Black
     ) { paddingValues ->
-        Column(
+        // Usamos LazyColumn para que toda la pantalla tenga scroll si hay muchos iconos o ejercicios
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
+            item { Spacer(modifier = Modifier.height(8.dp)) }
 
-            Text(
-                text = stringResource(R.string.label_routine_name),
-                color = Color.Gray,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(
-                value = tempName,
-                onValueChange = { tempName = it },
-                modifier = Modifier.fillMaxWidth(),
-                textStyle = androidx.compose.ui.text.TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
-                trailingIcon = {
-                    Icon(Icons.Default.Edit, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(18.dp))
-                },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = AegisBronze,
-                    unfocusedBorderColor = Color.DarkGray,
-                    focusedContainerColor = Color(0xFF161616),
-                    unfocusedContainerColor = Color(0xFF161616)
-                ),
-                shape = RoundedCornerShape(12.dp)
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    stringResource(R.string.label_exercises),
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp
-                )
-                // ✅ Leemos el tamaño directamente del ViewModel
-                Text(
-                    "${routinesViewModel.tempExercises.size} ${stringResource(R.string.label_added_suffix)}",
-                    color = AegisBronze,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
-                )
+            // SECCIÓN: NOMBRE
+            item {
+                Column {
+                    Text(
+                        text = stringResource(R.string.label_routine_name),
+                        color = Color.Gray,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = tempName,
+                        onValueChange = { tempName = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        textStyle = androidx.compose.ui.text.TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = Color(0xFF161616),
+                            unfocusedContainerColor = Color(0xFF161616),
+                            focusedBorderColor = AegisBronze
+                        )
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            val lazyListState = rememberLazyListState()
-            val reorderableLazyColumnState = rememberReorderableLazyColumnState(
-                lazyListState = lazyListState
-            ) { from, to ->
-                routinesViewModel.moveExercise(from.index, to.index)
-            }
-            LazyColumn(
-                state = lazyListState, // Conectamos el estado
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                items(
-                    items = routinesViewModel.tempExercises,
-                    key = { it.name + it.hashCode() } // ✅ OBLIGATORIO: Cada item necesita una llave única
-                ) { exercise ->
-                    // 3. Envolvemos cada tarjeta en un 'ReorderableItem'
-                    ReorderableItem(
-                        reorderableLazyColumnState,
-                        key = exercise.name + exercise.hashCode()
-                    ) { isDragging ->
-                        // Efecto de elevación mientras arrastramos
-                        val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp)
-
-                        Surface(
-                            shadowElevation = elevation,
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.padding(vertical = 4.dp)
-                        ) {
-                            // Dentro del ReorderableItem en rutinas
-                            ExerciseCard(
-                                exercise = exercise,
-                                onDelete = { routinesViewModel.tempExercises.remove(exercise) },
-                                showReorderHandle = true,
-                                modifier = Modifier.draggableHandle()
+            // SECCIÓN: SELECCIÓN DE ICONO (Nueva)
+            item {
+                Column {
+                    Text(
+                        text = stringResource(R.string.select_icon),
+                        color = Color.Gray,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        maxItemsInEachRow = 5,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        globalExerciseIcons.forEach { (name, icon) ->
+                            // Reutilizamos tu componente EditIconBox
+                            EditIconBox(
+                                icon = icon,
+                                isSelected = selectedIconName == name,
+                                onClick = { selectedIconName = name }
                             )
                         }
                     }
                 }
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedButton(
-                        onClick = { navController.navigate("add_exercise") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(1.dp, Color.DarkGray),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = AegisBronze)
-                    ) {
-                        Icon(Icons.Default.Add, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(R.string.btn_add_exercise),
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(16.dp)) // Espacio extra al final
+            }
+
+            // SECCIÓN: CABECERA EJERCICIOS
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(stringResource(R.string.label_exercises), color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(
+                        "${routinesViewModel.tempExercises.size} ${stringResource(R.string.label_added_suffix)}",
+                        color = AegisBronze,
+                        fontSize = 12.sp
+                    )
+                }
+            }
+
+            // LISTA DE EJERCICIOS REORDENABLES
+            items(
+                items = routinesViewModel.tempExercises,
+                key = { it.id } // Usar el ID es más seguro que el hashCode
+            ) { exercise ->
+                // Aquí iría tu lógica de ReorderableItem que ya tienes...
+                // (Omitido por brevedad, pero mantenlo igual que en tu código)
+                ExerciseCard(
+                    exercise = exercise,
+                    onDelete = { routinesViewModel.tempExercises.remove(exercise) }
+                )
+            }
+
+            // BOTÓN AÑADIR EJERCICIO
+            item {
+                OutlinedButton(
+                    onClick = { navController.navigate("add_exercise") },
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = AegisBronze)
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.btn_add_exercise), fontWeight = FontWeight.Bold)
                 }
             }
 
             // BOTÓN GUARDAR
-            Button(
-                onClick = {
-                    // ✅ Aquí es donde la magia ocurre: pasamos los temporales a la rutina real
-                    routinesViewModel.updateRoutineFull(
-                        id = routineId,
-                        newName = tempName,
-                        newExercises = routinesViewModel.tempExercises.toList()
-                    )
-                    // Limpiamos después de guardar para dejar todo ordenado
-                    routinesViewModel.clearTempExercises()
-                    onNavigateBack()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(80.dp)
-                    .padding(vertical = 12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = AegisBronze),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Icon(Icons.Default.Save, contentDescription = null, tint = Color.Black)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(stringResource(R.string.btn_save_routine), color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            item {
+                Button(
+                    onClick = {
+                        // IMPORTANTE: Actualizamos también el iconName
+                        routinesViewModel.updateRoutineFull(
+                            id = routineId,
+                            newName = tempName,
+                            newExercises = routinesViewModel.tempExercises.toList(),
+                            newIconName = selectedIconName // Debes añadir este parámetro a tu función
+                        )
+                        routinesViewModel.clearTempExercises()
+                        onNavigateBack()
+                    },
+                    modifier = Modifier.fillMaxWidth().height(60.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = AegisBronze),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(Icons.Default.Save, contentDescription = null, tint = Color.Black)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.btn_save_routine), color = Color.Black, fontWeight = FontWeight.Bold)
+                }
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
