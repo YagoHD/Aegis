@@ -281,8 +281,13 @@ fun AddExerciseScreen(
                 LibraryExerciseCard(
                     exercise = exercise,
                     onAdd = {
-                        onExerciseCreated(exercise)
-                        routinesViewModel.addExerciseToTemp(exercise)
+                        val isAlreadyAdded = routinesViewModel.tempExercises.any { it.name == exercise.name }
+
+                        if (!isAlreadyAdded) {
+                            onExerciseCreated(exercise)
+                            routinesViewModel.addExerciseToTemp(exercise)
+                        } else {
+                        }
                     },
                     onDelete = {
                         routinesViewModel.removeExerciseFromLibrary(exercise)

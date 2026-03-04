@@ -9,38 +9,34 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.data.Routine
-import com.yago.aegis.viewmodel.ProfileViewModel
 import com.yago.aegis.R
 import com.yago.aegis.ui.components.RoutineCard
 import com.yago.aegis.ui.theme.AegisBronze
@@ -58,6 +54,8 @@ fun RoutineScreen(
     var showDialog by remember { mutableStateOf(false) }
     var textState by remember { mutableStateOf("") }
     var routineToEdit by remember { mutableStateOf<Routine?>(null) }
+
+    var routineToDelete by remember { mutableStateOf<Routine?>(null) }
     // --- DIÁLOGO DE CREAR / EDITAR ---
     if (showDialog) {
         androidx.compose.material3.AlertDialog(
@@ -142,7 +140,7 @@ fun RoutineScreen(
                             // ✅ En lugar de abrir el diálogo, navegamos a la pantalla completa
                             onNavigateToEditRoutine(routine.id)
                         },
-                        onDelete = { routinesViewModel.removeRoutine(routine) }
+                        onDelete = { routineToDelete = routine }
                     )
                 }
             }
@@ -172,5 +170,41 @@ fun RoutineScreen(
                 )
             }
         }
+    }
+    if (routineToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { routineToDelete = null }, // Si tocan fuera, se cierra
+            title = {
+                Text(stringResource(R.string.dialog_delete_title), fontWeight = FontWeight.Bold)
+            },
+            text = {
+                Text(
+                    // ✅ FORMA CORRECTA: El primer parámetro es el ID, el segundo es el dato
+                    text = stringResource(
+                        R.string.dialog_delete_confirm,
+                        routineToDelete?.name ?: ""
+                    ),
+                    color = Color.Gray
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        routineToDelete?.let { routinesViewModel.removeRoutine(it) }
+                        routineToDelete = null // Cerramos el diálogo
+                    }
+                ) {
+                    Text(stringResource(R.string.btn_yes), color = AegisBronze)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { routineToDelete = null }) {
+                    Text(stringResource(R.string.btn_no))
+                }
+            },
+            containerColor = Color(0xFF1C1C1C), // Un gris oscuro para que pegue con tu App
+            titleContentColor = Color.White,
+            textContentColor = Color.Gray
+        )
     }
 }

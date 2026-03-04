@@ -58,5 +58,8 @@
     <string name="btn_create_exercise">CREAR EJERCICIO</string>
     <string name="label_or_select_library">O SELECCIONA DE LA LIBRERÍA</string>
     <string name="select_library">O SELECCIONALO DE LA LIBRERIA</string>
-
+    <string name="dialog_delete_title">Eliminar Rutina</string>
+    <string name="dialog_delete_confirm">¿Estás seguro de que quieres eliminar la rutina %1$s?</string>
+    <string name="btn_yes">SÍ, ELIMINAR</string>
+    <string name="btn_no">CANCELAR</string>
 </resources>

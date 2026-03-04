@@ -173,6 +173,26 @@ fun EditRoutineScreen(
                         }
                     }
                 }
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedButton(
+                        onClick = { navController.navigate("add_exercise") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, Color.DarkGray),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = AegisBronze)
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.btn_add_exercise),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp)) // Espacio extra al final
+                }
             }
 
             // BOTÓN GUARDAR
