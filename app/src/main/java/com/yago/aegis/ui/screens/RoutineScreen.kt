@@ -15,15 +15,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.data.Routine
 import com.yago.aegis.R
+import com.yago.aegis.ui.components.AegisAlertDialog
 import com.yago.aegis.ui.components.RoutineCard
 import com.yago.aegis.ui.theme.AegisBronze
 import com.yago.aegis.ui.theme.BackgroundBlackGrey
@@ -58,48 +59,38 @@ fun RoutineScreen(
     var routineToDelete by remember { mutableStateOf<Routine?>(null) }
     // --- DIÁLOGO DE CREAR / EDITAR ---
     if (showDialog) {
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { showDialog = false },
-            containerColor = Color(0xFF161616),
-            title = {
-                Text(
-                    text = if (routineToEdit == null) "NUEVA RUTINA" else "EDITAR RUTINA",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
+        AegisAlertDialog(
+            title = if (routineToEdit == null) "NUEVA RUTINA" else "EDITAR RUTINA",
+            confirmText = "GUARDAR",
+            dismissText = "CANCELAR",
+            onDismiss = { showDialog = false },
+            onConfirm = {
+                if (textState.isNotBlank()) {
+                    if (routineToEdit == null) {
+                        routinesViewModel.addRoutine(textState)
+                    } else {
+                        routinesViewModel.updateRoutine(routineToEdit!!.id, textState)
+                    }
+                    showDialog = false
+                }
             },
-            text = {
-                androidx.compose.material3.OutlinedTextField(
+            content = {
+                // ✅ Solo nos preocupamos por lo que hay "dentro"
+                OutlinedTextField(
                     value = textState,
                     onValueChange = { textState = it },
                     label = { Text("Nombre de la rutina", color = Color.Gray) },
                     singleLine = true,
-                    colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = AegisBronze,
                         unfocusedBorderColor = Color.DarkGray,
                         focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White
-                    )
+                        unfocusedTextColor = Color.White,
+                        cursorColor = AegisBronze
+                    ),
+                    shape = RoundedCornerShape(8.dp)
                 )
-            },
-            confirmButton = {
-                androidx.compose.material3.TextButton(onClick = {
-                    if (textState.isNotBlank()) {
-                        if (routineToEdit == null) {
-                            routinesViewModel.addRoutine(textState)
-                        } else {
-                            routinesViewModel.updateRoutine(routineToEdit!!.id, textState)
-                        }
-                        showDialog = false
-                    }
-                }) {
-                    Text("GUARDAR", color = AegisBronze, fontWeight = FontWeight.Bold)
-                }
-            },
-            dismissButton = {
-                androidx.compose.material3.TextButton(onClick = { showDialog = false }) {
-                    Text("CANCELAR", color = Color.Gray)
-                }
             }
         )
     }
@@ -172,39 +163,20 @@ fun RoutineScreen(
         }
     }
     if (routineToDelete != null) {
-        AlertDialog(
-            onDismissRequest = { routineToDelete = null }, // Si tocan fuera, se cierra
-            title = {
-                Text(stringResource(R.string.dialog_delete_title), fontWeight = FontWeight.Bold)
-            },
-            text = {
+        AegisAlertDialog(
+            title = stringResource(R.string.dialog_delete_title),
+            content = {
                 Text(
-                    // ✅ FORMA CORRECTA: El primer parámetro es el ID, el segundo es el dato
-                    text = stringResource(
-                        R.string.dialog_delete_confirm,
-                        routineToDelete?.name ?: ""
-                    ),
+                    text = stringResource(R.string.dialog_delete_confirm, routineToDelete?.name ?: ""),
                     color = Color.Gray
                 )
             },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        routineToDelete?.let { routinesViewModel.removeRoutine(it) }
-                        routineToDelete = null // Cerramos el diálogo
-                    }
-                ) {
-                    Text(stringResource(R.string.btn_yes), color = AegisBronze)
-                }
+            onConfirm = {
+                routineToDelete?.let { routinesViewModel.removeRoutine(it) }
+                routineToDelete = null
             },
-            dismissButton = {
-                TextButton(onClick = { routineToDelete = null }) {
-                    Text(stringResource(R.string.btn_no))
-                }
-            },
-            containerColor = Color(0xFF1C1C1C), // Un gris oscuro para que pegue con tu App
-            titleContentColor = Color.White,
-            textContentColor = Color.Gray
+            onDismiss = { routineToDelete = null },
+            confirmButtonColor = AegisBronze
         )
     }
 }

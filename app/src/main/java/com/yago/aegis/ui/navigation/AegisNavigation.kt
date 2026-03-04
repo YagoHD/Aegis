@@ -7,6 +7,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
@@ -105,9 +106,18 @@ fun AegisNavigation(profileViewModel: ProfileViewModel) {
                 )
             }
 
-            // 📊 PANTALLA DE ESTADÍSTICAS
-            composable("stats") {
-                // StatsScreen(profileViewModel)
+            // 📊 PANTALLA DE EJERCICIOS
+            composable("ejercicios") {
+                ExercisesLibraryScreen(
+                    routinesViewModel = routinesViewModel,
+                    onNavigateToCreate = {
+                        navController.navigate("create_exercise")
+                    },
+                    onNavigateToEdit = { exerciseName ->
+                        // ✅ Navegamos a la ruta de edición con el nombre como parámetro
+                        navController.navigate("edit_exercise/$exerciseName")
+                    }
+                )
             }
 
             // ⚙️ PANTALLA DE AJUSTES
@@ -149,6 +159,27 @@ fun AegisNavigation(profileViewModel: ProfileViewModel) {
                         // Como estamos usando el mismo routinesViewModel,
                         // el ejercicio se guardará correctamente.
                     }
+                )
+            }
+            composable("edit_exercise/{exerciseName}") { backStackEntry ->
+                val exerciseName = backStackEntry.arguments?.getString("exerciseName")
+                // Buscamos el ejercicio en la lista para pasarlo a la pantalla
+                val exercise = routinesViewModel.allExercises.collectAsState().value
+                    .find { it.name == exerciseName }
+
+                EditExerciseScreen(
+                    routinesViewModel = routinesViewModel,
+                    exerciseToEdit = exercise, // Pasamos el ejercicio para "Editar"
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+// O una ruta simple para crear
+            composable("create_exercise") {
+                EditExerciseScreen(
+                    routinesViewModel = routinesViewModel,
+                    exerciseToEdit = null, // Al ser null, la pantalla se abre vacía para "Crear"
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
         }

@@ -5,7 +5,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -14,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -25,7 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.R
 import com.yago.aegis.data.Exercise
-import com.yago.aegis.data.getExerciseIcon
+import com.yago.aegis.data.globalExerciseIcons
+import com.yago.aegis.ui.components.AegisAlertDialog
+import com.yago.aegis.ui.components.ExerciseCard
 import com.yago.aegis.ui.components.LibraryExerciseCard
 import com.yago.aegis.ui.theme.AegisBronze
 import com.yago.aegis.viewmodel.RoutinesViewModel
@@ -39,8 +41,7 @@ fun AddExerciseScreen(
 ) {
     val backgroundBlackgrey = colorResource(id = R.color.backgroundBlackgrey)
     val savedGlobalTags by routinesViewModel.globalTags.collectAsState()
-    val libraryExercises by routinesViewModel.exerciseLibrary.collectAsState()
-    // --- ESTADOS PARA LA CREACIÓN ---
+    val libraryExercises by routinesViewModel.allExercises.collectAsState(initial = emptyList<Exercise>())
     var exerciseName by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
     var selectedIconName by remember { mutableStateOf("dumbbell") }
@@ -48,7 +49,7 @@ fun AddExerciseScreen(
     // --- ESTADOS PARA EL DIÁLOGO DE TAGS ---
     var showTagDialog by remember { mutableStateOf(false) }
     var newTagText by remember { mutableStateOf("") }
-
+    var exerciseToDelete by remember { mutableStateOf<Exercise?>(null) }
     // --- ESTADO PARA LA BÚSQUEDA ---
     var searchQuery by remember { mutableStateOf("") }
     // Lógica de filtrado en tiempo real
@@ -68,25 +69,31 @@ fun AddExerciseScreen(
 
     // --- DIÁLOGO RÁPIDO DE TAGS ---
     if (showTagDialog) {
-        AlertDialog(
-            onDismissRequest = { showTagDialog = false },
-            containerColor = Color(0xFF161616),
-            title = { Text("CREAR TAG GLOBAL", color = Color.White, fontSize = 16.sp) },
-            text = {
+        AegisAlertDialog(
+            title = "CREAR TAG GLOBAL",
+            confirmText = "GUARDAR",
+            dismissText = "CANCELAR",
+            onDismiss = { showTagDialog = false },
+            onConfirm = {
+                if (newTagText.isNotBlank()) {
+                    routinesViewModel.addGlobalTag(newTagText)
+                    newTagText = ""
+                    showTagDialog = false
+                }
+            },
+            content = {
                 OutlinedTextField(
                     value = newTagText,
                     onValueChange = { newTagText = it.uppercase() },
-                    colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White)
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = AegisBronze,
+                        unfocusedBorderColor = Color.DarkGray,
+                        cursorColor = AegisBronze
+                    ),
+                    shape = RoundedCornerShape(8.dp)
                 )
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    if (newTagText.isNotBlank()) {
-                        routinesViewModel.addGlobalTag(newTagText) // Se guarda en DataStore
-                        newTagText = ""
-                        showTagDialog = false
-                    }
-                }) { Text("GUARDAR", color = AegisBronze) }
             }
         )
     }
@@ -203,12 +210,17 @@ fun AddExerciseScreen(
             item {
                 SectionLabel("SELECT VISUAL REFERENCE")
                 FlowRow(
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                     maxItemsInEachRow = 4,
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    exerciseIcons.forEach { (name, icon) ->
-                        IconBox(icon = icon, isSelected = selectedIconName == name, onClick = { selectedIconName = name })
+                    globalExerciseIcons.forEach { (name, icon) ->
+                        EditIconBox(
+                            icon = icon,
+                            isSelected = selectedIconName == name,
+                            onClick = { selectedIconName = name } // ✅ Esto cambiará el estado
+                        )
                     }
                 }
             }
@@ -226,7 +238,7 @@ fun AddExerciseScreen(
                                 iconName = selectedIconName,
                                 notes = ""
                             )
-                            routinesViewModel.addNewExerciseToLibrary(newExercise)
+                            routinesViewModel.saveOrUpdateExercise(newExercise)
                             routinesViewModel.addExerciseToTemp(newExercise)
 
                             exerciseName = ""
@@ -278,20 +290,18 @@ fun AddExerciseScreen(
 
             // LISTA DE EJERCICIOS FILTRADA
             items(filteredExercises) { exercise ->
-                LibraryExerciseCard(
-                    exercise = exercise,
-                    onAdd = {
-                        val isAlreadyAdded = routinesViewModel.tempExercises.any { it.name == exercise.name }
+                val isAlreadyInRoutine = routinesViewModel.tempExercises.any { it.id == exercise.id }
 
-                        if (!isAlreadyAdded) {
-                            onExerciseCreated(exercise)
+                ExerciseCard(
+                    exercise = exercise,
+                    isAddMode = true, // ✅ ACTIVAMOS EL MODO AÑADIR
+                    onEdit = {
+                        if (!isAlreadyInRoutine) {
                             routinesViewModel.addExerciseToTemp(exercise)
-                        } else {
                         }
                     },
-                    onDelete = {
-                        routinesViewModel.removeExerciseFromLibrary(exercise)
-                    }
+                    onDelete = { /* Ya no se usa aquí, podemos dejarlo vacío */ },
+                    modifier = Modifier.alpha(if (isAlreadyInRoutine) 0.5f else 1f)
                 )
             }
 

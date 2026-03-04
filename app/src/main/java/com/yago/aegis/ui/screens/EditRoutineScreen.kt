@@ -2,10 +2,9 @@ package com.yago.aegis.ui.screens
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items // ✅ Importante: Asegúrate de este import
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -21,10 +20,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.yago.aegis.R
-import com.yago.aegis.data.Exercise
+import com.yago.aegis.ui.components.ExerciseCard
 import com.yago.aegis.ui.theme.AegisBronze
 import com.yago.aegis.viewmodel.RoutinesViewModel
-import com.yago.aegis.ui.components.ExerciseEditCard
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyColumnState
 
@@ -164,11 +162,12 @@ fun EditRoutineScreen(
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier.padding(vertical = 4.dp)
                         ) {
-                            ExerciseEditCard(
+                            // Dentro del ReorderableItem en rutinas
+                            ExerciseCard(
                                 exercise = exercise,
-                                // ✅ Ahora este parámetro ya no dará error
-                                modifier = Modifier.draggableHandle(),
-                                onDelete = { routinesViewModel.tempExercises.remove(exercise) }
+                                onDelete = { routinesViewModel.tempExercises.remove(exercise) },
+                                showReorderHandle = true,
+                                modifier = Modifier.draggableHandle()
                             )
                         }
                     }

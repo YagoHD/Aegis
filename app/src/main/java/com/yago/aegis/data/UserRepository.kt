@@ -1,6 +1,7 @@
 package com.yago.aegis.data
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 
 class UserRepository(private val settingsStore: SettingsStore) {
 
@@ -35,7 +36,30 @@ class UserRepository(private val settingsStore: SettingsStore) {
     suspend fun updateRoutines(list: List<Routine>) = settingsStore.saveRoutines(list)
     suspend fun updateExerciseLibrary(list: List<Exercise>) = settingsStore.saveExerciseLibrary(list)
     suspend fun updateGlobalTags(tags: List<String>) = settingsStore.saveGlobalTags(tags)
+    fun getAllExercises(): Flow<List<Exercise>> = settingsStore.exerciseLibrary
+    suspend fun upsertExercise(exercise: Exercise) {
+        val currentList = settingsStore.exerciseLibrary.first().toMutableList()
 
+        // ✅ Buscamos por ID. Si lo encuentra, devuelve su posición (index)
+        val index = currentList.indexOfFirst { it.id == exercise.id }
+
+        if (index != -1) {
+            // Si el ID ya existe, reemplazamos el viejo por el nuevo editado
+            currentList[index] = exercise
+        } else {
+            // Si el ID es nuevo, lo añadimos a la lista
+            currentList.add(exercise)
+        }
+
+        settingsStore.saveExerciseLibrary(currentList)
+    }
+    suspend fun deleteExercise(exercise: Exercise) {
+        val currentList = settingsStore.exerciseLibrary.first().toMutableList()
+
+        currentList.removeAll { it.name.equals(exercise.name, ignoreCase = true) }
+
+        settingsStore.saveExerciseLibrary(currentList)
+    }
     // Fotos y sus fechas (Escritura)
     suspend fun updateBasePhoto(uri: String) = settingsStore.saveBasePhotoUri(uri)
     suspend fun updateBasePhotoDate(date: String) = settingsStore.saveBasePhotoDate(date)

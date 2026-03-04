@@ -27,7 +27,7 @@ fun AegisBottomBar(navController: NavHostController) {
     val items = listOf(
         Screen.Routine,
         Screen.Weekly,
-        Screen.Stats,
+        Screen.Ejercicios,
         Screen.Profile,
     )
 
