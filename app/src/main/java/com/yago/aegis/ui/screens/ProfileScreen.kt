@@ -34,26 +34,18 @@ import com.yago.aegis.viewmodel.ProfileViewModel
 fun MainProfileScreen(viewModel: ProfileViewModel, onNavigateToSettings: () -> Unit) {
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                modifier = Modifier.height(48.dp),
-                windowInsets = WindowInsets(0, 0, 0, 0), // ✅ CLAVE: Elimina el espacio extra superior
-                title = {
-                    Text(
-                        stringResource(R.string.profile_title),
-                        color = AegisWhite,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
+            AegisTopBar(
+                title = stringResource(R.string.profile_title),
                 actions = {
                     IconButton(onClick = onNavigateToSettings) {
-                        Icon(Icons.Default.Settings, contentDescription = "Ajustes", tint = AegisWhite, modifier = Modifier.size(20.dp))
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Ajustes",
+                            tint = AegisWhite,
+                            modifier = Modifier.size(20.dp)
+                        )
                     }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.Black,
-                    scrolledContainerColor = Color.Black
-                )
+                }
             )
         },
         containerColor = BackgroundBlackGrey

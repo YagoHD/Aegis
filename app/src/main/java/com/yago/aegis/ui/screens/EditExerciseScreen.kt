@@ -23,7 +23,10 @@ import androidx.compose.ui.unit.sp
 import com.yago.aegis.data.Exercise
 import com.yago.aegis.data.globalExerciseIcons
 import com.yago.aegis.ui.components.AegisAlertDialog
+import com.yago.aegis.ui.components.AegisTagManager
+import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.theme.AegisBronze
+import com.yago.aegis.ui.theme.AegisWhite
 import com.yago.aegis.viewmodel.RoutinesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -95,22 +98,17 @@ fun EditExerciseScreen(
     Scaffold(
         containerColor = Color(0xFF0F0E0E), // Fondo ultra oscuro
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = if (exerciseToEdit == null) "NEW EXERCISE" else "EDIT EXERCISE",
-                        color = Color.White,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 18.sp,
-                        letterSpacing = 1.sp
-                    )
-                },
+            AegisTopBar(
+                title = if (exerciseToEdit == null) "NEW EXERCISE" else "EDIT EXERCISE",
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.White)
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Volver",
+                            tint = Color.White
+                        )
                     }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
+                }
             )
         },
         bottomBar = {
@@ -123,8 +121,8 @@ fun EditExerciseScreen(
                             name = exerciseName,
                             tags = selectedTags.toList(),
                             iconName = selectedIconName,
-                            muscleGroup = selectedTags.firstOrNull() ?: "General",
-                            type = "Library",
+                            muscleGroup = selectedTags.firstOrNull() ?: "",
+                            type = "",
                         )
                         routinesViewModel.saveOrUpdateExercise(updatedExercise)
                         onNavigateBack()
@@ -168,31 +166,19 @@ fun EditExerciseScreen(
 
             // 2. TAGS & CATEGORÍAS
             item {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    EditLabel("TAGS & CATEGORIES")
-                    Spacer(modifier = Modifier.weight(1f))
-                    // Botones + y - redondos de la imagen
-                    RoundActionBtn(Icons.Default.Remove, onClick = { /* Lógica borrar opcional */ })
-                    Spacer(modifier = Modifier.width(10.dp))
-                    RoundActionBtn(Icons.Default.Add, onClick = { showTagDialog = true })
-                }
-
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    savedGlobalTags.forEach { tag ->
-                        val isSelected = selectedTags.contains(tag)
-                        EditTagChip(
-                            text = tag,
-                            isSelected = isSelected,
-                            onClick = {
-                                if (isSelected) selectedTags.remove(tag) else selectedTags.add(tag)
-                            }
-                        )
+                AegisTagManager(
+                    allTags = savedGlobalTags,
+                    selectedTags = selectedTags.toSet(),
+                    onTagClick = { tag ->
+                        if (selectedTags.contains(tag)) selectedTags.remove(tag)
+                        else selectedTags.add(tag)
+                    },
+                    onAddClick = { showTagDialog = true },
+                    onRemoveSelectedClick = {
+                        routinesViewModel.removeGlobalTags(selectedTags.toList())
+                        selectedTags.clear()
                     }
-                }
+                )
             }
 
             // 3. REFERENCIA VISUAL (ICONOS)

@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.yago.aegis.R
+import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.ExerciseCard
 import com.yago.aegis.ui.theme.AegisBronze
 import com.yago.aegis.viewmodel.RoutinesViewModel
@@ -50,29 +51,20 @@ fun EditRoutineScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                windowInsets = WindowInsets(0, 0, 0, 0),
-                title = {
-                    Text(
-                        tempName.uppercase(),
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
+            AegisTopBar(
+                title = tempName,
                 navigationIcon = {
                     IconButton(onClick = {
                         routinesViewModel.clearTempExercises()
                         onNavigateBack()
                     }) {
                         Icon(
-                            Icons.Default.ArrowBack,
+                            imageVector = Icons.Default.ArrowBack,
                             contentDescription = stringResource(R.string.content_desc_back),
                             tint = Color.White
                         )
                     }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Black)
+                }
             )
         },
         containerColor = Color.Black

@@ -62,4 +62,5 @@
     <string name="dialog_delete_confirm">¿Estás seguro de que quieres eliminar la rutina %1$s?</string>
     <string name="btn_yes">SÍ, ELIMINAR</string>
     <string name="btn_no">CANCELAR</string>
+    <string name="exercices_title">EJERCICIOS</string>
 </resources>

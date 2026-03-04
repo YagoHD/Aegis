@@ -27,6 +27,8 @@ import com.yago.aegis.R
 import com.yago.aegis.data.Exercise
 import com.yago.aegis.data.globalExerciseIcons
 import com.yago.aegis.ui.components.AegisAlertDialog
+import com.yago.aegis.ui.components.AegisTagManager
+import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.ExerciseCard
 import com.yago.aegis.ui.components.LibraryExerciseCard
 import com.yago.aegis.ui.theme.AegisBronze
@@ -100,26 +102,19 @@ fun AddExerciseScreen(
 
     Scaffold(
         topBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .statusBarsPadding()
-                    .height(56.dp)
-                    .background(Color.Black),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                IconButton(onClick = onNavigateBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = null, tint = AegisBronze)
+            // ✅ Usamos el componente unificado del Canvas
+            AegisTopBar(
+                title = stringResource(R.string.title_new_exercise),
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = null,
+                            tint = AegisBronze // Mantenemos tu toque de color bronce para la flecha
+                        )
+                    }
                 }
-                Text(
-                    text = stringResource(R.string.title_new_exercise),
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
-                )
-            }
+            )
         },
         containerColor = backgroundBlackgrey
     ) { paddingValues ->
@@ -142,68 +137,20 @@ fun AddExerciseScreen(
                 )
             }
 
-            // SECCIÓN: TAGS (Con botón de añadir funcional)
             item {
-                val RojoBurdeos = Color(0xFF800000)
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    SectionLabel("TAGS & CATEGORIES")
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    // --- BOTÓN ELIMINAR (EL MENOS EN ROJO) ---
-                    IconButton(
-                        onClick = {
-                            if (selectedTags.isNotEmpty()) {
-                                // 1. Borramos de la lista global en el disco
-                                routinesViewModel.removeGlobalTags(selectedTags.toList())
-                                // 2. Limpiamos la selección actual para que desaparezcan de la pantalla
-                                selectedTags.clear()
-                            }
-                        },
-                        modifier = Modifier.size(24.dp),
-                        enabled = selectedTags.isNotEmpty() // Solo se activa si hay algo seleccionado
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.RemoveCircleOutline,
-                            contentDescription = "Eliminar tags seleccionadas",
-                            tint = if (selectedTags.isNotEmpty()) RojoBurdeos else Color.DarkGray
-                        )
+                AegisTagManager(
+                    allTags = savedGlobalTags,
+                    selectedTags = selectedTags.toSet(),
+                    onTagClick = { tag ->
+                        if (selectedTags.contains(tag)) selectedTags.remove(tag)
+                        else selectedTags.add(tag)
+                    },
+                    onAddClick = { showTagDialog = true },
+                    onRemoveSelectedClick = {
+                        routinesViewModel.removeGlobalTags(selectedTags.toList())
+                        selectedTags.clear()
                     }
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    // --- BOTÓN AÑADIR (EL MÁS EN BRONCE) ---
-                    IconButton(
-                        onClick = { showTagDialog = true },
-                        modifier = Modifier.size(24.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.AddCircleOutline,
-                            contentDescription = "Añadir nueva tag",
-                            tint = AegisBronze
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // LISTADO DE TAGS
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    savedGlobalTags.forEach { tag ->
-                        val isSelected = selectedTags.contains(tag)
-                        TagChip(
-                            text = tag,
-                            isSelected = isSelected,
-                            onClick = {
-                                if (isSelected) selectedTags.remove(tag) else selectedTags.add(tag)
-                            }
-                        )
-                    }
-                }
+                )
             }
 
             // SECCIÓN: ICONOS

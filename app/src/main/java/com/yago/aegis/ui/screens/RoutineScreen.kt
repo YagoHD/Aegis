@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import com.yago.aegis.data.Routine
 import com.yago.aegis.R
 import com.yago.aegis.ui.components.AegisAlertDialog
+import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.RoutineCard
 import com.yago.aegis.ui.theme.AegisBronze
 import com.yago.aegis.ui.theme.BackgroundBlackGrey
@@ -97,18 +98,9 @@ fun RoutineScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                modifier = Modifier.height(48.dp),
-                windowInsets = WindowInsets(0, 0, 0, 0),
-                title = {
-                    Text(
-                        stringResource(R.string.routine_title).uppercase(),
-                        color = Color.White,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Black)
+            // ✅ Sustitución por el componente unificado
+            AegisTopBar(
+                title = stringResource(R.string.routine_title)
             )
         },
         containerColor = BackgroundBlackGrey

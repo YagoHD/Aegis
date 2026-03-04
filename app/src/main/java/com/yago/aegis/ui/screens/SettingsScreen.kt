@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.SettingsMenu
 import com.yago.aegis.ui.theme.AegisWhite
 import com.yago.aegis.viewmodel.ProfileViewModel
@@ -25,14 +26,19 @@ import com.yago.aegis.viewmodel.ProfileViewModel
 fun SettingsScreen(viewModel: ProfileViewModel, onBack: () -> Unit) {
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("CONFIGURACIÓN", color = AegisWhite, fontSize = 16.sp, fontWeight = FontWeight.Bold) },
+            // ✅ Sustitución por el componente unificado del Canvas
+            AegisTopBar(
+                title = "CONFIGURACIÓN",
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = AegisWhite)
+                        Icon(
+                            // Nota: Puedes usar Icons.Default o Icons.AutoMirrored
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Volver",
+                            tint = AegisWhite
+                        )
                     }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Black)
+                }
             )
         },
         containerColor = Color(0xFF0A0A0A)
