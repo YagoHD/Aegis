@@ -155,7 +155,7 @@ fun AddExerciseScreen(
 
             // SECCIÓN: ICONOS
             item {
-                SectionLabel("SELECT VISUAL REFERENCE")
+                SectionLabel(stringResource(R.string.select_icon))
                 FlowRow(
                     modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                     maxItemsInEachRow = 4,

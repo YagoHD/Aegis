@@ -17,9 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yago.aegis.R
 import com.yago.aegis.data.Exercise
 import com.yago.aegis.data.globalExerciseIcons
 import com.yago.aegis.ui.components.AegisAlertDialog
@@ -137,7 +139,7 @@ fun EditExerciseScreen(
                 border = BorderStroke(1.dp, Color(0xFF33302E))
             ) {
                 Text(
-                    "SAVE CHANGES",
+                    "CREATE",
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.5.sp
@@ -156,7 +158,7 @@ fun EditExerciseScreen(
 
             // 1. NOMBRE DEL EJERCICIO
             item {
-                EditLabel("EXERCISE NAME")
+                SectionLabel(stringResource(R.string.label_exercise_name))
                 EditInput(
                     value = exerciseName,
                     onValueChange = { exerciseName = it },
@@ -183,7 +185,7 @@ fun EditExerciseScreen(
 
             // 3. REFERENCIA VISUAL (ICONOS)
             item {
-                EditLabel("SELECT VISUAL REFERENCE")
+                SectionLabel(stringResource(R.string.select_icon))
                 FlowRow(
                     modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                     maxItemsInEachRow = 4,

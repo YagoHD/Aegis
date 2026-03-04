@@ -63,4 +63,6 @@
     <string name="btn_yes">SÍ, ELIMINAR</string>
     <string name="btn_no">CANCELAR</string>
     <string name="exercices_title">EJERCICIOS</string>
+    <string name="select_icon">SELECCIONA UN ICONO</string>
+    <string name="tags_title">TAGS Y CATEGORIAS</string>
 </resources>
