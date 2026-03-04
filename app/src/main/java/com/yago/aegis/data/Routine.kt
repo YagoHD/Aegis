@@ -4,5 +4,6 @@ data class Routine(
     val id: Int,
     val name: String,
     val exercises: List<Exercise> = emptyList(),
-    val iconRes: Int
+    val iconRes: Int,
+    val lastCompletedDates: List<Long>? = emptyList()
 )

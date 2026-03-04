@@ -22,13 +22,14 @@ import com.yago.aegis.ui.components.SettingsMenu
 import com.yago.aegis.ui.screens.*
 import com.yago.aegis.viewmodel.ProfileViewModel
 import com.yago.aegis.viewmodel.RoutinesViewModel
+import com.yago.aegis.viewmodel.WorkoutViewModel
 
 @Composable
 fun AegisNavigation(profileViewModel: ProfileViewModel) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-
+    val workoutViewModel: WorkoutViewModel = viewModel()
     // ✅ EXTRAEMOS EL REPOSITORIO Y CREAMOS EL ROUTINESVIEWMODEL CON FACTORY
     val repository = profileViewModel.repository
     val routinesViewModel: RoutinesViewModel = viewModel(
@@ -180,6 +181,24 @@ fun AegisNavigation(profileViewModel: ProfileViewModel) {
                     routinesViewModel = routinesViewModel,
                     exerciseToEdit = null, // Al ser null, la pantalla se abre vacía para "Crear"
                     onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable("train") {
+                SelectRoutineScreen(
+                    routinesViewModel = routinesViewModel,
+                    workoutViewModel = workoutViewModel, // Debes tener este ViewModel inyectado o creado arriba
+                    onNavigateToSettings = {
+                        navController.navigate("settings") // O la ruta que uses para ajustes
+                    },
+                    onNavigateToCreateRoutine = {
+                        navController.navigate("routine")
+                    },
+                    onStartWorkout = { routineId ->
+                        // Por ahora solo imprimimos para probar que el botón funciona
+                        println("Empezando rutina: $routineId")
+                        // Más adelante: navController.navigate("active_session/$routineId")
+                    }
                 )
             }
         }
