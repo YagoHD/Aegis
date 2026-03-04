@@ -21,28 +21,15 @@ import androidx.compose.ui.unit.sp
 import com.yago.aegis.data.Routine
 import com.yago.aegis.ui.theme.AegisBronze
 import com.yago.aegis.ui.theme.AegisCard
-import java.util.Calendar
-import java.util.concurrent.TimeUnit
+
 
 @Composable
 fun RoutineSelectionCard(
     routine: Routine,
     displayTags: String,
-    onStartClick: () -> Unit
+    onStartClick: () -> Unit,
+    lastPerformedText: String,
 ) {
-    // Obtenemos las listas de forma segura para evitar el error de nulidad
-    val safeDates = routine.lastCompletedDates ?: emptyList()
-    val safeExercises = routine.exercises ?: emptyList()
-
-    // Lógica para el texto de último entrenamiento
-    val lastPerformedText = remember(safeDates) {
-        if (safeDates.isEmpty()) {
-            "Never performed"
-        } else {
-            calculateLastPerformed(safeDates)
-        }
-    }
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -52,19 +39,20 @@ fun RoutineSelectionCard(
     ) {
         Box(modifier = Modifier.padding(16.dp)) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                // TAGS DINÁMICOS
+                // 1. Tags (solo si existen)
                 if (displayTags.isNotEmpty()) {
                     Text(
                         text = displayTags,
                         color = AegisBronze,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        )
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                 }
 
-                // TÍTULO DE LA RUTINA
+                // 2. Título
                 Text(
                     text = routine.name,
                     color = Color.White,
@@ -72,7 +60,7 @@ fun RoutineSelectionCard(
                     fontWeight = FontWeight.Bold
                 )
 
-                // TEXTO DINÁMICO (Antes era estático "Yesterday")
+                // 3. Texto dinámico del ViewModel
                 Text(
                     text = lastPerformedText,
                     color = Color.Gray,
@@ -81,23 +69,25 @@ fun RoutineSelectionCard(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // FILA INFERIOR: NOMBRES DE EJERCICIOS Y BOTÓN START
+                // 4. Fila inferior (Ejercicios y Botón)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Cápsulas de ejercicios (Manejo de nulos directo)
                     Row(
                         modifier = Modifier.weight(1f),
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        safeExercises.take(3).forEach { exercise ->
+                        routine.exercises.take(3).forEach { exercise ->
                             ExerciseNameCapsule(exercise.name)
                         }
                     }
 
                     Spacer(modifier = Modifier.width(8.dp))
 
+                    // Botón Start
                     Button(
                         onClick = onStartClick,
                         colors = ButtonDefaults.buttonColors(containerColor = AegisBronze),
@@ -116,7 +106,7 @@ fun RoutineSelectionCard(
                 }
             }
 
-            // ICONO DE LA RUTINA (Mantenemos tu lógica de routine.iconRes original)
+            // 5. Icono de rutina
             Surface(
                 modifier = Modifier
                     .size(40.dp)
@@ -131,29 +121,6 @@ fun RoutineSelectionCard(
                     modifier = Modifier.padding(8.dp)
                 )
             }
-        }
-    }
-}
-
-private fun calculateLastPerformed(dates: List<Long>): String {
-    if (dates.isEmpty()) return "Never performed"
-
-    val now = System.currentTimeMillis()
-    val lastDate = dates.last()
-
-    val oneWeekAgo = now - TimeUnit.DAYS.toMillis(7)
-    val sessionsThisWeek = dates.count { it >= oneWeekAgo }
-
-    return if (sessionsThisWeek > 1) {
-        "$sessionsThisWeek times this week"
-    } else {
-        val diffInMs = now - lastDate
-        val diffInDays = TimeUnit.MILLISECONDS.toDays(diffInMs)
-
-        when {
-            diffInDays < 1 -> "Last performed: Today"
-            diffInDays == 1L -> "Last performed: Yesterday"
-            else -> "Last performed: $diffInDays days ago"
         }
     }
 }

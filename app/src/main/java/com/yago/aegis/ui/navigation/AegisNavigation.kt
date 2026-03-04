@@ -10,9 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -25,20 +23,14 @@ import com.yago.aegis.viewmodel.RoutinesViewModel
 import com.yago.aegis.viewmodel.WorkoutViewModel
 
 @Composable
-fun AegisNavigation(profileViewModel: ProfileViewModel) {
+fun AegisNavigation(
+    profileViewModel: ProfileViewModel,
+    workoutViewModel: WorkoutViewModel,
+    routinesViewModel: RoutinesViewModel
+) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val workoutViewModel: WorkoutViewModel = viewModel()
-    // ✅ EXTRAEMOS EL REPOSITORIO Y CREAMOS EL ROUTINESVIEWMODEL CON FACTORY
-    val repository = profileViewModel.repository
-    val routinesViewModel: RoutinesViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return RoutinesViewModel(repository) as T
-            }
-        }
-    )
 
     // No mostramos la barra en settings para que la configuración ocupe toda la pantalla
     val showBottomBar = currentRoute != "settings"
@@ -55,7 +47,7 @@ fun AegisNavigation(profileViewModel: ProfileViewModel) {
             startDestination = "profile",
             modifier = Modifier.padding(paddingValues)
         ) {
-            // 🏋️ PANTALLA DE MIS RUTINAS
+            // 🏋️ PANTALLA DE MIS RUTINAS (Gestión/Creación)
             composable(
                 route = "routine",
                 enterTransition = {
@@ -107,7 +99,7 @@ fun AegisNavigation(profileViewModel: ProfileViewModel) {
                 )
             }
 
-            // 📊 PANTALLA DE EJERCICIOS
+            // 📊 PANTALLA DE EJERCICIOS (Librería)
             composable("ejercicios") {
                 ExercisesLibraryScreen(
                     routinesViewModel = routinesViewModel,
@@ -115,7 +107,6 @@ fun AegisNavigation(profileViewModel: ProfileViewModel) {
                         navController.navigate("create_exercise")
                     },
                     onNavigateToEdit = { exerciseName ->
-                        // ✅ Navegamos a la ruta de edición con el nombre como parámetro
                         navController.navigate("edit_exercise/$exerciseName")
                     }
                 )
@@ -151,53 +142,58 @@ fun AegisNavigation(profileViewModel: ProfileViewModel) {
                 )
             }
 
+            // ➕ PANTALLA DE AÑADIR EJERCICIO A RUTINA
             composable(route = "add_exercise") {
                 AddExerciseScreen(
                     routinesViewModel = routinesViewModel,
                     onNavigateBack = { navController.popBackStack() },
-                    onExerciseCreated = { newExercise ->
-                        // Aquí es donde el ejercicio vuelve a la pantalla de edición.
-                        // Como estamos usando el mismo routinesViewModel,
-                        // el ejercicio se guardará correctamente.
-                    }
+                    onExerciseCreated = { /* Lógica de retorno */ }
                 )
             }
+
+            // 📝 PANTALLA DE EDICIÓN DE EJERCICIO
             composable("edit_exercise/{exerciseName}") { backStackEntry ->
                 val exerciseName = backStackEntry.arguments?.getString("exerciseName")
-                // Buscamos el ejercicio en la lista para pasarlo a la pantalla
                 val exercise = routinesViewModel.allExercises.collectAsState().value
                     .find { it.name == exerciseName }
 
                 EditExerciseScreen(
                     routinesViewModel = routinesViewModel,
-                    exerciseToEdit = exercise, // Pasamos el ejercicio para "Editar"
+                    exerciseToEdit = exercise,
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
 
-// O una ruta simple para crear
+            // 🆕 CREAR NUEVO EJERCICIO
             composable("create_exercise") {
                 EditExerciseScreen(
                     routinesViewModel = routinesViewModel,
-                    exerciseToEdit = null, // Al ser null, la pantalla se abre vacía para "Crear"
+                    exerciseToEdit = null,
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
 
+            // 🎯 SELECCIONAR RUTINA PARA ENTRENAR
             composable("train") {
                 SelectRoutineScreen(
                     routinesViewModel = routinesViewModel,
-                    workoutViewModel = workoutViewModel, // Debes tener este ViewModel inyectado o creado arriba
+                    workoutViewModel = workoutViewModel,
                     onNavigateToSettings = {
-                        navController.navigate("settings") // O la ruta que uses para ajustes
+                        navController.navigate("settings")
                     },
                     onNavigateToCreateRoutine = {
-                        navController.navigate("routine")
+                        // Navegamos a la sección de gestión de rutinas
+                        navController.navigate("routine") {
+                            // Esto evita que se acumulen pantallas en la pila
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     },
                     onStartWorkout = { routineId ->
-                        // Por ahora solo imprimimos para probar que el botón funciona
-                        println("Empezando rutina: $routineId")
-                        // Más adelante: navController.navigate("active_session/$routineId")
+                        navController.navigate("active_session/$routineId")
                     }
                 )
             }

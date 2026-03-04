@@ -2,6 +2,7 @@ package com.yago.aegis.viewmodel
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.yago.aegis.data.Exercise
 import com.yago.aegis.data.Routine
@@ -12,6 +13,16 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
+
+    class RoutinesViewModelFactory(private val repository: UserRepository) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(RoutinesViewModel::class.java)) {
+                @Suppress("UNCHECKED_CAST")
+                return RoutinesViewModel(repository) as T
+            }
+            throw IllegalArgumentException("Unknown ViewModel class")
+        }
+    }
 
     // ✅ UNIFICADO: Esta es nuestra fuente única para la librería
     val allExercises: StateFlow<List<Exercise>> = repository.getAllExercises()

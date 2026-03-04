@@ -11,28 +11,37 @@ import com.yago.aegis.ui.navigation.AegisNavigation
 import com.yago.aegis.ui.theme.AegisTheme
 import com.yago.aegis.viewmodel.ProfileViewModel
 import com.yago.aegis.viewmodel.ProfileViewModelFactory
+import com.yago.aegis.viewmodel.RoutinesViewModel
+import com.yago.aegis.viewmodel.WorkoutViewModel
+import com.yago.aegis.viewmodel.WorkoutViewModelFactory
 
 class MainActivity : ComponentActivity() {
 
-    // Mantenemos la inicialización de datos aquí
+    // 1. Instancias únicas de datos
     private val settingsStore by lazy { SettingsStore(applicationContext) }
     private val userRepository by lazy { UserRepository(settingsStore) }
 
+    // 2. Declaramos los ViewModels usando sus Factories (Una sola vez aquí arriba está bien)
+    private val profileViewModel: ProfileViewModel by viewModels { ProfileViewModelFactory(userRepository) }
+    private val routinesViewModel: RoutinesViewModel by viewModels {
+        RoutinesViewModel.RoutinesViewModelFactory(
+            userRepository
+        )
+    }
+    private val workoutViewModel: WorkoutViewModel by viewModels { WorkoutViewModelFactory(settingsStore) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Habilita que el contenido se vea detrás de la barra de estado y navegación
         enableEdgeToEdge()
-
-        val viewModel: ProfileViewModel by viewModels {
-            ProfileViewModelFactory(userRepository)
-        }
 
         setContent {
             AegisTheme {
-                // Solo llamamos al componente de navegación global
-                // Él se encargará de decidir qué pantalla mostrar
-                AegisNavigation(profileViewModel = viewModel)
+                // 3. Pasamos los TRES ViewModels a la navegación
+                AegisNavigation(
+                    profileViewModel = profileViewModel,
+                    routinesViewModel = routinesViewModel, // <-- No olvides este
+                    workoutViewModel = workoutViewModel
+                )
             }
         }
     }
