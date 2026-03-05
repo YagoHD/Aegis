@@ -4,17 +4,28 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yago.aegis.ui.components.AegisAlertDialog
+import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.ExerciseSessionCard
 import com.yago.aegis.ui.components.SessionProgressHeader
 import com.yago.aegis.ui.theme.AegisBronze
+import com.yago.aegis.ui.theme.BackgroundBlackGrey
+import com.yago.aegis.viewmodel.ProfileViewModel
 import com.yago.aegis.viewmodel.RoutinesViewModel // ✅ Importante añadir este import
 import com.yago.aegis.viewmodel.WorkoutViewModel
 
@@ -22,13 +33,60 @@ import com.yago.aegis.viewmodel.WorkoutViewModel
 fun ActiveSessionScreen(
     workoutViewModel: WorkoutViewModel,
     routinesViewModel: RoutinesViewModel, // ✅ AÑADIDO: Ahora la pantalla ya conoce este ViewModel
-    onFinishWorkout: () -> Unit
+    onFinishWorkout: () -> Unit,
+    profileViewModel: ProfileViewModel,
 ) {
     // Si no hay sesión activa, salimos para evitar errores
-    val session = workoutViewModel.activeSession ?: return
 
+    val session = workoutViewModel.activeSession ?: return
+    var showCancelDialog by remember { mutableStateOf(false) }
+    if (showCancelDialog) {
+        AegisAlertDialog(
+            title = "¿Cancelar rutina?",
+            confirmText = "SÍ, CANCELAR",
+            dismissText = "NO, CONTINUAR",
+            confirmButtonColor = Color.Red, // Color de advertencia
+            onConfirm = {
+                showCancelDialog = false
+                onFinishWorkout() // Volvemos atrás sin guardar nada
+            },
+            onDismiss = { showCancelDialog = false },
+            content = {
+                Text(
+                    text = "Se perderá todo el progreso de esta sesión de entrenamiento.",
+                    color = Color.Gray
+                )
+            }
+        )
+    }
     Scaffold(
-        containerColor = Color.Black
+        containerColor = BackgroundBlackGrey,
+        topBar = {
+            // ✅ USAMOS TU COMPONENTE AEGIS TOP BAR
+            AegisTopBar(
+                title = session.routineName,
+                subtitle = "IN PROGRESS",
+                navigationIcon = {
+                    IconButton(onClick = { showCancelDialog = true }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { /* Menú de tres puntos si quieres */ }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = null,
+                            tint = Color.White
+                        )
+                    }
+                }
+            )
+        }
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -66,6 +124,7 @@ fun ActiveSessionScreen(
                     onClick = {
                         // Ahora sí podemos pasarle el routinesViewModel porque está en los parámetros
                         workoutViewModel.finishWorkout(routinesViewModel) {
+                            profileViewModel.incrementDisciplineDay()
                             onFinishWorkout()
                         }
                     },
@@ -84,7 +143,6 @@ fun ActiveSessionScreen(
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(100.dp)) }
         }
     }
 }

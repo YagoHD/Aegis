@@ -97,6 +97,13 @@ class ProfileViewModel(val repository: UserRepository) : ViewModel() {
                 user = user.copy(profilePhotoUri = uri)
             }
         }
+        viewModelScope.launch {
+            // Escuchamos los cambios del repositorio
+            repository.disciplineDay.collect { savedDays ->
+                // Actualizamos el objeto user con lo que viene del disco
+                user = user.copy(disciplineDay = savedDays)
+            }
+        }
     }
 
     // --- FUNCIONES DE ACTUALIZACIÓN (ESCRITURA EN DISCO) ---
@@ -188,6 +195,16 @@ class ProfileViewModel(val repository: UserRepository) : ViewModel() {
     fun updateHeight(newHeight: Int) {
         viewModelScope.launch {
             repository.updateHeight(newHeight.toDouble())
+        }
+    }
+
+    fun incrementDisciplineDay() {
+        val newDisciplineDay = user.disciplineDay + 1
+        // Actualizamos el estado local
+        user = user.copy(disciplineDay = newDisciplineDay)
+        // Guardamos en el repositorio para que no se pierda al cerrar la app
+        viewModelScope.launch {
+            repository.updateDisciplineDay(newDisciplineDay)
         }
     }
 

@@ -33,6 +33,7 @@ class SettingsStore(private val context: Context) {
         private val ROUTINES_KEY = stringPreferencesKey("routines_list")
         private val EXERCISES_LIBRARY_KEY = stringPreferencesKey("exercises_library")
         private val GLOBAL_TAGS_KEY = stringPreferencesKey("global_tags")
+        private val DISCIPLINE_DAY = intPreferencesKey("discipline_day")
     }
 
     // --- LECTURA (READ) ---
@@ -57,7 +58,6 @@ class SettingsStore(private val context: Context) {
             gson.fromJson(json, type)
         }
     }
-
     val exerciseLibrary: Flow<List<Exercise>> = context.dataStore.data.map { prefs ->
         val json = prefs[EXERCISES_LIBRARY_KEY] ?: ""
         if (json.isEmpty()) emptyList()
@@ -66,7 +66,6 @@ class SettingsStore(private val context: Context) {
             gson.fromJson(json, type)
         }
     }
-
     val globalTags: Flow<List<String>> = context.dataStore.data.map { prefs ->
         val json = prefs[GLOBAL_TAGS_KEY] ?: ""
         if (json.isEmpty()) listOf("COMPOUND", "ISOLATION", "CHEST", "LEGS")
@@ -75,7 +74,7 @@ class SettingsStore(private val context: Context) {
             gson.fromJson(json, type)
         }
     }
-
+    val disciplineDay: Flow<Int> = context.dataStore.data.map { it[DISCIPLINE_DAY] ?: 0 }
     // --- ESCRITURA (WRITE) ---
     suspend fun saveName(name: String) {
         context.dataStore.edit { it[USER_NAME] = name }
@@ -163,5 +162,8 @@ class SettingsStore(private val context: Context) {
     suspend fun saveRoutines(list: List<Routine>) {
         val json = gson.toJson(list)
         context.dataStore.edit { it[ROUTINES_KEY] = json }
+    }
+    suspend fun saveDisciplineDay(days: Int) {
+        context.dataStore.edit { it[DISCIPLINE_DAY] = days }
     }
 }

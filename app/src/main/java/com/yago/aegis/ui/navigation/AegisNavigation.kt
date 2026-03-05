@@ -219,7 +219,8 @@ fun AegisNavigation(
 
                 ActiveSessionScreen(
                     workoutViewModel = workoutViewModel,
-                    routinesViewModel = routinesViewModel, // ✅ Pásalo también aquí
+                    routinesViewModel = routinesViewModel,
+                    profileViewModel = profileViewModel,
                     onFinishWorkout = { navController.popBackStack() }
                 )
             }

@@ -22,6 +22,7 @@ class UserRepository(private val settingsStore: SettingsStore) {
     val actualPhotoDate = settingsStore.actualPhotoDate
     val exerciseLibrary: Flow<List<Exercise>> = settingsStore.exerciseLibrary
     val globalTags: Flow<List<String>> = settingsStore.globalTags
+    val disciplineDay: Flow<Int> = settingsStore.disciplineDay
 
     suspend fun updateName(name: String) = settingsStore.saveName(name)
     suspend fun toggleBMI(enabled: Boolean) = settingsStore.saveShowBMI(enabled)
@@ -66,4 +67,4 @@ class UserRepository(private val settingsStore: SettingsStore) {
 
     suspend fun updateActualPhoto(uri: String) = settingsStore.saveActualPhotoUri(uri)
     suspend fun updateActualPhotoDate(date: String) = settingsStore.saveActualPhotoDate(date)
-}
+    suspend fun updateDisciplineDay(days: Int) = settingsStore.saveDisciplineDay(days)}
