@@ -59,7 +59,8 @@ fun RoutineCard(
             ) {
                 // ✅ CAMBIO CLAVE: Usamos el icono que viene en la rutina
                 Icon(
-                    imageVector = getExerciseIcon(routine.iconName),
+                    // ✅ Si routine.iconName es nulo, usamos "dumbbell" por defecto
+                    imageVector = getExerciseIcon(routine.iconName ?: "dumbbell"),
                     contentDescription = null,
                     tint = AegisBronze,
                     modifier = Modifier.size(24.dp)

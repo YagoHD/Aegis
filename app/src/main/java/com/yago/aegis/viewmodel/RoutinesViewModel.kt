@@ -14,17 +14,7 @@ import kotlinx.coroutines.launch
 
 class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
 
-    class RoutinesViewModelFactory(private val repository: UserRepository) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(RoutinesViewModel::class.java)) {
-                @Suppress("UNCHECKED_CAST")
-                return RoutinesViewModel(repository) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
-        }
-    }
-
-    // ✅ UNIFICADO: Esta es nuestra fuente única para la librería
+    // ✅ Fuente única para la librería de ejercicios (Base de Datos)
     val allExercises: StateFlow<List<Exercise>> = repository.getAllExercises()
         .stateIn(
             scope = viewModelScope,
@@ -40,13 +30,16 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
             initialValue = listOf("COMPOUND", "CHEST", "LEGS", "BACK", "SHOULDERS")
         )
 
-    var tempExercises = mutableStateListOf<Exercise>()
-        private set
-
+    // ✅ Lista de rutinas que se muestran en la UI
     var routines = mutableStateListOf<Routine>()
         private set
 
+    // Lista temporal para la pantalla de creación/edición
+    var tempExercises = mutableStateListOf<Exercise>()
+        private set
+
     init {
+        // Observamos los cambios en el repositorio para mantener la lista 'routines' al día
         viewModelScope.launch {
             repository.routines.collect { savedRoutines ->
                 routines.clear()
@@ -55,16 +48,43 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
+    /**
+     * Guarda el estado actual de las rutinas en el almacenamiento persistente (DataStore).
+     */
     private fun persistChanges() {
         viewModelScope.launch {
             repository.updateRoutines(routines.toList())
         }
     }
 
-    // --- GESTIÓN DE RUTINAS ---
+    // --- 🛠️ GESTIÓN DE RENDIMIENTO (EL "CORAZÓN" DEL GUARDADO) ---
+
+    /**
+     * Actualiza el texto de 'Último Entrenamiento' en un ejercicio específico.
+     * Esta función es llamada por el WorkoutViewModel al finalizar una sesión.
+     */
+    fun updateExercisePerformance(exerciseId: Long, summary: String) {
+        val updatedRoutines = routines.map { routine ->
+            routine.copy(
+                // ✅ Nos aseguramos de que iconName nunca pase como null al copiar
+                iconName = routine.iconName ?: "dumbbell",
+                exercises = routine.exercises.map { exercise ->
+                    if (exercise.id == exerciseId) {
+                        exercise.copy(lastPerformance = summary)
+                    } else exercise
+                }
+            )
+        }
+
+        routines.clear()
+        routines.addAll(updatedRoutines)
+        persistChanges()
+    }
+
+    // --- 📁 GESTIÓN DE RUTINAS ---
+
     fun addRoutine(name: String, iconName: String = "dumbbell") {
         val newId = (routines.maxOfOrNull { it.id } ?: 0) + 1
-
         routines.add(
             Routine(
                 id = newId,
@@ -87,16 +107,16 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
             routines[index] = routines[index].copy(
                 name = newName.uppercase(),
                 exercises = newExercises,
-                iconName = newIconName // Actualizamos el nombre del icono
+                iconName = newIconName
             )
             persistChanges()
         }
     }
 
-    // --- GESTIÓN DE LIBRERÍA (La fuente única) ---
+    // --- 📚 GESTIÓN DE LIBRERÍA DE EJERCICIOS ---
+
     fun saveOrUpdateExercise(exercise: Exercise) {
         viewModelScope.launch {
-            // Pasamos el nombre a Mayúsculas para mantener la estética
             val formattedExercise = exercise.copy(name = exercise.name.uppercase())
             repository.upsertExercise(formattedExercise)
         }
@@ -105,8 +125,6 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
     fun deleteExerciseFromLibrary(exercise: Exercise) {
         viewModelScope.launch {
             repository.deleteExercise(exercise)
-            // IMPORTANTE: Si borras un ejercicio de la librería,
-            // deberías recorrer las rutinas y quitarlo de ahí también.
             removeExerciseFromAllRoutines(exercise.name)
         }
     }
@@ -120,7 +138,8 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
         persistChanges()
     }
 
-    // --- GESTIÓN DE TAGS ---
+    // --- 🏷️ GESTIÓN DE TAGS ---
+
     fun addGlobalTag(tag: String) {
         viewModelScope.launch {
             val currentTags = globalTags.value.toMutableList()
@@ -131,21 +150,23 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
-    // --- TEMPORALES PARA EDICIÓN ---
+    fun removeGlobalTags(tagsToRemove: List<String>) {
+        viewModelScope.launch {
+            val currentTags = globalTags.value.toMutableList()
+            currentTags.removeAll(tagsToRemove)
+            repository.updateGlobalTags(currentTags)
+        }
+    }
+
+    // --- ⏳ GESTIÓN TEMPORAL (EDICIÓN) ---
+
     fun setTempExercises(exercises: List<Exercise>?) {
         tempExercises.clear()
         exercises?.let { tempExercises.addAll(it) }
     }
-    fun updateRoutine(id: Int, newName: String) {
-        val index = routines.indexOfFirst { it.id == id }
-        if (index != -1) {
-            // Solo actualizamos el nombre, manteniendo los ejercicios que ya tenía
-            routines[index] = routines[index].copy(name = newName.uppercase())
-            persistChanges() // Guardamos en el disco (DataStore)
-        }
-    }
+
     fun addExerciseToTemp(exercise: Exercise) {
-        if (!tempExercises.any { it.name == exercise.name }) {
+        if (!tempExercises.any { it.id == exercise.id }) {
             tempExercises.add(exercise)
         }
     }
@@ -159,13 +180,15 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
             tempExercises.apply { add(to, removeAt(from)) }
         }
     }
-    fun removeGlobalTags(tagsToRemove: List<String>) {
-        viewModelScope.launch {
-            val currentTags = globalTags.value.toMutableList()
 
-            currentTags.removeAll(tagsToRemove)
-
-            repository.updateGlobalTags(currentTags)
+    // Factory para crear el ViewModel
+    class RoutinesViewModelFactory(private val repository: UserRepository) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(RoutinesViewModel::class.java)) {
+                @Suppress("UNCHECKED_CAST")
+                return RoutinesViewModel(repository) as T
+            }
+            throw IllegalArgumentException("Unknown ViewModel class")
         }
     }
 }

@@ -114,7 +114,7 @@ fun RoutineSelectionCard(
                 color = Color.White.copy(alpha = 0.05f)
             ) {
                 Icon(
-                    imageVector = getExerciseIcon(routine.iconName),
+                    imageVector = getExerciseIcon(routine.iconName ?: "dumbbell"),
                     contentDescription = null,
                     tint = AegisBronze,
                     modifier = Modifier.padding(8.dp)

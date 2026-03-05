@@ -17,7 +17,8 @@ data class Exercise(
     val id: Long = System.currentTimeMillis(),
     val tags: List<String> = emptyList(),
     val iconName: String = "dumbbell",
-    val notes: String = ""
+    val notes: String = "",
+    val lastPerformance: String = ""
 )
 
 /**

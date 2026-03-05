@@ -7,6 +7,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -197,6 +198,32 @@ fun AegisNavigation(
                     }
                 )
             }
+
+            composable(
+                route = "active_session/{routineId}",
+                arguments = listOf(
+                    androidx.navigation.navArgument("routineId") {
+                        type = androidx.navigation.NavType.IntType
+                    }
+                )
+            ) { backStackEntry ->
+                val routineId = backStackEntry.arguments?.getInt("routineId") ?: -1
+
+                // Buscamos la rutina real para pasarla al ViewModel
+                val routine = routinesViewModel.routines.find { it.id == routineId }
+
+                // Si la rutina existe, la iniciamos en el WorkoutViewModel
+                LaunchedEffect(routineId) {
+                    routine?.let { workoutViewModel.startWorkout(it) }
+                }
+
+                ActiveSessionScreen(
+                    workoutViewModel = workoutViewModel,
+                    routinesViewModel = routinesViewModel, // ✅ Pásalo también aquí
+                    onFinishWorkout = { navController.popBackStack() }
+                )
+            }
+
         }
     }
 }

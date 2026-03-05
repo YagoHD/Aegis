@@ -1,13 +1,16 @@
 package com.yago.aegis.viewmodel
 
-import android.R
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.yago.aegis.data.*
 import java.util.concurrent.TimeUnit
-import androidx.lifecycle.ViewModelProvider
-import com.yago.aegis.data.SettingsStore
 
+/**
+ * Factory para instanciar el ViewModel con sus dependencias.
+ */
 class WorkoutViewModelFactory(private val settingsStore: SettingsStore) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(WorkoutViewModel::class.java)) {
@@ -19,99 +22,144 @@ class WorkoutViewModelFactory(private val settingsStore: SettingsStore) : ViewMo
 }
 
 class WorkoutViewModel(private val settingsStore: SettingsStore) : ViewModel() {
-    // Esta es la lista "viva" de ejercicios que el usuario está entrenando ahora mismo
-    private val _exercisesProgress = mutableStateListOf<ExerciseProgress>()
-    val exercisesProgress: List<ExerciseProgress> get() = _exercisesProgress
-    val routines = settingsStore.routines
+
+    // Sesión activa que contiene el progreso de los ejercicios
+    var activeSession by mutableStateOf<WorkoutSession?>(null)
+        private set
+
     /**
-     * Inicializa la sesión con los ejercicios de la rutina seleccionada.
+     * Inicia una nueva sesión de entrenamiento basada en una rutina.
      */
     fun startWorkout(routine: Routine) {
-        _exercisesProgress.clear()
-        routine.exercises.forEach { exercise ->
-            _exercisesProgress.add(
-                ExerciseProgress(
-                    exercise = exercise,
-                    sets = mutableStateListOf(ExerciseSet(reps = 0, weight = 0.0))
-                )
+        val progress = routine.exercises.map { exercise ->
+            ExerciseProgress(
+                exercise = exercise,
+                sets = listOf(ExerciseSet()) // Empezamos con una única serie vacía
+            )
+        }
+        activeSession = WorkoutSession(
+            routineName = routine.name,
+            exercisesProgress = progress
+        )
+    }
+
+    /**
+     * Añade una nueva serie a un ejercicio específico dentro de la sesión activa.
+     */
+    fun addSet(exerciseId: Long) {
+        activeSession = activeSession?.let { session ->
+            session.copy(
+                exercisesProgress = session.exercisesProgress.map { prog ->
+                    if (prog.exercise.id == exerciseId) {
+                        prog.copy(sets = prog.sets + ExerciseSet())
+                    } else prog
+                }
             )
         }
     }
+
+    /**
+     * Actualiza los datos de una serie específica (Peso, Reps, Estado).
+     */
+    fun updateSet(exerciseId: Long, setId: String, weight: Double, reps: Int, completed: Boolean) {
+        activeSession = activeSession?.let { session ->
+            session.copy(
+                exercisesProgress = session.exercisesProgress.map { prog ->
+                    if (prog.exercise.id == exerciseId) {
+                        prog.copy(sets = prog.sets.map { set ->
+                            if (set.id == setId) {
+                                set.copy(weight = weight, reps = reps, isCompleted = completed)
+                            } else set
+                        })
+                    } else prog
+                }
+            )
+        }
+    }
+
+    /**
+     * Elimina una serie. Si es la última, la resetea pero no deja el ejercicio vacío.
+     */
+    fun removeSet(exerciseId: Long, setId: String) {
+        activeSession = activeSession?.let { session ->
+            session.copy(
+                exercisesProgress = session.exercisesProgress.map { prog ->
+                    if (prog.exercise.id == exerciseId) {
+                        val newSets = prog.sets.filter { it.id != setId }
+                        prog.copy(sets = if (newSets.isEmpty()) listOf(ExerciseSet()) else newSets)
+                    } else prog
+                }
+            )
+        }
+    }
+
+    /**
+     * Marca/Desmarca todas las series de un ejercicio de golpe.
+     */
+    fun toggleExerciseCompleted(exerciseId: Long) {
+        activeSession = activeSession?.let { session ->
+            session.copy(
+                exercisesProgress = session.exercisesProgress.map { prog ->
+                    if (prog.exercise.id == exerciseId) {
+                        val allDone = prog.sets.all { it.isCompleted }
+                        prog.copy(sets = prog.sets.map { it.copy(isCompleted = !allDone) })
+                    } else prog
+                }
+            )
+        }
+    }
+
+    /**
+     * Finaliza el entrenamiento, procesa los datos para el historial y limpia la sesión.
+     */
+    fun finishWorkout(routinesViewModel: RoutinesViewModel, onComplete: () -> Unit) {
+        val session = activeSession ?: return
+
+        session.exercisesProgress.forEach { progress ->
+            // Filtramos solo las series que el usuario marcó como completadas
+            val completedSets = progress.sets.filter { it.isCompleted }
+
+            if (completedSets.isNotEmpty()) {
+                // Formateamos el texto para la 'LastSessionCard' (ej: 80.0kg x 10   85.0kg x 8)
+                val summary = completedSets.joinToString("   ") { set ->
+                    // Mostramos decimales solo si son necesarios (.0 -> entero)
+                    val w = if (set.weight % 1 == 0.0) set.weight.toInt() else set.weight
+                    "${w}kg x ${set.reps}"
+                }
+
+                // Guardamos el historial en el RoutinesViewModel (que gestiona la lista global)
+                routinesViewModel.updateExercisePerformance(progress.exercise.id, summary)
+            }
+        }
+
+        activeSession = null
+        onComplete()
+    }
+
+    // --- FUNCIONES DE UTILIDAD PARA LA PANTALLA DE SELECCIÓN ---
+
+    fun getSafeRoutine(routine: Routine): Routine {
+        val currentIcon = routine.iconName ?: "dumbbell"
+        return if (currentIcon.isBlank()) {
+            routine.copy(iconName = "dumbbell")
+        } else {
+            routine.copy(iconName = currentIcon)
+        }
+    }
+
     fun calculateLastPerformed(dates: List<Long>?): String {
         val safeDates = dates ?: return "Never performed"
         if (safeDates.isEmpty()) return "Never performed"
 
         val now = System.currentTimeMillis()
         val lastDate = safeDates.last()
+        val diffInMs = now - lastDate
+        val diffInDays = TimeUnit.MILLISECONDS.toDays(diffInMs)
 
-        val oneWeekAgo = now - TimeUnit.DAYS.toMillis(7)
-        val sessionsThisWeek = safeDates.count { it >= oneWeekAgo }
-
-        return if (sessionsThisWeek > 1) {
-            "$sessionsThisWeek times this week"
-        } else {
-            val diffInMs = now - lastDate
-            val diffInDays = TimeUnit.MILLISECONDS.toDays(diffInMs)
-
-            when {
-                diffInDays < 1L -> "Last performed: Today"
-                diffInDays == 1L -> "Last performed: Yesterday"
-                else -> "Last performed: $diffInDays days ago"
-            }
-        }
-    }
-    /**
-     * Añade una nueva serie vacía a un ejercicio específico.
-     */
-    fun addSet(exerciseId: Long) {
-        val index = _exercisesProgress.indexOfFirst { it.exercise.id == exerciseId }
-        if (index != -1) {
-            val currentProgress = _exercisesProgress[index]
-            // En Compose, para que la lista se actualice, a veces es mejor reemplazar el objeto
-            val updatedSets = currentProgress.sets.toMutableList().apply {
-                add(ExerciseSet(reps = 0, weight = 0.0))
-            }
-            _exercisesProgress[index] = currentProgress.copy(sets = updatedSets)
-        }
-    }
-
-    /**
-     * Actualiza los datos de una serie (reps o peso).
-     */
-    fun updateSet(exerciseId: Long, setId: String, newReps: Int? = null, newWeight: Double? = null) {
-        val exerciseIndex = _exercisesProgress.indexOfFirst { it.exercise.id == exerciseId }
-        if (exerciseIndex != -1) {
-            val progress = _exercisesProgress[exerciseIndex]
-            val updatedSets = progress.sets.map { set ->
-                if (set.id == setId) {
-                    set.copy(
-                        reps = newReps ?: set.reps,
-                        weight = newWeight ?: set.weight
-                    )
-                } else set
-            }
-            _exercisesProgress[exerciseIndex] = progress.copy(sets = updatedSets)
-        }
-    }
-
-    /**
-     * Marca una serie como completada (el check verde).
-     */
-    fun toggleSetCompleted(exerciseId: Long, setId: String) {
-        val exerciseIndex = _exercisesProgress.indexOfFirst { it.exercise.id == exerciseId }
-        if (exerciseIndex != -1) {
-            val progress = _exercisesProgress[exerciseIndex]
-            val updatedSets = progress.sets.map { set ->
-                if (set.id == setId) set.copy(isCompleted = !set.isCompleted) else set
-            }
-            _exercisesProgress[exerciseIndex] = progress.copy(sets = updatedSets)
-        }
-    }
-    fun getSafeRoutine(routine: Routine): Routine {
-        return if (routine.iconName.isBlank()) {
-            routine.copy(iconName = "dumbbell")
-        } else {
-            routine
+        return when {
+            diffInDays < 1L -> "Last performed: Today"
+            diffInDays == 1L -> "Last performed: Yesterday"
+            else -> "Last performed: $diffInDays days ago"
         }
     }
 }
