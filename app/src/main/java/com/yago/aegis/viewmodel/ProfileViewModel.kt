@@ -9,6 +9,7 @@ import com.yago.aegis.data.BodyMeasure
 import com.yago.aegis.data.PhotoType
 import com.yago.aegis.data.UserProfile
 import com.yago.aegis.data.UserRepository
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -42,7 +43,7 @@ class ProfileViewModel(val repository: UserRepository) : ViewModel() {
     // 3. Medidas personalizadas (Sincronizadas con DataStore vía JSON)
     var customMeasures by mutableStateOf<List<BodyMeasure>>(emptyList())
         private set
-
+    val onboardingCompleted: Flow<Boolean?> = repository.onboardingCompleted
     init {
         // --- ESCUCHAR CAMBIOS DEL REPOSITORIO (LECTURA EN TIEMPO REAL) ---
 
@@ -167,22 +168,26 @@ class ProfileViewModel(val repository: UserRepository) : ViewModel() {
     }
 
     fun updatePhoto(uri: String, type: PhotoType) {
-        // 1. Generamos la fecha del momento exacto del cambio
         val formatter = DateTimeFormatter.ofPattern("dd MMMM", Locale("es", "ES"))
         val todayDate = LocalDate.now().format(formatter).uppercase()
 
-        // 2. Actualizamos la UI inmediatamente
         user = when (type) {
-            PhotoType.BASE -> user.copy(basePhotoUri = uri, basePhotoDate = todayDate)
+            PhotoType.BASE -> user.copy(
+                basePhotoUri = uri,
+                basePhotoDate = todayDate,
+                // ✅ Sincronizamos en la UI: La foto base ahora es el Avatar
+                profilePhotoUri = uri
+            )
             PhotoType.ACTUAL -> user.copy(actualPhotoUri = uri, actualPhotoDate = todayDate)
         }
 
-        // 3. Guardamos en el DataStore (Permanencia)
         viewModelScope.launch {
             when (type) {
                 PhotoType.BASE -> {
                     repository.updateBasePhoto(uri)
                     repository.updateBasePhotoDate(todayDate)
+                    // ✅ GUARDADO CRÍTICO: También persistimos como Avatar
+                    repository.updateAvatar(uri)
                 }
                 PhotoType.ACTUAL -> {
                     repository.updateActualPhoto(uri)
@@ -192,9 +197,9 @@ class ProfileViewModel(val repository: UserRepository) : ViewModel() {
         }
     }
 
-    fun updateHeight(newHeight: Int) {
+    fun updateHeight(newHeight: Double) { // <-- Asegúrate de que sea Double
         viewModelScope.launch {
-            repository.updateHeight(newHeight.toDouble())
+            repository.updateHeight(newHeight)
         }
     }
 
@@ -205,6 +210,11 @@ class ProfileViewModel(val repository: UserRepository) : ViewModel() {
         // Guardamos en el repositorio para que no se pierda al cerrar la app
         viewModelScope.launch {
             repository.updateDisciplineDay(newDisciplineDay)
+        }
+    }
+    fun completeOnboarding() {
+        viewModelScope.launch {
+            repository.updateOnboardingCompleted(true)
         }
     }
 

@@ -23,7 +23,7 @@ class UserRepository(private val settingsStore: SettingsStore) {
     val exerciseLibrary: Flow<List<Exercise>> = settingsStore.exerciseLibrary
     val globalTags: Flow<List<String>> = settingsStore.globalTags
     val disciplineDay: Flow<Int> = settingsStore.disciplineDay
-
+    val onboardingCompleted: Flow<Boolean> = settingsStore.onboardingCompleted
     suspend fun updateName(name: String) = settingsStore.saveName(name)
     suspend fun toggleBMI(enabled: Boolean) = settingsStore.saveShowBMI(enabled)
     suspend fun toggleBodyFat(enabled: Boolean) = settingsStore.saveShowBodyFat(enabled)
@@ -38,6 +38,7 @@ class UserRepository(private val settingsStore: SettingsStore) {
     suspend fun updateExerciseLibrary(list: List<Exercise>) = settingsStore.saveExerciseLibrary(list)
     suspend fun updateGlobalTags(tags: List<String>) = settingsStore.saveGlobalTags(tags)
     fun getAllExercises(): Flow<List<Exercise>> = settingsStore.exerciseLibrary
+
     suspend fun upsertExercise(exercise: Exercise) {
         val currentList = settingsStore.exerciseLibrary.first().toMutableList()
 
@@ -67,4 +68,8 @@ class UserRepository(private val settingsStore: SettingsStore) {
 
     suspend fun updateActualPhoto(uri: String) = settingsStore.saveActualPhotoUri(uri)
     suspend fun updateActualPhotoDate(date: String) = settingsStore.saveActualPhotoDate(date)
-    suspend fun updateDisciplineDay(days: Int) = settingsStore.saveDisciplineDay(days)}
+    suspend fun updateDisciplineDay(days: Int) = settingsStore.saveDisciplineDay(days)
+    suspend fun updateOnboardingCompleted(completed: Boolean) {
+        settingsStore.saveOnboardingCompleted(completed)
+    }
+}

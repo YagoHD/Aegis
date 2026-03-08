@@ -114,7 +114,7 @@ fun SettingsMenu(viewModel: ProfileViewModel) {
             onValueChange = { newValue ->
                 if (newValue.all { it.isDigit() }) {
                     tempHeight = newValue
-                    newValue.toIntOrNull()?.let { viewModel.updateHeight(it) }
+                    newValue.toIntOrNull()?.let { viewModel.updateHeight(it.toDouble()) }
                 }
             },
             label = { Text(stringResource(R.string.label_height), color = Color.Gray) },

@@ -4,6 +4,7 @@ import BiometricCard
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -69,18 +70,21 @@ fun ProfileContent(viewModel: ProfileViewModel) {
 
     // ✅ ESTE ES EL LAUNCHER CORRECTO CON PERMISOS PERSISTENTES
     val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
+        contract = ActivityResultContracts.PickVisualMedia()
     ) { uri: Uri? ->
         uri?.let {
             try {
-                // Pedimos permiso para que la imagen no desaparezca al cerrar la app
+                // 2. Intentamos persistir el permiso (esencial para que sobreviva al reinicio)
                 context.contentResolver.takePersistableUriPermission(
                     it,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
                 )
             } catch (e: Exception) {
-                // Algunos selectores no permiten persistencia, se ignora el error
+                // Si falla, al menos tenemos la Uri, pero el Photo Picker suele permitirlo
+                e.printStackTrace()
             }
+
+            // 3. Actualizamos el ViewModel
             viewModel.updatePhoto(uri = it.toString(), type = photoTypeTarget)
         }
     }
@@ -170,7 +174,10 @@ fun ProfileContent(viewModel: ProfileViewModel) {
             onConfirm = { type ->
                 photoTypeTarget = type
                 showDialog = false
-                launcher.launch("image/*")
+                // ✅ CORRECCIÓN: Usamos el Request específico para PickVisualMedia
+                launcher.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                )
             }
         )
     }

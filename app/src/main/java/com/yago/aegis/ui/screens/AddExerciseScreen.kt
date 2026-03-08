@@ -20,7 +20,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.R
@@ -30,7 +29,6 @@ import com.yago.aegis.ui.components.AegisAlertDialog
 import com.yago.aegis.ui.components.AegisTagManager
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.ExerciseCard
-import com.yago.aegis.ui.components.LibraryExerciseCard
 import com.yago.aegis.ui.theme.AegisBronze
 import com.yago.aegis.viewmodel.RoutinesViewModel
 

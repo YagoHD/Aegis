@@ -34,6 +34,7 @@ class SettingsStore(private val context: Context) {
         private val EXERCISES_LIBRARY_KEY = stringPreferencesKey("exercises_library")
         private val GLOBAL_TAGS_KEY = stringPreferencesKey("global_tags")
         private val DISCIPLINE_DAY = intPreferencesKey("discipline_day")
+        private val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
     }
 
     // --- LECTURA (READ) ---
@@ -44,7 +45,7 @@ class SettingsStore(private val context: Context) {
     val showGirths: Flow<Boolean> = context.dataStore.data.map { it[SHOW_GIRTHS] ?: true }
     val avatarUri: Flow<String?> = context.dataStore.data.map { it[AVATAR_URI] }
     val currentMass: Flow<String> = context.dataStore.data.map { it[CURRENT_MASS] ?: "0.0" }
-    val height: Flow<Double> = context.dataStore.data.map { it[HEIGHT] ?: 1.70 }
+    val height: Flow<Double> = context.dataStore.data.map { it[HEIGHT] ?: 0.0 }
     val bodyFat: Flow<String> = context.dataStore.data.map { it[BODY_FAT] ?: "0.0" }
     val basePhotoUri: Flow<String?> = context.dataStore.data.map { it[BASE_PHOTO_URI] }
     val actualPhotoUri: Flow<String?> = context.dataStore.data.map { it[ACTUAL_PHOTO_URI] }
@@ -75,6 +76,7 @@ class SettingsStore(private val context: Context) {
         }
     }
     val disciplineDay: Flow<Int> = context.dataStore.data.map { it[DISCIPLINE_DAY] ?: 0 }
+    val onboardingCompleted: Flow<Boolean> = context.dataStore.data.map { it[ONBOARDING_COMPLETED] ?: false }
     // --- ESCRITURA (WRITE) ---
     suspend fun saveName(name: String) {
         context.dataStore.edit { it[USER_NAME] = name }
@@ -110,6 +112,9 @@ class SettingsStore(private val context: Context) {
 
     suspend fun saveBodyFat(fat: String) {
         context.dataStore.edit { it[BODY_FAT] = fat }
+    }
+    suspend fun saveOnboardingCompleted(completed: Boolean) {
+        context.dataStore.edit { it[ONBOARDING_COMPLETED] = completed }
     }
 
     val customMeasures: Flow<List<BodyMeasure>> = context.dataStore.data.map { preferences ->

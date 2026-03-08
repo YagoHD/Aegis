@@ -4,6 +4,9 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -11,6 +14,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -32,9 +36,16 @@ fun AegisNavigation(
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val onboardingCompleted by profileViewModel.onboardingCompleted.collectAsState(initial = null)
+    if (onboardingCompleted == null) {
+        Box(modifier = Modifier.fillMaxSize().background(Color.Black))
+        return
+    }
+    val startDest = if (onboardingCompleted == true) "profile" else "welcome"
 
-    // No mostramos la barra en settings para que la configuración ocupe toda la pantalla
-    val showBottomBar = currentRoute != "settings"
+    // ✅ CORRECCIÓN 1: Ocultar la BottomBar en Onboarding y Settings
+    val onboardingRoutes = listOf("welcome", "identity", "metrics")
+    val showBottomBar = currentRoute != "settings" && !onboardingRoutes.contains(currentRoute)
 
     Scaffold(
         bottomBar = {
@@ -45,9 +56,39 @@ fun AegisNavigation(
     ) { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = "profile",
+            startDestination = startDest,
             modifier = Modifier.padding(paddingValues)
         ) {
+
+            // --- BLOQUE ONBOARDING ---
+            composable("welcome") {
+                WelcomeScreen(onContinue = { navController.navigate("identity") })
+            }
+
+            composable("identity") {
+                IdentityScreen(
+                    viewModel = profileViewModel,
+                    onContinue = { name, bio, photoUri ->
+                        profileViewModel.updateName(name)
+                        navController.navigate("metrics")
+                    },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable("metrics") {
+                MetricsScreen(onComplete = { height, mass ->
+                    profileViewModel.updateHeight(height)
+                    profileViewModel.updateMass(mass)
+                    profileViewModel.completeOnboarding()
+
+                    // ✅ CORRECCIÓN 2: Ir a profile y limpiar el rastro del onboarding
+                    navController.navigate("profile") {
+                        popUpTo("welcome") { inclusive = true }
+                    }
+                })
+            }
+
             // 🏋️ PANTALLA DE MIS RUTINAS (Gestión/Creación)
             composable(
                 route = "routine",
