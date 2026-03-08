@@ -45,8 +45,11 @@ fun AegisNavigation(
 
     // ✅ CORRECCIÓN 1: Ocultar la BottomBar en Onboarding y Settings
     val onboardingRoutes = listOf("welcome", "identity", "metrics")
-    val showBottomBar = currentRoute != "settings" && !onboardingRoutes.contains(currentRoute)
+    val isSessionActive = currentRoute?.startsWith("active_session") == true
 
+    val showBottomBar = currentRoute != "settings" &&
+            !onboardingRoutes.contains(currentRoute) &&
+            !isSessionActive
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
@@ -107,7 +110,6 @@ fun AegisNavigation(
             ) {
                 RoutineScreen(
                     routinesViewModel = routinesViewModel,
-                    onNavigateToSettings = { navController.navigate("settings") },
                     onNavigateToEditRoutine = { id ->
                         navController.navigate("edit_routine/$id")
                     }
@@ -220,9 +222,6 @@ fun AegisNavigation(
                 SelectRoutineScreen(
                     routinesViewModel = routinesViewModel,
                     workoutViewModel = workoutViewModel,
-                    onNavigateToSettings = {
-                        navController.navigate("settings")
-                    },
                     onNavigateToCreateRoutine = {
                         // Navegamos a la sección de gestión de rutinas
                         navController.navigate("routine") {

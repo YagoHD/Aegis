@@ -23,7 +23,6 @@ import com.yago.aegis.R
 import com.yago.aegis.data.globalExerciseIcons
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.ExerciseCard
-import com.yago.aegis.ui.theme.AegisBronze
 import com.yago.aegis.viewmodel.RoutinesViewModel
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyColumnState
@@ -40,7 +39,15 @@ fun EditRoutineScreen(
         routinesViewModel.routines.find { it.id == routineId }
     }
 
-    // Estados locales para la edición
+    // --- LÓGICA DE REORDENAMIENTO ---
+    val lazyListState = rememberLazyListState()
+    val reorderableState = rememberReorderableLazyColumnState(lazyListState) { from, to ->
+        routinesViewModel.tempExercises.apply {
+            // Restamos 4 porque hay 4 items antes de la lista (Spacer, Nombre, Iconos, Cabecera)
+            add(to.index - 4, removeAt(from.index - 4))
+        }
+    }
+
     var tempName by remember { mutableStateOf(originalRoutine?.name ?: "") }
     var selectedIconName by remember { mutableStateOf(originalRoutine?.iconName ?: "dumbbell") }
 
@@ -55,62 +62,75 @@ fun EditRoutineScreen(
     Scaffold(
         topBar = {
             AegisTopBar(
-                title = tempName,
+                title = tempName.uppercase(),
                 navigationIcon = {
                     IconButton(onClick = {
                         routinesViewModel.clearTempExercises()
                         onNavigateBack()
                     }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.White)
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
                     }
                 }
             )
         },
-        containerColor = Color.Black
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        // Usamos LazyColumn para que toda la pantalla tenga scroll si hay muchos iconos o ejercicios
         LazyColumn(
+            state = lazyListState, // Esencial para el reordenamiento
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
+            // ITEM 0
             item { Spacer(modifier = Modifier.height(8.dp)) }
 
-            // SECCIÓN: NOMBRE
+            // ITEM 1: NOMBRE
             item {
                 Column {
                     Text(
-                        text = stringResource(R.string.label_routine_name),
-                        color = Color.Gray,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
+                        text = stringResource(R.string.label_routine_name).uppercase(),
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.5.sp
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = tempName,
                         onValueChange = { tempName = it },
                         modifier = Modifier.fillMaxWidth(),
-                        textStyle = androidx.compose.ui.text.TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
-                        shape = RoundedCornerShape(12.dp),
+                        textStyle = androidx.compose.ui.text.TextStyle(
+                            color = MaterialTheme.colorScheme.onBackground,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        ),
+                        shape = RoundedCornerShape(8.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = Color(0xFF161616),
-                            unfocusedContainerColor = Color(0xFF161616),
-                            focusedBorderColor = AegisBronze
+                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+                            cursorColor = MaterialTheme.colorScheme.primary
                         )
                     )
                 }
             }
 
-            // SECCIÓN: SELECCIÓN DE ICONO (Nueva)
+            // ITEM 2: ICONO
             item {
                 Column {
                     Text(
-                        text = stringResource(R.string.select_icon),
-                        color = Color.Gray,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
+                        text = stringResource(R.string.select_icon).uppercase(),
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.5.sp
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     FlowRow(
@@ -120,8 +140,7 @@ fun EditRoutineScreen(
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         globalExerciseIcons.forEach { (name, icon) ->
-                            // Reutilizamos tu componente EditIconBox
-                            EditIconBox(
+                            AegisIconSelector(
                                 icon = icon,
                                 isSelected = selectedIconName == name,
                                 onClick = { selectedIconName = name }
@@ -131,46 +150,81 @@ fun EditRoutineScreen(
                 }
             }
 
-            // SECCIÓN: CABECERA EJERCICIOS
+            // ITEM 3: CABECERA EJERCICIOS
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.Bottom
                 ) {
-                    Text(stringResource(R.string.label_exercises), color = Color.White, fontWeight = FontWeight.Bold)
                     Text(
-                        "${routinesViewModel.tempExercises.size} ${stringResource(R.string.label_added_suffix)}",
-                        color = AegisBronze,
-                        fontSize = 12.sp
+                        text = stringResource(R.string.label_exercises).uppercase(),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontWeight = FontWeight.Black,
+                        fontSize = 14.sp,
+                        letterSpacing = 1.sp
+                    )
+                    Text(
+                        text = "${routinesViewModel.tempExercises.size} ${stringResource(R.string.label_added_suffix)}".uppercase(),
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
                     )
                 }
             }
 
-            // LISTA DE EJERCICIOS REORDENABLES
+            // LISTA REORDENABLE (A partir del ITEM 4)
             items(
                 items = routinesViewModel.tempExercises,
-                key = { it.id } // Usar el ID es más seguro que el hashCode
+                key = { it.id }
             ) { exercise ->
-                // Aquí iría tu lógica de ReorderableItem que ya tienes...
-                // (Omitido por brevedad, pero mantenlo igual que en tu código)
-                ExerciseCard(
-                    exercise = exercise,
-                    onDelete = { routinesViewModel.tempExercises.remove(exercise) }
-                )
+                ReorderableItem(reorderableState, key = exercise.id) { isDragging ->
+                    // 1. Efecto visual de "elevación" al arrastrar
+                    val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp)
+
+                    Surface(
+                        shadowElevation = elevation,
+                        shape = RoundedCornerShape(8.dp), // Ajustado a 8.dp para consistencia Obsidiana
+                        color = Color.Transparent
+                    ) {
+                        ExerciseCard(
+                            exercise = exercise,
+                            onDelete = { routinesViewModel.tempExercises.remove(exercise) },
+                            showReorderHandle = true,
+                            // ✅ CORRECTO: draggableHandle() se usa sin parámetros
+                            dragHandleModifier = Modifier.draggableHandle()
+                        )
+                    }
+                }
             }
 
-            // BOTÓN AÑADIR EJERCICIO
+            // BOTÓN AÑADIR
             item {
-                OutlinedButton(
+                Surface(
                     onClick = { navController.navigate("add_exercise") },
                     modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = AegisBronze)
+                    shape = RoundedCornerShape(8.dp),
+                    color = Color.Transparent,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.btn_add_exercise), fontWeight = FontWeight.Bold)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = stringResource(R.string.btn_add_exercise).uppercase(),
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Black,
+                            fontSize = 13.sp
+                        )
+                    }
                 }
             }
 
@@ -178,25 +232,31 @@ fun EditRoutineScreen(
             item {
                 Button(
                     onClick = {
-                        // IMPORTANTE: Actualizamos también el iconName
                         routinesViewModel.updateRoutineFull(
                             id = routineId,
                             newName = tempName,
                             newExercises = routinesViewModel.tempExercises.toList(),
-                            newIconName = selectedIconName // Debes añadir este parámetro a tu función
+                            newIconName = selectedIconName
                         )
                         routinesViewModel.clearTempExercises()
                         onNavigateBack()
                     },
                     modifier = Modifier.fillMaxWidth().height(60.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = AegisBronze),
-                    shape = RoundedCornerShape(12.dp)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = Color.Black
+                    ),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
-                    Icon(Icons.Default.Save, contentDescription = null, tint = Color.Black)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.btn_save_routine), color = Color.Black, fontWeight = FontWeight.Bold)
+                    Icon(Icons.Default.Save, contentDescription = null)
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        stringResource(R.string.btn_save_routine).uppercase(),
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.sp
+                    )
                 }
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(32.dp))
             }
         }
     }

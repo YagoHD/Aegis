@@ -1,5 +1,6 @@
 package com.yago.aegis.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -39,100 +40,81 @@ fun AddExerciseScreen(
     onNavigateBack: () -> Unit,
     onExerciseCreated: (Exercise) -> Unit
 ) {
-    val backgroundBlackgrey = colorResource(id = R.color.backgroundBlackgrey)
     val savedGlobalTags by routinesViewModel.globalTags.collectAsState()
-    val libraryExercises by routinesViewModel.allExercises.collectAsState(initial = emptyList<Exercise>())
+    val libraryExercises by routinesViewModel.allExercises.collectAsState(initial = emptyList())
+
     var exerciseName by remember { mutableStateOf("") }
-    var notes by remember { mutableStateOf("") }
     var selectedIconName by remember { mutableStateOf("dumbbell") }
     val selectedTags = remember { mutableStateListOf<String>() }
-    // --- ESTADOS PARA EL DIÁLOGO DE TAGS ---
+
     var showTagDialog by remember { mutableStateOf(false) }
     var newTagText by remember { mutableStateOf("") }
-    var exerciseToDelete by remember { mutableStateOf<Exercise?>(null) }
-    // --- ESTADO PARA LA BÚSQUEDA ---
     var searchQuery by remember { mutableStateOf("") }
-    // Lógica de filtrado en tiempo real
+
+    // Filtro de búsqueda
     val filteredExercises = libraryExercises.filter {
         it.name.contains(searchQuery, ignoreCase = true)
     }
 
-    val exerciseIcons = listOf(
-        "dumbbell" to Icons.Default.FitnessCenter,
-        "body" to Icons.Default.AccessibilityNew,
-        "legs" to Icons.Default.DirectionsRun,
-        "heart" to Icons.Default.Favorite,
-        "timer" to Icons.Default.Timer,
-        "bolt" to Icons.Default.Bolt,
-        "layers" to Icons.Default.Layers
-    )
-
-    // --- DIÁLOGO RÁPIDO DE TAGS ---
+    // --- DIÁLOGO DE TAGS (ESTILO UNIFICADO) ---
     if (showTagDialog) {
         AegisAlertDialog(
-            title = "CREAR TAG GLOBAL",
+            title = "NUEVO TAG GLOBAL",
             confirmText = "GUARDAR",
             dismissText = "CANCELAR",
             onDismiss = { showTagDialog = false },
             onConfirm = {
                 if (newTagText.isNotBlank()) {
-                    routinesViewModel.addGlobalTag(newTagText)
+                    routinesViewModel.addGlobalTag(newTagText.uppercase())
                     newTagText = ""
                     showTagDialog = false
                 }
-            },
-            content = {
-                OutlinedTextField(
-                    value = newTagText,
-                    onValueChange = { newTagText = it.uppercase() },
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = AegisBronze,
-                        unfocusedBorderColor = Color.DarkGray,
-                        cursorColor = AegisBronze
-                    ),
-                    shape = RoundedCornerShape(8.dp)
-                )
             }
-        )
+        ) {
+            EditInput(
+                value = newTagText,
+                onValueChange = { newTagText = it },
+                placeholder = "EJ: PECHO"
+            )
+        }
     }
 
     Scaffold(
         topBar = {
-            // ✅ Usamos el componente unificado del Canvas
             AegisTopBar(
-                title = stringResource(R.string.title_new_exercise),
+                title = stringResource(R.string.title_new_exercise).uppercase(),
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            Icons.Default.ArrowBack,
                             contentDescription = null,
-                            tint = AegisBronze // Mantenemos tu toque de color bronce para la flecha
+                            tint = MaterialTheme.colorScheme.primary // Flecha en Bronce
                         )
                     }
                 }
             )
         },
-        containerColor = backgroundBlackgrey
+        containerColor = MaterialTheme.colorScheme.background // 050505
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+                .padding(horizontal = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            item { Spacer(modifier = Modifier.height(10.dp)) }
+            item { Spacer(modifier = Modifier.height(8.dp)) }
 
-            // SECCIÓN: NOMBRE
+            // 1. SECCIÓN: CREACIÓN DE EJERCICIO
             item {
-                SectionLabel(stringResource(R.string.label_exercise_name))
-                AegisInput(
-                    value = exerciseName,
-                    onValueChange = { exerciseName = it },
-                    placeholder = stringResource(R.string.hint_exercise_name)
-                )
+                Column {
+                    SectionLabel(stringResource(R.string.label_exercise_name).uppercase())
+                    EditInput(
+                        value = exerciseName,
+                        onValueChange = { exerciseName = it },
+                        placeholder = stringResource(R.string.hint_exercise_name).uppercase()
+                    )
+                }
             }
 
             item {
@@ -151,25 +133,28 @@ fun AddExerciseScreen(
                 )
             }
 
-            // SECCIÓN: ICONOS
+            // 2. SECCIÓN: ICONOS (Usando el IconSelector que ya tenemos)
             item {
-                SectionLabel(stringResource(R.string.select_icon))
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-                    maxItemsInEachRow = 4,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    globalExerciseIcons.forEach { (name, icon) ->
-                        EditIconBox(
-                            icon = icon,
-                            isSelected = selectedIconName == name,
-                            onClick = { selectedIconName = name } // ✅ Esto cambiará el estado
-                        )
+                Column {
+                    SectionLabel(stringResource(R.string.select_icon).uppercase())
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                        maxItemsInEachRow = 5,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        globalExerciseIcons.forEach { (name, icon) ->
+                            AegisIconSelector(
+                                icon = icon,
+                                isSelected = selectedIconName == name,
+                                onClick = { selectedIconName = name }
+                            )
+                        }
                     }
                 }
             }
-            // BOTÓN CREAR
+
+            // BOTÓN CREAR (Bronce principal)
             item {
                 Button(
                     onClick = {
@@ -185,72 +170,91 @@ fun AddExerciseScreen(
                             )
                             routinesViewModel.saveOrUpdateExercise(newExercise)
                             routinesViewModel.addExerciseToTemp(newExercise)
-
                             exerciseName = ""
                             selectedTags.clear()
                             selectedIconName = "dumbbell"
                         }
                     },
                     modifier = Modifier.fillMaxWidth().height(56.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = AegisBronze),
-                    shape = RoundedCornerShape(12.dp)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = Color.Black
+                    ),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text("CREATE & ADD TO ROUTINE", color = Color.Black, fontWeight = FontWeight.ExtraBold)
-                }
-            }
-
-            // SEPARADOR LIBRERÍA
-            item {
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 10.dp)) {
-                    Divider(modifier = Modifier.weight(1f), color = Color.DarkGray)
                     Text(
-                        " OR SELECT FROM LIBRARY ",
-                        color = Color.Gray,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold
+                        "CREATE & ADD TO ROUTINE",
+                        fontWeight = FontWeight.Black,
+                        fontSize = 13.sp
                     )
-                    Divider(modifier = Modifier.weight(1f), color = Color.DarkGray)
                 }
             }
 
-            // BUSCADOR LIBRERÍA (Funcional)
+            // 3. SECCIÓN: LIBRERÍA (Separador visual táctico)
+            item {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(vertical = 12.dp)
+                ) {
+                    HorizontalDivider(
+                        modifier = Modifier.weight(1f),
+                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
+                    )
+                    Text(
+                        text = "  OR SELECT FROM LIBRARY  ",
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.sp
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.weight(1f),
+                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
+                    )
+                }
+            }
+
+            // BUSCADOR LIBRERÍA (Look Obsidiana)
             item {
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Search exercises...", color = Color.Gray, fontSize = 14.sp) },
-                    leadingIcon = { Icon(Icons.Default.Search, null, tint = Color.Gray) },
+                    placeholder = {
+                        Text("Search exercises...",
+                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f),
+                            fontSize = 13.sp)
+                    },
+                    leadingIcon = { Icon(Icons.Default.Search, null, tint = MaterialTheme.colorScheme.primary) },
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        focusedContainerColor = Color(0xFF161616),
-                        unfocusedContainerColor = Color(0xFF161616),
-                        focusedBorderColor = AegisBronze,
-                        unfocusedBorderColor = Color.Transparent
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = Color.Transparent,
+                        focusedTextColor = MaterialTheme.colorScheme.onBackground
                     ),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(8.dp)
                 )
             }
 
-            // LISTA DE EJERCICIOS FILTRADA
+            // LISTA DE LIBRERÍA
             items(filteredExercises) { exercise ->
                 val isAlreadyInRoutine = routinesViewModel.tempExercises.any { it.id == exercise.id }
 
                 ExerciseCard(
                     exercise = exercise,
-                    isAddMode = true, // ✅ ACTIVAMOS EL MODO AÑADIR
+                    isAddMode = true,
                     onEdit = {
                         if (!isAlreadyInRoutine) {
                             routinesViewModel.addExerciseToTemp(exercise)
                         }
                     },
-                    onDelete = { /* Ya no se usa aquí, podemos dejarlo vacío */ },
-                    modifier = Modifier.alpha(if (isAlreadyInRoutine) 0.5f else 1f)
+                    onDelete = {},
+                    modifier = Modifier.alpha(if (isAlreadyInRoutine) 0.4f else 1f)
                 )
             }
 
-            item { Spacer(modifier = Modifier.height(20.dp)) }
+            item { Spacer(modifier = Modifier.height(32.dp)) }
         }
     }
 }
@@ -259,11 +263,12 @@ fun AddExerciseScreen(
 @Composable
 fun SectionLabel(text: String) {
     Text(
-        text = text,
-        color = Color(0xFFC5A358), // Un tono más dorado/bronce
-        fontSize = 11.sp,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(bottom = 8.dp)
+        text = text.uppercase(),
+        color = MaterialTheme.colorScheme.secondary, // Bronce suave o gris técnico
+        fontSize = 10.sp,
+        fontWeight = FontWeight.Black,
+        letterSpacing = 1.5.sp,
+        modifier = Modifier.padding(bottom = 8.dp, start = 2.dp)
     )
 }
 
@@ -279,16 +284,27 @@ fun AegisInput(
         value = value,
         onValueChange = onValueChange,
         modifier = Modifier.fillMaxWidth(),
-        placeholder = { Text(placeholder, color = Color.DarkGray, fontSize = 14.sp) },
+        placeholder = {
+            Text(
+                text = placeholder.uppercase(),
+                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f),
+                fontSize = 12.sp,
+                letterSpacing = 0.5.sp
+            )
+        },
         singleLine = singleLine,
         minLines = minLines,
+        textStyle = androidx.compose.ui.text.TextStyle(
+            color = MaterialTheme.colorScheme.onBackground,
+            fontWeight = FontWeight.Bold,
+            fontSize = 15.sp
+        ),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = Color(0xFF161616),
-            unfocusedContainerColor = Color(0xFF161616),
-            focusedBorderColor = AegisBronze,
-            unfocusedBorderColor = Color.DarkGray,
-            focusedTextColor = Color.White,
-            unfocusedTextColor = Color.White
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+            cursorColor = MaterialTheme.colorScheme.primary
         ),
         shape = RoundedCornerShape(8.dp)
     )
@@ -296,19 +312,22 @@ fun AegisInput(
 
 @Composable
 fun TagChip(text: String, isSelected: Boolean, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(4.dp))
-            .background(if (isSelected) AegisBronze else Color(0xFF161616)) // Cambio de color táctico
-            .border(1.dp, if (isSelected) AegisBronze else Color.DarkGray, RoundedCornerShape(4.dp))
-            .clickable { onClick() }
-            .padding(horizontal = 10.dp, vertical = 6.dp)
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(4.dp),
+        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
+        )
     ) {
         Text(
-            text = text,
-            color = if (isSelected) Color.Black else Color.LightGray,
+            text = text.uppercase(),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            color = if (isSelected) Color.Black else MaterialTheme.colorScheme.secondary,
             fontSize = 10.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Black,
+            letterSpacing = 0.5.sp
         )
     }
 }
@@ -318,12 +337,16 @@ fun IconBox(icon: ImageVector, isSelected: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .size(60.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(if (isSelected) AegisBronze.copy(alpha = 0.1f) else Color(0xFF161616))
+            .clip(RoundedCornerShape(8.dp))
+            .background(
+                if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                else MaterialTheme.colorScheme.surfaceVariant
+            )
             .border(
-                width = if (isSelected) 2.dp else 1.dp,
-                color = if (isSelected) AegisBronze else Color.DarkGray,
-                shape = RoundedCornerShape(12.dp)
+                width = if (isSelected) 1.5.dp else 1.dp,
+                color = if (isSelected) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f),
+                shape = RoundedCornerShape(8.dp)
             )
             .clickable { onClick() },
         contentAlignment = Alignment.Center
@@ -331,8 +354,9 @@ fun IconBox(icon: ImageVector, isSelected: Boolean, onClick: () -> Unit) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = if (isSelected) AegisBronze else Color.Gray,
-            modifier = Modifier.size(28.dp)
+            tint = if (isSelected) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+            modifier = Modifier.size(26.dp)
         )
     }
 }

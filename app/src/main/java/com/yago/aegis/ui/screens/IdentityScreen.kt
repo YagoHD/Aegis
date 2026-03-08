@@ -6,10 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -27,16 +25,9 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.yago.aegis.ui.components.AegisTextField
 import com.yago.aegis.ui.components.AegisTopBar
-import com.yago.aegis.ui.theme.AegisBronze
-import com.yago.aegis.ui.theme.AegisCream
-import com.yago.aegis.ui.theme.AegisSteel
-import com.yago.aegis.ui.theme.AegisWhite
-import com.yago.aegis.ui.theme.BackgroundBlackGrey
-import com.yago.aegis.ui.theme.MatteBlack
 import com.yago.aegis.viewmodel.ProfileViewModel
-import android.net.Uri // 👈 Esta es la clave
+import android.net.Uri
 import android.content.Intent
-import com.yago.aegis.data.PhotoType
 import com.yago.aegis.ui.components.AegisStepProgress
 
 @Composable
@@ -49,58 +40,54 @@ fun IdentityScreen(
     var bio by remember { mutableStateOf("") }
     var selectedPhotoUri by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
-    // Launcher para la foto de perfil
+
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let { selectedUri ->
             try {
-                // IMPORTANTE: Primero el permiso, luego el guardado
                 context.contentResolver.takePersistableUriPermission(
                     selectedUri,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
                 )
-
-                // Guardamos en el ViewModel (esto dispara el proceso en segundo plano)
                 viewModel.updateAvatar(selectedUri.toString())
-
-                // Actualizamos la vista previa local
                 selectedPhotoUri = selectedUri.toString()
-
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
 
+    // ELIMINADO: .verticalScroll(rememberScrollState())
+    // Esto hace que la pantalla sea estática y "Premium"
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundBlackGrey)
+            .background(MaterialTheme.colorScheme.background)
             .padding(24.dp)
-            .verticalScroll(rememberScrollState())
     ) {
         AegisTopBar(
             title = "IDENTIDAD",
             subtitle = "PASO 02",
             navigationIcon = {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = null, tint = AegisWhite)
+                    Icon(Icons.Default.ArrowBack, contentDescription = null, tint = MaterialTheme.colorScheme.onBackground)
                 }
             }
         )
-        // La barra de progreso ahora está en la misma posición relativa que en las otras
+
         AegisStepProgress(currentStep = 2)
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(32.dp)) // Reducido un poco para ganar aire
 
-        // Selector de Foto de Perfil (Círculo con borde AegisBronze)
+        // Avatar Section
         Box(
             modifier = Modifier
-                .size(150.dp)
+                .size(140.dp) // Ajustado ligeramente
                 .align(Alignment.CenterHorizontally)
                 .clip(CircleShape)
-                .background(AegisCream) // El color crema de tu paleta
+                .background(MaterialTheme.colorScheme.surface)
+                .border(1.dp, MaterialTheme.colorScheme.secondary, CircleShape)
                 .clickable { launcher.launch("image/*") }
         ) {
             if (selectedPhotoUri != null) {
@@ -114,35 +101,28 @@ fun IdentityScreen(
                 Icon(
                     Icons.Default.Person,
                     contentDescription = null,
-                    modifier = Modifier.size(60.dp).align(Alignment.Center),
-                    tint = AegisSteel
+                    modifier = Modifier.size(56.dp).align(Alignment.Center),
+                    tint = MaterialTheme.colorScheme.secondary
                 )
-            }
-            // Botón "+" pequeño
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(8.dp)
-                    .size(32.dp)
-                    .background(MatteBlack, CircleShape)
-                    .border(1.dp, AegisBronze, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Default.Add, contentDescription = null, tint = AegisBronze, modifier = Modifier.size(16.dp))
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "Prepara tu perfil",
-            style = TextStyle(color = AegisWhite, fontSize = 24.sp, fontWeight = FontWeight.Bold),
+            text = "CONFIGURA TU AVATAR",
+            style = TextStyle(
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 18.sp, // Un poco más pequeño para elegancia
+                fontWeight = FontWeight.Black,
+                letterSpacing = 2.sp
+            ),
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(40.dp))
 
-        // Campo de Nombre Full Identity (OBLIGATORIO)
+        // Form Section
         AegisTextField(
             label = "NOMBRE DE USUARIO",
             value = name,
@@ -150,21 +130,20 @@ fun IdentityScreen(
             placeholder = "Alexander Vance"
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        // Campo de Bio (OPCIONAL)
         AegisTextField(
-            label = "BIOGRAFIA",
+            label = "BIOGRAFÍA (OPCIONAL)",
             value = bio,
             onValueChange = { bio = it },
-            placeholder = "Describe tu forma de entrenar...",
+            placeholder = "Define tu filosofía...",
             isSingleLine = false,
-            modifier = Modifier.height(120.dp)
+            modifier = Modifier.height(120.dp) // Ajustado para que quepa en pantallas pequeñas
         )
 
+        // Este Spacer "empuja" todo lo de arriba hacia arriba y lo de abajo hacia abajo
         Spacer(modifier = Modifier.weight(1f))
 
-        // Botón Continuar con degradado Aegis
         Button(
             onClick = { if (name.isNotBlank()) onContinue(name, bio, selectedPhotoUri) },
             modifier = Modifier
@@ -172,15 +151,20 @@ fun IdentityScreen(
                 .height(56.dp),
             enabled = name.isNotBlank(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = AegisBronze,
-                disabledContainerColor = AegisSteel
+                containerColor = MaterialTheme.colorScheme.primary,
+                disabledContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)
             ),
             shape = RoundedCornerShape(8.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("CONTINUAR", color = Color.Black, fontWeight = FontWeight.Black)
-                Spacer(modifier = Modifier.width(8.dp))
-                Icon(Icons.Default.ArrowForward, contentDescription = null, tint = Color.Black)
+                Text(
+                    "CONTINUAR",
+                    color = Color.Black,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.sp
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Icon(Icons.Default.ArrowForward, contentDescription = null, tint = Color.Black, modifier = Modifier.size(20.dp))
             }
         }
     }

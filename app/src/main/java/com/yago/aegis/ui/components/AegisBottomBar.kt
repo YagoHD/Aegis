@@ -14,71 +14,77 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.yago.aegis.R
 import com.yago.aegis.data.Screen
-import com.yago.aegis.ui.theme.AegisBronze
 
 @Composable
 fun AegisBottomBar(navController: NavHostController) {
-    // Dividimos los iconos para dejar el centro libre
     val leftItems = listOf(Screen.Weekly, Screen.Routine)
     val rightItems = listOf(Screen.Ejercicios, Screen.Profile)
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    NavigationBar(
-        containerColor = Color.Black,
-        tonalElevation = 0.dp,
-        modifier = Modifier.height(80.dp),
-        windowInsets = WindowInsets(0, 0, 0, 0)
-    ) {
-        // 1. Lado Izquierdo
-        leftItems.forEach { screen ->
-            AegisNavItem(screen, currentRoute, navController)
-        }
+    Column {
+        // --- SEPARADOR TÉCNICO SUPERIOR ---
+        HorizontalDivider(
+            thickness = 1.dp,
+            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f)
+        )
 
-        // 2. BOTÓN CENTRAL: ENTRENAMIENTO (BOLT)
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight()
-                .padding(bottom = 12.dp),
-            contentAlignment = Alignment.Center
+        // Usamos surface (121212) para que destaque sobre el background (050505)
+        NavigationBar(
+            containerColor = MaterialTheme.colorScheme.surface,
+            tonalElevation = 0.dp,
+            modifier = Modifier.height(84.dp),
+            windowInsets = WindowInsets(0, 0, 0, 0)
         ) {
+            // 1. Lado Izquierdo
+            leftItems.forEach { screen ->
+                AegisNavItem(screen, currentRoute, navController)
+            }
+
+            // 2. BOTÓN CENTRAL: ACCIÓN ELITE
             Box(
                 modifier = Modifier
-                    .size(50.dp)
-                    .clip(CircleShape)
-                    .background(AegisBronze)
-                    .clickable {
-                        if (currentRoute != Screen.Train.route) {
-                            navController.navigate(Screen.Train.route) {
-                                popUpTo(navController.graph.startDestinationId) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
-                    },
+                    .weight(1.2f)
+                    .fillMaxHeight(),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Bolt,
-                    contentDescription = "Empezar entrenamiento",
-                    tint = Color.Black,
-                    modifier = Modifier.size(28.dp)
-                )
+                Box(
+                    modifier = Modifier
+                        .size(54.dp) // Un pelín más grande para impacto visual
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary)
+                        .clickable {
+                            if (currentRoute != Screen.Train.route) {
+                                navController.navigate(Screen.Train.route) {
+                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Bolt,
+                        contentDescription = "Empezar entrenamiento",
+                        tint = Color.Black,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
             }
-        }
 
-        // 3. Lado Derecho
-        rightItems.forEach { screen ->
-            AegisNavItem(screen, currentRoute, navController)
+            // 3. Lado Derecho
+            rightItems.forEach { screen ->
+                AegisNavItem(screen, currentRoute, navController)
+            }
         }
     }
 }
@@ -90,9 +96,10 @@ fun RowScope.AegisNavItem(
     navController: NavHostController
 ) {
     val labelText = stringResource(screen.labelRes)
+    val isSelected = currentRoute == screen.route
 
     NavigationBarItem(
-        selected = currentRoute == screen.route,
+        selected = isSelected,
         onClick = {
             if (currentRoute != screen.route) {
                 navController.navigate(screen.route) {
@@ -106,23 +113,25 @@ fun RowScope.AegisNavItem(
             Icon(
                 imageVector = screen.icon,
                 contentDescription = labelText,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(22.dp)
             )
         },
         label = {
             Text(
                 text = labelText.uppercase(),
-                fontSize = 9.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 0.5.sp
+                style = TextStyle(
+                    fontSize = 8.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.2.sp // Ajustado para que quepa bien en el nuevo ancho
+                )
             )
         },
         alwaysShowLabel = true,
         colors = NavigationBarItemDefaults.colors(
-            selectedIconColor = AegisBronze,
-            selectedTextColor = AegisBronze,
-            unselectedIconColor = Color.Gray,
-            unselectedTextColor = Color.Gray,
+            selectedIconColor = MaterialTheme.colorScheme.primary,
+            selectedTextColor = MaterialTheme.colorScheme.primary,
+            unselectedIconColor = MaterialTheme.colorScheme.secondary,
+            unselectedTextColor = MaterialTheme.colorScheme.secondary,
             indicatorColor = Color.Transparent
         )
     )

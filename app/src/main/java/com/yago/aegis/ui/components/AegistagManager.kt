@@ -1,21 +1,21 @@
 package com.yago.aegis.ui.components
 
-import com.yago.aegis.ui.screens.SectionLabel
+import androidx.compose.foundation.background
 import com.yago.aegis.ui.screens.TagChip
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.RemoveCircleOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.yago.aegis.R
-import com.yago.aegis.ui.theme.AegisBronze
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -27,63 +27,78 @@ fun AegisTagManager(
     onRemoveSelectedClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val RojoBurdeos = Color(0xFF800000)
-    val haySeleccionados = selectedTags.isNotEmpty()
+    val hasSelection = selectedTags.isNotEmpty()
 
     Column(modifier = modifier.fillMaxWidth()) {
-        // Cabecera con etiquetas y botones de acción
+        // --- CABECERA TÉCNICA ---
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Reutilizamos tu SectionLabel si la tienes definida, si no, un Text estándar
-            SectionLabel(stringResource(R.string.tags_title))
+            // Usamos el estilo de cabecera que definimos para Settings
+            SectionHeader(text = stringResource(R.string.tags_title))
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Botón Eliminar (Rojo si hay selección)
+            // Botón Eliminar Seleccionados
+            // Solo brilla en color "error" si hay algo que borrar
             IconButton(
                 onClick = onRemoveSelectedClick,
-                modifier = Modifier.size(24.dp),
-                enabled = haySeleccionados
+                modifier = Modifier.size(28.dp),
+                enabled = hasSelection
             ) {
                 Icon(
                     imageVector = Icons.Default.RemoveCircleOutline,
                     contentDescription = "Eliminar seleccionados",
-                    tint = if (haySeleccionados) RojoBurdeos else Color.DarkGray
+                    tint = if (hasSelection)
+                        MaterialTheme.colorScheme.error
+                    else MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
+                    modifier = Modifier.size(20.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(8.dp))
 
-            // Botón Añadir (Bronce)
+            // Botón Añadir (Bronce Aegis)
             IconButton(
                 onClick = onAddClick,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(28.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.AddCircleOutline,
                     contentDescription = "Añadir nuevo",
-                    tint = AegisBronze
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(22.dp)
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        // Contenedor fluido de etiquetas
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            allTags.forEach { tag ->
-                val isSelected = selectedTags.contains(tag)
-                TagChip(
-                    text = tag,
-                    isSelected = isSelected,
-                    onClick = { onTagClick(tag) }
+        // --- CONTENEDOR DE ETIQUETAS (FLOW) ---
+        // Aplicamos un ligero fondo oscuro para agrupar las etiquetas visualmente
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                    shape = RoundedCornerShape(8.dp)
                 )
+                .padding(8.dp)
+        ) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                allTags.forEach { tag ->
+                    val isSelected = selectedTags.contains(tag)
+                    TagChip(
+                        text = tag.uppercase(), // Consistencia táctica
+                        isSelected = isSelected,
+                        onClick = { onTagClick(tag) }
+                    )
+                }
             }
         }
     }

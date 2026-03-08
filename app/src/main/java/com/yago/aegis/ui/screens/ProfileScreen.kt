@@ -7,6 +7,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,7 +18,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -26,8 +26,6 @@ import androidx.compose.ui.unit.sp
 import com.yago.aegis.R
 import com.yago.aegis.data.PhotoType
 import com.yago.aegis.ui.components.*
-import com.yago.aegis.ui.theme.AegisWhite
-import com.yago.aegis.ui.theme.BackgroundBlackGrey
 import com.yago.aegis.viewmodel.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,6 +33,7 @@ import com.yago.aegis.viewmodel.ProfileViewModel
 fun MainProfileScreen(viewModel: ProfileViewModel, onNavigateToSettings: () -> Unit) {
     Scaffold(
         topBar = {
+            // Ya configurada con 10% Bronce en subtítulo y 60% Black
             AegisTopBar(
                 title = stringResource(R.string.profile_title),
                 actions = {
@@ -42,16 +41,17 @@ fun MainProfileScreen(viewModel: ProfileViewModel, onNavigateToSettings: () -> U
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Ajustes",
-                            tint = AegisWhite,
-                            modifier = Modifier.size(20.dp)
+                            // Usamos onBackground (Blanco roto) para iconos secundarios
+                            tint = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.size(22.dp)
                         )
                     }
                 }
             )
         },
-        containerColor = BackgroundBlackGrey
+        // 60%: Fondo negro profundo del sistema
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        // Importante: paddingValues aquí contendrá el alto de la TopBar (48.dp)
         Box(modifier = Modifier.padding(paddingValues)) {
             ProfileContent(viewModel)
         }
@@ -63,28 +63,21 @@ fun ProfileContent(viewModel: ProfileViewModel) {
     val user = viewModel.user
     val imc = viewModel.calcularBMI()
     val scrollState = rememberScrollState()
-    val context = LocalContext.current // Contexto dentro de la función correcta
+    val context = LocalContext.current
 
     var showDialog by remember { mutableStateOf(false) }
     var photoTypeTarget by remember { mutableStateOf(PhotoType.BASE) }
 
-    // ✅ ESTE ES EL LAUNCHER CORRECTO CON PERMISOS PERSISTENTES
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri: Uri? ->
         uri?.let {
             try {
-                // 2. Intentamos persistir el permiso (esencial para que sobreviva al reinicio)
                 context.contentResolver.takePersistableUriPermission(
                     it,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
                 )
-            } catch (e: Exception) {
-                // Si falla, al menos tenemos la Uri, pero el Photo Picker suele permitirlo
-                e.printStackTrace()
-            }
-
-            // 3. Actualizamos el ViewModel
+            } catch (e: Exception) { e.printStackTrace() }
             viewModel.updatePhoto(uri = it.toString(), type = photoTypeTarget)
         }
     }
@@ -92,27 +85,36 @@ fun ProfileContent(viewModel: ProfileViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            // ✅ Añadimos esto para que el contenido "flote" sobre el teclado
+            .padding(horizontal = 24.dp) // Aumentamos padding lateral para estilo Elite
             .imePadding()
             .verticalScroll(scrollState)
     ) {
+        Spacer(modifier = Modifier.height(16.dp))
+
         ProfileHeader(
             name = user.name,
             disciplineDay = user.disciplineDay,
             profilePhotoUri = user.profilePhotoUri
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(40.dp))
 
-        // --- BIOMETRÍA ---
-        Text(text = stringResource(R.string.label_biometrics), color = AegisWhite, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(8.dp))
+        // --- BIOMETRÍA (Sección con etiquetas en AegisSteel) ---
+        Text(
+            text = stringResource(R.string.label_biometrics).uppercase(),
+            color = MaterialTheme.colorScheme.secondary, // AegisSteel (Gris técnico)
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 2.sp
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // BiometricCard usará internamente el 30% (SurfaceDark)
             Box(modifier = Modifier.weight(1f)) {
                 BiometricCard(stringResource(R.string.label_mass), user.currentMass, "KG") {
                     viewModel.updateMass(it)
@@ -134,18 +136,27 @@ fun ProfileContent(viewModel: ProfileViewModel) {
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(40.dp))
 
         // --- MEDIDAS DINÁMICAS ---
         if (viewModel.showGirths) {
-            Text(text = stringResource(R.string.label_key_girths), color = AegisWhite, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = stringResource(R.string.label_key_girths).uppercase(),
+                color = MaterialTheme.colorScheme.secondary,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 2.sp
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Contenedor 30%: SurfaceDark con borde fino
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFF161616))
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
+                    .padding(vertical = 8.dp)
             ) {
                 viewModel.customMeasures.forEach { measure ->
                     GirthRow(measure.name, measure.value) { newValue ->
@@ -155,7 +166,7 @@ fun ProfileContent(viewModel: ProfileViewModel) {
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(40.dp))
 
         // --- LOG VISUAL ---
         if (viewModel.showVisualLog) {
@@ -167,14 +178,16 @@ fun ProfileContent(viewModel: ProfileViewModel) {
                 onAddClick = { showDialog = true }
             )
         }
+
+        Spacer(modifier = Modifier.height(25.dp))
     }
+
     if (showDialog) {
         PhotoSourceDialog(
             onDismiss = { showDialog = false },
             onConfirm = { type ->
                 photoTypeTarget = type
                 showDialog = false
-                // ✅ CORRECCIÓN: Usamos el Request específico para PickVisualMedia
                 launcher.launch(
                     PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                 )

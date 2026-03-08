@@ -1,6 +1,6 @@
 package com.yago.aegis.ui.components
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -9,7 +9,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -17,9 +16,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.data.Routine
 import com.yago.aegis.data.getExerciseIcon
-import com.yago.aegis.ui.theme.AegisBronze
-import com.yago.aegis.ui.theme.AegisCard
-
 
 @Composable
 fun RoutineSelectionCard(
@@ -31,49 +27,60 @@ fun RoutineSelectionCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = AegisCard)
+            .padding(vertical = 10.dp),
+        shape = RoundedCornerShape(12.dp), // Esquinas más agresivas
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
+        )
     ) {
         Box(modifier = Modifier.padding(16.dp)) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                // 1. Tags (solo si existen)
+                // 1. Tags (Estilo Metadato)
                 if (displayTags.isNotEmpty()) {
                     Text(
-                        text = displayTags,
-                        color = AegisBronze,
+                        text = displayTags.uppercase(),
+                        color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.sp
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 1.5.sp,
+                            fontSize = 9.sp
                         )
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
                 }
 
-                // 2. Título
+                // 2. Título (Negrita Itálica para dinamismo)
                 Text(
-                    text = routine.name,
+                    text = routine.name.uppercase(),
                     color = Color.White,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Black,
+                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                    letterSpacing = 0.5.sp
                 )
 
-                // 3. Texto dinámico del ViewModel
+                // 3. Última sesión (Gris Acero)
                 Text(
-                    text = lastPerformedText,
-                    color = Color.Gray,
-                    fontSize = 12.sp
+                    text = lastPerformedText.uppercase(),
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-                // 4. Fila inferior (Ejercicios y Botón)
+                // 4. Fila inferior: Ejercicios y Acción
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.Bottom // Alineado a la base para look técnico
                 ) {
-                    // Cápsulas de ejercicios (Manejo de nulos directo)
+                    // Cápsulas de ejercicios
                     Row(
                         modifier = Modifier.weight(1f),
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -83,40 +90,49 @@ fun RoutineSelectionCard(
                         }
                     }
 
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
 
-                    // Botón Start
+                    // Botón Start (El foco principal)
                     Button(
                         onClick = onStartClick,
-                        colors = ButtonDefaults.buttonColors(containerColor = AegisBronze),
-                        shape = RoundedCornerShape(8.dp),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = Color.Black
+                        ),
+                        shape = RoundedCornerShape(6.dp), // Botón más cuadrado = más serio
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
                     ) {
-                        Text("START", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "START",
+                            fontWeight = FontWeight.Black,
+                            fontSize = 13.sp,
+                            letterSpacing = 1.sp
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
                         Icon(
-                            Icons.Default.PlayArrow,
+                            imageVector = Icons.Default.PlayArrow,
                             contentDescription = null,
-                            tint = Color.Black,
-                            modifier = Modifier.size(14.dp)
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
             }
 
-            // 5. Icono de rutina
+            // 5. Icono de rutina (Esquina superior derecha)
             Surface(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(44.dp)
                     .align(Alignment.TopEnd),
                 shape = RoundedCornerShape(8.dp),
-                color = Color.White.copy(alpha = 0.05f)
+                color = MaterialTheme.colorScheme.background.copy(alpha = 0.4f),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
             ) {
                 Icon(
                     imageVector = getExerciseIcon(routine.iconName ?: "dumbbell"),
                     contentDescription = null,
-                    tint = AegisBronze,
-                    modifier = Modifier.padding(8.dp)
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(10.dp)
                 )
             }
         }
@@ -125,22 +141,20 @@ fun RoutineSelectionCard(
 
 @Composable
 fun ExerciseNameCapsule(name: String) {
-    Box(
-        modifier = Modifier
-            .height(24.dp)
-            .widthIn(max = 80.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color.White.copy(alpha = 0.1f))
-            .padding(horizontal = 8.dp),
-        contentAlignment = Alignment.Center
+    Surface(
+        modifier = Modifier.widthIn(max = 85.dp),
+        shape = RoundedCornerShape(4.dp), // Cápsulas más rectangulares
+        color = Color.White.copy(alpha = 0.05f),
+        border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.1f))
     ) {
         Text(
-            text = name,
+            text = name.uppercase(),
             color = Color.LightGray,
-            fontSize = 9.sp,
-            fontWeight = FontWeight.Medium,
+            fontSize = 8.sp,
+            fontWeight = FontWeight.Bold,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
         )
     }
 }

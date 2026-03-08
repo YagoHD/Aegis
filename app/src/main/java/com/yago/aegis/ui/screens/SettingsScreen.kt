@@ -1,24 +1,19 @@
 package com.yago.aegis.ui.screens
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.SettingsMenu
-import com.yago.aegis.ui.theme.AegisWhite
 import com.yago.aegis.viewmodel.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -26,24 +21,32 @@ import com.yago.aegis.viewmodel.ProfileViewModel
 fun SettingsScreen(viewModel: ProfileViewModel, onBack: () -> Unit) {
     Scaffold(
         topBar = {
-            // ✅ Sustitución por el componente unificado del Canvas
+            // El componente AegisTopBar ya incluye el HorizontalDivider
+            // y el containerColor en 'surface' (121212)
             AegisTopBar(
                 title = "CONFIGURACIÓN",
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            // Nota: Puedes usar Icons.Default o Icons.AutoMirrored
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver",
-                            tint = AegisWhite
+                            // Usamos onBackground para que sea un blanco nítido
+                            tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 }
             )
         },
-        containerColor = Color(0xFF0A0A0A)
+        // 60%: BackgroundBlack (050505) - El vacío profundo
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
+        // Box que contiene el menú, asegurando que el contenido empiece
+        // justo después del separador de la TopBar
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
             SettingsMenu(viewModel)
         }
     }

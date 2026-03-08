@@ -9,12 +9,29 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = AegisBronze,       // 10%: El oro/bronce para acciones
+    onPrimary = Color.Black,
+
+    secondary = AegisSteel,      // 30%: El gris técnico para textos secundarios
+    onSecondary = AegisWhite,
+
+    background = BackgroundBlack, // 60%: El negro profundo (050505)
+    onBackground = AegisWhite,
+
+    // --- LAS CAPAS DE SUPERFICIE ---
+    surface = SurfaceBars,        // Para TopBar y BottomBar (121212)
+    onSurface = AegisWhite,
+
+    // ESTA ES LA QUE USA TU TARJETA:
+    surfaceVariant = SurfaceDark, // Para las tarjetas (0E0E0E o 0C0C0C)
+    onSurfaceVariant = AegisWhite,
+
+    error = AegisError,           // Para la papelera y alertas
+    onError = Color.White
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -35,9 +52,8 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun AegisTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    darkTheme: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -45,7 +61,6 @@ fun AegisTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }

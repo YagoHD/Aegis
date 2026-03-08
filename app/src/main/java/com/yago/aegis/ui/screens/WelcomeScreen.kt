@@ -1,8 +1,6 @@
 package com.yago.aegis.ui.screens
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,31 +28,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.ui.components.AegisStepProgress
-import com.yago.aegis.ui.theme.AegisBronze
 import com.yago.aegis.ui.theme.AegisCream
-import com.yago.aegis.ui.theme.AegisSteel
-import com.yago.aegis.ui.theme.AegisWhite
-import com.yago.aegis.ui.theme.BackgroundBlackGrey
-import com.yago.aegis.ui.theme.MatteBlack
 import com.yago.aegis.R
+
 @Composable
 fun WelcomeScreen(onContinue: () -> Unit) {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        // --- 1. IMAGEN DE FONDO ---
+        // --- 1. IMAGEN DE FONDO (El 60% dominante) ---
         Image(
             painter = painterResource(id = R.drawable.welcome_bg),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop, // Esto hace que llene toda la pantalla
+            contentScale = ContentScale.Crop,
             colorFilter = ColorFilter.tint(
-                Color.Black.copy(alpha = 0.4f),
+                Color.Black.copy(alpha = 0.5f),
                 blendMode = BlendMode.Darken
-            ) // Oscurece un poco la imagen para que resalte el texto
+            )
         )
-
-        // --- 2. CONTENIDO ENCIMA ---
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -71,7 +63,7 @@ fun WelcomeScreen(onContinue: () -> Unit) {
                 Icon(
                     imageVector = Icons.Default.Shield,
                     contentDescription = null,
-                    tint = AegisBronze,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(80.dp)
                 )
 
@@ -80,7 +72,7 @@ fun WelcomeScreen(onContinue: () -> Unit) {
                 Text(
                     text = "AEGIS",
                     style = TextStyle(
-                        color = AegisWhite,
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontSize = 48.sp,
                         fontWeight = FontWeight.ExtraBold,
                         letterSpacing = 8.sp
@@ -94,24 +86,28 @@ fun WelcomeScreen(onContinue: () -> Unit) {
                     style = TextStyle(
                         color = AegisCream,
                         fontSize = 20.sp,
-                        fontStyle = FontStyle.Italic
+                        fontStyle = FontStyle.Italic,
+                        fontWeight = FontWeight.Light
                     )
                 )
             }
 
-            // Botón alineado abajo
             Button(
                 onClick = onContinue,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = AegisBronze),
-                shape = RoundedCornerShape(8.dp)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                ),
+                shape = RoundedCornerShape(8.dp),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
             ) {
                 Text(
                     text = "EMPIEZA YA",
                     color = Color.Black,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 2.sp
                 )
             }
         }

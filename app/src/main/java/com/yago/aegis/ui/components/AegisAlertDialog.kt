@@ -1,17 +1,15 @@
 package com.yago.aegis.ui.components
 
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.yago.aegis.R
-import com.yago.aegis.ui.theme.AegisBronze
 
-// Actualiza tu archivo AegisAlertDialog.kt
 @Composable
 fun AegisAlertDialog(
     title: String,
@@ -19,31 +17,53 @@ fun AegisAlertDialog(
     onDismiss: () -> Unit,
     confirmText: String = "SÍ",
     dismissText: String = "NO",
-    confirmButtonColor: Color = AegisBronze,
-    // ✅ Cambiamos message: String por un bloque Composable
+    confirmButtonColor: Color = MaterialTheme.colorScheme.primary,
     content: @Composable () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+
+        modifier = Modifier.border(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+            shape = RoundedCornerShape(28.dp)
+        ),
+
         title = {
-            Text(text = title.uppercase(), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text(
+                text = title.uppercase(),
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 2.sp
+            )
         },
+
         text = {
-            // ✅ Aquí se dibujará lo que le pasemos (Texto o TextField)
             content()
         },
+
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text(confirmText, color = confirmButtonColor, fontWeight = FontWeight.Bold)
+                Text(
+                    text = confirmText.uppercase(),
+                    color = confirmButtonColor,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.sp
+                )
             }
         },
+
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(dismissText, color = Color.White)
+                Text(
+                    text = dismissText.uppercase(),
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
             }
-        },
-        containerColor = Color(0xFF161616),
-        titleContentColor = Color.White,
-        textContentColor = Color.Gray
+        }
     )
 }

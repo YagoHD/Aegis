@@ -1,8 +1,10 @@
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -11,15 +13,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.yago.aegis.ui.theme.AegisBronze
-
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.style.TextAlign
 
@@ -34,19 +33,26 @@ fun BiometricCard(
 
     Column(
         modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFF161616))
+            .fillMaxWidth() // Dejamos que el Row superior controle el tamaño
+            .clip(RoundedCornerShape(8.dp)) // Esquinas más cerradas para un look más serio
+            .background(MaterialTheme.colorScheme.surface) // 30%: SurfaceDark
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+                shape = RoundedCornerShape(8.dp)
+            ) // Borde técnico casi invisible
             .padding(12.dp)
-            .width(115.dp) // ✅ Ancho fijo un poco mayor para evitar que se corte el número
     ) {
+        // ETIQUETA: AegisSteel (Gris técnico)
         Text(
             text = label.uppercase(),
-            color = Color.Gray,
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Bold
+            color = MaterialTheme.colorScheme.secondary,
+            fontSize = 9.sp,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 1.5.sp
         )
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Row(
             verticalAlignment = Alignment.Bottom,
@@ -56,40 +62,42 @@ fun BiometricCard(
                 BasicTextField(
                     value = tempValue,
                     onValueChange = { newValue ->
-                        // Filtro para números
                         if (newValue.isEmpty() || newValue.matches(Regex("^\\d*\\.?\\d*$"))) {
                             tempValue = newValue
                             onValueChange(newValue)
                         }
                     },
                     textStyle = TextStyle(
-                        color = Color.White,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Start // ✅ Asegura que empiece desde la izquierda
+                        color = MaterialTheme.colorScheme.onBackground, // AegisWhite
+                        fontSize = 22.sp, // Un poco más grande para impacto
+                        fontWeight = FontWeight.ExtraBold,
+                        textAlign = TextAlign.Start,
+                        letterSpacing = (-0.5).sp // Kerning negativo para look moderno
                     ),
-                    cursorBrush = SolidColor(AegisBronze),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary), // 10% Bronce
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     singleLine = true,
-                    modifier = Modifier.weight(1f, fill = false) // ✅ La clave: crece pero no empuja de más
+                    modifier = Modifier.weight(1f, fill = false)
                 )
             } else {
                 Text(
                     text = value,
-                    color = Color.White,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = (-0.5).sp
                 )
             }
 
-            // Espacio mínimo para que el KG no se pegue literal al número
             Spacer(modifier = Modifier.width(4.dp))
 
+            // UNIDAD: AegisSteel más pequeño
             Text(
-                text = unit,
-                color = Color.Gray,
-                fontSize = 12.sp,
-                modifier = Modifier.padding(bottom = 2.dp)
+                text = unit.uppercase(),
+                color = MaterialTheme.colorScheme.secondary,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 3.dp)
             )
         }
     }

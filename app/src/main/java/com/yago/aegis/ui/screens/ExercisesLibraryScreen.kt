@@ -1,5 +1,6 @@
 package com.yago.aegis.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -8,9 +9,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -19,10 +22,6 @@ import com.yago.aegis.data.Exercise
 import com.yago.aegis.ui.components.AegisAlertDialog
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.ExerciseCard
-import com.yago.aegis.ui.theme.AegisBronze
-import com.yago.aegis.ui.theme.BackgroundBlackGrey
-import com.yago.aegis.ui.theme.AegisCard
-import com.yago.aegis.ui.theme.AegisWhite
 import com.yago.aegis.viewmodel.RoutinesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,31 +39,31 @@ fun ExercisesLibraryScreen(
         it.name.contains(searchQuery, ignoreCase = true)
     }
 
-    // Diálogo de eliminación
+    // --- DIÁLOGO DE ELIMINACIÓN (ESTILO ÉLITE) ---
     if (exerciseToDelete != null) {
         AegisAlertDialog(
-            title = "¿Eliminar ejercicio?",
-            content = {
-                Text(
-                    text = "¿Estás seguro de que quieres eliminar '${exerciseToDelete?.name}'? Esto lo borrará de la librería y de todas tus rutinas.",
-                    color = Color.Gray
-                )
-            },
+            title = "ELIMINAR EJERCICIO",
             onConfirm = {
                 exerciseToDelete?.let { routinesViewModel.deleteExerciseFromLibrary(it) }
                 exerciseToDelete = null
             },
             onDismiss = { exerciseToDelete = null },
             confirmText = "ELIMINAR",
-            confirmButtonColor = Color(0xFF800000) // Rojo Burdeos para coherencia de peligro
-        )
+            // Rojo burdeos técnico para peligro
+            confirmButtonColor = Color(0xFFB3261E)
+        ) {
+            Text(
+                text = "¿Estás seguro de que quieres eliminar '${exerciseToDelete?.name}'? Esta acción es irreversible y afectará a tus rutinas.",
+                color = MaterialTheme.colorScheme.secondary, // AegisSteel
+                fontSize = 14.sp,
+                lineHeight = 20.sp
+            )
+        }
     }
 
     Scaffold(
-        // ✅ Usamos el color de fondo definido en tu Theme
-        containerColor = BackgroundBlackGrey,
+        containerColor = MaterialTheme.colorScheme.background, // 050505
         topBar = {
-            // ✅ Usamos el componente que definimos en el Canvas
             AegisTopBar(
                 title = stringResource(R.string.exercices_title)
             )
@@ -74,52 +73,84 @@ fun ExercisesLibraryScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 24.dp) // Padding de lujo
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            // BOTÓN CREAR NUEVO EJERCICIO
-            Button(
+            // --- BOTÓN CREAR: Módulo de Acción ---
+            Surface(
                 onClick = onNavigateToCreate,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(65.dp),
-                shape = RoundedCornerShape(12.dp),
-                // ✅ Usamos AegisCard o un color oscuro coherente
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E1E1E))
+                    .height(60.dp),
+                shape = RoundedCornerShape(8.dp),
+                color = MaterialTheme.colorScheme.surface, // 121212
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
             ) {
-                Icon(Icons.Default.AddCircle, contentDescription = null, tint = AegisBronze)
-                Spacer(modifier = Modifier.width(12.dp))
-                Text("CREAR NUEVO EJERCICIO", color = Color.White, fontWeight = FontWeight.Bold)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AddCircle,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "CREAR NUEVO EJERCICIO",
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontWeight = FontWeight.Black,
+                        fontSize = 13.sp,
+                        letterSpacing = 1.sp
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            // BUSCADOR
+            // --- BUSCADOR TÁCTICO ---
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text("Buscar en la librería...", color = Color.Gray) },
+                placeholder = {
+                    Text(
+                        "BUSCAR EN LA LIBRERÍA...",
+                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 modifier = Modifier.fillMaxWidth(),
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray) },
-                shape = RoundedCornerShape(12.dp),
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.Search,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                },
+                shape = RoundedCornerShape(8.dp),
+                singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = AegisCard,
-                    unfocusedContainerColor = AegisCard,
-                    unfocusedBorderColor = Color.Transparent,
-                    focusedBorderColor = AegisBronze,
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    cursorColor = AegisBronze
-                )
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    cursorColor = MaterialTheme.colorScheme.primary,
+                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onBackground
+                ),
+                textStyle = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Medium)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            // LISTA DE EJERCICIOS
+            // --- LISTA DE EJERCICIOS ---
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                contentPadding = PaddingValues(bottom = 20.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(bottom = 100.dp) // Espacio para la BottomBar
             ) {
                 items(filteredExercises) { exercise ->
                     ExerciseCard(

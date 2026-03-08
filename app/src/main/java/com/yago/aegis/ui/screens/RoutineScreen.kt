@@ -1,38 +1,44 @@
 package com.yago.aegis.ui.screens
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -44,26 +50,21 @@ import com.yago.aegis.data.globalExerciseIcons
 import com.yago.aegis.ui.components.AegisAlertDialog
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.RoutineCard
-import com.yago.aegis.ui.theme.AegisBronze
-import com.yago.aegis.ui.theme.BackgroundBlackGrey
 import com.yago.aegis.viewmodel.RoutinesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun RoutineScreen(
     routinesViewModel: RoutinesViewModel,
-    onNavigateToSettings: () -> Unit,
     onNavigateToEditRoutine: (Int) -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var textState by remember { mutableStateOf("") }
-    // Estado para el icono seleccionado en el diálogo
     var selectedIconName by remember { mutableStateOf("dumbbell") }
 
-    var routineToEdit by remember { mutableStateOf<Routine?>(null) }
     var routineToDelete by remember { mutableStateOf<Routine?>(null) }
 
-    // --- DIÁLOGO DE CREAR ---
+    // --- DIÁLOGO DE CREAR (ESTILO AEGIS) ---
     if (showDialog) {
         AegisAlertDialog(
             title = "NUEVA RUTINA",
@@ -72,69 +73,101 @@ fun RoutineScreen(
             onDismiss = { showDialog = false },
             onConfirm = {
                 if (textState.isNotBlank()) {
-                    // ✅ Pasamos el nombre Y el icono seleccionado
                     routinesViewModel.addRoutine(textState, selectedIconName)
                     showDialog = false
                 }
-            },
-            content = {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    OutlinedTextField(
-                        value = textState,
-                        onValueChange = { textState = it },
-                        label = { Text("Nombre de la rutina", color = Color.Gray) },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = AegisBronze,
-                            unfocusedBorderColor = Color.DarkGray,
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White
-                        ),
-                        shape = RoundedCornerShape(8.dp)
-                    )
+            }
+        ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = textState,
+                    onValueChange = { textState = it },
+                    placeholder = {
+                        Text("NOMBRE DE LA RUTINA",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f))
+                    },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.background,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.background,
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
+                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onBackground
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-                    Text("Selecciona un icono", color = Color.Gray, fontSize = 12.sp)
+                Text(
+                    text = "SELECCIONA UN ICONO",
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.sp
+                )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-                    // ✅ Selector de iconos dentro del diálogo
-                    FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        globalExerciseIcons.forEach { (name, icon) ->
-                            EditIconBox(
-                                icon = icon,
-                                isSelected = selectedIconName == name,
-                                onClick = { selectedIconName = name }
-                            )
-                        }
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    globalExerciseIcons.forEach { (name, icon) ->
+                        // Aquí usamos el componente de selección que diseñaremos abajo
+                        AegisIconSelector(
+                            icon = icon,
+                            isSelected = selectedIconName == name,
+                            onClick = { selectedIconName = name }
+                        )
                     }
                 }
             }
-        )
+        }
+    }
+
+    // --- DIÁLOGO DE ELIMINAR ---
+    if (routineToDelete != null) {
+        AegisAlertDialog(
+            title = "ELIMINAR RUTINA",
+            onConfirm = {
+                routineToDelete?.let { routinesViewModel.removeRoutine(it) }
+                routineToDelete = null
+            },
+            onDismiss = { routineToDelete = null },
+            confirmButtonColor = MaterialTheme.colorScheme.error // Rojo táctico
+        ) {
+            Text(
+                text = "¿Estás seguro de que quieres eliminar '${routineToDelete?.name}'? Se perderán todos los ejercicios asignados.",
+                color = MaterialTheme.colorScheme.secondary,
+                fontSize = 14.sp
+            )
+        }
     }
 
     Scaffold(
         topBar = { AegisTopBar(title = stringResource(R.string.routine_title)) },
-        containerColor = BackgroundBlackGrey
+        // Usamos background (050505) para profundidad total
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(horizontal = 24.dp) // Padding lateral de lujo
         ) {
+            Spacer(modifier = Modifier.height(16.dp))
+
             LazyColumn(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(12.dp) // Un poco más de espacio
+                verticalArrangement = Arrangement.spacedBy(14.dp), // Espacio entre tarjetas
+                contentPadding = PaddingValues(bottom = 20.dp)
             ) {
                 items(routinesViewModel.routines) { routine ->
-                    // Asegúrate de que RoutineCard use getExerciseIcon(routine.iconName)
                     RoutineCard(
                         routine = routine,
                         onEdit = { onNavigateToEditRoutine(routine.id) },
@@ -143,46 +176,63 @@ fun RoutineScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
+            // --- BOTÓN CREAR: Look Transparente/Bordeado ---
+            Surface(
                 onClick = {
                     textState = ""
-                    selectedIconName = "dumbbell" // Reset al icono por defecto
+                    selectedIconName = "dumbbell"
                     showDialog = true
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
-                    .border(1.dp, AegisBronze, RoundedCornerShape(12.dp)),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                shape = RoundedCornerShape(12.dp)
+                    .padding(vertical = 16.dp)
+                    .height(56.dp),
+                color = Color.Transparent,
+                shape = RoundedCornerShape(8.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
             ) {
-                Icon(Icons.Default.Add, contentDescription = null, tint = AegisBronze)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = stringResource(R.string.btn_create_routine).uppercase(),
-                    color = AegisBronze,
-                    fontWeight = FontWeight.Bold
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "CREAR NUEVA RUTINA",
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Black,
+                        fontSize = 13.sp,
+                        letterSpacing = 1.5.sp
+                    )
+                }
             }
         }
     }
-    if (routineToDelete != null) {
-        AegisAlertDialog(
-            title = stringResource(R.string.dialog_delete_title),
-            content = {
-                Text(
-                    text = stringResource(R.string.dialog_delete_confirm, routineToDelete?.name ?: ""),
-                    color = Color.Gray
-                )
-            },
-            onConfirm = {
-                routineToDelete?.let { routinesViewModel.removeRoutine(it) }
-                routineToDelete = null
-            },
-            onDismiss = { routineToDelete = null },
-            confirmButtonColor = AegisBronze
+}
+@Composable
+fun AegisIconSelector(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(45.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else Color.Transparent)
+            .border(
+                width = 1.dp,
+                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+                shape = RoundedCornerShape(8.dp)
+            )
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.size(24.dp)
         )
     }
 }

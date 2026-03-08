@@ -10,11 +10,24 @@ val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
-val AegisBlack = Color(0xFF0A0A0A)
-val AegisCard = Color(0xFF161616)
-val AegisBronze = Color(0xFF9E7E5D)
-val AegisWhite = Color(0xFFE5E5E5)
 val BackgroundBlackGrey = Color(0xFF0A0A0A)
 val MatteBlack = Color(0xFF161614)
-val AegisSteel = Color(0xFF3D3D3A)
-val AegisCream = Color(0xFFF5F5F0)
+
+
+// --- COLORES PRIMARIOS (La Identidad) ---
+val AegisBronze = Color(0xFFB39371) // Un bronce más vibrante, tirando a oro viejo
+val AegisBronzeDark = Color(0xFF8A6E51) // Para estados presionados o degradados
+val AegisGoldAccent = Color(0xFFD4AF37) // Oro puro para detalles muy pequeños (estrellas, medallas)
+
+// --- COLORES DE FONDO (El Lujo del Negro) ---
+val BackgroundBlack = Color(0xFF050505) // Negro casi puro, muy elegante
+val SurfaceDark = Color(0xFF0E0E0E)   // Para tarjetas (Cards) y menús
+val SurfaceElevated = Color(0xFF242424) // Para elementos que flotan sobre las tarjetas
+val SurfaceBars = Color(0xFF121212)
+// --- COLORES DE TEXTO Y CONTRASTE ---
+val AegisWhite = Color(0xFFF2F2F2)     // Blanco roto (menos agresivo a la vista)
+val AegisCream = Color(0xFFECECE4)     // Crema para textos secundarios o subtítulos
+val AegisSteel = Color(0xFF70706B)     // Gris metálico para textos desactivados o bordes finos
+val AegisCard = SurfaceDark
+// --- ESTADOS ---
+val AegisError = Color(0xFFCF6679)     // Rojo suave para no romper la estética

@@ -1,12 +1,10 @@
 package com.yago.aegis.ui.screens
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -27,94 +25,77 @@ import com.yago.aegis.data.globalExerciseIcons
 import com.yago.aegis.ui.components.AegisAlertDialog
 import com.yago.aegis.ui.components.AegisTagManager
 import com.yago.aegis.ui.components.AegisTopBar
-import com.yago.aegis.ui.theme.AegisBronze
-import com.yago.aegis.ui.theme.AegisWhite
 import com.yago.aegis.viewmodel.RoutinesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun EditExerciseScreen(
     routinesViewModel: RoutinesViewModel,
-    exerciseToEdit: Exercise? = null, // Si es null -> Modo Crear
+    exerciseToEdit: Exercise? = null,
     onNavigateBack: () -> Unit
 ) {
-    // --- ESTADOS DE LA INTERFAZ ---
+    // 1. ESTADOS (Se mantienen igual, funcionan bien)
     var exerciseName by remember { mutableStateOf(exerciseToEdit?.name ?: "") }
     val selectedTags = remember { mutableStateListOf<String>().apply {
         exerciseToEdit?.tags?.let { addAll(it) }
     } }
     var selectedIconName by remember { mutableStateOf(exerciseToEdit?.iconName ?: "dumbbell") }
 
-    // Estados para gestión de Tags
     val savedGlobalTags by routinesViewModel.globalTags.collectAsState()
     var showTagDialog by remember { mutableStateOf(false) }
     var newTagText by remember { mutableStateOf("") }
 
-    // Iconos disponibles (puedes añadir más)
-    val exerciseIcons = listOf(
-        "dumbbell" to Icons.Default.FitnessCenter,
-        "body" to Icons.Default.AccessibilityNew,
-        "kick" to Icons.Default.SportsMartialArts,
-        "run" to Icons.Default.DirectionsRun,
-        "walk" to Icons.Default.DirectionsWalk,
-        "chart" to Icons.Default.ShowChart,
-        "timer" to Icons.Default.Timer,
-        "yoga" to Icons.Default.SelfImprovement
-    )
-
-    // --- DIÁLOGO PARA CREAR TAGS ---
+    // 2. DIÁLOGO DE TAGS (Integrado en el sistema de diseño)
     if (showTagDialog) {
         AegisAlertDialog(
-            title = "CREAR TAG GLOBAL",
-            confirmText = "GUARDAR",
+            title = "NUEVO TAG",
+            confirmText = "AÑADIR",
             dismissText = "CANCELAR",
             onDismiss = { showTagDialog = false },
             onConfirm = {
                 if (newTagText.isNotBlank()) {
-                    routinesViewModel.addGlobalTag(newTagText)
+                    routinesViewModel.addGlobalTag(newTagText.uppercase())
                     newTagText = ""
                     showTagDialog = false
                 }
-            },
-            content = {
-                // ✅ Solo definimos el cuerpo del diálogo
-                OutlinedTextField(
-                    value = newTagText,
-                    onValueChange = { newTagText = it.uppercase() },
-                    placeholder = { Text("Ej: PECHO", color = Color.Gray) },
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = AegisBronze,
-                        unfocusedBorderColor = Color.DarkGray,
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        cursorColor = AegisBronze
-                    ),
-                    shape = RoundedCornerShape(8.dp)
-                )
             }
-        )
+        ) {
+            OutlinedTextField(
+                value = newTagText,
+                onValueChange = { newTagText = it },
+                placeholder = { Text("EJ: PECHO", color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)) },
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                textStyle = androidx.compose.ui.text.TextStyle(color = MaterialTheme.colorScheme.onBackground),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.background,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.background,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)
+                ),
+                shape = RoundedCornerShape(8.dp)
+            )
+        }
     }
 
     Scaffold(
-        containerColor = Color(0xFF0F0E0E), // Fondo ultra oscuro
+        // ✅ Usamos el fondo del sistema (050505)
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             AegisTopBar(
-                title = if (exerciseToEdit == null) "NEW EXERCISE" else "EDIT EXERCISE",
+                title = if (exerciseToEdit == null) "NUEVO EJERCICIO" else "EDITAR EJERCICIO",
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Volver",
-                            tint = Color.White
+                            tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 }
             )
         },
         bottomBar = {
-            // BOTÓN GUARDAR (Fijado abajo como en la imagen)
+            // ✅ Botón "CREATE" en Bronce brillante
             Button(
                 onClick = {
                     if (exerciseName.isNotBlank()) {
@@ -133,16 +114,17 @@ fun EditExerciseScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(24.dp)
-                    .height(60.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E1C1A)),
-                border = BorderStroke(1.dp, Color(0xFF33302E))
+                    .height(56.dp),
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary, // AegisBronze
+                    contentColor = Color.Black
+                )
             ) {
                 Text(
-                    "CREATE",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.5.sp
+                    text = if (exerciseToEdit == null) "CREAR" else "EDITAR",
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.sp
                 )
             }
         }
@@ -151,23 +133,24 @@ fun EditExerciseScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 20.dp),
+                .padding(horizontal = 24.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             item { Spacer(modifier = Modifier.height(8.dp)) }
 
             // 1. NOMBRE DEL EJERCICIO
             item {
-                SectionLabel(stringResource(R.string.label_exercise_name))
+                SectionLabel(stringResource(R.string.label_exercise_name).uppercase())
                 EditInput(
                     value = exerciseName,
                     onValueChange = { exerciseName = it },
-                    placeholder = "Incline Bench Press"
+                    placeholder = "EJ: PRESS BANCA INCLINADO"
                 )
             }
 
             // 2. TAGS & CATEGORÍAS
             item {
+                // AegisTagManager debería usar MaterialTheme.colorScheme.primary para los seleccionados
                 AegisTagManager(
                     allTags = savedGlobalTags,
                     selectedTags = selectedTags.toSet(),
@@ -183,9 +166,9 @@ fun EditExerciseScreen(
                 )
             }
 
-            // 3. REFERENCIA VISUAL (ICONOS)
+            // 3. SELECCIÓN DE ICONO
             item {
-                SectionLabel(stringResource(R.string.select_icon))
+                SectionLabel(stringResource(R.string.select_icon).uppercase())
                 FlowRow(
                     modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                     maxItemsInEachRow = 4,
@@ -193,14 +176,17 @@ fun EditExerciseScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     globalExerciseIcons.forEach { (name, icon) ->
-                        EditIconBox(
+                        // ✅ Reutilizamos el selector modular
+                        AegisIconSelector(
                             icon = icon,
                             isSelected = selectedIconName == name,
-                            onClick = { selectedIconName = name } // ✅ Esto cambiará el estado
+                            onClick = { selectedIconName = name }
                         )
                     }
                 }
             }
+
+            item { Spacer(modifier = Modifier.height(100.dp)) }
         }
     }
 }
@@ -211,33 +197,50 @@ fun EditInput(value: String, onValueChange: (String) -> Unit, placeholder: Strin
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-        placeholder = { Text(placeholder, color = Color.DarkGray) },
-        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp),
+        placeholder = {
+            Text(
+                text = placeholder.uppercase(),
+                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f),
+                fontSize = 12.sp,
+                letterSpacing = 1.sp
+            )
+        },
+        shape = RoundedCornerShape(8.dp), // Consistencia con el resto de la app
+        textStyle = androidx.compose.ui.text.TextStyle(
+            color = MaterialTheme.colorScheme.onBackground,
+            fontWeight = FontWeight.Bold,
+            fontSize = 15.sp
+        ),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = Color(0xFF161513),
-            unfocusedContainerColor = Color(0xFF161513),
-            focusedBorderColor = Color(0xFF423E3A),
-            unfocusedBorderColor = Color(0xFF2C2926),
-            focusedTextColor = Color.White,
-            unfocusedTextColor = Color.White
+            // Usamos surfaceVariant (0E0E0E) para que destaque sutilmente sobre el fondo
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+            // Bordes refinados
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+            cursorColor = MaterialTheme.colorScheme.primary
         )
     )
 }
-
-
 
 @Composable
 fun EditIconBox(icon: ImageVector, isSelected: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .size(70.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFF161513))
+            .size(64.dp) // Un pelín más compacto para que quepan mejor en filas de 4
+            .clip(RoundedCornerShape(8.dp))
+            .background(
+                if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+                else MaterialTheme.colorScheme.surfaceVariant
+            )
             .border(
-                width = if (isSelected) 2.dp else 1.dp,
-                color = if (isSelected) AegisBronze else Color(0xFF2C2926),
-                shape = RoundedCornerShape(12.dp)
+                width = if (isSelected) 1.5.dp else 1.dp,
+                color = if (isSelected) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f),
+                shape = RoundedCornerShape(8.dp)
             )
             .clickable { onClick() },
         contentAlignment = Alignment.Center
@@ -245,8 +248,10 @@ fun EditIconBox(icon: ImageVector, isSelected: Boolean, onClick: () -> Unit) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = if (isSelected) AegisBronze else Color.DarkGray,
-            modifier = Modifier.size(30.dp)
+            // El icono se apaga cuando no está seleccionado para dar foco al activo
+            tint = if (isSelected) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+            modifier = Modifier.size(26.dp)
         )
     }
 }
