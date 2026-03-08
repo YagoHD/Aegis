@@ -171,13 +171,9 @@ class ProfileViewModel(val repository: UserRepository) : ViewModel() {
         val formatter = DateTimeFormatter.ofPattern("dd MMMM", Locale("es", "ES"))
         val todayDate = LocalDate.now().format(formatter).uppercase()
 
+        // 1. Actualizamos SOLO las fotos del log, sin tocar el avatar
         user = when (type) {
-            PhotoType.BASE -> user.copy(
-                basePhotoUri = uri,
-                basePhotoDate = todayDate,
-                // ✅ Sincronizamos en la UI: La foto base ahora es el Avatar
-                profilePhotoUri = uri
-            )
+            PhotoType.BASE -> user.copy(basePhotoUri = uri, basePhotoDate = todayDate)
             PhotoType.ACTUAL -> user.copy(actualPhotoUri = uri, actualPhotoDate = todayDate)
         }
 
@@ -186,8 +182,7 @@ class ProfileViewModel(val repository: UserRepository) : ViewModel() {
                 PhotoType.BASE -> {
                     repository.updateBasePhoto(uri)
                     repository.updateBasePhotoDate(todayDate)
-                    // ✅ GUARDADO CRÍTICO: También persistimos como Avatar
-                    repository.updateAvatar(uri)
+                    // ❌ HEMOS QUITADO: repository.updateAvatar(uri)
                 }
                 PhotoType.ACTUAL -> {
                     repository.updateActualPhoto(uri)

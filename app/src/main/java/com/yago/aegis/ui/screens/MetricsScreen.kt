@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yago.aegis.ui.components.AegisStepProgress
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.MetricInput
 import com.yago.aegis.ui.theme.AegisBronze
@@ -41,6 +42,7 @@ fun MetricsScreen(
             title = "PHYSICAL PARAMETERS",
             subtitle = "STEP 03"
         )
+        AegisStepProgress(currentStep = 3)
 
         Spacer(modifier = Modifier.height(40.dp))
 

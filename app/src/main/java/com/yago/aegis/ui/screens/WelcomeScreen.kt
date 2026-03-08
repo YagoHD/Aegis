@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yago.aegis.ui.components.AegisStepProgress
 import com.yago.aegis.ui.theme.AegisBronze
 import com.yago.aegis.ui.theme.AegisCream
 import com.yago.aegis.ui.theme.AegisSteel
@@ -44,6 +45,8 @@ fun WelcomeScreen(onContinue: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            AegisStepProgress(currentStep = 1)
+
             // Icono de Escudo Aegis
             Icon(
                 imageVector = Icons.Default.Shield,

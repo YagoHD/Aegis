@@ -37,6 +37,7 @@ import com.yago.aegis.viewmodel.ProfileViewModel
 import android.net.Uri // 👈 Esta es la clave
 import android.content.Intent
 import com.yago.aegis.data.PhotoType
+import com.yago.aegis.ui.components.AegisStepProgress
 
 @Composable
 fun IdentityScreen(
@@ -52,27 +53,23 @@ fun IdentityScreen(
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        uri?.let {
+        uri?.let { selectedUri ->
             try {
-                // 🛡️ PASO 1: Pedir permiso permanente (ESTO ES LO QUE FALTA)
+                // IMPORTANTE: Primero el permiso, luego el guardado
                 context.contentResolver.takePersistableUriPermission(
-                    it,
+                    selectedUri,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
                 )
+
+                // Guardamos en el ViewModel (esto dispara el proceso en segundo plano)
+                viewModel.updateAvatar(selectedUri.toString())
+
+                // Actualizamos la vista previa local
+                selectedPhotoUri = selectedUri.toString()
+
             } catch (e: Exception) {
-                // Algunos selectores no lo permiten, pero intentarlo es vital
                 e.printStackTrace()
             }
-
-            // 🛡️ PASO 2: Guardar en el ViewModel
-            // Usamos updateAvatar para que se guarde en el mismo sitio que Settings
-            viewModel.updateAvatar(it.toString())
-
-            // También la guardamos como foto de "Antes" para el log visual
-            viewModel.updatePhoto(it.toString(), PhotoType.BASE)
-
-            // Actualizamos el estado local de la pantalla para que se vea la miniatura
-            selectedPhotoUri = it.toString()
         }
     }
 
@@ -93,6 +90,7 @@ fun IdentityScreen(
                 }
             }
         )
+        AegisStepProgress(currentStep = 2)
 
         Spacer(modifier = Modifier.height(40.dp))
 
