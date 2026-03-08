@@ -36,7 +36,10 @@ fun ActiveSessionScreen(
     val session = workoutViewModel.activeSession ?: return
     var showCancelDialog by remember { mutableStateOf(false) }
 
-    // --- DIÁLOGO DE CANCELACIÓN ---
+    // --- NUEVO ESTADO PARA EL DIÁLOGO DE CONFIRMACIÓN ---
+    var exercisesToAutoCheck by remember { mutableStateOf<List<com.yago.aegis.data.ExerciseProgress>>(emptyList()) }
+
+    // --- DIÁLOGO DE ABANDONO (EXISTENTE) ---
     if (showCancelDialog) {
         AegisAlertDialog(
             title = "ABANDONAR SESIÓN",
@@ -53,6 +56,46 @@ fun ActiveSessionScreen(
                 color = MaterialTheme.colorScheme.secondary,
                 fontSize = 14.sp
             )
+        }
+    }
+
+    // --- NUEVO DIÁLOGO: CONFIRMAR EJERCICIOS OLVIDADOS ---
+    if (exercisesToAutoCheck.isNotEmpty()) {
+        AegisAlertDialog(
+            title = "EJERCICIOS SIN MARCAR",
+            confirmText = "MARCAR Y FINALIZAR",
+            dismissText = "REVISAR",
+            onDismiss = { exercisesToAutoCheck = emptyList() },
+            onConfirm = {
+                // Marcamos todos los pendientes y finalizamos
+                exercisesToAutoCheck.forEach {
+                    workoutViewModel.toggleExerciseCompleted(it.exercise.id)
+                }
+                exercisesToAutoCheck = emptyList()
+
+                // Ejecutamos el finalizado real
+                workoutViewModel.finishWorkout(routinesViewModel) {
+                    profileViewModel.incrementDisciplineDay()
+                    onFinishWorkout()
+                }
+            }
+        ) {
+            Column {
+                Text(
+                    text = "Has introducido datos en los siguientes ejercicios pero no los has marcado como completados:",
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+                exercisesToAutoCheck.forEach { progress ->
+                    Text(
+                        text = "• ${progress.exercise.name.uppercase()}",
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp
+                    )
+                }
+            }
         }
     }
 
@@ -74,13 +117,11 @@ fun ActiveSessionScreen(
             )
         }
     ) { padding ->
-        // 1. Usamos una Column principal para separar lo fijo de lo móvil
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // --- ESTE BLOQUE SE QUEDA FIJO ---
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -89,7 +130,6 @@ fun ActiveSessionScreen(
                 SessionProgressHeader(session)
             }
 
-            // 2. La LazyColumn ahora solo contiene los ejercicios y el botón
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -127,13 +167,23 @@ fun ActiveSessionScreen(
                     }
                 }
 
-                // 3. BOTÓN DE FINALIZAR
                 item {
                     Button(
                         onClick = {
-                            workoutViewModel.finishWorkout(routinesViewModel) {
-                                profileViewModel.incrementDisciplineDay()
-                                onFinishWorkout()
+                            // --- LÓGICA DE DETECCIÓN ANTES DE FINALIZAR ---
+                            val uncompletedWithData = session.exercisesProgress.filter { progress ->
+                                val hasData = progress.sets.any { it.weight > 0 || it.reps > 0 }
+                                val isNotChecked = !progress.sets.all { it.isCompleted }
+                                hasData && isNotChecked
+                            }
+
+                            if (uncompletedWithData.isNotEmpty()) {
+                                exercisesToAutoCheck = uncompletedWithData
+                            } else {
+                                workoutViewModel.finishWorkout(routinesViewModel) {
+                                    profileViewModel.incrementDisciplineDay()
+                                    onFinishWorkout()
+                                }
                             }
                         },
                         modifier = Modifier
