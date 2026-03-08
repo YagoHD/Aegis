@@ -41,7 +41,7 @@ import com.yago.aegis.ui.components.AegisStepProgress
 
 @Composable
 fun IdentityScreen(
-    viewModel: ProfileViewModel, // 👈 Añadimos el ViewModel aquí
+    viewModel: ProfileViewModel,
     onContinue: (String, String, String?) -> Unit,
     onBack: () -> Unit
 ) {
@@ -80,7 +80,6 @@ fun IdentityScreen(
             .padding(24.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        // Barra superior con retroceso
         AegisTopBar(
             title = "IDENTIDAD",
             subtitle = "PASO 02",
@@ -90,9 +89,10 @@ fun IdentityScreen(
                 }
             }
         )
+        // La barra de progreso ahora está en la misma posición relativa que en las otras
         AegisStepProgress(currentStep = 2)
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
         // Selector de Foto de Perfil (Círculo con borde AegisBronze)
         Box(

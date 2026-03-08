@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.Straighten
@@ -25,7 +27,8 @@ import com.yago.aegis.ui.theme.BackgroundBlackGrey
 
 @Composable
 fun MetricsScreen(
-    onComplete: (Double, String) -> Unit
+    onComplete: (Double, String) -> Unit,
+    onBack: () -> Unit
 ) {
     // Estados para los inputs
     var height by remember { mutableStateOf("") }
@@ -39,8 +42,13 @@ fun MetricsScreen(
     ) {
         // 1. Barra superior de navegación (Paso 03)
         AegisTopBar(
-            title = "PHYSICAL PARAMETERS",
-            subtitle = "STEP 03"
+            title = "PARÁMETROS",
+            subtitle = "PASO 03",
+            navigationIcon = { // ✅ Ahora el usuario puede volver a IdentityScreen
+                IconButton(onClick = onBack) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = null, tint = AegisWhite)
+                }
+            }
         )
         AegisStepProgress(currentStep = 3)
 
@@ -48,14 +56,14 @@ fun MetricsScreen(
 
         // 2. Cabecera de la pantalla
         Text(
-            text = "BODY METRICS",
+            text = "MÉTRICAS CORPORALES",
             color = AegisWhite,
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Black,
-            letterSpacing = 1.sp
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Black
         )
+        Spacer(modifier = Modifier.weight(1f))
         Text(
-            text = "Enter precision data to calibrate your industrial-grade performance profile.",
+            text = "Introduce tus datos para calcular tu IMC",
             color = AegisSteel,
             fontSize = 14.sp,
             lineHeight = 20.sp,
@@ -66,8 +74,8 @@ fun MetricsScreen(
 
         // 3. Inputs métricos usando tu componente MetricInput
         MetricInput(
-            label = "HEIGHT CONFIGURATION",
-            unit = "CENTIMETERS",
+            label = "ALTURA",
+            unit = "CENTIMETROS",
             value = height,
             onValueChange = { height = it },
             icon = Icons.Default.Straighten // Icono de regla
@@ -76,8 +84,8 @@ fun MetricsScreen(
         Spacer(modifier = Modifier.height(48.dp))
 
         MetricInput(
-            label = "CURRENT MASS",
-            unit = "KILOGRAMS",
+            label = "PESO",
+            unit = "KILOGRAMOS",
             value = mass,
             onValueChange = { mass = it },
             icon = Icons.Default.MonitorWeight // Icono de báscula
@@ -92,37 +100,18 @@ fun MetricsScreen(
         Button(
             onClick = {
                 val h = height.toDoubleOrNull() ?: 0.0
-                if (h > 0.0 && mass.isNotEmpty()) {
-                    onComplete(h, mass)
-                }
+                if (h > 0.0 && mass.isNotEmpty()) onComplete(h, mass)
             },
             enabled = isEnabled,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
+            modifier = Modifier.fillMaxWidth().height(56.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = AegisBronze,
                 contentColor = Color.Black,
                 disabledContainerColor = AegisSteel
             ),
-            shape = RoundedCornerShape(8.dp)
+            shape = RoundedCornerShape(8.dp) // Unificado
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = "COMPLETE SETUP",
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 14.sp
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Icon(
-                    imageVector = Icons.Default.ArrowForward,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
+            Text("FINALIZAR CONFIGURACIÓN", fontWeight = FontWeight.ExtraBold)
         }
     }
 }

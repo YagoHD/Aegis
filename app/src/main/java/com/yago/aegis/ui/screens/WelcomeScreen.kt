@@ -92,7 +92,7 @@ fun WelcomeScreen(onContinue: () -> Unit) {
                 border = BorderStroke(1.dp, AegisSteel)
             ) {
                 Text(
-                    text = "GET STARTED",
+                    text = "EMPIEZA YA",
                     color = AegisWhite,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 2.sp

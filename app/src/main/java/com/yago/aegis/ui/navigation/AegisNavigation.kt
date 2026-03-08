@@ -86,7 +86,7 @@ fun AegisNavigation(
                     navController.navigate("profile") {
                         popUpTo("welcome") { inclusive = true }
                     }
-                })
+                },onBack = { navController.popBackStack() })
             }
 
             // 🏋️ PANTALLA DE MIS RUTINAS (Gestión/Creación)
