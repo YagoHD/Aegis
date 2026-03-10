@@ -35,6 +35,12 @@ class SettingsStore(private val context: Context) {
         private val GLOBAL_TAGS_KEY = stringPreferencesKey("global_tags")
         private val DISCIPLINE_DAY = intPreferencesKey("discipline_day")
         private val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
+        private val WORKOUT_HISTORY_KEY = stringPreferencesKey("workout_history")
+        private val SHOW_VOLUME_CARD = booleanPreferencesKey("show_volume_card")
+        private val SHOW_DISCIPLINE_CARD = booleanPreferencesKey("show_discipline_card")
+        private val SHOW_EVOLUTION_GRAPH = booleanPreferencesKey("show_evolution_graph")
+        private val SHOW_ANALYTICS_LIST = booleanPreferencesKey("show_analytics_list")
+        private val TARGET_DAYS_PER_WEEK = intPreferencesKey("target_days_per_week")
     }
 
     // --- LECTURA (READ) ---
@@ -77,6 +83,19 @@ class SettingsStore(private val context: Context) {
     }
     val disciplineDay: Flow<Int> = context.dataStore.data.map { it[DISCIPLINE_DAY] ?: 0 }
     val onboardingCompleted: Flow<Boolean> = context.dataStore.data.map { it[ONBOARDING_COMPLETED] ?: false }
+    val workoutHistory: Flow<List<WorkoutSession>> = context.dataStore.data.map { prefs ->
+        val json = prefs[WORKOUT_HISTORY_KEY] ?: ""
+        if (json.isEmpty()) emptyList()
+        else {
+            val type = object : TypeToken<List<WorkoutSession>>() {}.type
+            gson.fromJson(json, type)
+        }
+    }
+    val showVolumeCard: Flow<Boolean> = context.dataStore.data.map { it[SHOW_VOLUME_CARD] ?: true }
+    val showDisciplineCard: Flow<Boolean> = context.dataStore.data.map { it[SHOW_DISCIPLINE_CARD] ?: true }
+    val showEvolutionGraph: Flow<Boolean> = context.dataStore.data.map { it[SHOW_EVOLUTION_GRAPH] ?: true }
+    val showAnalyticsList: Flow<Boolean> = context.dataStore.data.map { it[SHOW_ANALYTICS_LIST] ?: true }
+    val targetDaysPerWeek: Flow<Int> = context.dataStore.data.map { it[TARGET_DAYS_PER_WEEK] ?: 5 }
     // --- ESCRITURA (WRITE) ---
     suspend fun saveName(name: String) {
         context.dataStore.edit { it[USER_NAME] = name }
@@ -170,5 +189,33 @@ class SettingsStore(private val context: Context) {
     }
     suspend fun saveDisciplineDay(days: Int) {
         context.dataStore.edit { it[DISCIPLINE_DAY] = days }
+    }
+    suspend fun saveWorkoutSession(session: WorkoutSession) {
+        context.dataStore.edit { prefs ->
+            val currentJson = prefs[WORKOUT_HISTORY_KEY] ?: ""
+            val type = object : TypeToken<MutableList<WorkoutSession>>() {}.type
+            val history: MutableList<WorkoutSession> = if (currentJson.isEmpty()) {
+                mutableListOf()
+            } else {
+                gson.fromJson(currentJson, type)
+            }
+
+            history.add(session)
+            prefs[WORKOUT_HISTORY_KEY] = gson.toJson(history)
+        }
+    }
+
+    suspend fun updateTargetDays(days: Int) {
+        context.dataStore.edit { it[TARGET_DAYS_PER_WEEK] = days }
+    }
+    suspend fun toggleStatSection(keyName: String, isEnabled: Boolean) {
+        val key = when(keyName) {
+            "volume" -> SHOW_VOLUME_CARD
+            "discipline" -> SHOW_DISCIPLINE_CARD
+            "evolution" -> SHOW_EVOLUTION_GRAPH
+            "analytics" -> SHOW_ANALYTICS_LIST
+            else -> return
+        }
+        context.dataStore.edit { it[key] = isEnabled }
     }
 }

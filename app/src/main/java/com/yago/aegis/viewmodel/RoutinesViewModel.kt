@@ -9,6 +9,7 @@ import com.yago.aegis.data.Routine
 import com.yago.aegis.data.UserRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -63,22 +64,68 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
      * Actualiza el texto de 'Último Entrenamiento' en un ejercicio específico.
      * Esta función es llamada por el WorkoutViewModel al finalizar una sesión.
      */
-    fun updateExercisePerformance(exerciseId: Long, summary: String) {
-        val updatedRoutines = routines.map { routine ->
-            routine.copy(
-                // ✅ Nos aseguramos de que iconName nunca pase como null al copiar
-                iconName = routine.iconName ?: "dumbbell",
-                exercises = routine.exercises.map { exercise ->
-                    if (exercise.id == exerciseId) {
-                        exercise.copy(lastPerformance = summary)
-                    } else exercise
-                }
-            )
-        }
+    fun updateExercisePerformance(exerciseId: Long, summary: String, new1RM: Double) {
+        viewModelScope.launch {
+            // 1. Obtenemos la versión más reciente de la librería directamente del repositorio
+            // Usamos .first() para leer el valor actual sin quedarnos escuchando
+            val currentLibrary = repository.getAllExercises().first()
+            val exerciseInLibrary = currentLibrary.find { it.id == exerciseId }
 
-        routines.clear()
-        routines.addAll(updatedRoutines)
-        persistChanges()
+            exerciseInLibrary?.let { currentExercise ->
+                val updatedPR = if (new1RM > currentExercise.oneRepMax) {
+                    // Redondeo manual para evitar problemas de formato
+                    (kotlin.math.round(new1RM * 10) / 10.0)
+                } else {
+                    currentExercise.oneRepMax
+                }
+
+                // LOG DE CONTROL: Mira el Logcat en Android Studio con el filtro "AEGIS_DEBUG"
+                android.util.Log.d("AEGIS_DEBUG", "Actualizando Ejercicio: ${currentExercise.name} | Nuevo PR: $updatedPR")
+
+                val updatedExercise = currentExercise.copy(
+                    lastPerformance = summary,
+                    oneRepMax = updatedPR
+                )
+
+                // GUARDADO CRÍTICO EN EL REPOSITORIO
+                repository.upsertExercise(updatedExercise)
+            }
+
+            // 2. Actualizar las rutinas locales (esto es lo que ya hacías)
+            val updatedRoutines = routines.map { routine ->
+                routine.copy(
+                    exercises = routine.exercises.map { exercise ->
+                        if (exercise.id == exerciseId) {
+                            val updatedPR = if (new1RM > exercise.oneRepMax) (kotlin.math.round(new1RM * 10) / 10.0) else exercise.oneRepMax
+                            exercise.copy(lastPerformance = summary, oneRepMax = updatedPR)
+                        } else exercise
+                    }
+                )
+            }
+            routines.clear()
+            routines.addAll(updatedRoutines)
+            persistChanges()
+        }
+    }
+
+    /**
+     * Función auxiliar para extraer el peso y calcular el 1RM aproximado
+     * Espera un formato tipo "100.0kg x 8"
+     */
+    private fun extract1RMFromSummary(summary: String): Double {
+        return try {
+            // Buscamos el peso antes de "kg" y las reps después de "x"
+            val weight = summary.substringBefore("kg").trim().toDouble()
+            val reps = summary.substringAfter("x").trim().toInt()
+
+            // Fórmula de Brzycki: Peso * (36 / (37 - Reps)) o la simplificada:
+            // Peso * (1 + 0.0333 * reps)
+            (weight * (1 + (reps / 30.0))).let {
+                kotlin.math.round(it * 10) / 10.0 // Redondear a 1 decimal
+            }
+        } catch (e: Exception) {
+            0.0
+        }
     }
 
     // --- 📁 GESTIÓN DE RUTINAS ---

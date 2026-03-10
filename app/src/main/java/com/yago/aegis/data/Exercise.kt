@@ -1,7 +1,6 @@
 package com.yago.aegis.data
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -18,9 +17,18 @@ data class Exercise(
     val tags: List<String> = emptyList(),
     val iconName: String = "dumbbell",
     val notes: String = "",
-    val lastPerformance: String = ""
+    val lastPerformance: String = "",
+    val oneRepMax: Double = 0.0,    // Para mostrar "1RM: 115KG" en la lista
+    val bestSet: String? = "--",     // Para mostrar el mejor récord histórico
+    val history: List<ExerciseRecord> = emptyList()
 )
 
+data class ExerciseRecord(
+    val date: Long,
+    val weight: Double,
+    val reps: Int,
+    val oneRepMax: Double
+)
 /**
  * EL REGISTRO: Lo que el usuario anota en cada serie durante el entreno.
  */

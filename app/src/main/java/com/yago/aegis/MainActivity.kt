@@ -40,7 +40,8 @@ class MainActivity : ComponentActivity() {
                 AegisNavigation(
                     profileViewModel = profileViewModel,
                     routinesViewModel = routinesViewModel, // <-- No olvides este
-                    workoutViewModel = workoutViewModel
+                    workoutViewModel = workoutViewModel,
+                    settingsStore = settingsStore
                 )
             }
         }

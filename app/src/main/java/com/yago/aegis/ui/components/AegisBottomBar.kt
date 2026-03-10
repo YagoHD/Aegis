@@ -24,7 +24,7 @@ import com.yago.aegis.data.Screen
 
 @Composable
 fun AegisBottomBar(navController: NavHostController) {
-    val leftItems = listOf(Screen.Weekly, Screen.Routine)
+    val leftItems = listOf(Screen.Stats, Screen.Routine)
     val rightItems = listOf(Screen.Ejercicios, Screen.Profile)
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()

@@ -46,7 +46,7 @@
     <string name="btn_save_routine">GUARDAR RUTINA</string>
     <string name="nav_profile">Perfil</string>
     <string name="nav_routine">Rutinas</string>
-    <string name="nav_weekly">Semana</string>
+    <string name="nav_stats">Stats</string>
     <string name="nav_exercices">Ejercicios</string>
     <string name="title_new_exercise">NUEVO EJERCICIO</string>
     <string name="label_exercise_name">NOMBRE DEL EJERCICIO</string>

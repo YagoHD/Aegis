@@ -5,7 +5,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.yago.aegis.data.*
+import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
 /**
@@ -115,20 +117,28 @@ class WorkoutViewModel(private val settingsStore: SettingsStore) : ViewModel() {
     fun finishWorkout(routinesViewModel: RoutinesViewModel, onComplete: () -> Unit) {
         val session = activeSession ?: return
 
+        viewModelScope.launch {
+            settingsStore.saveWorkoutSession(session)
+        }
+
         session.exercisesProgress.forEach { progress ->
-            // Filtramos solo las series que el usuario marcó como completadas
             val completedSets = progress.sets.filter { it.isCompleted }
 
             if (completedSets.isNotEmpty()) {
-                // Formateamos el texto para la 'LastSessionCard' (ej: 80.0kg x 10   85.0kg x 8)
                 val summary = completedSets.joinToString("   ") { set ->
-                    // Mostramos decimales solo si son necesarios (.0 -> entero)
                     val w = if (set.weight % 1 == 0.0) set.weight.toInt() else set.weight
                     "${w}kg x ${set.reps}"
                 }
 
-                // Guardamos el historial en el RoutinesViewModel (que gestiona la lista global)
-                routinesViewModel.updateExercisePerformance(progress.exercise.id, summary)
+                val best1RMOfSession = completedSets.maxOf { set ->
+                    set.weight * (1 + (set.reps / 30.0))
+                }
+
+                routinesViewModel.updateExercisePerformance(
+                    exerciseId = progress.exercise.id,
+                    summary = summary,
+                    new1RM = best1RMOfSession
+                )
             }
         }
 

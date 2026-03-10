@@ -15,23 +15,28 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.yago.aegis.data.Screen
+import com.yago.aegis.data.SettingsStore
 import com.yago.aegis.ui.components.AegisBottomBar
 import com.yago.aegis.ui.components.SettingsMenu
 import com.yago.aegis.ui.screens.*
 import com.yago.aegis.viewmodel.ProfileViewModel
 import com.yago.aegis.viewmodel.RoutinesViewModel
+import com.yago.aegis.viewmodel.StatsViewModel
 import com.yago.aegis.viewmodel.WorkoutViewModel
 
 @Composable
 fun AegisNavigation(
     profileViewModel: ProfileViewModel,
     workoutViewModel: WorkoutViewModel,
-    routinesViewModel: RoutinesViewModel
+    routinesViewModel: RoutinesViewModel,
+    settingsStore: SettingsStore
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -46,7 +51,9 @@ fun AegisNavigation(
     // ✅ CORRECCIÓN 1: Ocultar la BottomBar en Onboarding y Settings
     val onboardingRoutes = listOf("welcome", "identity", "metrics")
     val isSessionActive = currentRoute?.startsWith("active_session") == true
-
+    val sharedStatsViewModel: StatsViewModel = viewModel(
+        factory = com.yago.aegis.viewmodel.StatsViewModelFactory(settingsStore)
+    )
     val showBottomBar = currentRoute != "settings" &&
             !onboardingRoutes.contains(currentRoute) &&
             !isSessionActive
@@ -117,9 +124,23 @@ fun AegisNavigation(
             }
 
             // 📅 PANTALLA DE DISCIPLINA SEMANAL
-            composable("weekly") {
-                // WeeklyScreen(profileViewModel)
+
+            composable("stats") {
+                // 2. Pásale el sharedStatsViewModel a la pantalla principal
+                StatsScreen(
+                    viewModel = sharedStatsViewModel, // <-- CAMBIO AQUÍ
+                    onNavigateToSettings = { navController.navigate("stats_settings") },
+                    onNavigateToExerciseDetail = { /* ... */ }
+                )
             }
+
+            composable("stats_settings") {
+                // 3. Pásale el MISMO sharedStatsViewModel a los ajustes
+                StatsSettingsScreen(
+                    viewModel = sharedStatsViewModel, // <-- MISMA INSTANCIA
+                )
+            }
+
 
             // 👤 PANTALLA DE PERFIL
             composable(
