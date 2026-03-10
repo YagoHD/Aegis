@@ -19,115 +19,106 @@ fun StatsScreen(
     onNavigateToSettings: () -> Unit = {},
     onNavigateToExerciseDetail: (Long) -> Unit = {}
 ) {
-    // 1. Estados de Visibilidad (conectados al DataStore)
     val showVolume by viewModel.showVolumeCard.collectAsState(initial = true)
     val showDiscipline by viewModel.showDisciplineCard.collectAsState(initial = true)
     val showEvolution by viewModel.showEvolutionGraph.collectAsState(initial = true)
     val showAnalytics by viewModel.showAnalyticsList.collectAsState(initial = true)
-
-    // 2. Objetivo de días dinámico
     val targetDays by viewModel.targetDaysPerWeek.collectAsState(initial = 5)
-
-    // 3. Datos de rendimiento
     val weeklyStats by viewModel.weeklyDiscipline.collectAsState(initial = 0 to 5)
     val volumeStats by viewModel.weeklyVolumeStats.collectAsState(initial = 0.0 to 0.0)
     val filteredList by viewModel.filteredExercises.collectAsState(initial = emptyList())
     val monthlyData by viewModel.monthlyVolumeEvolution.collectAsState(initial = emptyList())
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(bottom = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
-    ) {
-
-        // --- BARRA SUPERIOR ---
-        item {
+    // Usamos Scaffold para que la TopBar esté fija y el contenido haga scroll debajo
+    Scaffold(
+        topBar = {
             AegisTopBar(
-                title = "ESTADISTICAS",
+                title = "ESTADÍSTICAS",
                 actions = {
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Settings",
-                            tint = MaterialTheme.colorScheme.onBackground
+                            tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.8f) // Acero sutil
                         )
                     }
                 }
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp), // Padding global para todos los items
+            // Aumentamos el espacio entre secciones para el look "modular"
+            verticalArrangement = Arrangement.spacedBy(28.dp)
+        ) {
 
-        // --- MÉTRICAS RÁPIDAS (DISCIPLINA Y VOLUMEN) ---
-        if (showDiscipline || showVolume) {
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    if (showDiscipline) {
-                        StatCard(
-                            title = "DISCIPLINA SEMANAL",
-                            // Usamos targetDays para que el "/5" cambie según los ajustes
-                            mainValue = "${weeklyStats.first}/$targetDays",
-                            subValue = "SESSIONS",
-                            modifier = Modifier.weight(1.0f),
-                            showProgress = true,
-                            // Calculamos el progreso real basado en el objetivo del usuario
-                            progress = if (targetDays > 0) weeklyStats.first.toFloat() / targetDays else 0f
-                        )
-                    }
+            item { Spacer(Modifier.height(8.dp)) } // Margen superior tras la TopBar
 
-                    if (showVolume) {
-                        StatCard(
-                            title = "VOLUMEN SEMANAL",
-                            mainValue = formatVolume(volumeStats.first),
-                            subValue = when {
-                                volumeStats.second.isNaN() -> "NEW START"
-                                volumeStats.second >= 0 -> "+${volumeStats.second.toInt()}%"
-                                else -> "${volumeStats.second.toInt()}%"
-                            },
-                            isPositive = volumeStats.second.isNaN() || volumeStats.second >= 0,
-                            modifier = Modifier.weight(1.0f)
-                        )
+            // --- BLOQUE DE MÉTRICAS (DISCIPLINA Y VOLUMEN) ---
+            if (showDiscipline || showVolume) {
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        if (showDiscipline) {
+                            StatCard(
+                                title = "DISCIPLINA SEMANAL",
+                                mainValue = "${weeklyStats.first}/$targetDays",
+                                subValue = "SESIONES COMPLETADAS",
+                                modifier = Modifier.weight(1f),
+                                showProgress = true,
+                                progress = if (targetDays > 0) weeklyStats.first.toFloat() / targetDays else 0f
+                            )
+                        }
+
+                        if (showVolume) {
+                            StatCard(
+                                title = "VOLUMEN SEMANAL",
+                                mainValue = formatVolume(volumeStats.first),
+                                subValue = when {
+                                    volumeStats.second.isNaN() -> "SIN DATOS"
+                                    volumeStats.second >= 0 -> "+${volumeStats.second.toInt()}% VS PREV"
+                                    else -> "${volumeStats.second.toInt()}% VS PREV"
+                                },
+                                isPositive = volumeStats.second.isNaN() || volumeStats.second >= 0,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                     }
                 }
             }
-        }
 
-        // --- SECCIÓN DE EVOLUCIÓN MENSUAL ---
-        if (showEvolution) {
-            item {
-                Box(Modifier.padding(horizontal = 16.dp)) {
+            // --- BLOQUE DE EVOLUCIÓN (GRÁFICA DE BARRAS) ---
+            if (showEvolution) {
+                item {
                     WeightEvolutionSection(monthlyData = monthlyData)
                 }
             }
-        }
 
-        // --- ANALÍTICAS (CABECERA Y LISTADO) ---
-        if (showAnalytics) {
-            item {
-                Box(Modifier.padding(horizontal = 16.dp)) {
+            // --- SECCIÓN DE ANALÍTICAS ---
+            if (showAnalytics) {
+                item {
                     ExerciseAnalyticsHeader(
                         searchQuery = viewModel.searchQuery,
                         onSearchChange = { viewModel.searchQuery = it }
                     )
                 }
-            }
 
-            items(filteredList) { exercise ->
-                Box(Modifier.padding(horizontal = 16.dp)) {
+                // Usamos un espaciado menor entre las filas de ejercicios (8.dp)
+                items(filteredList) { exercise ->
                     ExerciseStatRow(
                         exercise = exercise,
                         onClick = { onNavigateToExerciseDetail(exercise.id) }
                     )
                 }
             }
-        }
 
-        // ESPACIADO FINAL
-        item { Spacer(Modifier.height(80.dp)) }
+            item { Spacer(Modifier.height(32.dp)) }
+        }
     }
 }

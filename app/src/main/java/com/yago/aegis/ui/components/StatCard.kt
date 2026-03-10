@@ -1,17 +1,16 @@
 package com.yago.aegis.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -33,64 +32,67 @@ fun StatCard(
     showProgress: Boolean = false,
     progress: Float = 0f
 ) {
-    Card(
-        modifier = modifier.height(140.dp),
-        // Usamos surfaceVariant (0E0E0E) para que contraste con el fondo (050505)
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        ),
-        shape = RoundedCornerShape(12.dp) // Redondeado más técnico, menos circular
+    // Usamos Surface para el borde técnico y el fondo unificado
+    Surface(
+        modifier = modifier.height(130.dp), // Un poco más compacta y agresiva
+        color = MaterialTheme.colorScheme.surfaceVariant, // 30%: SurfaceDark
+        shape = RoundedCornerShape(8.dp), // Esquinas unificadas (8.dp)
+        border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f) // Borde acero sutil
+        )
     ) {
         Column(
             modifier = Modifier
-                .padding(16.dp)
+                .padding(14.dp)
                 .fillMaxSize()
         ) {
-            // TÍTULO: Estilo etiqueta técnica
+            // ETIQUETA: AegisSteel (Gris técnico)
             Text(
                 text = title.uppercase(),
-                color = MaterialTheme.colorScheme.secondary, // AegisSteel
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.5.sp
-                )
+                color = MaterialTheme.colorScheme.secondary,
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 1.5.sp
             )
 
             Spacer(Modifier.weight(1f))
 
-            // VALOR PRINCIPAL: Grande y contundente
+            // VALOR PRINCIPAL: Contundente con kerning negativo
             Text(
-                text = mainValue,
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = (-1).sp // Un poco más apretado para look "racing"
-                )
+                text = mainValue.uppercase(),
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = (-0.8).sp
             )
 
-            // SUBVALOR: Dinámico (Verde si es positivo, Acero si es neutro)
-            Text(
-                text = subValue,
-                color = if (isPositive && subValue.contains("+"))
-                    Color(0xFF4CAF50)
-                else
-                    MaterialTheme.colorScheme.secondary,
-                style = MaterialTheme.typography.bodySmall.copy(
+            // SUBVALOR / TENDENCIA
+            if (subValue.isNotEmpty()) {
+                Text(
+                    text = subValue.uppercase(),
+                    color = if (isPositive && subValue.contains("+"))
+                        Color(0xFF81C784) // Un verde más técnico/pastel que no rompa el estilo
+                    else
+                        MaterialTheme.colorScheme.secondary.copy(alpha = 0.7f),
+                    fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
-                    fontStyle = FontStyle.Italic
+                    fontStyle = FontStyle.Italic,
+                    letterSpacing = 0.5.sp
                 )
-            )
+            }
 
+            // BARRA DE CARGA AEGIS
             if (showProgress) {
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(10.dp))
                 LinearProgressIndicator(
                     progress = { progress },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(4.dp)
-                        .clip(CircleShape),
+                        .height(3.dp) // Más fina, más técnica
+                        .clip(RoundedCornerShape(2.dp)),
                     color = MaterialTheme.colorScheme.primary, // AegisBronze
-                    trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
                     strokeCap = StrokeCap.Round
                 )
             }

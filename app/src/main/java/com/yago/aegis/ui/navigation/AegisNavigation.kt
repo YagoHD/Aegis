@@ -17,11 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.yago.aegis.data.Screen
+import androidx.navigation.navArgument
 import com.yago.aegis.data.SettingsStore
 import com.yago.aegis.ui.components.AegisBottomBar
 import com.yago.aegis.ui.components.SettingsMenu
@@ -126,11 +127,15 @@ fun AegisNavigation(
             // 📅 PANTALLA DE DISCIPLINA SEMANAL
 
             composable("stats") {
-                // 2. Pásale el sharedStatsViewModel a la pantalla principal
                 StatsScreen(
-                    viewModel = sharedStatsViewModel, // <-- CAMBIO AQUÍ
-                    onNavigateToSettings = { navController.navigate("stats_settings") },
-                    onNavigateToExerciseDetail = { /* ... */ }
+                    viewModel = sharedStatsViewModel,
+                    onNavigateToSettings = {
+                        navController.navigate("stats_settings")
+                    },
+                    onNavigateToExerciseDetail = { exerciseId ->
+                        // ✅ Ahora sí, navegamos pasando el ID
+                        navController.navigate("exercise_detail/$exerciseId")
+                    }
                 )
             }
 
@@ -176,7 +181,17 @@ fun AegisNavigation(
                     }
                 )
             }
-
+            composable(
+                route = "exercise_detail/{exerciseId}",
+                arguments = listOf(navArgument("exerciseId") { type = NavType.LongType })
+            ) { backStackEntry ->
+                val exerciseId = backStackEntry.arguments?.getLong("exerciseId") ?: -1L
+                ExerciseDetailScreen(
+                    exerciseId = exerciseId,
+                    viewModel = sharedStatsViewModel, // Usamos el mismo para tener los datos
+                    onBack = { navController.popBackStack() }
+                )
+            }
             // ⚙️ PANTALLA DE AJUSTES
             composable(
                 route = "settings",

@@ -1,6 +1,10 @@
 package com.yago.aegis.ui.components
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,7 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -20,9 +23,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,77 +34,87 @@ fun ExerciseStatRow(
     exercise: Exercise,
     onClick: () -> Unit
 ) {
-    Column(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(horizontal = 4.dp) // Un pequeño margen interno para no pegar al borde
+            .padding(vertical = 4.dp) // Espaciado entre tarjetas igual que en tus listas
+            .clickable { onClick() },
+        shape = RoundedCornerShape(8.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant, // 30%: SurfaceDark/Variant
+        border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f) // El mismo acero sutil
+        )
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 12.dp)
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // CONTENEDOR DEL ICONO: Usamos surfaceVariant (el gris oscuro técnico)
-            Surface(
-                modifier = Modifier.size(44.dp),
-                shape = RoundedCornerShape(8.dp), // Menos redondeado para look más agresivo
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                border = null // Mantenerlo limpio
+            // 1. ICONO DINÁMICO (Con el mismo recuadro que tu ExerciseCard)
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.background,
+                        shape = RoundedCornerShape(4.dp)
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(4.dp)
+                    ),
+                contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = getExerciseIcon(exercise.iconName),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary, // AegisBronze
-                    modifier = Modifier.padding(10.dp)
+                    modifier = Modifier.size(22.dp)
                 )
             }
 
-            Spacer(Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(16.dp))
 
+            // 2. TEXTO E INFORMACIÓN (Mismo estilo de jerarquía)
             Column(modifier = Modifier.weight(1f)) {
-                // NOMBRE: Black Italic (Sello de la casa)
                 Text(
                     text = exercise.name.uppercase(),
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontStyle = FontStyle.Italic,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 0.5.sp,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 13.sp, // Alineado con tu ExerciseCard
+                    letterSpacing = 0.5.sp
                 )
-
-                Spacer(Modifier.height(2.dp))
-
-                // STATS: Mezclamos Gris Acero con un toque de Bronce en el PR
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = exercise.muscleGroup.uppercase(),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            color = MaterialTheme.colorScheme.secondary, // AegisSteel
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.sp
-                        )
-                    )
-
-                    Text(
-                        text = "  •  ",
-                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
-                    )
-
-                    Text(
-                        text = "PR: ${exercise.oneRepMax} KG",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f), // Toque de bronce
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 0.5.sp
-                        )
-                    )
-                }
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = "${exercise.type} • ${exercise.muscleGroup}".uppercase(),
+                    color = MaterialTheme.colorScheme.secondary, // AegisSteel
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
             }
 
-            // INDICADOR DE ACCIÓN
+            // 3. SECCIÓN DE DATOS (En lugar de iconos, mostramos el PR)
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = "PR RECORD",
+                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f),
+                    fontSize = 8.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
+                Text(
+                    text = "${exercise.oneRepMax.toInt()} KG",
+                    color = MaterialTheme.colorScheme.primary, // Resaltado en Bronce
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = (-0.5).sp
+                )
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // INDICADOR DE ENTRADA
             Icon(
                 imageVector = Icons.Default.ChevronRight,
                 contentDescription = null,
@@ -112,12 +122,5 @@ fun ExerciseStatRow(
                 modifier = Modifier.size(18.dp)
             )
         }
-
-        // SEPARADOR AEGIS: Muy sutil, usando el color de los bordes del sistema
-        HorizontalDivider(
-            modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
-            thickness = 1.dp
-        )
     }
 }

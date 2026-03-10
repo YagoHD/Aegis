@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,20 +29,18 @@ fun ExerciseAnalyticsHeader(
     onSearchChange: (String) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        // Título de sección: Usamos el Bronce Aegis y espaciado de letras "Elite"
+        // ETIQUETA SUPERIOR: Estilo técnico (AegisSteel)
         Text(
             text = "ANÁLISIS DE RENDIMIENTO",
-            color = MaterialTheme.colorScheme.primary, // AegisBronze
-            style = MaterialTheme.typography.labelLarge.copy(
-                fontWeight = FontWeight.Black,
-                letterSpacing = 2.sp,
-                fontSize = 11.sp
-            )
+            color = MaterialTheme.colorScheme.secondary, // Cambiado a Steel para dejar el Bronze al buscador
+            fontSize = 9.sp,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 1.5.sp
         )
 
         Spacer(Modifier.height(12.dp))
 
-        // --- BUSCADOR ESTILO AEGIS ---
+        // --- BUSCADOR ESTILO AEGIS (Unificado con BiometricCard) ---
         OutlinedTextField(
             value = searchQuery,
             onValueChange = onSearchChange,
@@ -49,16 +48,20 @@ fun ExerciseAnalyticsHeader(
             placeholder = {
                 Text(
                     "FILTRAR EJERCICIOS...",
-                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f),
+                    style = TextStyle(
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp
+                    )
                 )
             },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                    modifier = Modifier.size(20.dp)
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                    modifier = Modifier.size(18.dp)
                 )
             },
             trailingIcon = {
@@ -67,28 +70,30 @@ fun ExerciseAnalyticsHeader(
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.secondary
+                            tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f),
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
             },
-            shape = RoundedCornerShape(8.dp), // Menos redondeado para un look más serio
+            shape = RoundedCornerShape(8.dp), // Esquinas unificadas (8.dp)
             singleLine = true,
-            textStyle = MaterialTheme.typography.bodyLarge.copy(
-                color = Color.White,
-                fontWeight = FontWeight.Bold
+            textStyle = TextStyle(
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = (-0.2).sp
             ),
             colors = OutlinedTextFieldDefaults.colors(
-                // Usamos las capas de superficie de tu tema
+                // FONDO: SurfaceVariant (Gris oscuro técnico)
                 focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                 unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
 
-                // Bordes: Solo se ilumina el bronce cuando el usuario escribe
+                // BORDES: Unificados con el 0.15f de la ExerciseCard
                 focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-                unfocusedBorderColor = Color.Transparent,
+                unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f),
 
                 cursorColor = MaterialTheme.colorScheme.primary,
-
                 focusedTextColor = Color.White,
                 unfocusedTextColor = Color.White
             )

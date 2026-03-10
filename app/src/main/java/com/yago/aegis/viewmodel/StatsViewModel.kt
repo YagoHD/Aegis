@@ -38,7 +38,12 @@ class StatsViewModel(private val settingsStore: SettingsStore) : ViewModel() {
     val showEvolutionGraph = settingsStore.showEvolutionGraph
     val showAnalyticsList = settingsStore.showAnalyticsList
     val targetDaysPerWeek = settingsStore.targetDaysPerWeek
-
+    val allExercises: StateFlow<List<Exercise>> = settingsStore.exerciseLibrary
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
     // El historial completo desde DataStore
     val workoutHistory: StateFlow<List<WorkoutSession>> = settingsStore.workoutHistory
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -83,13 +88,27 @@ class StatsViewModel(private val settingsStore: SettingsStore) : ViewModel() {
     // LISTA FILTRADA: Se actualiza automáticamente cuando cambia la búsqueda o el grupo
     val filteredExercises: Flow<List<Exercise>> = combine(
         exerciseLibrary,
+        workoutHistory, // Ahora también escuchamos los cambios en el historial
         snapshotFlow { searchQuery },
         snapshotFlow { selectedMuscleGroup }
-    ) { library, query, group ->
+    ) { library, history, query, group ->
         library.filter { exercise ->
+            // 1. Filtrado por búsqueda y grupo
             val matchesQuery = exercise.name.contains(query, ignoreCase = true)
             val matchesGroup = group == "ALL" || exercise.muscleGroup.uppercase() == group.uppercase()
             matchesQuery && matchesGroup
+        }.map { exercise ->
+            // 2. CÁLCULO DEL PR REAL PARA CADA EJERCICIO
+            // Buscamos en todo el historial el peso máximo levantado para ESTE ejercicio
+            val maxWeightInHistory = history
+                .flatMap { session -> session.exercisesProgress }
+                .filter { it.exercise.id == exercise.id }
+                .flatMap { it.sets }
+                .filter { it.isCompleted } // Solo contamos los que terminaste
+                .maxOfOrNull { it.weight } ?: exercise.oneRepMax
+
+            // Devolvemos una copia del ejercicio con el PR actualizado "al vuelo"
+            exercise.copy(oneRepMax = maxWeightInHistory)
         }
     }
 
@@ -137,4 +156,16 @@ class StatsViewModel(private val settingsStore: SettingsStore) : ViewModel() {
         viewModelScope.launch { settingsStore.toggleStatSection("analytics", enabled) }
     }
 
+    fun getExerciseHistory(exerciseId: Long): Flow<List<WorkoutSession>> {
+        return workoutHistory.map { history ->
+            // 1. Filtramos la lista global de sesiones (history)
+            history.filter { session ->
+                // 2. Miramos dentro de 'exercisesProgress' de cada sesión
+                session.exercisesProgress.any { progress ->
+                    // 3. Comprobamos si el ID del ejercicio coincide
+                    progress.exercise.id == exerciseId
+                }
+            }
+        }
+    }
 }
