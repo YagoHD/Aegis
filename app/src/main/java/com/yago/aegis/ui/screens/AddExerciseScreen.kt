@@ -157,17 +157,23 @@ fun AddExerciseScreen(
                 Button(
                     onClick = {
                         if (exerciseName.isNotBlank()) {
-                            val primaryTag = selectedTags.firstOrNull() ?: "GENERAL"
+                            // Si no hay tags, dejamos la lista vacía y los grupos como "PENDIENTE" o el nombre del ejercicio
+                            val hasTags = selectedTags.isNotEmpty()
+
                             val newExercise = Exercise(
-                                name = exerciseName,
-                                type = primaryTag,
-                                muscleGroup = primaryTag,
-                                tags = selectedTags.toList(),
+                                // id = System.currentTimeMillis(), // Asegúrate de generar un ID si el modelo lo requiere
+                                name = exerciseName.trim().uppercase(),
+                                type = if (hasTags) selectedTags.first() else "",
+                                muscleGroup = if (hasTags) selectedTags.first() else " ",
+                                tags = selectedTags.toList(), // Si está vacía, se guarda vacía []
                                 iconName = selectedIconName,
                                 notes = ""
                             )
+
                             routinesViewModel.saveOrUpdateExercise(newExercise)
                             routinesViewModel.addExerciseToTemp(newExercise)
+
+                            // Reset de campos
                             exerciseName = ""
                             selectedTags.clear()
                             selectedIconName = "dumbbell"
@@ -181,7 +187,7 @@ fun AddExerciseScreen(
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
-                        "CREATE & ADD TO ROUTINE",
+                        "CREAR Y AÑADIR A LA RUTINA",
                         fontWeight = FontWeight.Black,
                         fontSize = 13.sp
                     )
