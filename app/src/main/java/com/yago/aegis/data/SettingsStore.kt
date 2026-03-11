@@ -75,7 +75,7 @@ class SettingsStore(private val context: Context) {
     }
     val globalTags: Flow<List<String>> = context.dataStore.data.map { prefs ->
         val json = prefs[GLOBAL_TAGS_KEY] ?: ""
-        if (json.isEmpty()) listOf("COMPOUND", "ISOLATION", "CHEST", "LEGS")
+        if (json.isEmpty()) listOf("PULL", "PUSH", "LEGS")
         else {
             val type = object : TypeToken<List<String>>() {}.type
             gson.fromJson(json, type)

@@ -42,7 +42,7 @@ fun SessionProgressHeader(session: WorkoutSession) {
             verticalAlignment = Alignment.Bottom
         ) {
             Text(
-                text = "PROGRESS STATUS",
+                text = "PROGRESO",
                 color = MaterialTheme.colorScheme.secondary,
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Black,

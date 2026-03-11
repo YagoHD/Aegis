@@ -170,7 +170,12 @@ fun ActiveSessionScreen(
                 item {
                     Button(
                         onClick = {
-                            // --- LÓGICA DE DETECCIÓN ANTES DE FINALIZAR ---
+                            // 1. Detectar si hay al menos una serie con peso o reps (Sesión con datos)
+                            val hasAnyData = session.exercisesProgress.any { progress ->
+                                progress.sets.any { it.weight > 0 || it.reps > 0 }
+                            }
+
+                            // 2. Tu lógica original de detección de olvidados
                             val uncompletedWithData = session.exercisesProgress.filter { progress ->
                                 val hasData = progress.sets.any { it.weight > 0 || it.reps > 0 }
                                 val isNotChecked = !progress.sets.all { it.isCompleted }
@@ -180,8 +185,15 @@ fun ActiveSessionScreen(
                             if (uncompletedWithData.isNotEmpty()) {
                                 exercisesToAutoCheck = uncompletedWithData
                             } else {
-                                workoutViewModel.finishWorkout(routinesViewModel) {
-                                    profileViewModel.incrementDisciplineDay()
+                                // 3. FINALIZACIÓN REAL
+                                if (hasAnyData) {
+                                    // Si hay datos, finalizamos sumando disciplina
+                                    workoutViewModel.finishWorkout(routinesViewModel) {
+                                        profileViewModel.incrementDisciplineDay()
+                                        onFinishWorkout()
+                                    }
+                                } else {
+                                    // Si está totalmente vacía, salimos sin sumar nada
                                     onFinishWorkout()
                                 }
                             }
