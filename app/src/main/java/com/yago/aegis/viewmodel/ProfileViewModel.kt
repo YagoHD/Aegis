@@ -9,6 +9,8 @@ import com.yago.aegis.data.BodyMeasure
 import com.yago.aegis.data.PhotoType
 import com.yago.aegis.data.UserProfile
 import com.yago.aegis.data.UserRepository
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -109,9 +111,17 @@ class ProfileViewModel(val repository: UserRepository) : ViewModel() {
 
     // --- FUNCIONES DE ACTUALIZACIÓN (ESCRITURA EN DISCO) ---
 
+    private var searchJob: Job? = null
+
     fun updateName(newName: String) {
-        val validated = if (newName.isBlank()) "Guerrero Aegis" else newName
-        viewModelScope.launch { repository.updateName(validated) }
+        // 1. Cancelamos el guardado anterior si el usuario sigue escribiendo
+        searchJob?.cancel()
+
+        // 2. Lanzamos un nuevo proceso con un pequeño retraso
+        searchJob = viewModelScope.launch {
+            delay(300) // Espera 300ms de calma antes de tocar el disco
+            repository.updateName(newName)
+        }
     }
 
     fun updateMass(newMass: String) {

@@ -38,7 +38,7 @@ fun SettingsMenu(viewModel: ProfileViewModel) {
     val user = viewModel.user
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
-
+    var tempName by remember(user.name) { mutableStateOf(user.name) }
     var tempHeight by remember(user.height) { mutableStateOf(user.height.toString()) }
 
     val context = LocalContext.current
@@ -96,8 +96,11 @@ fun SettingsMenu(viewModel: ProfileViewModel) {
             // Usamos tu AegisTextField
             AegisTextField(
                 label = "NOMBRE",
-                value = user.name,
-                onValueChange = { viewModel.updateName(it) },
+                value = tempName,
+                onValueChange = { newValue ->
+                    tempName = newValue // Actualización instantánea en UI
+                    viewModel.updateName(newValue) // El ViewModel lo procesa en paralelo
+                },
                 placeholder = "Introduce tu nombre...",
                 modifier = Modifier.weight(1f)
             )
