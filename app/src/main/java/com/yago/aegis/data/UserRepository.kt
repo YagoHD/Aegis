@@ -72,4 +72,12 @@ class UserRepository(private val settingsStore: SettingsStore) {
     suspend fun updateOnboardingCompleted(completed: Boolean) {
         settingsStore.saveOnboardingCompleted(completed)
     }
+    suspend fun updateRoutine(updatedRoutine: Routine) {
+        val currentRoutines = routines.first().toMutableList()
+        val index = currentRoutines.indexOfFirst { it.id == updatedRoutine.id }
+        if (index != -1) {
+            currentRoutines[index] = updatedRoutine
+            updateRoutines(currentRoutines) // Esta es la que escribe en el DataStore
+        }
+    }
 }

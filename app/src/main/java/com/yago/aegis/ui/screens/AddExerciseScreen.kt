@@ -35,8 +35,8 @@ import com.yago.aegis.viewmodel.RoutinesViewModel
 @Composable
 fun AddExerciseScreen(
     routinesViewModel: RoutinesViewModel,
+    routineId: Int,
     onNavigateBack: () -> Unit,
-    onExerciseCreated: (Exercise) -> Unit
 ) {
     val savedGlobalTags by routinesViewModel.globalTags.collectAsState()
     val libraryExercises by routinesViewModel.allExercises.collectAsState(initial = emptyList())
@@ -243,17 +243,21 @@ fun AddExerciseScreen(
 
             // LISTA DE LIBRERÍA
             items(filteredExercises) { exercise ->
+                // Comprobamos si ya está en la rutina (usando tempExercises del VM)
                 val isAlreadyInRoutine = routinesViewModel.tempExercises.any { it.id == exercise.id }
 
                 ExerciseCard(
                     exercise = exercise,
                     isAddMode = true,
                     onEdit = {
-                        if (!isAlreadyInRoutine) {
+                        // 2. USAMOS EL ID QUE AHORA SÍ EXISTE
+                        if (routineId != -1) {
+                            routinesViewModel.addExerciseToRoutineDirectly(routineId, exercise)
+                        } else {
                             routinesViewModel.addExerciseToTemp(exercise)
                         }
                     },
-                    onDelete = {},
+                    onDelete = { /* No hace nada en esta pantalla */ }, // 3. SOLUCIÓN AL ERROR DE PARÁMETRO
                     modifier = Modifier.alpha(if (isAlreadyInRoutine) 0.4f else 1f)
                 )
             }

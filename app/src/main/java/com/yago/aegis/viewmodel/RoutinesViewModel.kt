@@ -238,4 +238,22 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
             throw IllegalArgumentException("Unknown ViewModel class")
         }
     }
+    fun addExerciseToRoutineDirectly(routineId: Int, exercise: Exercise) {
+        viewModelScope.launch {
+            // 1. Buscamos la rutina actual
+            val routine = routines.find { it.id == routineId } ?: return@launch
+
+            // 2. Creamos la nueva lista de ejercicios sumando el nuevo
+            val updatedExercises = routine.exercises.toMutableList().apply {
+                add(exercise)
+            }
+
+            // 3. Actualizamos la rutina real en el repositorio/DataStore inmediatamente
+            val updatedRoutine = routine.copy(exercises = updatedExercises)
+            repository.updateRoutine(updatedRoutine)
+
+            // 4. Sincronizamos la lista temporal para que la UI se refresque
+            setTempExercises(updatedExercises)
+        }
+    }
 }

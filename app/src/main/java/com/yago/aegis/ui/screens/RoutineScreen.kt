@@ -139,7 +139,7 @@ fun RoutineScreen(
                 routineToDelete = null
             },
             onDismiss = { routineToDelete = null },
-            confirmButtonColor = MaterialTheme.colorScheme.error // Rojo táctico
+            confirmButtonColor = Color(0xFFB3261E)
         ) {
             Text(
                 text = "¿Estás seguro de que quieres eliminar '${routineToDelete?.name}'? Se perderán todos los ejercicios asignados.",

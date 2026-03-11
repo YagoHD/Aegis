@@ -223,11 +223,17 @@ fun AegisNavigation(
             }
 
             // ➕ PANTALLA DE AÑADIR EJERCICIO A RUTINA
-            composable(route = "add_exercise") {
+            composable(
+                route = "add_exercise/{routineId}",
+                arguments = listOf(navArgument("routineId") { type = NavType.IntType }) // Especificamos que es Int
+            ) { backStackEntry ->
+                // Extraemos el Int directamente
+                val id = backStackEntry.arguments?.getInt("routineId") ?: -1
+
                 AddExerciseScreen(
                     routinesViewModel = routinesViewModel,
+                    routineId = id,
                     onNavigateBack = { navController.popBackStack() },
-                    onExerciseCreated = { /* Lógica de retorno */ }
                 )
             }
 
