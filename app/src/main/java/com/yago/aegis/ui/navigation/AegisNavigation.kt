@@ -68,7 +68,8 @@ fun AegisNavigation(
             !onboardingRoutes.contains(currentRoute) &&
             !authRoutes.contains(currentRoute) &&
             !isSessionActive &&
-            currentRoute != "workout_settings"
+            currentRoute != "workout_settings" &&
+            currentRoute != "workout_complete"
 
     Scaffold(
         bottomBar = { if (showBottomBar) AegisBottomBar(navController) }
@@ -242,9 +243,46 @@ fun AegisNavigation(
                     workoutViewModel = workoutViewModel,
                     routinesViewModel = routinesViewModel,
                     profileViewModel = profileViewModel,
-                    onFinishWorkout = { navController.popBackStack() },
+                    onFinishWorkout = {
+                        navController.navigate("workout_complete") {
+                            popUpTo("active_session/{routineId}") { inclusive = true }
+                        }
+                    },
                     onNavigateToSettings = { navController.navigate("workout_settings") }
                 )
+            }
+
+            composable("workout_complete") {
+                val summary = workoutViewModel.workoutSummary.collectAsState().value
+                val allHistory by sharedStatsViewModel.workoutHistory.collectAsState()
+
+                if (summary != null) {
+                    // Buscar el volumen de la penúltima sesión con el mismo nombre de rutina
+                    val previousVolume = allHistory
+                        .filter { it.routineName == summary.routineName }
+                        .dropLast(1) // Quitar la sesión que acabamos de guardar
+                        .lastOrNull()
+                        ?.exercisesProgress
+                        ?.sumOf { prog -> prog.sets.filter { it.isCompleted }.sumOf { it.weight * it.reps } }
+                        ?: 0.0
+
+                    WorkoutCompleteScreen(
+                        summary = summary,
+                        previousVolume = previousVolume,
+                        onFinish = {
+                            workoutViewModel.clearSummary()
+                            navController.navigate("profile") {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
+                    )
+                } else {
+                    LaunchedEffect(Unit) {
+                        navController.navigate("profile") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                }
             }
 
             composable("workout_settings") {

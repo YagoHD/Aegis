@@ -6,8 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.yago.aegis.data.ExerciseProgress
 import com.yago.aegis.data.ExerciseSet
 import com.yago.aegis.data.Routine
+import com.yago.aegis.data.ExerciseSummary
 import com.yago.aegis.data.UserRepository
 import com.yago.aegis.data.WorkoutSession
+import com.yago.aegis.data.WorkoutSummary
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,6 +25,15 @@ class WorkoutViewModel(private val repository: UserRepository) : ViewModel() {
 
     private val _activeSession = MutableStateFlow<WorkoutSession?>(null)
     val activeSession: StateFlow<WorkoutSession?> = _activeSession.asStateFlow()
+
+    // Tiempo de inicio para calcular duración
+    private var sessionStartTime: Long = 0L
+
+    // Resumen post-entrenamiento
+    private val _workoutSummary = MutableStateFlow<WorkoutSummary?>(null)
+    val workoutSummary: StateFlow<WorkoutSummary?> = _workoutSummary.asStateFlow()
+
+    fun clearSummary() { _workoutSummary.value = null }
 
     private val _uncompletedWithData = MutableStateFlow<List<ExerciseProgress>>(emptyList())
     val uncompletedWithData: StateFlow<List<ExerciseProgress>> = _uncompletedWithData.asStateFlow()
@@ -100,6 +111,7 @@ class WorkoutViewModel(private val repository: UserRepository) : ViewModel() {
     // ─────────────────────────────────────────────
 
     fun startWorkout(routine: Routine) {
+        sessionStartTime = System.currentTimeMillis()
         val progress = routine.exercises.map { exercise ->
             ExerciseProgress(exercise = exercise, sets = listOf(ExerciseSet()))
         }
@@ -190,6 +202,36 @@ class WorkoutViewModel(private val repository: UserRepository) : ViewModel() {
                     }
                 }
             }
+            // Calcular resumen post-entrenamiento
+            val durationMs = System.currentTimeMillis() - sessionStartTime
+            val totalVolume = session.exercisesProgress.sumOf { prog ->
+                prog.sets.filter { it.isCompleted }.sumOf { it.weight * it.reps }
+            }
+            val completedExercises = session.exercisesProgress.filter { prog ->
+                prog.sets.any { it.isCompleted }
+            }
+            val exerciseSummaries = completedExercises.map { prog ->
+                val completedSets = prog.sets.filter { it.isCompleted }
+                val avgWeight = if (completedSets.isNotEmpty()) completedSets.map { it.weight }.average() else 0.0
+                val maxWeight = completedSets.maxOfOrNull { it.weight } ?: 0.0
+                val isBodyweight = completedSets.all { it.weight == 0.0 }
+                val isNewPR = maxWeight > prog.exercise.oneRepMax && maxWeight > 0.0
+                ExerciseSummary(
+                    name = prog.exercise.name,
+                    sets = completedSets.size,
+                    avgWeight = avgWeight,
+                    maxWeight = maxWeight,
+                    isBodyweight = isBodyweight,
+                    isNewPR = isNewPR
+                )
+            }
+            _workoutSummary.value = WorkoutSummary(
+                routineName = session.routineName,
+                durationMs = durationMs,
+                totalVolume = totalVolume,
+                exerciseCount = completedExercises.size,
+                exercises = exerciseSummaries
+            )
             _activeSession.value = null
             onComplete()
         }

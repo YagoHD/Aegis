@@ -39,7 +39,6 @@ fun StatsScreen(
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Settings",
-                            tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.8f) // Acero sutil
                         )
                     }
                 }
