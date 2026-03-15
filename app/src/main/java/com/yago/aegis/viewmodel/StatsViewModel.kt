@@ -81,18 +81,24 @@ class StatsViewModel(private val repository: UserRepository) : ViewModel() {
 
     // Búsqueda y filtro de ejercicios (estado UI local al ViewModel)
     var searchQuery by mutableStateOf("")
-    var selectedMuscleGroup by mutableStateOf("ALL")
+    var selectedTag by mutableStateOf("ALL")
+
+    // Tags disponibles para el filtro en Stats
+    val availableStatsTags: StateFlow<List<String>> = allExercises.map { exercises ->
+        exercises.flatMap { it.tags }.map { it.uppercase() }.distinct().sorted()
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val filteredExercises: Flow<List<Exercise>> = combine(
         allExercises,
         workoutHistory,
         snapshotFlow { searchQuery },
-        snapshotFlow { selectedMuscleGroup }
-    ) { library, history, query, group ->
+        snapshotFlow { selectedTag }
+    ) { library, history, query, tag ->
         library.filter { exercise ->
             val matchesQuery = exercise.name.contains(query, ignoreCase = true)
-            val matchesGroup = group == "ALL" || exercise.muscleGroup.uppercase() == group.uppercase()
-            matchesQuery && matchesGroup
+            val matchesTag = tag == "ALL" || exercise.tags.any { it.uppercase() == tag.uppercase() }
+                || exercise.muscleGroup.uppercase() == tag.uppercase()
+            matchesQuery && matchesTag
         }.map { exercise ->
             val maxWeight = history
                 .flatMap { it.exercisesProgress }

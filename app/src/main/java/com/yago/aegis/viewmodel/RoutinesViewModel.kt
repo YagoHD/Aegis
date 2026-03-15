@@ -8,6 +8,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.yago.aegis.data.DefaultExercises
 import com.yago.aegis.data.Exercise
 import com.yago.aegis.data.Routine
 import com.yago.aegis.data.UserRepository
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -34,13 +36,28 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
 
     // Búsqueda en librería de ejercicios: movida aquí desde ExercisesLibraryScreen
     var librarySearchQuery by mutableStateOf("")
+    var selectedLibraryTag by mutableStateOf("ALL")
+
+    // Tags disponibles derivados de los ejercicios + tags globales
+    val availableLibraryTags: StateFlow<List<String>> = combine(
+        allExercises,
+        globalTags
+    ) { exercises, globals ->
+        val fromExercises = exercises.flatMap { it.tags }.map { it.uppercase() }
+        (globals.map { it.uppercase() } + fromExercises).distinct().sorted()
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val filteredLibraryExercises: StateFlow<List<Exercise>> = combine(
         allExercises,
-        snapshotFlow { librarySearchQuery }
-    ) { exercises, query ->
-        if (query.isBlank()) exercises
-        else exercises.filter { it.name.contains(query, ignoreCase = true) }
+        snapshotFlow { librarySearchQuery },
+        snapshotFlow { selectedLibraryTag }
+    ) { exercises, query, tag ->
+        exercises.filter { exercise ->
+            val matchesQuery = query.isBlank() || exercise.name.contains(query, ignoreCase = true)
+            val matchesTag = tag == "ALL" || exercise.tags.any { it.uppercase() == tag.uppercase() }
+                || exercise.muscleGroup.uppercase() == tag.uppercase()
+            matchesQuery && matchesTag
+        }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     init {
@@ -116,6 +133,30 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
     fun saveOrUpdateExercise(exercise: Exercise) {
         viewModelScope.launch {
             repository.upsertExercise(exercise.copy(name = exercise.name.uppercase()))
+        }
+    }
+
+    // True si hay al menos 1 ejercicio base en la librería
+    val hasDefaultExercises: StateFlow<Boolean> = allExercises.map { exercises ->
+        val defaultNames = DefaultExercises.getAll().map { it.name }.toSet()
+        exercises.any { it.name in defaultNames }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    fun loadDefaultExercises() {
+        viewModelScope.launch {
+            val current = allExercises.value
+            val currentNames = current.map { it.name }.toSet()
+            // Solo añade los que no existen ya (por si el usuario los borró y vuelve a importar)
+            val toAdd = DefaultExercises.getAll().filter { it.name !in currentNames }
+            toAdd.forEach { repository.upsertExercise(it) }
+        }
+    }
+
+    fun deleteDefaultExercises() {
+        viewModelScope.launch {
+            val defaultNames = DefaultExercises.getAll().map { it.name }.toSet()
+            val toDelete = allExercises.value.filter { it.name in defaultNames }
+            toDelete.forEach { repository.deleteExercise(it) }
         }
     }
 

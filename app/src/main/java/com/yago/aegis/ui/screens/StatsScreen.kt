@@ -27,6 +27,7 @@ fun StatsScreen(
     val weeklyStats by viewModel.weeklyDiscipline.collectAsState(initial = 0 to 5)
     val volumeStats by viewModel.weeklyVolumeStats.collectAsState(initial = 0.0 to 0.0)
     val filteredList by viewModel.filteredExercises.collectAsState(initial = emptyList())
+    val availableTags by viewModel.availableStatsTags.collectAsState(initial = emptyList())
     val monthlyData by viewModel.monthlyVolumeEvolution.collectAsState(initial = emptyList())
 
     // Usamos Scaffold para que la TopBar esté fija y el contenido haga scroll debajo
@@ -104,7 +105,10 @@ fun StatsScreen(
                 item {
                     ExerciseAnalyticsHeader(
                         searchQuery = viewModel.searchQuery,
-                        onSearchChange = { viewModel.searchQuery = it }
+                        onSearchChange = { viewModel.searchQuery = it },
+                        availableTags = availableTags,
+                        selectedTag = viewModel.selectedTag,
+                        onTagSelected = { viewModel.selectedTag = it }
                     )
                 }
 

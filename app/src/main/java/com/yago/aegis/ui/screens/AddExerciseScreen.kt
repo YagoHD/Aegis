@@ -26,6 +26,7 @@ import com.yago.aegis.R
 import com.yago.aegis.data.Exercise
 import com.yago.aegis.data.globalExerciseIcons
 import com.yago.aegis.ui.components.AegisAlertDialog
+import com.yago.aegis.ui.components.TagFilterRow
 import com.yago.aegis.ui.components.AegisTagManager
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.ExerciseCard
@@ -48,10 +49,19 @@ fun AddExerciseScreen(
     var showTagDialog by remember { mutableStateOf(false) }
     var newTagText by remember { mutableStateOf("") }
     var searchQuery by remember { mutableStateOf("") }
+    var selectedTag by remember { mutableStateOf("ALL") }
 
-    // Filtro de búsqueda
-    val filteredExercises = libraryExercises.filter {
-        it.name.contains(searchQuery, ignoreCase = true)
+    // Tags disponibles derivados de los ejercicios de la librería
+    val availableTags = remember(libraryExercises) {
+        libraryExercises.flatMap { it.tags }.map { it.uppercase() }.distinct().sorted()
+    }
+
+    // Filtro de búsqueda + tag
+    val filteredExercises = libraryExercises.filter { exercise ->
+        val matchesQuery = searchQuery.isBlank() || exercise.name.contains(searchQuery, ignoreCase = true)
+        val matchesTag = selectedTag == "ALL" || exercise.tags.any { it.uppercase() == selectedTag.uppercase() }
+            || exercise.muscleGroup.uppercase() == selectedTag.uppercase()
+        matchesQuery && matchesTag
     }
 
     // --- DIÁLOGO DE TAGS (ESTILO UNIFICADO) ---
@@ -239,6 +249,19 @@ fun AddExerciseScreen(
                     ),
                     shape = RoundedCornerShape(8.dp)
                 )
+            }
+
+            // FILTRO POR TAG
+            if (availableTags.isNotEmpty()) {
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    TagFilterRow(
+                        tags = availableTags,
+                        selectedTag = selectedTag,
+                        onTagSelected = { selectedTag = it }
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
             }
 
             // LISTA DE LIBRERÍA
