@@ -38,6 +38,12 @@ class UserRepository(
     val showEvolutionGraph = settingsStore.showEvolutionGraph
     val showAnalyticsList = settingsStore.showAnalyticsList
     val targetDaysPerWeek = settingsStore.targetDaysPerWeek
+    val restTimerSeconds = settingsStore.restTimerSeconds
+    val timerVibrate = settingsStore.timerVibrate
+    val timerSound = settingsStore.timerSound
+    val showRestTimer = settingsStore.showRestTimer
+    val timerPosX = settingsStore.timerPosX
+    val timerPosY = settingsStore.timerPosY
 
     fun getAllExercises(): Flow<List<Exercise>> = settingsStore.exerciseLibrary
 
@@ -143,8 +149,28 @@ class UserRepository(
         syncScope.launch { runCatching { firestore.appendWorkoutSession(session) } }
     }
 
+    suspend fun updateTimerVibrate(enabled: Boolean) {
+        settingsStore.saveTimerVibrate(enabled)
+        syncSettingsToCloud()
+    }
+    suspend fun updateTimerSound(enabled: Boolean) {
+        settingsStore.saveTimerSound(enabled)
+        syncSettingsToCloud()
+    }
+    suspend fun updateShowRestTimer(show: Boolean) {
+        settingsStore.saveShowRestTimer(show)
+        syncSettingsToCloud()
+    }
+    suspend fun updateTimerPosition(x: Float, y: Float) {
+        settingsStore.saveTimerPosition(x, y)
+        // La posición es preferencia local, no se sincroniza con la nube
+    }
     suspend fun updateTargetDays(days: Int) {
         settingsStore.updateTargetDays(days)
+        syncSettingsToCloud()
+    }
+    suspend fun updateRestTimerSeconds(seconds: Int) {
+        settingsStore.updateRestTimerSeconds(seconds)
         syncSettingsToCloud()
     }
 
@@ -261,3 +287,6 @@ class UserRepository(
         )
     }
 }
+
+// Extensiones para workout settings — añadidas al final del archivo
+// (las lecturas se exponen directamente desde settingsStore)

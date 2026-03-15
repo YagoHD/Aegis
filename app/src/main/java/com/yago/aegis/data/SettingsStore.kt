@@ -3,6 +3,7 @@ package com.yago.aegis.data
 import android.content.Context
 import androidx.datastore.dataStore
 import androidx.datastore.preferences.core.*
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -41,6 +42,12 @@ class SettingsStore(private val context: Context) {
         private val SHOW_EVOLUTION_GRAPH = booleanPreferencesKey("show_evolution_graph")
         private val SHOW_ANALYTICS_LIST = booleanPreferencesKey("show_analytics_list")
         private val TARGET_DAYS_PER_WEEK = intPreferencesKey("target_days_per_week")
+        private val REST_TIMER_SECONDS = intPreferencesKey("rest_timer_seconds")
+        private val TIMER_VIBRATE = booleanPreferencesKey("timer_vibrate")
+        private val TIMER_SOUND = booleanPreferencesKey("timer_sound")
+        private val SHOW_REST_TIMER = booleanPreferencesKey("show_rest_timer")
+        private val TIMER_POS_X = floatPreferencesKey("timer_pos_x")
+        private val TIMER_POS_Y = floatPreferencesKey("timer_pos_y")
     }
 
     // --- LECTURA (READ) ---
@@ -96,6 +103,13 @@ class SettingsStore(private val context: Context) {
     val showEvolutionGraph: Flow<Boolean> = context.dataStore.data.map { it[SHOW_EVOLUTION_GRAPH] ?: true }
     val showAnalyticsList: Flow<Boolean> = context.dataStore.data.map { it[SHOW_ANALYTICS_LIST] ?: true }
     val targetDaysPerWeek: Flow<Int> = context.dataStore.data.map { it[TARGET_DAYS_PER_WEEK] ?: 5 }
+    val restTimerSeconds: Flow<Int> = context.dataStore.data.map { it[REST_TIMER_SECONDS] ?: 90 }
+    val timerVibrate: Flow<Boolean> = context.dataStore.data.map { it[TIMER_VIBRATE] ?: true }
+    val timerSound: Flow<Boolean> = context.dataStore.data.map { it[TIMER_SOUND] ?: true }
+    val showRestTimer: Flow<Boolean> = context.dataStore.data.map { it[SHOW_REST_TIMER] ?: true }
+    // -1f significa "usar posición por defecto (esquina inferior derecha)"
+    val timerPosX: Flow<Float> = context.dataStore.data.map { it[TIMER_POS_X] ?: -1f }
+    val timerPosY: Flow<Float> = context.dataStore.data.map { it[TIMER_POS_Y] ?: -1f }
     // --- ESCRITURA (WRITE) ---
     suspend fun saveName(name: String) {
         context.dataStore.edit { it[USER_NAME] = name }
@@ -207,6 +221,24 @@ class SettingsStore(private val context: Context) {
 
     suspend fun updateTargetDays(days: Int) {
         context.dataStore.edit { it[TARGET_DAYS_PER_WEEK] = days }
+    }
+    suspend fun saveTimerVibrate(enabled: Boolean) {
+        context.dataStore.edit { it[TIMER_VIBRATE] = enabled }
+    }
+    suspend fun saveTimerSound(enabled: Boolean) {
+        context.dataStore.edit { it[TIMER_SOUND] = enabled }
+    }
+    suspend fun saveShowRestTimer(show: Boolean) {
+        context.dataStore.edit { it[SHOW_REST_TIMER] = show }
+    }
+    suspend fun saveTimerPosition(x: Float, y: Float) {
+        context.dataStore.edit {
+            it[TIMER_POS_X] = x
+            it[TIMER_POS_Y] = y
+        }
+    }
+    suspend fun updateRestTimerSeconds(seconds: Int) {
+        context.dataStore.edit { it[REST_TIMER_SECONDS] = seconds }
     }
     suspend fun toggleStatSection(keyName: String, isEnabled: Boolean) {
         val key = when(keyName) {

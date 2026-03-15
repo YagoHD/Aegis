@@ -43,13 +43,104 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    var showForgotDialog by remember { mutableStateOf(false) }
+    var forgotEmail by remember { mutableStateOf("") }
 
-    // Navegar al éxito
     LaunchedEffect(uiState.isSuccess) {
         if (uiState.isSuccess) onLoginSuccess()
     }
 
-    // Launcher para Google Sign-In
+    // Diálogo de recuperar contraseña
+    if (showForgotDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showForgotDialog = false
+                forgotEmail = ""
+                authViewModel.clearState()
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+            title = {
+                Text(
+                    "RECUPERAR CONTRASEÑA",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.sp
+                )
+            },
+            text = {
+                Column {
+                    if (uiState.successMessage != null) {
+                        Text(
+                            uiState.successMessage!!,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    } else {
+                        Text(
+                            "Introduce tu correo y te enviaremos un enlace para restablecer tu contraseña.",
+                            color = MaterialTheme.colorScheme.secondary,
+                            fontSize = 13.sp,
+                            lineHeight = 18.sp
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        OutlinedTextField(
+                            value = forgotEmail,
+                            onValueChange = { forgotEmail = it },
+                            label = { Text("EMAIL") },
+                            leadingIcon = { Icon(Icons.Default.Email, null, tint = MaterialTheme.colorScheme.secondary) },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(8.dp),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                            singleLine = true,
+                            colors = authTextFieldColors()
+                        )
+                        if (uiState.errorMessage != null) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(uiState.errorMessage!!, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                if (uiState.successMessage != null) {
+                    TextButton(onClick = {
+                        showForgotDialog = false
+                        forgotEmail = ""
+                        authViewModel.clearState()
+                    }) {
+                        Text("CERRAR", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black)
+                    }
+                } else {
+                    TextButton(
+                        onClick = {
+                            if (forgotEmail.isNotBlank()) authViewModel.sendPasswordReset(forgotEmail)
+                        },
+                        enabled = !uiState.isLoading
+                    ) {
+                        if (uiState.isLoading) {
+                            CircularProgressIndicator(modifier = Modifier.size(16.dp), color = MaterialTheme.colorScheme.primary, strokeWidth = 2.dp)
+                        } else {
+                            Text("ENVIAR EMAIL", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black)
+                        }
+                    }
+                }
+            },
+            dismissButton = {
+                if (uiState.successMessage == null) {
+                    TextButton(onClick = {
+                        showForgotDialog = false
+                        forgotEmail = ""
+                        authViewModel.clearState()
+                    }) {
+                        Text("CANCELAR", color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        )
+    }
+
     val googleLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -58,9 +149,7 @@ fun LoginScreen(
             try {
                 val account = task.getResult(ApiException::class.java)
                 authViewModel.loginWithGoogle(account)
-            } catch (e: ApiException) {
-                // Error silencioso — el mensaje de error lo gestiona el ViewModel
-            }
+            } catch (e: ApiException) { }
         }
     }
 
@@ -82,32 +171,13 @@ fun LoginScreen(
     ) {
         Spacer(modifier = Modifier.weight(1f))
 
-        // Logo
-        Icon(
-            imageVector = Icons.Default.Shield,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(64.dp)
-        )
+        Icon(imageVector = Icons.Default.Shield, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(64.dp))
         Spacer(modifier = Modifier.height(12.dp))
-        Text(
-            text = "AEGIS",
-            fontSize = 36.sp,
-            fontWeight = FontWeight.Black,
-            letterSpacing = 6.sp,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Text(
-            text = "INICIA SESIÓN",
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 3.sp,
-            color = MaterialTheme.colorScheme.secondary
-        )
+        Text("AEGIS", fontSize = 36.sp, fontWeight = FontWeight.Black, letterSpacing = 6.sp, color = MaterialTheme.colorScheme.onBackground)
+        Text("INICIA SESIÓN", fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 3.sp, color = MaterialTheme.colorScheme.secondary)
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // Email
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
@@ -122,7 +192,6 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Contraseña
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -130,11 +199,7 @@ fun LoginScreen(
             leadingIcon = { Icon(Icons.Default.Lock, null, tint = MaterialTheme.colorScheme.secondary) },
             trailingIcon = {
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(
-                        if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                        null,
-                        tint = MaterialTheme.colorScheme.secondary
-                    )
+                    Icon(if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility, null, tint = MaterialTheme.colorScheme.secondary)
                 }
             },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -145,20 +210,30 @@ fun LoginScreen(
             colors = authTextFieldColors()
         )
 
-        // Error
-        if (uiState.errorMessage != null) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = uiState.errorMessage!!,
-                color = MaterialTheme.colorScheme.error,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold
-            )
+        // Botón "Olvidé mi contraseña"
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+            TextButton(onClick = {
+                forgotEmail = email // Pre-rellenamos con el email que haya escrito
+                authViewModel.clearState()
+                showForgotDialog = true
+            }) {
+                Text(
+                    "¿OLVIDASTE TU CONTRASEÑA?",
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp
+                )
+            }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        if (uiState.errorMessage != null) {
+            Text(uiState.errorMessage!!, color = MaterialTheme.colorScheme.error, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(4.dp))
+        }
 
-        // Botón login email
+        Spacer(modifier = Modifier.height(12.dp))
+
         Button(
             onClick = { authViewModel.login(email, password) },
             enabled = email.isNotBlank() && password.isNotBlank() && !uiState.isLoading,
@@ -171,11 +246,7 @@ fun LoginScreen(
             )
         ) {
             if (uiState.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    color = Color.Black,
-                    strokeWidth = 2.dp
-                )
+                CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.Black, strokeWidth = 2.dp)
             } else {
                 Text("INICIAR SESIÓN", fontWeight = FontWeight.Black, letterSpacing = 1.sp)
             }
@@ -183,56 +254,30 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Separador
         Row(verticalAlignment = Alignment.CenterVertically) {
             HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f))
-            Text(
-                "  O  ",
-                color = MaterialTheme.colorScheme.secondary,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold
-            )
+            Text("  O  ", color = MaterialTheme.colorScheme.secondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
             HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f))
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botón Google
         OutlinedButton(
             onClick = { launchGoogleSignIn() },
             enabled = !uiState.isLoading,
             modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = RoundedCornerShape(8.dp),
-            border = androidx.compose.foundation.BorderStroke(
-                1.dp,
-                MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)
-            )
+            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f))
         ) {
-            Text(
-                "CONTINUAR CON GOOGLE",
-                color = MaterialTheme.colorScheme.onBackground,
-                fontWeight = FontWeight.Black,
-                letterSpacing = 1.sp,
-                fontSize = 13.sp
-            )
+            Text("CONTINUAR CON GOOGLE", color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Black, letterSpacing = 1.sp, fontSize = 13.sp)
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Ir a registro
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                "¿No tienes cuenta?",
-                color = MaterialTheme.colorScheme.secondary,
-                fontSize = 13.sp
-            )
+            Text("¿No tienes cuenta?", color = MaterialTheme.colorScheme.secondary, fontSize = 13.sp)
             TextButton(onClick = onNavigateToRegister) {
-                Text(
-                    "REGÍSTRATE",
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Black,
-                    fontSize = 13.sp
-                )
+                Text("REGÍSTRATE", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black, fontSize = 13.sp)
             }
         }
 

@@ -31,6 +31,7 @@ class StatsViewModel(private val repository: UserRepository) : ViewModel() {
     val showEvolutionGraph = repository.showEvolutionGraph
     val showAnalyticsList = repository.showAnalyticsList
     val targetDaysPerWeek = repository.targetDaysPerWeek
+    val restTimerSeconds = repository.restTimerSeconds
 
     // Librería de ejercicios
     val allExercises: StateFlow<List<Exercise>> = repository.exerciseLibrary
@@ -115,6 +116,9 @@ class StatsViewModel(private val repository: UserRepository) : ViewModel() {
 
     fun updateTargetDays(days: Int) {
         viewModelScope.launch { repository.updateTargetDays(days) }
+    }
+    fun updateRestTimerSeconds(seconds: Int) {
+        viewModelScope.launch { repository.updateRestTimerSeconds(seconds) }
     }
 
     fun toggleVolumeCard(enabled: Boolean) {

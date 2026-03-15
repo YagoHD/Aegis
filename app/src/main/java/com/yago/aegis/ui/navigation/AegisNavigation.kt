@@ -67,7 +67,8 @@ fun AegisNavigation(
     val showBottomBar = currentRoute != "settings" &&
             !onboardingRoutes.contains(currentRoute) &&
             !authRoutes.contains(currentRoute) &&
-            !isSessionActive
+            !isSessionActive &&
+            currentRoute != "workout_settings"
 
     Scaffold(
         bottomBar = { if (showBottomBar) AegisBottomBar(navController) }
@@ -182,7 +183,15 @@ fun AegisNavigation(
                 enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
                 exitTransition = { slideOutHorizontally(targetOffsetX = { it }) }
             ) {
-                SettingsMenu(viewModel = profileViewModel)
+                SettingsMenu(
+                    viewModel = profileViewModel,
+                    authViewModel = authViewModel,
+                    onLogout = {
+                        navController.navigate("login") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                )
             }
 
             composable(
@@ -233,7 +242,21 @@ fun AegisNavigation(
                     workoutViewModel = workoutViewModel,
                     routinesViewModel = routinesViewModel,
                     profileViewModel = profileViewModel,
-                    onFinishWorkout = { navController.popBackStack() }
+                    onFinishWorkout = { navController.popBackStack() },
+                    onNavigateToSettings = { navController.navigate("workout_settings") }
+                )
+            }
+
+            composable("workout_settings") {
+                WorkoutSettingsScreen(
+                    workoutViewModel = workoutViewModel,
+                    onNavigateBack = { navController.popBackStack() },
+                    onSave = { seconds, vibrate, sound, showTimer ->
+                        userRepository.updateRestTimerSeconds(seconds)
+                        userRepository.updateTimerVibrate(vibrate)
+                        userRepository.updateTimerSound(sound)
+                        userRepository.updateShowRestTimer(showTimer)
+                    }
                 )
             }
         }
