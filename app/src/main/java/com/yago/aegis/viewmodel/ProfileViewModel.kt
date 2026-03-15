@@ -1,9 +1,7 @@
 package com.yago.aegis.viewmodel
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.yago.aegis.data.BodyMeasure
 import com.yago.aegis.data.PhotoType
@@ -12,114 +10,130 @@ import com.yago.aegis.data.UserRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-class ProfileViewModel(val repository: UserRepository) : ViewModel() {
+// UiState sellado: toda la UI lee de aquí, no de múltiples variables sueltas
+data class ProfileUiState(
+    val user: UserProfile = UserProfile(
+        name = "Cargando...",
+        disciplineDay = 0,
+        currentMass = "0.0",
+        height = 170,
+        bodyFat = "0.0",
+        goal = "BULK"
+    ),
+    val showBMI: Boolean = true,
+    val showBodyFat: Boolean = true,
+    val showVisualLog: Boolean = true,
+    val showGirths: Boolean = true,
+    val customMeasures: List<BodyMeasure> = emptyList()
+)
 
-    // 1. Estado del Usuario (Sincronizado con DataStore)
-    var user by mutableStateOf(
-        UserProfile(
-            name = "Cargando...",
-            disciplineDay = 0,
-            currentMass = "0.0",
-            height = 170,
-            bodyFat = "0.0",
-            goal = "BULK"
-        )
-    )
-        private set
+class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
 
-    // 2. Estados de la Interfaz (Sincronizados con DataStore)
-    var showBMI by mutableStateOf(true)
-        private set
-    var showBodyFat by mutableStateOf(true)
-        private set
-    var showVisualLog by mutableStateOf(true)
-        private set
-    var showGirths by mutableStateOf(true)
-        private set
+    private val _uiState = MutableStateFlow(ProfileUiState())
+    val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
-    // 3. Medidas personalizadas (Sincronizadas con DataStore vía JSON)
-    var customMeasures by mutableStateOf<List<BodyMeasure>>(emptyList())
-        private set
-    val onboardingCompleted: Flow<Boolean?> = repository.onboardingCompleted
+    val onboardingCompleted: Flow<Boolean> = repository.onboardingCompleted
+
     init {
-        // --- ESCUCHAR CAMBIOS DEL REPOSITORIO (LECTURA EN TIEMPO REAL) ---
+        collectProfileData()
+    }
 
+    private fun collectProfileData() {
         viewModelScope.launch {
-            repository.userName.collect { user = user.copy(name = it) }
+            repository.userName.collect { name ->
+                _uiState.update { it.copy(user = it.user.copy(name = name)) }
+            }
         }
         viewModelScope.launch {
-            repository.currentMass.collect { user = user.copy(currentMass = it) }
+            repository.currentMass.collect { mass ->
+                _uiState.update { it.copy(user = it.user.copy(currentMass = mass)) }
+            }
         }
         viewModelScope.launch {
-            repository.height.collect { user = user.copy(height = it.toInt()) }
+            repository.height.collect { h ->
+                _uiState.update { it.copy(user = it.user.copy(height = h.toInt())) }
+            }
         }
         viewModelScope.launch {
-            repository.bodyFat.collect { user = user.copy(bodyFat = it) }
+            repository.bodyFat.collect { fat ->
+                _uiState.update { it.copy(user = it.user.copy(bodyFat = fat)) }
+            }
         }
+        // avatarUri recogida UNA sola vez (estaba duplicada en el código original)
         viewModelScope.launch {
-            repository.avatarUri.collect { uri -> user = user.copy(profilePhotoUri = uri) }
+            repository.avatarUri.collect { uri ->
+                _uiState.update { it.copy(user = it.user.copy(profilePhotoUri = uri)) }
+            }
         }
         viewModelScope.launch {
             repository.basePhotoUri.collect { uri ->
-                user = user.copy(basePhotoUri = uri)
+                _uiState.update { it.copy(user = it.user.copy(basePhotoUri = uri)) }
             }
         }
         viewModelScope.launch {
             repository.actualPhotoUri.collect { uri ->
-                user = user.copy(actualPhotoUri = uri)
+                _uiState.update { it.copy(user = it.user.copy(actualPhotoUri = uri)) }
             }
         }
-
-        viewModelScope.launch { repository.showBMI.collect { showBMI = it } }
-        viewModelScope.launch { repository.showBodyFat.collect { showBodyFat = it } }
-        viewModelScope.launch { repository.showVisualLog.collect { showVisualLog = it } }
-        viewModelScope.launch { repository.showGirths.collect { showGirths = it } }
-
-        viewModelScope.launch {
-            repository.customMeasures.collect { customMeasures = it }
-        }
-
         viewModelScope.launch {
             repository.basePhotoDate.collect { date ->
-                user = user.copy(basePhotoDate = date)
+                _uiState.update { it.copy(user = it.user.copy(basePhotoDate = date)) }
             }
         }
-
         viewModelScope.launch {
             repository.actualPhotoDate.collect { date ->
-                user = user.copy(actualPhotoDate = date)
+                _uiState.update { it.copy(user = it.user.copy(actualPhotoDate = date)) }
             }
         }
         viewModelScope.launch {
-            repository.avatarUri.collect { uri ->
-                user = user.copy(profilePhotoUri = uri)
+            repository.disciplineDay.collect { days ->
+                _uiState.update { it.copy(user = it.user.copy(disciplineDay = days)) }
             }
         }
         viewModelScope.launch {
-            // Escuchamos los cambios del repositorio
-            repository.disciplineDay.collect { savedDays ->
-                // Actualizamos el objeto user con lo que viene del disco
-                user = user.copy(disciplineDay = savedDays)
+            repository.showBMI.collect { show ->
+                _uiState.update { it.copy(showBMI = show) }
+            }
+        }
+        viewModelScope.launch {
+            repository.showBodyFat.collect { show ->
+                _uiState.update { it.copy(showBodyFat = show) }
+            }
+        }
+        viewModelScope.launch {
+            repository.showVisualLog.collect { show ->
+                _uiState.update { it.copy(showVisualLog = show) }
+            }
+        }
+        viewModelScope.launch {
+            repository.showGirths.collect { show ->
+                _uiState.update { it.copy(showGirths = show) }
+            }
+        }
+        viewModelScope.launch {
+            repository.customMeasures.collect { measures ->
+                _uiState.update { it.copy(customMeasures = measures) }
             }
         }
     }
 
-    // --- FUNCIONES DE ACTUALIZACIÓN (ESCRITURA EN DISCO) ---
+    // --- ESCRITURA ---
 
-    private var searchJob: Job? = null
+    private var debounceJob: Job? = null
 
     fun updateName(newName: String) {
-        // 1. Cancelamos el guardado anterior si el usuario sigue escribiendo
-        searchJob?.cancel()
-
-        // 2. Lanzamos un nuevo proceso con un pequeño retraso
-        searchJob = viewModelScope.launch {
-            delay(300) // Espera 300ms de calma antes de tocar el disco
+        debounceJob?.cancel()
+        debounceJob = viewModelScope.launch {
+            delay(300)
             repository.updateName(newName)
         }
     }
@@ -132,24 +146,21 @@ class ProfileViewModel(val repository: UserRepository) : ViewModel() {
         viewModelScope.launch { repository.updateBodyFat(newFat) }
     }
 
-    fun updateAvatar(uri: String) {
-        user = user.copy(profilePhotoUri = uri)
-
-        viewModelScope.launch {
-            repository.updateAvatar(uri)
-        }
+    fun updateHeight(newHeight: Double) {
+        viewModelScope.launch { repository.updateHeight(newHeight) }
     }
 
-    // Toggles persistentes
+    fun updateAvatar(uri: String) {
+        viewModelScope.launch { repository.updateAvatar(uri) }
+    }
+
     fun toggleBMI(enabled: Boolean) = viewModelScope.launch { repository.toggleBMI(enabled) }
     fun toggleBodyFat(enabled: Boolean) = viewModelScope.launch { repository.toggleBodyFat(enabled) }
     fun toggleVisualLog(enabled: Boolean) = viewModelScope.launch { repository.toggleVisualLog(enabled) }
     fun toggleGirths(enabled: Boolean) = viewModelScope.launch { repository.toggleGirths(enabled) }
 
-    // --- GESTIÓN DE MEDIDAS (PERSISTENCIA DE LISTAS) ---
-
     fun updateMeasureValue(id: String, newValue: String) {
-        val updatedList = customMeasures.map {
+        val updatedList = _uiState.value.customMeasures.map {
             if (it.id == id) it.copy(value = newValue) else it
         }
         viewModelScope.launch { repository.updateMeasures(updatedList) }
@@ -157,42 +168,23 @@ class ProfileViewModel(val repository: UserRepository) : ViewModel() {
 
     fun addMeasure(name: String) {
         val newId = name.uppercase().replace(" ", "_")
-        val newList = customMeasures + BodyMeasure(newId, name, "0.0")
+        val newList = _uiState.value.customMeasures + BodyMeasure(newId, name, "0.0")
         viewModelScope.launch { repository.updateMeasures(newList) }
     }
 
     fun removeMeasure(id: String) {
-        val newList = customMeasures.filter { it.id != id }
+        val newList = _uiState.value.customMeasures.filter { it.id != id }
         viewModelScope.launch { repository.updateMeasures(newList) }
-    }
-
-    fun calcularBMI(): Double {
-        val mass = user.currentMass.toDoubleOrNull() ?: 0.0
-        val heightInMeters = user.height / 100.0
-
-        return if (mass > 0 && heightInMeters > 0) {
-            mass / (heightInMeters * heightInMeters)
-        } else {
-            0.0
-        }
     }
 
     fun updatePhoto(uri: String, type: PhotoType) {
         val formatter = DateTimeFormatter.ofPattern("dd MMMM", Locale("es", "ES"))
         val todayDate = LocalDate.now().format(formatter).uppercase()
-
-        // 1. Actualizamos SOLO las fotos del log, sin tocar el avatar
-        user = when (type) {
-            PhotoType.BASE -> user.copy(basePhotoUri = uri, basePhotoDate = todayDate)
-            PhotoType.ACTUAL -> user.copy(actualPhotoUri = uri, actualPhotoDate = todayDate)
-        }
-
         viewModelScope.launch {
             when (type) {
                 PhotoType.BASE -> {
                     repository.updateBasePhoto(uri)
                     repository.updateBasePhotoDate(todayDate)
-                    // ❌ HEMOS QUITADO: repository.updateAvatar(uri)
                 }
                 PhotoType.ACTUAL -> {
                     repository.updateActualPhoto(uri)
@@ -202,25 +194,30 @@ class ProfileViewModel(val repository: UserRepository) : ViewModel() {
         }
     }
 
-    fun updateHeight(newHeight: Double) { // <-- Asegúrate de que sea Double
-        viewModelScope.launch {
-            repository.updateHeight(newHeight)
-        }
-    }
-
     fun incrementDisciplineDay() {
-        val newDisciplineDay = user.disciplineDay + 1
-        // Actualizamos el estado local
-        user = user.copy(disciplineDay = newDisciplineDay)
-        // Guardamos en el repositorio para que no se pierda al cerrar la app
-        viewModelScope.launch {
-            repository.updateDisciplineDay(newDisciplineDay)
-        }
-    }
-    fun completeOnboarding() {
-        viewModelScope.launch {
-            repository.updateOnboardingCompleted(true)
-        }
+        val newDay = _uiState.value.user.disciplineDay + 1
+        viewModelScope.launch { repository.updateDisciplineDay(newDay) }
     }
 
+    fun completeOnboarding() {
+        viewModelScope.launch { repository.updateOnboardingCompleted(true) }
+    }
+
+    fun calcularBMI(): Double {
+        val state = _uiState.value
+        val mass = state.user.currentMass.toDoubleOrNull() ?: 0.0
+        val heightInMeters = state.user.height / 100.0
+        return if (mass > 0 && heightInMeters > 0) mass / (heightInMeters * heightInMeters) else 0.0
+    }
+
+    // Factory manual (sin Hilt). Si en el futuro añades Hilt, elimina este bloque.
+    class Factory(private val repository: UserRepository) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(ProfileViewModel::class.java)) {
+                @Suppress("UNCHECKED_CAST")
+                return ProfileViewModel(repository) as T
+            }
+            throw IllegalArgumentException("Unknown ViewModel class")
+        }
+    }
 }

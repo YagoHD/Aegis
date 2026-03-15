@@ -202,7 +202,7 @@ fun EditRoutineScreen(
             // BOTÓN AÑADIR
             item {
                 Surface(
-                    onClick = { navController.navigate("add_exercise/$routineId") },
+                    onClick = { navController.navigate("add_exercise") },
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     shape = RoundedCornerShape(8.dp),
                     color = Color.Transparent,

@@ -1,77 +1,61 @@
 package com.yago.aegis.viewmodel
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.yago.aegis.data.*
+import com.yago.aegis.data.Exercise
+import com.yago.aegis.data.ExerciseProgress
+import com.yago.aegis.data.ExerciseSet
+import com.yago.aegis.data.Routine
+import com.yago.aegis.data.UserRepository
+import com.yago.aegis.data.WorkoutSession
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
-/**
- * Factory para instanciar el ViewModel con sus dependencias.
- */
-class WorkoutViewModelFactory(private val settingsStore: SettingsStore) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(WorkoutViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return WorkoutViewModel(settingsStore) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
-    }
-}
+// WorkoutViewModel ahora recibe UserRepository (capa de datos correcta),
+// NO SettingsStore directamente como estaba antes.
+class WorkoutViewModel(private val repository: UserRepository) : ViewModel() {
 
-class WorkoutViewModel(private val settingsStore: SettingsStore) : ViewModel() {
+    private val _activeSession = MutableStateFlow<WorkoutSession?>(null)
+    val activeSession: StateFlow<WorkoutSession?> = _activeSession.asStateFlow()
 
-    // Sesión activa que contiene el progreso de los ejercicios
-    var activeSession by mutableStateOf<WorkoutSession?>(null)
-        private set
+    // Estado para ejercicios con datos pero sin marcar (detectado aquí, no en la Screen)
+    private val _uncompletedWithData = MutableStateFlow<List<ExerciseProgress>>(emptyList())
+    val uncompletedWithData: StateFlow<List<ExerciseProgress>> = _uncompletedWithData.asStateFlow()
 
-    /**
-     * Inicia una nueva sesión de entrenamiento basada en una rutina.
-     */
     fun startWorkout(routine: Routine) {
         val progress = routine.exercises.map { exercise ->
-            ExerciseProgress(
-                exercise = exercise,
-                sets = listOf(ExerciseSet()) // Empezamos con una única serie vacía
-            )
+            ExerciseProgress(exercise = exercise, sets = listOf(ExerciseSet()))
         }
-        activeSession = WorkoutSession(
+        _activeSession.value = WorkoutSession(
             routineName = routine.name,
             exercisesProgress = progress
         )
     }
 
-    /**
-     * Añade una nueva serie a un ejercicio específico dentro de la sesión activa.
-     */
     fun addSet(exerciseId: Long) {
-        activeSession = activeSession?.let { session ->
-            session.copy(
+        _activeSession.update { session ->
+            session?.copy(
                 exercisesProgress = session.exercisesProgress.map { prog ->
-                    if (prog.exercise.id == exerciseId) {
-                        prog.copy(sets = prog.sets + ExerciseSet())
-                    } else prog
+                    if (prog.exercise.id == exerciseId) prog.copy(sets = prog.sets + ExerciseSet())
+                    else prog
                 }
             )
         }
     }
 
-    /**
-     * Actualiza los datos de una serie específica (Peso, Reps, Estado).
-     */
     fun updateSet(exerciseId: Long, setId: String, weight: Double, reps: Int, completed: Boolean) {
-        activeSession = activeSession?.let { session ->
-            session.copy(
+        _activeSession.update { session ->
+            session?.copy(
                 exercisesProgress = session.exercisesProgress.map { prog ->
                     if (prog.exercise.id == exerciseId) {
                         prog.copy(sets = prog.sets.map { set ->
-                            if (set.id == setId) {
-                                set.copy(weight = weight, reps = reps, isCompleted = completed)
-                            } else set
+                            if (set.id == setId) set.copy(weight = weight, reps = reps, isCompleted = completed)
+                            else set
                         })
                     } else prog
                 }
@@ -79,12 +63,9 @@ class WorkoutViewModel(private val settingsStore: SettingsStore) : ViewModel() {
         }
     }
 
-    /**
-     * Elimina una serie. Si es la última, la resetea pero no deja el ejercicio vacío.
-     */
     fun removeSet(exerciseId: Long, setId: String) {
-        activeSession = activeSession?.let { session ->
-            session.copy(
+        _activeSession.update { session ->
+            session?.copy(
                 exercisesProgress = session.exercisesProgress.map { prog ->
                     if (prog.exercise.id == exerciseId) {
                         val newSets = prog.sets.filter { it.id != setId }
@@ -95,12 +76,9 @@ class WorkoutViewModel(private val settingsStore: SettingsStore) : ViewModel() {
         }
     }
 
-    /**
-     * Marca/Desmarca todas las series de un ejercicio de golpe.
-     */
     fun toggleExerciseCompleted(exerciseId: Long) {
-        activeSession = activeSession?.let { session ->
-            session.copy(
+        _activeSession.update { session ->
+            session?.copy(
                 exercisesProgress = session.exercisesProgress.map { prog ->
                     if (prog.exercise.id == exerciseId) {
                         val allDone = prog.sets.all { it.isCompleted }
@@ -111,65 +89,90 @@ class WorkoutViewModel(private val settingsStore: SettingsStore) : ViewModel() {
         }
     }
 
-    /**
-     * Finaliza el entrenamiento, procesa los datos para el historial y limpia la sesión.
-     */
-    fun finishWorkout(routinesViewModel: RoutinesViewModel, onComplete: () -> Unit) {
-        val session = activeSession ?: return
+    // Lógica de validación extraída de ActiveSessionScreen (antes estaba en el onClick del botón)
+    fun requestFinishWorkout() {
+        val session = _activeSession.value ?: return
+        val uncompleted = session.exercisesProgress.filter { progress ->
+            val hasData = progress.sets.any { it.weight > 0 || it.reps > 0 }
+            val isNotChecked = !progress.sets.all { it.isCompleted }
+            hasData && isNotChecked
+        }
+        if (uncompleted.isNotEmpty()) {
+            _uncompletedWithData.value = uncompleted
+        } else {
+            finishWorkout()
+        }
+    }
+
+    // Marca los ejercicios sin marcar y finaliza (acción del diálogo de confirmación)
+    fun forceFinishWorkout(routinesViewModel: RoutinesViewModel, onComplete: () -> Unit) {
+        _uncompletedWithData.value.forEach { toggleExerciseCompleted(it.exercise.id) }
+        _uncompletedWithData.value = emptyList()
+        finishWorkout(routinesViewModel, onComplete)
+    }
+
+    fun dismissUncompletedDialog() {
+        _uncompletedWithData.value = emptyList()
+    }
+
+    fun finishWorkout(routinesViewModel: RoutinesViewModel? = null, onComplete: () -> Unit = {}) {
+        val session = _activeSession.value ?: return
+        val hasAnyData = session.exercisesProgress.any { it.sets.any { s -> s.weight > 0 || s.reps > 0 } }
 
         viewModelScope.launch {
-            settingsStore.saveWorkoutSession(session)
-        }
-
-        session.exercisesProgress.forEach { progress ->
-            val completedSets = progress.sets.filter { it.isCompleted }
-
-            if (completedSets.isNotEmpty()) {
-                val summary = completedSets.joinToString("   ") { set ->
-                    val w = if (set.weight % 1 == 0.0) set.weight.toInt() else set.weight
-                    "${w}kg x ${set.reps}"
+            if (hasAnyData) {
+                repository.saveWorkoutSession(session)
+                session.exercisesProgress.forEach { progress ->
+                    val completedSets = progress.sets.filter { it.isCompleted }
+                    if (completedSets.isNotEmpty()) {
+                        val summary = completedSets.joinToString("   ") { set ->
+                            val w = if (set.weight % 1 == 0.0) set.weight.toInt() else set.weight
+                            "${w}kg x ${set.reps}"
+                        }
+                        val best1RM = completedSets.maxOf { it.weight * (1 + (it.reps / 30.0)) }
+                        routinesViewModel?.updateExercisePerformance(
+                            exerciseId = progress.exercise.id,
+                            summary = summary,
+                            new1RM = best1RM
+                        )
+                    }
                 }
-
-                val best1RMOfSession = completedSets.maxOf { set ->
-                    set.weight * (1 + (set.reps / 30.0))
-                }
-
-                routinesViewModel.updateExercisePerformance(
-                    exerciseId = progress.exercise.id,
-                    summary = summary,
-                    new1RM = best1RMOfSession
-                )
             }
+            _activeSession.value = null
+            onComplete()
         }
+    }
 
-        activeSession = null
+    fun cancelWorkout(onComplete: () -> Unit) {
+        _activeSession.value = null
         onComplete()
     }
 
-    // --- FUNCIONES DE UTILIDAD PARA LA PANTALLA DE SELECCIÓN ---
+    // --- UTILIDADES PARA SelectRoutineScreen ---
 
     fun getSafeRoutine(routine: Routine): Routine {
         val currentIcon = routine.iconName ?: "dumbbell"
-        return if (currentIcon.isBlank()) {
-            routine.copy(iconName = "dumbbell")
-        } else {
-            routine.copy(iconName = currentIcon)
-        }
+        return if (currentIcon.isBlank()) routine.copy(iconName = "dumbbell") else routine.copy(iconName = currentIcon)
     }
 
     fun calculateLastPerformed(dates: List<Long>?): String {
         val safeDates = dates ?: return "Never performed"
         if (safeDates.isEmpty()) return "Never performed"
-
-        val now = System.currentTimeMillis()
-        val lastDate = safeDates.last()
-        val diffInMs = now - lastDate
-        val diffInDays = TimeUnit.MILLISECONDS.toDays(diffInMs)
-
+        val diffInDays = TimeUnit.MILLISECONDS.toDays(System.currentTimeMillis() - safeDates.last())
         return when {
             diffInDays < 1L -> "Last performed: Today"
             diffInDays == 1L -> "Last performed: Yesterday"
             else -> "Last performed: $diffInDays days ago"
+        }
+    }
+
+    class Factory(private val repository: UserRepository) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(WorkoutViewModel::class.java)) {
+                @Suppress("UNCHECKED_CAST")
+                return WorkoutViewModel(repository) as T
+            }
+            throw IllegalArgumentException("Unknown ViewModel class")
         }
     }
 }

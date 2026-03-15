@@ -34,8 +34,11 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsMenu(viewModel: ProfileViewModel) {
+    // Usamos el uiState sellado del ViewModel refactorizado
+    val state by viewModel.uiState.collectAsState()
+    val user = state.user
+
     var newMeasureName by remember { mutableStateOf("") }
-    val user = viewModel.user
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
     var tempName by remember(user.name) { mutableStateOf(user.name) }
@@ -59,12 +62,11 @@ fun SettingsMenu(viewModel: ProfileViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 20.dp) // Más aire lateral para look premium
+            .padding(horizontal = 20.dp)
             .verticalScroll(scrollState)
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- SECCIÓN 1: PERFIL DE OPERADOR ---
         SectionHeader(text = "DATOS DE USUARIO")
 
         Row(
@@ -74,7 +76,6 @@ fun SettingsMenu(viewModel: ProfileViewModel) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Avatar con estilo Aegis
             Box(
                 modifier = Modifier
                     .size(64.dp)
@@ -84,7 +85,6 @@ fun SettingsMenu(viewModel: ProfileViewModel) {
                     .clickable { avatarLauncher.launch("image/*") },
                 contentAlignment = Alignment.Center
             ) {
-                // Aquí podrías cargar la imagen real con AsyncImage de Coil
                 Icon(
                     imageVector = Icons.Default.Person,
                     contentDescription = null,
@@ -93,20 +93,18 @@ fun SettingsMenu(viewModel: ProfileViewModel) {
                 )
             }
 
-            // Usamos tu AegisTextField
             AegisTextField(
                 label = "NOMBRE",
                 value = tempName,
                 onValueChange = { newValue ->
-                    tempName = newValue // Actualización instantánea en UI
-                    viewModel.updateName(newValue) // El ViewModel lo procesa en paralelo
+                    tempName = newValue
+                    viewModel.updateName(newValue)
                 },
                 placeholder = "Introduce tu nombre...",
                 modifier = Modifier.weight(1f)
             )
         }
 
-        // Campo de Altura (Integrando el estilo de los MetricInputs)
         AegisTextField(
             label = stringResource(R.string.label_height),
             value = tempHeight,
@@ -122,29 +120,26 @@ fun SettingsMenu(viewModel: ProfileViewModel) {
 
         VerticalDividerSection()
 
-        // --- SECCIÓN 2: INTERFAZ TÁCTICA ---
         SectionHeader(text = stringResource(R.string.settings_title_interface))
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Encapsulamos los interruptores en una superficie para agruparlos
         Surface(
             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
             shape = RoundedCornerShape(12.dp)
         ) {
             Column(modifier = Modifier.padding(8.dp)) {
-                SettingsRow(stringResource(R.string.settings_label_body_fat), viewModel.showBodyFat) { viewModel.toggleBodyFat(it) }
-                SettingsRow(stringResource(R.string.settings_label_bmi), viewModel.showBMI) { viewModel.toggleBMI(it) }
-                SettingsRow(stringResource(R.string.settings_label_visual_log), viewModel.showVisualLog) { viewModel.toggleVisualLog(it) }
-                SettingsRow(stringResource(R.string.settings_label_girths), viewModel.showGirths) { viewModel.toggleGirths(it) }
+                SettingsRow(stringResource(R.string.settings_label_body_fat), state.showBodyFat) { viewModel.toggleBodyFat(it) }
+                SettingsRow(stringResource(R.string.settings_label_bmi), state.showBMI) { viewModel.toggleBMI(it) }
+                SettingsRow(stringResource(R.string.settings_label_visual_log), state.showVisualLog) { viewModel.toggleVisualLog(it) }
+                SettingsRow(stringResource(R.string.settings_label_girths), state.showGirths) { viewModel.toggleGirths(it) }
             }
         }
 
         VerticalDividerSection()
 
-        // --- SECCIÓN 3: GESTIÓN DE MÉTRICAS ---
         SectionHeader(text = stringResource(R.string.settings_title_manage_measures))
 
-        viewModel.customMeasures.forEach { measure ->
+        state.customMeasures.forEach { measure ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -173,7 +168,6 @@ fun SettingsMenu(viewModel: ProfileViewModel) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- SECCIÓN 4: AÑADIR NUEVA MÉTRICA ---
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.Bottom,
@@ -196,7 +190,6 @@ fun SettingsMenu(viewModel: ProfileViewModel) {
                 )
             }
 
-            // Botón Añadir Estilo Aegis
             IconButton(
                 onClick = {
                     if (newMeasureName.isNotBlank()) {
@@ -215,8 +208,6 @@ fun SettingsMenu(viewModel: ProfileViewModel) {
         Spacer(modifier = Modifier.height(100.dp))
     }
 }
-
-// --- COMPONENTES DE APOYO PARA MANTENER EL CÓDIGO LIMPIO ---
 
 @Composable
 fun SectionHeader(text: String) {
@@ -251,7 +242,7 @@ fun SettingsRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = label.uppercase(), // Consistencia con el look técnico
+            text = label.uppercase(),
             color = if (checked) Color.White else MaterialTheme.colorScheme.secondary,
             style = TextStyle(
                 fontWeight = if (checked) FontWeight.Bold else FontWeight.Medium,
@@ -265,15 +256,10 @@ fun SettingsRow(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
-                // Pulgar (la bolita)
-                checkedThumbColor = MaterialTheme.colorScheme.primary, // Bronce brillante
-                uncheckedThumbColor = MaterialTheme.colorScheme.secondary, // Gris acero
-
-                // Carril (el fondo del switch)
+                checkedThumbColor = MaterialTheme.colorScheme.primary,
+                uncheckedThumbColor = MaterialTheme.colorScheme.secondary,
                 checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant, // Fondo 161616
-
-                // Bordes
+                uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
                 uncheckedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
             )
         )

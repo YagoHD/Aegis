@@ -6,13 +6,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -33,13 +28,14 @@ fun ActiveSessionScreen(
     onFinishWorkout: () -> Unit,
     profileViewModel: ProfileViewModel,
 ) {
-    val session = workoutViewModel.activeSession ?: return
+    val session by workoutViewModel.activeSession.collectAsState()
+    val uncompletedWithData by workoutViewModel.uncompletedWithData.collectAsState()
     var showCancelDialog by remember { mutableStateOf(false) }
 
-    // --- NUEVO ESTADO PARA EL DIÁLOGO DE CONFIRMACIÓN ---
-    var exercisesToAutoCheck by remember { mutableStateOf<List<com.yago.aegis.data.ExerciseProgress>>(emptyList()) }
+    // FIX: variable local inmutable — evita NPE cuando session se pone a null
+    // durante la recomposición al finalizar el entrenamiento
+    val currentSession = session ?: return
 
-    // --- DIÁLOGO DE ABANDONO (EXISTENTE) ---
     if (showCancelDialog) {
         AegisAlertDialog(
             title = "ABANDONAR SESIÓN",
@@ -48,7 +44,7 @@ fun ActiveSessionScreen(
             onDismiss = { showCancelDialog = false },
             onConfirm = {
                 showCancelDialog = false
-                onFinishWorkout()
+                workoutViewModel.cancelWorkout { onFinishWorkout() }
             }
         ) {
             Text(
@@ -59,22 +55,14 @@ fun ActiveSessionScreen(
         }
     }
 
-    // --- NUEVO DIÁLOGO: CONFIRMAR EJERCICIOS OLVIDADOS ---
-    if (exercisesToAutoCheck.isNotEmpty()) {
+    if (uncompletedWithData.isNotEmpty()) {
         AegisAlertDialog(
             title = "EJERCICIOS SIN MARCAR",
             confirmText = "MARCAR Y FINALIZAR",
             dismissText = "REVISAR",
-            onDismiss = { exercisesToAutoCheck = emptyList() },
+            onDismiss = { workoutViewModel.dismissUncompletedDialog() },
             onConfirm = {
-                // Marcamos todos los pendientes y finalizamos
-                exercisesToAutoCheck.forEach {
-                    workoutViewModel.toggleExerciseCompleted(it.exercise.id)
-                }
-                exercisesToAutoCheck = emptyList()
-
-                // Ejecutamos el finalizado real
-                workoutViewModel.finishWorkout(routinesViewModel) {
+                workoutViewModel.forceFinishWorkout(routinesViewModel) {
                     profileViewModel.incrementDisciplineDay()
                     onFinishWorkout()
                 }
@@ -87,7 +75,7 @@ fun ActiveSessionScreen(
                     fontSize = 14.sp,
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
-                exercisesToAutoCheck.forEach { progress ->
+                uncompletedWithData.forEach { progress ->
                     Text(
                         text = "• ${progress.exercise.name.uppercase()}",
                         color = MaterialTheme.colorScheme.primary,
@@ -103,7 +91,7 @@ fun ActiveSessionScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             AegisTopBar(
-                title = session.routineName.uppercase(),
+                title = currentSession.routineName.uppercase(),
                 subtitle = "SESIÓN EN CURSO",
                 navigationIcon = {
                     IconButton(onClick = { showCancelDialog = true }) {
@@ -127,7 +115,7 @@ fun ActiveSessionScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp)
             ) {
-                SessionProgressHeader(session)
+                SessionProgressHeader(currentSession)
             }
 
             LazyColumn(
@@ -139,7 +127,7 @@ fun ActiveSessionScreen(
                 item { Spacer(modifier = Modifier.height(8.dp)) }
 
                 itemsIndexed(
-                    items = session.exercisesProgress,
+                    items = currentSession.exercisesProgress,
                     key = { _, progress -> progress.exercise.id }
                 ) { index, progress ->
                     Column {
@@ -157,7 +145,7 @@ fun ActiveSessionScreen(
                             }
                         )
 
-                        if (index < session.exercisesProgress.lastIndex) {
+                        if (index < currentSession.exercisesProgress.lastIndex) {
                             HorizontalDivider(
                                 modifier = Modifier.padding(top = 16.dp, start = 8.dp, end = 8.dp),
                                 thickness = 0.5.dp,
@@ -170,30 +158,10 @@ fun ActiveSessionScreen(
                 item {
                     Button(
                         onClick = {
-                            // 1. Detectar si hay al menos una serie con peso o reps (Sesión con datos)
-                            val hasAnyData = session.exercisesProgress.any { progress ->
-                                progress.sets.any { it.weight > 0 || it.reps > 0 }
-                            }
-
-                            // 2. Tu lógica original de detección de olvidados
-                            val uncompletedWithData = session.exercisesProgress.filter { progress ->
-                                val hasData = progress.sets.any { it.weight > 0 || it.reps > 0 }
-                                val isNotChecked = !progress.sets.all { it.isCompleted }
-                                hasData && isNotChecked
-                            }
-
-                            if (uncompletedWithData.isNotEmpty()) {
-                                exercisesToAutoCheck = uncompletedWithData
-                            } else {
-                                // 3. FINALIZACIÓN REAL
-                                if (hasAnyData) {
-                                    // Si hay datos, finalizamos sumando disciplina
-                                    workoutViewModel.finishWorkout(routinesViewModel) {
-                                        profileViewModel.incrementDisciplineDay()
-                                        onFinishWorkout()
-                                    }
-                                } else {
-                                    // Si está totalmente vacía, salimos sin sumar nada
+                            workoutViewModel.requestFinishWorkout()
+                            if (workoutViewModel.uncompletedWithData.value.isEmpty()) {
+                                workoutViewModel.finishWorkout(routinesViewModel) {
+                                    profileViewModel.incrementDisciplineDay()
                                     onFinishWorkout()
                                 }
                             }

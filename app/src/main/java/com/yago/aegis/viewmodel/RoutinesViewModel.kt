@@ -1,6 +1,10 @@
 package com.yago.aegis.viewmodel
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -9,38 +13,37 @@ import com.yago.aegis.data.Routine
 import com.yago.aegis.data.UserRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
 
-    // ✅ Fuente única para la librería de ejercicios (Base de Datos)
     val allExercises: StateFlow<List<Exercise>> = repository.getAllExercises()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // ✅ Etiquetas globales sincronizadas
     val globalTags: StateFlow<List<String>> = repository.globalTags
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = listOf("COMPOUND", "CHEST", "LEGS", "BACK", "SHOULDERS")
-        )
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), listOf("PUSH", "PULL", "LEGS"))
 
-    // ✅ Lista de rutinas que se muestran en la UI
     var routines = mutableStateListOf<Routine>()
         private set
 
-    // Lista temporal para la pantalla de creación/edición
     var tempExercises = mutableStateListOf<Exercise>()
         private set
 
+    // Búsqueda en librería de ejercicios: movida aquí desde ExercisesLibraryScreen
+    var librarySearchQuery by mutableStateOf("")
+
+    val filteredLibraryExercises: StateFlow<List<Exercise>> = combine(
+        allExercises,
+        snapshotFlow { librarySearchQuery }
+    ) { exercises, query ->
+        if (query.isBlank()) exercises
+        else exercises.filter { it.name.contains(query, ignoreCase = true) }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     init {
-        // Observamos los cambios en el repositorio para mantener la lista 'routines' al día
         viewModelScope.launch {
             repository.routines.collect { savedRoutines ->
                 routines.clear()
@@ -49,58 +52,33 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
-    /**
-     * Guarda el estado actual de las rutinas en el almacenamiento persistente (DataStore).
-     */
     private fun persistChanges() {
-        viewModelScope.launch {
-            repository.updateRoutines(routines.toList())
-        }
+        viewModelScope.launch { repository.updateRoutines(routines.toList()) }
     }
 
-    // --- 🛠️ GESTIÓN DE RENDIMIENTO (EL "CORAZÓN" DEL GUARDADO) ---
+    // --- RENDIMIENTO ---
 
-    /**
-     * Actualiza el texto de 'Último Entrenamiento' en un ejercicio específico.
-     * Esta función es llamada por el WorkoutViewModel al finalizar una sesión.
-     */
     fun updateExercisePerformance(exerciseId: Long, summary: String, new1RM: Double) {
         viewModelScope.launch {
-            // 1. Obtenemos la versión más reciente de la librería directamente del repositorio
-            // Usamos .first() para leer el valor actual sin quedarnos escuchando
             val currentLibrary = repository.getAllExercises().first()
             val exerciseInLibrary = currentLibrary.find { it.id == exerciseId }
-
-            exerciseInLibrary?.let { currentExercise ->
-                val updatedPR = if (new1RM > currentExercise.oneRepMax) {
-                    // Redondeo manual para evitar problemas de formato
-                    (kotlin.math.round(new1RM * 10) / 10.0)
+            exerciseInLibrary?.let { current ->
+                val updatedPR = if (new1RM > current.oneRepMax) {
+                    kotlin.math.round(new1RM * 10) / 10.0
                 } else {
-                    currentExercise.oneRepMax
+                    current.oneRepMax
                 }
-
-                // LOG DE CONTROL: Mira el Logcat en Android Studio con el filtro "AEGIS_DEBUG"
-                android.util.Log.d("AEGIS_DEBUG", "Actualizando Ejercicio: ${currentExercise.name} | Nuevo PR: $updatedPR")
-
-                val updatedExercise = currentExercise.copy(
-                    lastPerformance = summary,
-                    oneRepMax = updatedPR
-                )
-
-                // GUARDADO CRÍTICO EN EL REPOSITORIO
-                repository.upsertExercise(updatedExercise)
+                repository.upsertExercise(current.copy(lastPerformance = summary, oneRepMax = updatedPR))
             }
 
-            // 2. Actualizar las rutinas locales (esto es lo que ya hacías)
             val updatedRoutines = routines.map { routine ->
-                routine.copy(
-                    exercises = routine.exercises.map { exercise ->
-                        if (exercise.id == exerciseId) {
-                            val updatedPR = if (new1RM > exercise.oneRepMax) (kotlin.math.round(new1RM * 10) / 10.0) else exercise.oneRepMax
-                            exercise.copy(lastPerformance = summary, oneRepMax = updatedPR)
-                        } else exercise
-                    }
-                )
+                routine.copy(exercises = routine.exercises.map { exercise ->
+                    if (exercise.id == exerciseId) {
+                        val updatedPR = if (new1RM > exercise.oneRepMax) kotlin.math.round(new1RM * 10) / 10.0
+                        else exercise.oneRepMax
+                        exercise.copy(lastPerformance = summary, oneRepMax = updatedPR)
+                    } else exercise
+                })
             }
             routines.clear()
             routines.addAll(updatedRoutines)
@@ -108,38 +86,11 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
-    /**
-     * Función auxiliar para extraer el peso y calcular el 1RM aproximado
-     * Espera un formato tipo "100.0kg x 8"
-     */
-    private fun extract1RMFromSummary(summary: String): Double {
-        return try {
-            // Buscamos el peso antes de "kg" y las reps después de "x"
-            val weight = summary.substringBefore("kg").trim().toDouble()
-            val reps = summary.substringAfter("x").trim().toInt()
-
-            // Fórmula de Brzycki: Peso * (36 / (37 - Reps)) o la simplificada:
-            // Peso * (1 + 0.0333 * reps)
-            (weight * (1 + (reps / 30.0))).let {
-                kotlin.math.round(it * 10) / 10.0 // Redondear a 1 decimal
-            }
-        } catch (e: Exception) {
-            0.0
-        }
-    }
-
-    // --- 📁 GESTIÓN DE RUTINAS ---
+    // --- RUTINAS ---
 
     fun addRoutine(name: String, iconName: String = "dumbbell") {
         val newId = (routines.maxOfOrNull { it.id } ?: 0) + 1
-        routines.add(
-            Routine(
-                id = newId,
-                name = name.uppercase(),
-                exercises = emptyList(),
-                iconName = iconName
-            )
-        )
+        routines.add(Routine(id = newId, name = name.uppercase(), exercises = emptyList(), iconName = iconName))
         persistChanges()
     }
 
@@ -160,12 +111,11 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
-    // --- 📚 GESTIÓN DE LIBRERÍA DE EJERCICIOS ---
+    // --- LIBRERÍA DE EJERCICIOS ---
 
     fun saveOrUpdateExercise(exercise: Exercise) {
         viewModelScope.launch {
-            val formattedExercise = exercise.copy(name = exercise.name.uppercase())
-            repository.upsertExercise(formattedExercise)
+            repository.upsertExercise(exercise.copy(name = exercise.name.uppercase()))
         }
     }
 
@@ -177,15 +127,15 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
     }
 
     private fun removeExerciseFromAllRoutines(exerciseName: String) {
-        val updatedRoutines = routines.map { routine ->
+        val updated = routines.map { routine ->
             routine.copy(exercises = routine.exercises.filterNot { it.name == exerciseName })
         }
         routines.clear()
-        routines.addAll(updatedRoutines)
+        routines.addAll(updated)
         persistChanges()
     }
 
-    // --- 🏷️ GESTIÓN DE TAGS ---
+    // --- TAGS ---
 
     fun addGlobalTag(tag: String) {
         viewModelScope.launch {
@@ -205,7 +155,7 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
-    // --- ⏳ GESTIÓN TEMPORAL (EDICIÓN) ---
+    // --- TEMPORAL (EDICIÓN DE RUTINA) ---
 
     fun setTempExercises(exercises: List<Exercise>?) {
         tempExercises.clear()
@@ -213,9 +163,7 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
     }
 
     fun addExerciseToTemp(exercise: Exercise) {
-        if (!tempExercises.any { it.id == exercise.id }) {
-            tempExercises.add(exercise)
-        }
+        if (!tempExercises.any { it.id == exercise.id }) tempExercises.add(exercise)
     }
 
     fun clearTempExercises() {
@@ -228,32 +176,13 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
-    // Factory para crear el ViewModel
-    class RoutinesViewModelFactory(private val repository: UserRepository) : ViewModelProvider.Factory {
+    class Factory(private val repository: UserRepository) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(RoutinesViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
                 return RoutinesViewModel(repository) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")
-        }
-    }
-    fun addExerciseToRoutineDirectly(routineId: Int, exercise: Exercise) {
-        viewModelScope.launch {
-            // 1. Buscamos la rutina actual
-            val routine = routines.find { it.id == routineId } ?: return@launch
-
-            // 2. Creamos la nueva lista de ejercicios sumando el nuevo
-            val updatedExercises = routine.exercises.toMutableList().apply {
-                add(exercise)
-            }
-
-            // 3. Actualizamos la rutina real en el repositorio/DataStore inmediatamente
-            val updatedRoutine = routine.copy(exercises = updatedExercises)
-            repository.updateRoutine(updatedRoutine)
-
-            // 4. Sincronizamos la lista temporal para que la UI se refresque
-            setTempExercises(updatedExercises)
         }
     }
 }

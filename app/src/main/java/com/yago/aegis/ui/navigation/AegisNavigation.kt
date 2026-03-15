@@ -23,7 +23,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.yago.aegis.data.SettingsStore
+import com.yago.aegis.data.UserRepository
 import com.yago.aegis.ui.components.AegisBottomBar
 import com.yago.aegis.ui.components.SettingsMenu
 import com.yago.aegis.ui.screens.*
@@ -32,37 +32,41 @@ import com.yago.aegis.viewmodel.RoutinesViewModel
 import com.yago.aegis.viewmodel.StatsViewModel
 import com.yago.aegis.viewmodel.WorkoutViewModel
 
+// AegisNavigation recibe UserRepository en lugar de SettingsStore.
+// StatsViewModel se crea con su Factory pasando UserRepository (capa correcta).
 @Composable
 fun AegisNavigation(
     profileViewModel: ProfileViewModel,
     workoutViewModel: WorkoutViewModel,
     routinesViewModel: RoutinesViewModel,
-    settingsStore: SettingsStore
+    userRepository: UserRepository
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val onboardingCompleted by profileViewModel.onboardingCompleted.collectAsState(initial = null)
+
     if (onboardingCompleted == null) {
         Box(modifier = Modifier.fillMaxSize().background(Color.Black))
         return
     }
-    val startDest = if (onboardingCompleted == true) "profile" else "welcome"
 
-    // ✅ CORRECCIÓN 1: Ocultar la BottomBar en Onboarding y Settings
+    val startDest = if (onboardingCompleted == true) "profile" else "welcome"
     val onboardingRoutes = listOf("welcome", "identity", "metrics")
     val isSessionActive = currentRoute?.startsWith("active_session") == true
+
+    // StatsViewModel creado con UserRepository (ya no con SettingsStore)
     val sharedStatsViewModel: StatsViewModel = viewModel(
-        factory = com.yago.aegis.viewmodel.StatsViewModelFactory(settingsStore)
+        factory = StatsViewModel.Factory(userRepository)
     )
+
     val showBottomBar = currentRoute != "settings" &&
             !onboardingRoutes.contains(currentRoute) &&
             !isSessionActive
+
     Scaffold(
         bottomBar = {
-            if (showBottomBar) {
-                AegisBottomBar(navController)
-            }
+            if (showBottomBar) AegisBottomBar(navController)
         }
     ) { paddingValues ->
         NavHost(
@@ -71,96 +75,72 @@ fun AegisNavigation(
             modifier = Modifier.padding(paddingValues)
         ) {
 
-            // --- BLOQUE ONBOARDING ---
+            // --- ONBOARDING ---
             composable("welcome") {
                 WelcomeScreen(onContinue = { navController.navigate("identity") })
             }
-
             composable("identity") {
                 IdentityScreen(
                     viewModel = profileViewModel,
-                    onContinue = { name, bio, photoUri ->
+                    onContinue = { name, _, _ ->
                         profileViewModel.updateName(name)
                         navController.navigate("metrics")
                     },
                     onBack = { navController.popBackStack() }
                 )
             }
-
             composable("metrics") {
-                MetricsScreen(onComplete = { height, mass ->
-                    profileViewModel.updateHeight(height)
-                    profileViewModel.updateMass(mass)
-                    profileViewModel.completeOnboarding()
-
-                    // ✅ CORRECCIÓN 2: Ir a profile y limpiar el rastro del onboarding
-                    navController.navigate("profile") {
-                        popUpTo("welcome") { inclusive = true }
-                    }
-                },onBack = { navController.popBackStack() })
+                MetricsScreen(
+                    onComplete = { height, mass ->
+                        profileViewModel.updateHeight(height)
+                        profileViewModel.updateMass(mass)
+                        profileViewModel.completeOnboarding()
+                        navController.navigate("profile") {
+                            popUpTo("welcome") { inclusive = true }
+                        }
+                    },
+                    onBack = { navController.popBackStack() }
+                )
             }
 
-            // 🏋️ PANTALLA DE MIS RUTINAS (Gestión/Creación)
+            // --- RUTINAS ---
             composable(
                 route = "routine",
                 enterTransition = {
-                    slideIntoContainer(
-                        animationSpec = tween(300),
-                        towards = AnimatedContentTransitionScope.SlideDirection.Right
-                    )
+                    slideIntoContainer(animationSpec = tween(300), towards = AnimatedContentTransitionScope.SlideDirection.Right)
                 },
                 exitTransition = {
-                    slideOutOfContainer(
-                        animationSpec = tween(300),
-                        towards = AnimatedContentTransitionScope.SlideDirection.Left
-                    )
+                    slideOutOfContainer(animationSpec = tween(300), towards = AnimatedContentTransitionScope.SlideDirection.Left)
                 }
             ) {
                 RoutineScreen(
                     routinesViewModel = routinesViewModel,
-                    onNavigateToEditRoutine = { id ->
-                        navController.navigate("edit_routine/$id")
-                    }
+                    onNavigateToEditRoutine = { id -> navController.navigate("edit_routine/$id") }
                 )
             }
 
-            // 📅 PANTALLA DE DISCIPLINA SEMANAL
-
+            // --- STATS ---
             composable("stats") {
                 StatsScreen(
                     viewModel = sharedStatsViewModel,
-                    onNavigateToSettings = {
-                        navController.navigate("stats_settings")
-                    },
+                    onNavigateToSettings = { navController.navigate("stats_settings") },
                     onNavigateToExerciseDetail = { exerciseId ->
-                        // ✅ Ahora sí, navegamos pasando el ID
                         navController.navigate("exercise_detail/$exerciseId")
                     }
                 )
             }
-
             composable("stats_settings") {
-                // 3. Pásale el MISMO sharedStatsViewModel a los ajustes
-                StatsSettingsScreen(
-                    viewModel = sharedStatsViewModel, // <-- MISMA INSTANCIA
-                )
+                StatsSettingsScreen(viewModel = sharedStatsViewModel)
             }
 
-
-            // 👤 PANTALLA DE PERFIL
+            // --- PERFIL ---
             composable(
                 route = "profile",
                 enterTransition = {
-                    slideIntoContainer(
-                        animationSpec = tween(300),
-                        towards = AnimatedContentTransitionScope.SlideDirection.Left
-                    )
+                    slideIntoContainer(animationSpec = tween(300), towards = AnimatedContentTransitionScope.SlideDirection.Left)
                 },
                 exitTransition = {
-                    slideOutOfContainer(
-                        animationSpec = tween(300),
-                        towards = AnimatedContentTransitionScope.SlideDirection.Right
-                    )
+                    slideOutOfContainer(animationSpec = tween(300), towards = AnimatedContentTransitionScope.SlideDirection.Right)
                 }
             ) {
                 MainProfileScreen(
@@ -169,16 +149,12 @@ fun AegisNavigation(
                 )
             }
 
-            // 📊 PANTALLA DE EJERCICIOS (Librería)
+            // --- EJERCICIOS ---
             composable("ejercicios") {
                 ExercisesLibraryScreen(
                     routinesViewModel = routinesViewModel,
-                    onNavigateToCreate = {
-                        navController.navigate("create_exercise")
-                    },
-                    onNavigateToEdit = { exerciseName ->
-                        navController.navigate("edit_exercise/$exerciseName")
-                    }
+                    onNavigateToCreate = { navController.navigate("create_exercise") },
+                    onNavigateToEdit = { exerciseName -> navController.navigate("edit_exercise/$exerciseName") }
                 )
             }
             composable(
@@ -188,32 +164,26 @@ fun AegisNavigation(
                 val exerciseId = backStackEntry.arguments?.getLong("exerciseId") ?: -1L
                 ExerciseDetailScreen(
                     exerciseId = exerciseId,
-                    viewModel = sharedStatsViewModel, // Usamos el mismo para tener los datos
+                    viewModel = sharedStatsViewModel,
                     onBack = { navController.popBackStack() }
                 )
             }
-            // ⚙️ PANTALLA DE AJUSTES
+
+            // --- AJUSTES ---
             composable(
                 route = "settings",
                 enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
                 exitTransition = { slideOutHorizontally(targetOffsetX = { it }) }
             ) {
-                SettingsMenu(
-                    viewModel = profileViewModel,
-                )
+                SettingsMenu(viewModel = profileViewModel)
             }
 
-            // ✏️ PANTALLA DE EDICIÓN DE RUTINA
+            // --- EDICIÓN DE RUTINA ---
             composable(
                 route = "edit_routine/{routineId}",
-                arguments = listOf(
-                    androidx.navigation.navArgument("routineId") {
-                        type = androidx.navigation.NavType.IntType
-                    }
-                )
+                arguments = listOf(navArgument("routineId") { type = NavType.IntType })
             ) { backStackEntry ->
                 val routineId = backStackEntry.arguments?.getInt("routineId") ?: -1
-
                 EditRoutineScreen(
                     routineId = routineId,
                     routinesViewModel = routinesViewModel,
@@ -222,27 +192,18 @@ fun AegisNavigation(
                 )
             }
 
-            // ➕ PANTALLA DE AÑADIR EJERCICIO A RUTINA
-            composable(
-                route = "add_exercise/{routineId}",
-                arguments = listOf(navArgument("routineId") { type = NavType.IntType }) // Especificamos que es Int
-            ) { backStackEntry ->
-                // Extraemos el Int directamente
-                val id = backStackEntry.arguments?.getInt("routineId") ?: -1
-
+            composable(route = "add_exercise") {
                 AddExerciseScreen(
                     routinesViewModel = routinesViewModel,
-                    routineId = id,
                     onNavigateBack = { navController.popBackStack() },
+                    onExerciseCreated = {}
                 )
             }
 
-            // 📝 PANTALLA DE EDICIÓN DE EJERCICIO
             composable("edit_exercise/{exerciseName}") { backStackEntry ->
                 val exerciseName = backStackEntry.arguments?.getString("exerciseName")
                 val exercise = routinesViewModel.allExercises.collectAsState().value
                     .find { it.name == exerciseName }
-
                 EditExerciseScreen(
                     routinesViewModel = routinesViewModel,
                     exerciseToEdit = exercise,
@@ -250,7 +211,6 @@ fun AegisNavigation(
                 )
             }
 
-            // 🆕 CREAR NUEVO EJERCICIO
             composable("create_exercise") {
                 EditExerciseScreen(
                     routinesViewModel = routinesViewModel,
@@ -259,15 +219,13 @@ fun AegisNavigation(
                 )
             }
 
-            // 🎯 SELECCIONAR RUTINA PARA ENTRENAR
+            // --- SELECCIÓN DE RUTINA PARA ENTRENAR ---
             composable("train") {
                 SelectRoutineScreen(
                     routinesViewModel = routinesViewModel,
                     workoutViewModel = workoutViewModel,
                     onNavigateToCreateRoutine = {
-                        // Navegamos a la sección de gestión de rutinas
                         navController.navigate("routine") {
-                            // Esto evita que se acumulen pantallas en la pila
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
                             }
@@ -275,30 +233,19 @@ fun AegisNavigation(
                             restoreState = true
                         }
                     },
-                    onStartWorkout = { routineId ->
-                        navController.navigate("active_session/$routineId")
-                    }
+                    onStartWorkout = { routineId -> navController.navigate("active_session/$routineId") }
                 )
             }
 
             composable(
                 route = "active_session/{routineId}",
-                arguments = listOf(
-                    androidx.navigation.navArgument("routineId") {
-                        type = androidx.navigation.NavType.IntType
-                    }
-                )
+                arguments = listOf(navArgument("routineId") { type = NavType.IntType })
             ) { backStackEntry ->
                 val routineId = backStackEntry.arguments?.getInt("routineId") ?: -1
-
-                // Buscamos la rutina real para pasarla al ViewModel
                 val routine = routinesViewModel.routines.find { it.id == routineId }
-
-                // Si la rutina existe, la iniciamos en el WorkoutViewModel
                 LaunchedEffect(routineId) {
                     routine?.let { workoutViewModel.startWorkout(it) }
                 }
-
                 ActiveSessionScreen(
                     workoutViewModel = workoutViewModel,
                     routinesViewModel = routinesViewModel,
@@ -306,7 +253,6 @@ fun AegisNavigation(
                     onFinishWorkout = { navController.popBackStack() }
                 )
             }
-
         }
     }
 }

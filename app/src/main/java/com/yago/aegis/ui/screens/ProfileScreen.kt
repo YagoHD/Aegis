@@ -33,7 +33,6 @@ import com.yago.aegis.viewmodel.ProfileViewModel
 fun MainProfileScreen(viewModel: ProfileViewModel, onNavigateToSettings: () -> Unit) {
     Scaffold(
         topBar = {
-            // Ya configurada con 10% Bronce en subtítulo y 60% Black
             AegisTopBar(
                 title = stringResource(R.string.profile_title),
                 actions = {
@@ -41,7 +40,6 @@ fun MainProfileScreen(viewModel: ProfileViewModel, onNavigateToSettings: () -> U
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Ajustes",
-                            // Usamos onBackground (Blanco roto) para iconos secundarios
                             tint = MaterialTheme.colorScheme.onBackground,
                             modifier = Modifier.size(22.dp)
                         )
@@ -49,7 +47,6 @@ fun MainProfileScreen(viewModel: ProfileViewModel, onNavigateToSettings: () -> U
                 }
             )
         },
-        // 60%: Fondo negro profundo del sistema
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
@@ -60,7 +57,9 @@ fun MainProfileScreen(viewModel: ProfileViewModel, onNavigateToSettings: () -> U
 
 @Composable
 fun ProfileContent(viewModel: ProfileViewModel) {
-    val user = viewModel.user
+    // Un solo collectAsState para todo el estado (UiState sellado)
+    val state by viewModel.uiState.collectAsState()
+    val user = state.user
     val imc = viewModel.calcularBMI()
     val scrollState = rememberScrollState()
     val context = LocalContext.current
@@ -77,7 +76,9 @@ fun ProfileContent(viewModel: ProfileViewModel) {
                     it,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
                 )
-            } catch (e: Exception) { e.printStackTrace() }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
             viewModel.updatePhoto(uri = it.toString(), type = photoTypeTarget)
         }
     }
@@ -85,7 +86,7 @@ fun ProfileContent(viewModel: ProfileViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp) // Aumentamos padding lateral para estilo Elite
+            .padding(horizontal = 24.dp)
             .imePadding()
             .verticalScroll(scrollState)
     ) {
@@ -99,10 +100,9 @@ fun ProfileContent(viewModel: ProfileViewModel) {
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        // --- BIOMETRÍA (Sección con etiquetas en AegisSteel) ---
         Text(
             text = stringResource(R.string.label_biometrics).uppercase(),
-            color = MaterialTheme.colorScheme.secondary, // AegisSteel (Gris técnico)
+            color = MaterialTheme.colorScheme.secondary,
             fontSize = 11.sp,
             fontWeight = FontWeight.Black,
             letterSpacing = 2.sp
@@ -114,22 +114,19 @@ fun ProfileContent(viewModel: ProfileViewModel) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // BiometricCard usará internamente el 30% (SurfaceDark)
             Box(modifier = Modifier.weight(1f)) {
                 BiometricCard(stringResource(R.string.label_mass), user.currentMass, "KG") {
                     viewModel.updateMass(it)
                 }
             }
-
-            if (viewModel.showBodyFat) {
+            if (state.showBodyFat) {
                 Box(modifier = Modifier.weight(1f)) {
                     BiometricCard(stringResource(R.string.label_body_fat), user.bodyFat, "%") {
                         viewModel.updateBodyFat(it)
                     }
                 }
             }
-
-            if (viewModel.showBMI) {
+            if (state.showBMI) {
                 Box(modifier = Modifier.weight(1f)) {
                     BiometricCard(stringResource(R.string.label_bmi), "%.1f".format(imc), "")
                 }
@@ -138,8 +135,7 @@ fun ProfileContent(viewModel: ProfileViewModel) {
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        // --- MEDIDAS DINÁMICAS ---
-        if (viewModel.showGirths) {
+        if (state.showGirths) {
             Text(
                 text = stringResource(R.string.label_key_girths).uppercase(),
                 color = MaterialTheme.colorScheme.secondary,
@@ -148,8 +144,6 @@ fun ProfileContent(viewModel: ProfileViewModel) {
                 letterSpacing = 2.sp
             )
             Spacer(modifier = Modifier.height(16.dp))
-
-            // Contenedor 30%: SurfaceDark con borde fino
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -158,7 +152,7 @@ fun ProfileContent(viewModel: ProfileViewModel) {
                     .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
                     .padding(vertical = 8.dp)
             ) {
-                viewModel.customMeasures.forEach { measure ->
+                state.customMeasures.forEach { measure ->
                     GirthRow(measure.name, measure.value) { newValue ->
                         viewModel.updateMeasureValue(measure.id, newValue)
                     }
@@ -168,8 +162,7 @@ fun ProfileContent(viewModel: ProfileViewModel) {
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        // --- LOG VISUAL ---
-        if (viewModel.showVisualLog) {
+        if (state.showVisualLog) {
             VisualLogSection(
                 baseUri = user.basePhotoUri?.let { Uri.parse(it) },
                 baseDate = user.basePhotoDate,
@@ -188,9 +181,7 @@ fun ProfileContent(viewModel: ProfileViewModel) {
             onConfirm = { type ->
                 photoTypeTarget = type
                 showDialog = false
-                launcher.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                )
+                launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             }
         )
     }

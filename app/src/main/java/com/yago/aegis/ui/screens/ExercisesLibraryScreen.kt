@@ -32,14 +32,10 @@ fun ExercisesLibraryScreen(
     onNavigateToEdit: (String) -> Unit
 ) {
     var exerciseToDelete by remember { mutableStateOf<Exercise?>(null) }
-    var searchQuery by remember { mutableStateOf("") }
-    val exercises by routinesViewModel.allExercises.collectAsState(initial = emptyList())
 
-    val filteredExercises = exercises.filter {
-        it.name.contains(searchQuery, ignoreCase = true)
-    }
+    // La búsqueda vive ahora en el ViewModel, no en la Screen
+    val filteredExercises by routinesViewModel.filteredLibraryExercises.collectAsState()
 
-    // --- DIÁLOGO DE ELIMINACIÓN (ESTILO ÉLITE) ---
     if (exerciseToDelete != null) {
         AegisAlertDialog(
             title = "ELIMINAR EJERCICIO",
@@ -49,12 +45,11 @@ fun ExercisesLibraryScreen(
             },
             onDismiss = { exerciseToDelete = null },
             confirmText = "ELIMINAR",
-            // Rojo burdeos técnico para peligro
             confirmButtonColor = Color(0xFFB3261E)
         ) {
             Text(
                 text = "¿Estás seguro de que quieres eliminar '${exerciseToDelete?.name}'? Esta acción es irreversible y afectará a tus rutinas.",
-                color = MaterialTheme.colorScheme.secondary, // AegisSteel
+                color = MaterialTheme.colorScheme.secondary,
                 fontSize = 14.sp,
                 lineHeight = 20.sp
             )
@@ -62,29 +57,22 @@ fun ExercisesLibraryScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background, // 050505
-        topBar = {
-            AegisTopBar(
-                title = stringResource(R.string.exercices_title)
-            )
-        },
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = { AegisTopBar(title = stringResource(R.string.exercices_title)) },
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 24.dp) // Padding de lujo
+                .padding(horizontal = 24.dp)
         ) {
             Spacer(modifier = Modifier.height(20.dp))
 
-            // --- BOTÓN CREAR: Módulo de Acción ---
             Surface(
                 onClick = onNavigateToCreate,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp),
+                modifier = Modifier.fillMaxWidth().height(60.dp),
                 shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.surface, // 121212
+                color = MaterialTheme.colorScheme.surface,
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
             ) {
                 Row(
@@ -110,10 +98,9 @@ fun ExercisesLibraryScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // --- BUSCADOR TÁCTICO ---
             OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
+                value = routinesViewModel.librarySearchQuery,
+                onValueChange = { routinesViewModel.librarySearchQuery = it },
                 placeholder = {
                     Text(
                         "BUSCAR EN LA LIBRERÍA...",
@@ -147,10 +134,9 @@ fun ExercisesLibraryScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // --- LISTA DE EJERCICIOS ---
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(bottom = 100.dp) // Espacio para la BottomBar
+                contentPadding = PaddingValues(bottom = 100.dp)
             ) {
                 items(filteredExercises) { exercise ->
                     ExerciseCard(
