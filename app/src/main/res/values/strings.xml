@@ -66,4 +66,5 @@
     <string name="select_icon">SELECCIONA UN ICONO</string>
     <string name="tags_title">TAGS Y CATEGORIAS</string>
     <string name="nav_train" />
+    <string name="default_web_client_id">322703265285-qke4qco28fmnp92utb5ob8l9sak16lkp.apps.googleusercontent.com</string>
 </resources>
