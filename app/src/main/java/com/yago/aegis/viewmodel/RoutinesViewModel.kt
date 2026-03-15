@@ -138,29 +138,57 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
-    // True si hay al menos 1 ejercicio con tag __base__ en la librería
+    // True si hay al menos 1 ejercicio base (nuevo con BASE_TAG o legacy con ID coincidente)
     val hasDefaultExercises: StateFlow<Boolean> = allExercises.map { exercises ->
-        exercises.any { DefaultExercises.BASE_TAG in it.tags }
+        exercises.any {
+            DefaultExercises.BASE_TAG in it.tags || DefaultExercises.isLegacyBaseExercise(it)
+        }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     fun loadDefaultExercises() {
         viewModelScope.launch {
             val current = allExercises.value
-            // Solo salta los que ya existen con __base__ (ejercicios base ya cargados)
-            // Los ejercicios del usuario con el mismo nombre NO se tocan — tienen IDs distintos
-            val existingBaseIds = current
+
+            // 1. Migrar legacy: ejercicios base sin BASE_TAG → añadirles BASE_TAG y nuevo ID
+            val legacyToMigrate = current.filter { DefaultExercises.isLegacyBaseExercise(it) }
+            legacyToMigrate.forEach { legacy ->
+                // Primero eliminamos el legacy
+                repository.deleteExercise(legacy)
+                // Luego guardamos la versión nueva con BASE_TAG e ID correcto
+                val updated = DefaultExercises.getAll().find { it.name == legacy.name }
+                if (updated != null) {
+                    // Preservamos oneRepMax y lastPerformance del usuario
+                    repository.upsertExercise(
+                        updated.copy(
+                            oneRepMax = legacy.oneRepMax,
+                            lastPerformance = legacy.lastPerformance,
+                            bestSet = legacy.bestSet,
+                            history = legacy.history
+                        )
+                    )
+                }
+            }
+
+            // 2. Añadir los que no existen todavía (ni legacy ni nuevo)
+            val currentAfterMigration = allExercises.value
+            val existingBaseIds = currentAfterMigration
                 .filter { DefaultExercises.BASE_TAG in it.tags }
                 .map { it.id }.toSet()
-            val toAdd = DefaultExercises.getAll().filter { it.id !in existingBaseIds }
+            val migratedNames = legacyToMigrate.map { it.name }.toSet()
+            val toAdd = DefaultExercises.getAll().filter {
+                it.id !in existingBaseIds && it.name !in migratedNames
+            }
             toAdd.forEach { repository.upsertExercise(it) }
         }
     }
 
     fun deleteDefaultExercises() {
         viewModelScope.launch {
-            // Solo elimina ejercicios que tengan el tag __base__
-            // Los ejercicios del usuario con el mismo nombre NO se ven afectados
-            val toDelete = allExercises.value.filter { DefaultExercises.BASE_TAG in it.tags }
+            // Elimina ejercicios con BASE_TAG (nuevos) O con ID legacy coincidente
+            // Nunca toca ejercicios del usuario aunque tengan el mismo nombre
+            val toDelete = allExercises.value.filter {
+                DefaultExercises.BASE_TAG in it.tags || DefaultExercises.isLegacyBaseExercise(it)
+            }
             toDelete.forEach { repository.deleteExercise(it) }
         }
     }
