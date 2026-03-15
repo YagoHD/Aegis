@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.R
+import com.yago.aegis.data.DefaultExercises
 import com.yago.aegis.data.Exercise
 import com.yago.aegis.data.globalExerciseIcons
 import com.yago.aegis.ui.components.AegisAlertDialog
@@ -53,7 +54,10 @@ fun AddExerciseScreen(
 
     // Tags disponibles derivados de los ejercicios de la librería
     val availableTags = remember(libraryExercises) {
-        libraryExercises.flatMap { it.tags }.map { it.uppercase() }.distinct().sorted()
+        libraryExercises.flatMap { it.tags }
+            .map { it.uppercase() }
+            .filter { it != DefaultExercises.BASE_TAG.uppercase() }
+            .distinct().sorted()
     }
 
     // Filtro de búsqueda + tag

@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.R
+import com.yago.aegis.data.DefaultExercises
 import com.yago.aegis.data.Exercise
 import com.yago.aegis.data.globalExerciseIcons
 import com.yago.aegis.ui.components.AegisAlertDialog
@@ -37,7 +38,7 @@ fun EditExerciseScreen(
     // 1. ESTADOS (Se mantienen igual, funcionan bien)
     var exerciseName by remember { mutableStateOf(exerciseToEdit?.name ?: "") }
     val selectedTags = remember { mutableStateListOf<String>().apply {
-        exerciseToEdit?.tags?.let { addAll(it) }
+        exerciseToEdit?.tags?.let { tags -> addAll(tags.filter { it != DefaultExercises.BASE_TAG }) }
     } }
     var selectedIconName by remember { mutableStateOf(exerciseToEdit?.iconName ?: "dumbbell") }
 

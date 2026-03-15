@@ -44,7 +44,9 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
         globalTags
     ) { exercises, globals ->
         val fromExercises = exercises.flatMap { it.tags }.map { it.uppercase() }
-        (globals.map { it.uppercase() } + fromExercises).distinct().sorted()
+        (globals.map { it.uppercase() } + fromExercises)
+            .filter { it != DefaultExercises.BASE_TAG.uppercase() }
+            .distinct().sorted()
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val filteredLibraryExercises: StateFlow<List<Exercise>> = combine(
@@ -136,26 +138,29 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
-    // True si hay al menos 1 ejercicio base en la librería
+    // True si hay al menos 1 ejercicio con tag __base__ en la librería
     val hasDefaultExercises: StateFlow<Boolean> = allExercises.map { exercises ->
-        val defaultNames = DefaultExercises.getAll().map { it.name }.toSet()
-        exercises.any { it.name in defaultNames }
+        exercises.any { DefaultExercises.BASE_TAG in it.tags }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     fun loadDefaultExercises() {
         viewModelScope.launch {
             val current = allExercises.value
-            val currentNames = current.map { it.name }.toSet()
-            // Solo añade los que no existen ya (por si el usuario los borró y vuelve a importar)
-            val toAdd = DefaultExercises.getAll().filter { it.name !in currentNames }
+            // Solo salta los que ya existen con __base__ (ejercicios base ya cargados)
+            // Los ejercicios del usuario con el mismo nombre NO se tocan — tienen IDs distintos
+            val existingBaseIds = current
+                .filter { DefaultExercises.BASE_TAG in it.tags }
+                .map { it.id }.toSet()
+            val toAdd = DefaultExercises.getAll().filter { it.id !in existingBaseIds }
             toAdd.forEach { repository.upsertExercise(it) }
         }
     }
 
     fun deleteDefaultExercises() {
         viewModelScope.launch {
-            val defaultNames = DefaultExercises.getAll().map { it.name }.toSet()
-            val toDelete = allExercises.value.filter { it.name in defaultNames }
+            // Solo elimina ejercicios que tengan el tag __base__
+            // Los ejercicios del usuario con el mismo nombre NO se ven afectados
+            val toDelete = allExercises.value.filter { DefaultExercises.BASE_TAG in it.tags }
             toDelete.forEach { repository.deleteExercise(it) }
         }
     }

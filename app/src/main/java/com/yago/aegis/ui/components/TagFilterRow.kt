@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yago.aegis.data.DefaultExercises
 
 /**
  * Fila de chips con scroll horizontal para filtrar por tag.
@@ -44,8 +45,8 @@ fun TagFilterRow(
             onClick = { onTagSelected("ALL") }
         )
 
-        // Resto de tags
-        tags.forEach { tag ->
+        // Resto de tags — se oculta el tag interno __base__
+        tags.filter { it != DefaultExercises.BASE_TAG }.forEach { tag ->
             TagChipFilter(
                 label = tag.uppercase(),
                 isSelected = selectedTag == tag,

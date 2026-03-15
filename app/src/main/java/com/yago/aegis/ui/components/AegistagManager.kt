@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.yago.aegis.R
+import com.yago.aegis.data.DefaultExercises
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -91,7 +92,7 @@ fun AegisTagManager(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                allTags.forEach { tag ->
+                allTags.filter { it != DefaultExercises.BASE_TAG }.forEach { tag ->
                     val isSelected = selectedTags.contains(tag)
                     TagChip(
                         text = tag.uppercase(), // Consistencia táctica

@@ -7,6 +7,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.yago.aegis.data.DefaultExercises
 import com.yago.aegis.data.Exercise
 import com.yago.aegis.data.UserRepository
 import com.yago.aegis.data.WorkoutSession
@@ -85,7 +86,10 @@ class StatsViewModel(private val repository: UserRepository) : ViewModel() {
 
     // Tags disponibles para el filtro en Stats
     val availableStatsTags: StateFlow<List<String>> = allExercises.map { exercises ->
-        exercises.flatMap { it.tags }.map { it.uppercase() }.distinct().sorted()
+        exercises.flatMap { it.tags }
+            .map { it.uppercase() }
+            .filter { it != DefaultExercises.BASE_TAG.uppercase() }
+            .distinct().sorted()
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val filteredExercises: Flow<List<Exercise>> = combine(

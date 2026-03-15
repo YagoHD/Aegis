@@ -1,5 +1,9 @@
 package com.yago.aegis.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -36,6 +40,7 @@ fun ExercisesLibraryScreen(
 ) {
     var exerciseToDelete by remember { mutableStateOf<Exercise?>(null) }
     var showLoadDefaultsDialog by remember { mutableStateOf(false) }
+    var showFilters by remember { mutableStateOf(false) }
 
     val filteredExercises by routinesViewModel.filteredLibraryExercises.collectAsState()
     val allExercises by routinesViewModel.allExercises.collectAsState()
@@ -43,7 +48,10 @@ fun ExercisesLibraryScreen(
     val hasDefaultExercises by routinesViewModel.hasDefaultExercises.collectAsState()
     val isEmpty = allExercises.isEmpty()
 
-    // ─── DIÁLOGO DINÁMICO cargar / eliminar ───
+    val isFiltering = routinesViewModel.librarySearchQuery.isNotEmpty()
+            || routinesViewModel.selectedLibraryTag != "ALL"
+
+    // ─── DIÁLOGO cargar / eliminar ───
     if (showLoadDefaultsDialog) {
         AegisAlertDialog(
             title = if (hasDefaultExercises) "ELIMINAR EJERCICIOS BASE" else "CARGAR EJERCICIOS BASE",
@@ -99,144 +107,201 @@ fun ExercisesLibraryScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 20.dp)
         ) {
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // ─── BOTÓN CREAR ───
-            Surface(
-                onClick = onNavigateToCreate,
-                modifier = Modifier.fillMaxWidth().height(60.dp),
-                shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.surface,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+            // ─── FILA DE BOTONES (mismo tamaño, misma línea) ───
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                // Botón crear
+                Surface(
+                    onClick = onNavigateToCreate,
+                    modifier = Modifier.weight(1f).height(44.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.AddCircle,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Icon(
+                            Icons.Default.Add, null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            "CREAR",
+                            color = MaterialTheme.colorScheme.onBackground,
+                            fontWeight = FontWeight.Black,
+                            fontSize = 11.sp,
+                            letterSpacing = 1.sp
+                        )
+                    }
+                }
+
+                // Botón cargar/eliminar base
+                val baseColor = if (hasDefaultExercises)
+                    MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
+                else if (isEmpty) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.secondary
+
+                Surface(
+                    onClick = { showLoadDefaultsDialog = true },
+                    modifier = Modifier.weight(1f).height(44.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    color = Color.Transparent,
+                    border = BorderStroke(
+                        1.dp,
+                        if (hasDefaultExercises) MaterialTheme.colorScheme.error.copy(alpha = 0.4f)
+                        else if (isEmpty) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                        else MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
                     )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = "CREAR NUEVO EJERCICIO",
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontWeight = FontWeight.Black,
-                        fontSize = 13.sp,
-                        letterSpacing = 1.sp
-                    )
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Icon(
+                            if (hasDefaultExercises) Icons.Default.DeleteSweep else Icons.Default.Download,
+                            null,
+                            tint = baseColor,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            if (hasDefaultExercises) "ELIMINAR BASE" else "CARGAR BASE",
+                            color = baseColor,
+                            fontWeight = FontWeight.Black,
+                            fontSize = 11.sp,
+                            letterSpacing = 1.sp
+                        )
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // ─── BOTÓN DINÁMICO: CARGAR o ELIMINAR ejercicios base ───
-            val btnBorderColor = when {
-                hasDefaultExercises -> MaterialTheme.colorScheme.error.copy(alpha = 0.5f)
-                isEmpty             -> MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                else                -> MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
-            }
-            val btnIconColor = when {
-                hasDefaultExercises -> MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
-                isEmpty             -> MaterialTheme.colorScheme.primary
-                else                -> MaterialTheme.colorScheme.secondary
-            }
-            val btnTextColor = btnIconColor
-            val btnIcon = if (hasDefaultExercises) Icons.Default.DeleteSweep else Icons.Default.Download
-            val btnLabel = if (hasDefaultExercises) "ELIMINAR EJERCICIOS BASE" else "CARGAR EJERCICIOS BASE"
-
-            Surface(
-                onClick = { showLoadDefaultsDialog = true },
-                modifier = Modifier.fillMaxWidth().height(48.dp),
-                shape = RoundedCornerShape(8.dp),
-                color = Color.Transparent,
-                border = BorderStroke(1.dp, btnBorderColor)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = btnIcon,
-                        contentDescription = null,
-                        tint = btnIconColor,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = btnLabel,
-                        color = btnTextColor,
-                        fontWeight = FontWeight.Black,
-                        fontSize = 11.sp,
-                        letterSpacing = 1.sp
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // ─── BUSCADOR + TAGS (solo si hay ejercicios) ───
+            // ─── BUSCADOR + BOTÓN FILTRO ───
             if (!isEmpty) {
-                OutlinedTextField(
-                    value = routinesViewModel.librarySearchQuery,
-                    onValueChange = { routinesViewModel.librarySearchQuery = it },
-                    placeholder = {
-                        Text(
-                            "BUSCAR EN LA LIBRERÍA...",
-                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    },
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    leadingIcon = {
-                        Icon(
-                            Icons.Default.Search,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    },
-                    trailingIcon = {
-                        if (routinesViewModel.librarySearchQuery.isNotEmpty()) {
-                            IconButton(onClick = { routinesViewModel.librarySearchQuery = "" }) {
-                                Icon(
-                                    Icons.Default.Close, null,
-                                    tint = MaterialTheme.colorScheme.secondary,
-                                    modifier = Modifier.size(18.dp)
-                                )
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = routinesViewModel.librarySearchQuery,
+                        onValueChange = { routinesViewModel.librarySearchQuery = it },
+                        placeholder = {
+                            Text(
+                                "BUSCAR...",
+                                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        },
+                        modifier = Modifier.weight(1f),
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.Search, null,
+                                tint = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        },
+                        trailingIcon = {
+                            if (routinesViewModel.librarySearchQuery.isNotEmpty()) {
+                                IconButton(onClick = { routinesViewModel.librarySearchQuery = "" }) {
+                                    Icon(Icons.Default.Close, null,
+                                        tint = MaterialTheme.colorScheme.secondary,
+                                        modifier = Modifier.size(16.dp))
+                                }
+                            }
+                        },
+                        shape = RoundedCornerShape(8.dp),
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            cursorColor = MaterialTheme.colorScheme.primary,
+                            focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onBackground
+                        ),
+                        textStyle = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                    )
+
+                    // Botón filtro — se resalta si hay un tag activo
+                    val filterActive = routinesViewModel.selectedLibraryTag != "ALL"
+                    Surface(
+                        onClick = { showFilters = !showFilters },
+                        shape = RoundedCornerShape(8.dp),
+                        color = if (filterActive)
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                        else MaterialTheme.colorScheme.surface,
+                        border = BorderStroke(
+                            1.dp,
+                            if (filterActive) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
+                        ),
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                            Icon(
+                                if (filterActive) Icons.Default.FilterAlt else Icons.Default.FilterList,
+                                null,
+                                tint = if (filterActive) MaterialTheme.colorScheme.primary
+                                       else MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                }
+
+                // ─── TAGS DESPLEGABLES ───
+                AnimatedVisibility(
+                    visible = showFilters && availableTags.isNotEmpty(),
+                    enter = expandVertically(animationSpec = tween(200)),
+                    exit = shrinkVertically(animationSpec = tween(200))
+                ) {
+                    Column {
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            TagFilterRow(
+                                tags = availableTags,
+                                selectedTag = routinesViewModel.selectedLibraryTag,
+                                onTagSelected = { routinesViewModel.selectedLibraryTag = it },
+                                modifier = Modifier.weight(1f)
+                            )
+                            // Botón limpiar filtro
+                            if (routinesViewModel.selectedLibraryTag != "ALL") {
+                                TextButton(
+                                    onClick = { routinesViewModel.selectedLibraryTag = "ALL" },
+                                    contentPadding = PaddingValues(horizontal = 8.dp)
+                                ) {
+                                    Text(
+                                        "LIMPIAR",
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Black
+                                    )
+                                }
                             }
                         }
-                    },
-                    shape = RoundedCornerShape(8.dp),
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        cursorColor = MaterialTheme.colorScheme.primary,
-                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onBackground
-                    ),
-                    textStyle = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                )
-
-                // ─── TAGS ───
-                if (availableTags.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    TagFilterRow(
-                        tags = availableTags,
-                        selectedTag = routinesViewModel.selectedLibraryTag,
-                        onTagSelected = { routinesViewModel.selectedLibraryTag = it }
-                    )
+                    }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
             }
 
             // ─── LISTA o ESTADO VACÍO ───
@@ -244,22 +309,19 @@ fun ExercisesLibraryScreen(
                 EmptyLibraryState()
             } else {
                 LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
                     contentPadding = PaddingValues(bottom = 100.dp)
                 ) {
-                    // Contador al buscar o filtrar
-                    val isFiltering = routinesViewModel.librarySearchQuery.isNotEmpty()
-                            || routinesViewModel.selectedLibraryTag != "ALL"
                     if (isFiltering) {
                         item {
                             Text(
-                                text = "${filteredExercises.size} EJERCICIOS ENCONTRADOS",
+                                text = "${filteredExercises.size} EJERCICIOS",
                                 color = MaterialTheme.colorScheme.secondary,
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Black,
                                 letterSpacing = 1.5.sp
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(6.dp))
                         }
                     }
 
@@ -273,21 +335,18 @@ fun ExercisesLibraryScreen(
                         )
                     }
 
-                    // Sin resultados
                     if (filteredExercises.isEmpty() && isFiltering) {
                         item {
                             Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 40.dp),
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 40.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Icon(
                                     Icons.Default.SearchOff, null,
                                     tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
-                                    modifier = Modifier.size(40.dp)
+                                    modifier = Modifier.size(36.dp)
                                 )
-                                Spacer(modifier = Modifier.height(12.dp))
+                                Spacer(modifier = Modifier.height(10.dp))
                                 Text(
                                     "SIN RESULTADOS",
                                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
@@ -308,9 +367,7 @@ fun ExercisesLibraryScreen(
 @Composable
 private fun EmptyLibraryState() {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 48.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(

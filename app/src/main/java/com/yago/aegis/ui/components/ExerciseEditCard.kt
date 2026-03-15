@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yago.aegis.data.DefaultExercises
 import com.yago.aegis.data.Exercise
 import com.yago.aegis.data.getExerciseIcon
 
@@ -79,8 +80,12 @@ fun ExerciseCard(
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = (if (exercise.tags.isNotEmpty()) exercise.tags.joinToString(" • ")
-                    else "${exercise.type} • ${exercise.muscleGroup}").uppercase(),
+                    text = exercise.tags
+                        .filter { it != DefaultExercises.BASE_TAG }
+                        .takeIf { it.isNotEmpty() }
+                        ?.joinToString(" • ")
+                        ?.uppercase()
+                        ?: "${exercise.type} • ${exercise.muscleGroup}".uppercase(),
                     color = MaterialTheme.colorScheme.secondary,
                     fontSize = 9.sp,
                     fontWeight = FontWeight.Bold,
