@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -44,7 +45,8 @@ private val motivationalQuotes = listOf(
 fun WorkoutCompleteScreen(
     summary: WorkoutSummary,
     previousVolume: Double,
-    onFinish: () -> Unit
+    onFinish: () -> Unit,
+    onNavigateToHistory: () -> Unit = {}
 ) {
     val scrollState = rememberScrollState()
     val quote = remember { motivationalQuotes.random() }
@@ -322,7 +324,30 @@ fun WorkoutCompleteScreen(
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ─── ENLACE AL HISTORIAL ───
+            TextButton(
+                onClick = onNavigateToHistory,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                androidx.compose.material3.Icon(
+                    imageVector = androidx.compose.material.icons.Icons.Default.History,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = androidx.compose.ui.Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "VER HISTORIAL COMPLETO",
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             // ─── BOTÓN FINISH SESSION ───
             Button(

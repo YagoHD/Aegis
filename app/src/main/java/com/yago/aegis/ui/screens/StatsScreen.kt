@@ -17,7 +17,8 @@ import com.yago.aegis.viewmodel.StatsViewModel
 fun StatsScreen(
     viewModel: StatsViewModel,
     onNavigateToSettings: () -> Unit = {},
-    onNavigateToExerciseDetail: (Long) -> Unit = {}
+    onNavigateToExerciseDetail: (Long) -> Unit = {},
+    onNavigateToHistory: () -> Unit = {}
 ) {
     val showVolume by viewModel.showVolumeCard.collectAsState(initial = true)
     val showDiscipline by viewModel.showDisciplineCard.collectAsState(initial = true)
@@ -36,6 +37,14 @@ fun StatsScreen(
             AegisTopBar(
                 title = "ESTADÍSTICAS",
                 actions = {
+                    IconButton(onClick = onNavigateToHistory) {
+                        Icon(
+                            imageVector = androidx.compose.material.icons.Icons.Default.History,
+                            contentDescription = "Historial",
+                            tint = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(
                             imageVector = Icons.Default.Settings,

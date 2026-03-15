@@ -69,7 +69,8 @@ fun AegisNavigation(
             !authRoutes.contains(currentRoute) &&
             !isSessionActive &&
             currentRoute != "workout_settings" &&
-            currentRoute != "workout_complete"
+            currentRoute != "workout_complete" &&
+            currentRoute != "workout_history"
 
     Scaffold(
         bottomBar = { if (showBottomBar) AegisBottomBar(navController) }
@@ -148,7 +149,8 @@ fun AegisNavigation(
                 StatsScreen(
                     viewModel = sharedStatsViewModel,
                     onNavigateToSettings = { navController.navigate("stats_settings") },
-                    onNavigateToExerciseDetail = { exerciseId -> navController.navigate("exercise_detail/$exerciseId") }
+                    onNavigateToExerciseDetail = { exerciseId -> navController.navigate("exercise_detail/$exerciseId") },
+                    onNavigateToHistory = { navController.navigate("workout_history") }
                 )
             }
             composable("stats_settings") { StatsSettingsScreen(viewModel = sharedStatsViewModel) }
@@ -274,7 +276,8 @@ fun AegisNavigation(
                             navController.navigate("profile") {
                                 popUpTo(0) { inclusive = true }
                             }
-                        }
+                        },
+                        onNavigateToHistory = { navController.navigate("workout_history") }
                     )
                 } else {
                     LaunchedEffect(Unit) {
@@ -283,6 +286,14 @@ fun AegisNavigation(
                         }
                     }
                 }
+            }
+
+            composable("workout_history") {
+                val history by sharedStatsViewModel.workoutHistory.collectAsState()
+                WorkoutHistoryScreen(
+                    sessions = history,
+                    onBack = { navController.popBackStack() }
+                )
             }
 
             composable("workout_settings") {
