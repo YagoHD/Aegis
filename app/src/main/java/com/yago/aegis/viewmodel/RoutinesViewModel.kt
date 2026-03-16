@@ -49,18 +49,44 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
             .distinct().sorted()
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val filteredLibraryExercises: StateFlow<List<Exercise>> = combine(
+    // Ejercicios del usuario (sin BASE_TAG)
+    val filteredUserExercises: StateFlow<List<Exercise>> = combine(
         allExercises,
         snapshotFlow { librarySearchQuery },
         snapshotFlow { selectedLibraryTag }
     ) { exercises, query, tag ->
-        exercises.filter { exercise ->
-            val matchesQuery = query.isBlank() || exercise.name.contains(query, ignoreCase = true)
-            val matchesTag = tag == "ALL" || exercise.tags.any { it.uppercase() == tag.uppercase() }
-                || exercise.muscleGroup.uppercase() == tag.uppercase()
-            matchesQuery && matchesTag
-        }
+        exercises
+            .filter { DefaultExercises.BASE_TAG !in it.tags }
+            .filter { exercise ->
+                val matchesQuery = query.isBlank() || exercise.name.contains(query, ignoreCase = true)
+                val matchesTag = tag == "ALL" || exercise.tags.any { it.uppercase() == tag.uppercase() }
+                    || exercise.muscleGroup.uppercase() == tag.uppercase()
+                matchesQuery && matchesTag
+            }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // Ejercicios base (con BASE_TAG)
+    val filteredBaseExercises: StateFlow<List<Exercise>> = combine(
+        allExercises,
+        snapshotFlow { librarySearchQuery },
+        snapshotFlow { selectedLibraryTag }
+    ) { exercises, query, tag ->
+        exercises
+            .filter { DefaultExercises.BASE_TAG in it.tags }
+            .filter { exercise ->
+                val matchesQuery = query.isBlank() || exercise.name.contains(query, ignoreCase = true)
+                val matchesTag = tag == "ALL" || exercise.tags.any { it.uppercase() == tag.uppercase() }
+                    || exercise.muscleGroup.uppercase() == tag.uppercase()
+                matchesQuery && matchesTag
+            }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // Combinado para compatibilidad con otras pantallas (AddExercise, etc.)
+    val filteredLibraryExercises: StateFlow<List<Exercise>> = combine(
+        filteredUserExercises,
+        filteredBaseExercises
+    ) { user, base -> user + base }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     init {
         viewModelScope.launch {
@@ -138,56 +164,29 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
-    // True si hay al menos 1 ejercicio base (nuevo con BASE_TAG o legacy con ID coincidente)
+    // True si hay al menos 1 ejercicio con BASE_TAG en la librería
     val hasDefaultExercises: StateFlow<Boolean> = allExercises.map { exercises ->
-        exercises.any {
-            DefaultExercises.BASE_TAG in it.tags || DefaultExercises.isLegacyBaseExercise(it)
-        }
+        exercises.any { DefaultExercises.BASE_TAG in it.tags }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     fun loadDefaultExercises() {
         viewModelScope.launch {
             val current = allExercises.value
-
-            // 1. Migrar legacy: ejercicios base sin BASE_TAG → añadirles BASE_TAG y nuevo ID
-            val legacyToMigrate = current.filter { DefaultExercises.isLegacyBaseExercise(it) }
-            legacyToMigrate.forEach { legacy ->
-                // Primero eliminamos el legacy
-                repository.deleteExercise(legacy)
-                // Luego guardamos la versión nueva con BASE_TAG e ID correcto
-                val updated = DefaultExercises.getAll().find { it.name == legacy.name }
-                if (updated != null) {
-                    // Preservamos oneRepMax y lastPerformance del usuario
-                    repository.upsertExercise(
-                        updated.copy(
-                            oneRepMax = legacy.oneRepMax,
-                            lastPerformance = legacy.lastPerformance,
-                            bestSet = legacy.bestSet,
-                            history = legacy.history
-                        )
-                    )
-                }
-            }
-
-            // 2. Añadir los que no existen todavía (ni legacy ni nuevo)
-            val currentAfterMigration = allExercises.value
-            val existingBaseIds = currentAfterMigration
-                .filter { DefaultExercises.BASE_TAG in it.tags }
-                .map { it.id }.toSet()
-            val migratedNames = legacyToMigrate.map { it.name }.toSet()
-            val toAdd = DefaultExercises.getAll().filter {
-                it.id !in existingBaseIds && it.name !in migratedNames
-            }
+            // Los nombres base llevan ZWS (Zero Width Space) al final
+            // así que NUNCA coinciden con nombres creados por el usuario
+            // Solo saltamos los que ya están cargados (mismo ID base)
+            val existingIds = current.map { it.id }.toSet()
+            val toAdd = DefaultExercises.getAll().filter { it.id !in existingIds }
             toAdd.forEach { repository.upsertExercise(it) }
         }
     }
 
     fun deleteDefaultExercises() {
         viewModelScope.launch {
-            // Elimina ejercicios con BASE_TAG (nuevos) O con ID legacy coincidente
-            // Nunca toca ejercicios del usuario aunque tengan el mismo nombre
+            // ÚNICO criterio: tiene BASE_TAG → es base → se elimina
+            // Ejercicios del usuario NUNCA tienen BASE_TAG, así que nunca se tocan
             val toDelete = allExercises.value.filter {
-                DefaultExercises.BASE_TAG in it.tags || DefaultExercises.isLegacyBaseExercise(it)
+                DefaultExercises.BASE_TAG in it.tags
             }
             toDelete.forEach { repository.deleteExercise(it) }
         }

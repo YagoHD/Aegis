@@ -3,16 +3,21 @@ package com.yago.aegis.data
 /**
  * Catálogo de ejercicios base.
  *
- * Todos llevan el tag interno BASE_TAG = "__base__" que:
- * - Es invisible para el usuario (filtrado en la UI de tags)
- * - Permite identificar y eliminar solo ejercicios base sin tocar
- *   los ejercicios personalizados aunque tengan el mismo nombre
+ * BASE_TAG = "__base__" es el único marcador fiable para identificar
+ * ejercicios base. Es invisible para el usuario pero la app lo usa
+ * internamente para cargar y eliminar sin tocar ejercicios del usuario.
  */
 object DefaultExercises {
 
     const val BASE_TAG = "__base__"
+    // Sufijo invisible (Zero Width Space) añadido a todos los nombres base
+    // Hace que "PRESS BANCA" (usuario) != "PRESS BANCA\u200B" (base)
+    private const val ZWS = "\u200B"
 
     fun getAll(): List<Exercise> = pecho + espalda + hombros + biceps + triceps + piernas
+
+    // Devuelve solo los nombres en mayúsculas para comparación rápida
+    fun getAllNames(): Set<String> = getAll().map { it.name }.toSet()
 
     // ─── PECHO ───────────────────────────────────────────────────────────────
     private val pecho = listOf(
@@ -112,9 +117,8 @@ object DefaultExercises {
         tag: String,
         icon: String = "dumbbell"
     ) = Exercise(
-        // ID único basado en prefijo __base__ + nombre — nunca colisiona con ejercicios del usuario
         id = ("__base__$name").hashCode().toLong().let { if (it < 0) -it else it },
-        name = name.uppercase(),
+        name = name.uppercase() + ZWS,
         type = tag,
         muscleGroup = muscleGroup,
         tags = listOf(tag, muscleGroup, BASE_TAG),
@@ -125,29 +129,4 @@ object DefaultExercises {
         bestSet = "--",
         history = emptyList()
     )
-
-    /**
-     * IDs legacy: versión anterior usaba solo el nombre como base del hash.
-     * Usamos esto para migrar ejercicios base ya guardados sin BASE_TAG.
-     */
-    private fun legacyId(name: String): Long {
-        val h = name.hashCode()
-        return if (h < 0) (h * -1 + 1_000_000).toLong() else h.toLong()
-    }
-
-    /**
-     * Devuelve un mapa de (nombre_uppercase -> id_legacy) para detectar
-     * ejercicios base guardados con la versión anterior de la app.
-     */
-    fun getLegacyIds(): Map<String, Long> =
-        getAll().associate { it.name to legacyId(it.name) }
-
-    /**
-     * Dado un ejercicio de la librería del usuario, determina si es un ejercicio base
-     * guardado con la versión legacy (sin BASE_TAG pero con ID y nombre coincidentes).
-     */
-    fun isLegacyBaseExercise(exercise: Exercise): Boolean {
-        val legacyId = getLegacyIds()[exercise.name] ?: return false
-        return exercise.id == legacyId && BASE_TAG !in exercise.tags
-    }
 }

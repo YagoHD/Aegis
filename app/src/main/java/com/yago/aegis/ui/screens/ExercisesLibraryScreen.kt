@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -41,17 +42,17 @@ fun ExercisesLibraryScreen(
     var exerciseToDelete by remember { mutableStateOf<Exercise?>(null) }
     var showLoadDefaultsDialog by remember { mutableStateOf(false) }
     var showFilters by remember { mutableStateOf(false) }
+    var baseSectionExpanded by remember { mutableStateOf(true) }
 
-    val filteredExercises by routinesViewModel.filteredLibraryExercises.collectAsState()
-    val allExercises by routinesViewModel.allExercises.collectAsState()
+    val userExercises by routinesViewModel.filteredUserExercises.collectAsState()
+    val baseExercises by routinesViewModel.filteredBaseExercises.collectAsState()
     val availableTags by routinesViewModel.availableLibraryTags.collectAsState()
     val hasDefaultExercises by routinesViewModel.hasDefaultExercises.collectAsState()
-    val isEmpty = allExercises.isEmpty()
 
     val isFiltering = routinesViewModel.librarySearchQuery.isNotEmpty()
             || routinesViewModel.selectedLibraryTag != "ALL"
 
-    // ─── DIÁLOGO cargar / eliminar ───
+    // ─── DIÁLOGO cargar / eliminar base ───
     if (showLoadDefaultsDialog) {
         AegisAlertDialog(
             title = if (hasDefaultExercises) "ELIMINAR EJERCICIOS BASE" else "CARGAR EJERCICIOS BASE",
@@ -68,9 +69,9 @@ fun ExercisesLibraryScreen(
         ) {
             Text(
                 text = if (hasDefaultExercises)
-                    "Se eliminarán todos los ejercicios base de la librería. Tus ejercicios personalizados no se verán afectados.\n\nSi algún ejercicio base está en una rutina activa, también se eliminará de ella."
+                    "Se eliminarán todos los ejercicios de la sección BASE. Tus ejercicios personalizados no se verán afectados en ningún caso."
                 else
-                    "Se añadirán más de 60 ejercicios organizados por grupo muscular (Pecho, Espalda, Hombros, Bíceps, Tríceps y Piernas).\n\nNo se eliminará ningún ejercicio que ya tengas creado.",
+                    "Se añadirán más de 60 ejercicios organizados por grupo muscular. Aparecerán en una sección separada y no afectarán a tus ejercicios.",
                 color = MaterialTheme.colorScheme.secondary,
                 fontSize = 14.sp,
                 lineHeight = 20.sp
@@ -91,7 +92,7 @@ fun ExercisesLibraryScreen(
             confirmButtonColor = Color(0xFFB3261E)
         ) {
             Text(
-                text = "¿Estás seguro de que quieres eliminar '${exerciseToDelete?.name}'? Esta acción es irreversible y afectará a tus rutinas.",
+                text = "¿Estás seguro de que quieres eliminar '${exerciseToDelete?.name}'? Esta acción es irreversible.",
                 color = MaterialTheme.colorScheme.secondary,
                 fontSize = 14.sp,
                 lineHeight = 20.sp
@@ -111,12 +112,11 @@ fun ExercisesLibraryScreen(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            // ─── FILA DE BOTONES (mismo tamaño, misma línea) ───
+            // ─── FILA DE BOTONES ───
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Botón crear
                 Surface(
                     onClick = onNavigateToCreate,
                     modifier = Modifier.weight(1f).height(44.dp),
@@ -129,39 +129,22 @@ fun ExercisesLibraryScreen(
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        Icon(
-                            Icons.Default.Add, null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(16.dp)
-                        )
+                        Icon(Icons.Default.Add, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            "CREAR",
-                            color = MaterialTheme.colorScheme.onBackground,
-                            fontWeight = FontWeight.Black,
-                            fontSize = 11.sp,
-                            letterSpacing = 1.sp
-                        )
+                        Text("CREAR", color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Black, fontSize = 11.sp, letterSpacing = 1.sp)
                     }
                 }
 
-                // Botón cargar/eliminar base
-                val baseColor = if (hasDefaultExercises)
-                    MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
-                else if (isEmpty) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.secondary
-
+                val baseColor = if (hasDefaultExercises) MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
+                                else MaterialTheme.colorScheme.secondary
                 Surface(
                     onClick = { showLoadDefaultsDialog = true },
                     modifier = Modifier.weight(1f).height(44.dp),
                     shape = RoundedCornerShape(8.dp),
                     color = Color.Transparent,
-                    border = BorderStroke(
-                        1.dp,
+                    border = BorderStroke(1.dp,
                         if (hasDefaultExercises) MaterialTheme.colorScheme.error.copy(alpha = 0.4f)
-                        else if (isEmpty) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
-                        else MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
-                    )
+                        else MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f))
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -170,17 +153,12 @@ fun ExercisesLibraryScreen(
                     ) {
                         Icon(
                             if (hasDefaultExercises) Icons.Default.DeleteSweep else Icons.Default.Download,
-                            null,
-                            tint = baseColor,
-                            modifier = Modifier.size(16.dp)
+                            null, tint = baseColor, modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             if (hasDefaultExercises) "ELIMINAR BASE" else "CARGAR BASE",
-                            color = baseColor,
-                            fontWeight = FontWeight.Black,
-                            fontSize = 11.sp,
-                            letterSpacing = 1.sp
+                            color = baseColor, fontWeight = FontWeight.Black, fontSize = 11.sp, letterSpacing = 1.sp
                         )
                     }
                 }
@@ -189,177 +167,239 @@ fun ExercisesLibraryScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             // ─── BUSCADOR + BOTÓN FILTRO ───
-            if (!isEmpty) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    OutlinedTextField(
-                        value = routinesViewModel.librarySearchQuery,
-                        onValueChange = { routinesViewModel.librarySearchQuery = it },
-                        placeholder = {
-                            Text(
-                                "BUSCAR...",
-                                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        },
-                        modifier = Modifier.weight(1f),
-                        leadingIcon = {
-                            Icon(
-                                Icons.Default.Search, null,
-                                tint = MaterialTheme.colorScheme.secondary,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        },
-                        trailingIcon = {
-                            if (routinesViewModel.librarySearchQuery.isNotEmpty()) {
-                                IconButton(onClick = { routinesViewModel.librarySearchQuery = "" }) {
-                                    Icon(Icons.Default.Close, null,
-                                        tint = MaterialTheme.colorScheme.secondary,
-                                        modifier = Modifier.size(16.dp))
-                                }
-                            }
-                        },
-                        shape = RoundedCornerShape(8.dp),
-                        singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surface,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            cursorColor = MaterialTheme.colorScheme.primary,
-                            focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                            unfocusedTextColor = MaterialTheme.colorScheme.onBackground
-                        ),
-                        textStyle = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.Medium)
-                    )
-
-                    // Botón filtro — se resalta si hay un tag activo
-                    val filterActive = routinesViewModel.selectedLibraryTag != "ALL"
-                    Surface(
-                        onClick = { showFilters = !showFilters },
-                        shape = RoundedCornerShape(8.dp),
-                        color = if (filterActive)
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                        else MaterialTheme.colorScheme.surface,
-                        border = BorderStroke(
-                            1.dp,
-                            if (filterActive) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
-                        ),
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                            Icon(
-                                if (filterActive) Icons.Default.FilterAlt else Icons.Default.FilterList,
-                                null,
-                                tint = if (filterActive) MaterialTheme.colorScheme.primary
-                                       else MaterialTheme.colorScheme.secondary,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                    }
-                }
-
-                // ─── TAGS DESPLEGABLES ───
-                AnimatedVisibility(
-                    visible = showFilters && availableTags.isNotEmpty(),
-                    enter = expandVertically(animationSpec = tween(200)),
-                    exit = shrinkVertically(animationSpec = tween(200))
-                ) {
-                    Column {
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            TagFilterRow(
-                                tags = availableTags,
-                                selectedTag = routinesViewModel.selectedLibraryTag,
-                                onTagSelected = { routinesViewModel.selectedLibraryTag = it },
-                                modifier = Modifier.weight(1f)
-                            )
-                            // Botón limpiar filtro
-                            if (routinesViewModel.selectedLibraryTag != "ALL") {
-                                TextButton(
-                                    onClick = { routinesViewModel.selectedLibraryTag = "ALL" },
-                                    contentPadding = PaddingValues(horizontal = 8.dp)
-                                ) {
-                                    Text(
-                                        "LIMPIAR",
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.Black
-                                    )
-                                }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedTextField(
+                    value = routinesViewModel.librarySearchQuery,
+                    onValueChange = { routinesViewModel.librarySearchQuery = it },
+                    placeholder = {
+                        Text("BUSCAR...", color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+                            fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    },
+                    modifier = Modifier.weight(1f),
+                    leadingIcon = {
+                        Icon(Icons.Default.Search, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(18.dp))
+                    },
+                    trailingIcon = {
+                        if (routinesViewModel.librarySearchQuery.isNotEmpty()) {
+                            IconButton(onClick = { routinesViewModel.librarySearchQuery = "" }) {
+                                Icon(Icons.Default.Close, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(16.dp))
                             }
                         }
+                    },
+                    shape = RoundedCornerShape(8.dp),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        cursorColor = MaterialTheme.colorScheme.primary,
+                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onBackground
+                    ),
+                    textStyle = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                )
+
+                val filterActive = routinesViewModel.selectedLibraryTag != "ALL"
+                Surface(
+                    onClick = { showFilters = !showFilters },
+                    shape = RoundedCornerShape(8.dp),
+                    color = if (filterActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                            else MaterialTheme.colorScheme.surface,
+                    border = BorderStroke(1.dp,
+                        if (filterActive) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)),
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                        Icon(
+                            if (filterActive) Icons.Default.FilterAlt else Icons.Default.FilterList,
+                            null,
+                            tint = if (filterActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(18.dp)
+                        )
                     }
                 }
-
-                Spacer(modifier = Modifier.height(12.dp))
             }
 
-            // ─── LISTA o ESTADO VACÍO ───
-            if (isEmpty) {
+            // ─── TAGS DESPLEGABLES ───
+            AnimatedVisibility(
+                visible = showFilters && availableTags.isNotEmpty(),
+                enter = expandVertically(animationSpec = tween(200)),
+                exit = shrinkVertically(animationSpec = tween(200))
+            ) {
+                Column {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        TagFilterRow(
+                            tags = availableTags,
+                            selectedTag = routinesViewModel.selectedLibraryTag,
+                            onTagSelected = { routinesViewModel.selectedLibraryTag = it },
+                            modifier = Modifier.weight(1f)
+                        )
+                        if (routinesViewModel.selectedLibraryTag != "ALL") {
+                            TextButton(
+                                onClick = { routinesViewModel.selectedLibraryTag = "ALL" },
+                                contentPadding = PaddingValues(horizontal = 8.dp)
+                            ) {
+                                Text("LIMPIAR", color = MaterialTheme.colorScheme.secondary, fontSize = 10.sp, fontWeight = FontWeight.Black)
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // ─── LISTA CON SECCIONES ───
+            val totalCount = userExercises.size + baseExercises.size
+
+            if (totalCount == 0 && !isFiltering) {
                 EmptyLibraryState()
             } else {
                 LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(bottom = 100.dp)
                 ) {
-                    if (isFiltering) {
+
+                    // ── SECCIÓN: MIS EJERCICIOS ──
+                    if (userExercises.isNotEmpty() || !isFiltering) {
                         item {
-                            Text(
-                                text = "${filteredExercises.size} EJERCICIOS",
-                                color = MaterialTheme.colorScheme.secondary,
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Black,
-                                letterSpacing = 1.5.sp
+                            SectionHeader(
+                                title = "MIS EJERCICIOS",
+                                count = userExercises.size,
+                                isExpandable = false
                             )
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
                         }
                     }
 
-                    items(filteredExercises) { exercise ->
-                        ExerciseCard(
-                            exercise = exercise,
-                            onEdit = { onNavigateToEdit(exercise.name) },
-                            onDelete = { exerciseToDelete = exercise },
-                            showReorderHandle = false,
-                            isAddMode = false
-                        )
+                    if (userExercises.isEmpty() && !isFiltering) {
+                        item {
+                            Text(
+                                text = "Aún no tienes ejercicios propios. Pulsa CREAR para añadir el primero.",
+                                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+                                fontSize = 12.sp,
+                                fontStyle = FontStyle.Italic,
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
+                                lineHeight = 18.sp
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                    } else {
+                        items(userExercises, key = { it.id }) { exercise ->
+                            ExerciseCard(
+                                exercise = exercise,
+                                onEdit = { onNavigateToEdit(exercise.name) },
+                                onDelete = { exerciseToDelete = exercise },
+                                showReorderHandle = false,
+                                isAddMode = false
+                            )
+                        }
                     }
 
-                    if (filteredExercises.isEmpty() && isFiltering) {
+                    // ── SEPARADOR ──
+                    if (hasDefaultExercises) {
+                        item {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            HorizontalDivider(color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f))
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+
+                        // ── SECCIÓN: EJERCICIOS BASE (plegable) ──
+                        item {
+                            SectionHeader(
+                                title = "EJERCICIOS BASE",
+                                count = baseExercises.size,
+                                isExpandable = true,
+                                expanded = baseSectionExpanded,
+                                onToggle = { baseSectionExpanded = !baseSectionExpanded }
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+
+                        if (baseSectionExpanded) {
+                            items(baseExercises, key = { it.id }) { exercise ->
+                                ExerciseCard(
+                                    exercise = exercise,
+                                    onEdit = { onNavigateToEdit(exercise.name) },
+                                    onDelete = { exerciseToDelete = exercise },
+                                    showReorderHandle = false,
+                                    isAddMode = false
+                                )
+                            }
+                        }
+                    }
+
+                    // Sin resultados al buscar
+                    if (totalCount == 0 && isFiltering) {
                         item {
                             Column(
                                 modifier = Modifier.fillMaxWidth().padding(vertical = 40.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Icon(
-                                    Icons.Default.SearchOff, null,
+                                Icon(Icons.Default.SearchOff, null,
                                     tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
-                                    modifier = Modifier.size(36.dp)
-                                )
+                                    modifier = Modifier.size(36.dp))
                                 Spacer(modifier = Modifier.height(10.dp))
-                                Text(
-                                    "SIN RESULTADOS",
+                                Text("SIN RESULTADOS",
                                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Black,
-                                    letterSpacing = 1.sp,
-                                    textAlign = TextAlign.Center
-                                )
+                                    fontSize = 11.sp, fontWeight = FontWeight.Black,
+                                    letterSpacing = 1.sp, textAlign = TextAlign.Center)
                             }
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun SectionHeader(
+    title: String,
+    count: Int,
+    isExpandable: Boolean,
+    expanded: Boolean = true,
+    onToggle: () -> Unit = {}
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (isExpandable) Modifier.clickable { onToggle() } else Modifier)
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            color = MaterialTheme.colorScheme.primary,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 2.sp,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = "$count",
+            color = MaterialTheme.colorScheme.secondary,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold
+        )
+        if (isExpandable) {
+            Spacer(modifier = Modifier.width(4.dp))
+            Icon(
+                if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                null,
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.size(16.dp)
+            )
         }
     }
 }
@@ -377,21 +417,12 @@ private fun EmptyLibraryState() {
             modifier = Modifier.size(56.dp)
         )
         Spacer(modifier = Modifier.height(20.dp))
-        Text(
-            text = "LIBRERÍA VACÍA",
-            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f),
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Black,
-            letterSpacing = 2.sp
-        )
+        Text("LIBRERÍA VACÍA", color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f),
+            fontSize = 13.sp, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
         Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "Carga los ejercicios base o crea\nlos tuyos desde cero.",
+        Text("Carga los ejercicios base o crea\nlos tuyos desde cero.",
             color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f),
-            fontSize = 13.sp,
-            fontStyle = FontStyle.Italic,
-            textAlign = TextAlign.Center,
-            lineHeight = 20.sp
-        )
+            fontSize = 13.sp, fontStyle = FontStyle.Italic,
+            textAlign = TextAlign.Center, lineHeight = 20.sp)
     }
 }

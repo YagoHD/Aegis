@@ -54,13 +54,12 @@ fun AegisNavigation(
     }
 
     val startDest = when {
-        onboardingCompleted == true && authViewModel.isLoggedIn -> "profile"
-        onboardingCompleted == true && !authViewModel.isLoggedIn -> "login"
-        else -> "welcome"
+        authViewModel.isLoggedIn -> "profile"   // Sesión activa → app directamente
+        else -> "welcome"                        // Sin sesión → welcome (login o registro)
     }
 
     val onboardingRoutes = listOf("welcome", "identity", "metrics", "register")
-    val authRoutes = listOf("login")
+    val authRoutes = listOf("login", "welcome")
     val isSessionActive = currentRoute?.startsWith("active_session") == true
     val sharedStatsViewModel: StatsViewModel = viewModel(factory = StatsViewModel.Factory(userRepository))
 
@@ -87,17 +86,29 @@ fun AegisNavigation(
             ) {
                 LoginScreen(
                     authViewModel = authViewModel,
-                    onNavigateToRegister = { navController.navigate("register") },
+                    onNavigateToRegister = {
+                        // Volver a welcome para iniciar el flujo de registro completo
+                        navController.navigate("welcome") {
+                            popUpTo("login") { inclusive = true }
+                        }
+                    },
                     onLoginSuccess = {
                         navController.navigate("profile") {
-                            popUpTo("login") { inclusive = true }
+                            popUpTo(0) { inclusive = true }
                         }
                     }
                 )
             }
 
             composable("welcome") {
-                WelcomeScreen(onContinue = { navController.navigate("identity") })
+                WelcomeScreen(
+                    onLogin = {
+                        navController.navigate("login") {
+                            popUpTo("welcome") { inclusive = false }
+                        }
+                    },
+                    onRegister = { navController.navigate("identity") }
+                )
             }
             composable("identity") {
                 IdentityScreen(
@@ -127,7 +138,7 @@ fun AegisNavigation(
                     authViewModel = authViewModel,
                     onRegisterSuccess = {
                         navController.navigate("profile") {
-                            popUpTo("welcome") { inclusive = true }
+                            popUpTo(0) { inclusive = true }
                         }
                     },
                     onBack = { navController.popBackStack() }
@@ -190,7 +201,7 @@ fun AegisNavigation(
                     viewModel = profileViewModel,
                     authViewModel = authViewModel,
                     onLogout = {
-                        navController.navigate("login") {
+                        navController.navigate("welcome") {
                             popUpTo(0) { inclusive = true }
                         }
                     }
