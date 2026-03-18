@@ -85,7 +85,7 @@ fun WorkoutHistoryScreen(
                     }
                     itemsIndexed(
                         items = monthSessions,
-                        key = { _, session -> session.id }
+                        key = { index, session -> "${month}_${session.id}_${index}" }
                     ) { _, session ->
                         HistorySessionRow(session = session)
                     }

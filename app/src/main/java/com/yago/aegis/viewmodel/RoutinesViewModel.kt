@@ -106,20 +106,33 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
     fun updateExercisePerformance(exerciseId: Long, summary: String, new1RM: Double) {
         viewModelScope.launch {
             val currentLibrary = repository.getAllExercises().first()
+
+            // Buscar en librería primero por ID, luego por nombre como fallback
+            // (los ejercicios en rutinas pueden tener IDs distintos a los de la librería
+            // si fueron creados en momentos diferentes — System.currentTimeMillis())
             val exerciseInLibrary = currentLibrary.find { it.id == exerciseId }
+                ?: currentLibrary.find { libEx ->
+                    // Buscar el ejercicio cuyo nombre coincida con el de la sesión
+                    routines.any { routine ->
+                        routine.exercises.any { it.id == exerciseId && it.name == libEx.name }
+                    }
+                }
+
             exerciseInLibrary?.let { current ->
                 val updatedPR = if (new1RM > current.oneRepMax) {
                     kotlin.math.round(new1RM * 10) / 10.0
-                } else {
-                    current.oneRepMax
-                }
+                } else current.oneRepMax
                 repository.upsertExercise(current.copy(lastPerformance = summary, oneRepMax = updatedPR))
             }
 
+            // Actualizar en todas las rutinas — buscar por ID o por nombre
             val updatedRoutines = routines.map { routine ->
                 routine.copy(exercises = routine.exercises.map { exercise ->
-                    if (exercise.id == exerciseId) {
-                        val updatedPR = if (new1RM > exercise.oneRepMax) kotlin.math.round(new1RM * 10) / 10.0
+                    val matches = exercise.id == exerciseId ||
+                        (exerciseInLibrary != null && exercise.name == exerciseInLibrary.name)
+                    if (matches) {
+                        val updatedPR = if (new1RM > exercise.oneRepMax)
+                            kotlin.math.round(new1RM * 10) / 10.0
                         else exercise.oneRepMax
                         exercise.copy(lastPerformance = summary, oneRepMax = updatedPR)
                     } else exercise

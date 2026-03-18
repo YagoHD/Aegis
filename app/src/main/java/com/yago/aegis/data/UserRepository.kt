@@ -216,7 +216,19 @@ class UserRepository(
 
     suspend fun syncOnLogin() {
         runCatching {
+            // 1. Limpiar duplicados del historial local
+            settingsStore.deduplicateWorkoutHistory()
+
             if (firestore.hasCloudData()) {
+                // 2. Deduplicar también el historial en Firestore
+                val cloudHistory = firestore.getWorkoutHistory()
+                if (cloudHistory != null) {
+                    val deduped = cloudHistory.distinctBy { it.id }.sortedBy { it.date }
+                    if (deduped.size < cloudHistory.size) {
+                        // Había duplicados en la nube — guardar versión limpia
+                        firestore.saveWorkoutHistory(deduped)
+                    }
+                }
                 downloadFromCloud()
             } else {
                 uploadToCloud()
@@ -243,11 +255,15 @@ class UserRepository(
         firestore.getExercises()?.let { settingsStore.saveExerciseLibrary(it) }
         firestore.getWorkoutHistory()?.let { cloudHistory ->
             val localHistory = settingsStore.workoutHistory.first()
-            val localIds = localHistory.map { it.id }.toSet()
-            val cloudIds = cloudHistory.map { it.id }.toSet()
-            val localOnly = localHistory.filter { it.id !in cloudIds }
-            val merged = (cloudHistory + localOnly).sortedBy { it.date }
-            merged.filter { it.id !in localIds }.forEach { settingsStore.saveWorkoutSession(it) }
+            // Merge deduplicado: combinar local + nube, eliminar duplicados por ID
+            // y reemplazar el historial local completo con el resultado limpio
+            val merged = (localHistory + cloudHistory)
+                .distinctBy { it.id }
+                .sortedBy { it.date }
+            // Sobrescribir el historial local completo con la versión limpia
+            settingsStore.replaceWorkoutHistory(merged)
+            // Sincronizar la versión limpia a Firestore también
+            syncScope.launch { runCatching { firestore.saveWorkoutHistory(merged) } }
         }
         firestore.getTags()?.let { settingsStore.saveGlobalTags(it) }
         firestore.getSettings()?.let { data ->

@@ -204,6 +204,26 @@ class SettingsStore(private val context: Context) {
     suspend fun saveDisciplineDay(days: Int) {
         context.dataStore.edit { it[DISCIPLINE_DAY] = days }
     }
+    // Reemplaza el historial completo con una lista limpia
+    suspend fun replaceWorkoutHistory(sessions: List<WorkoutSession>) {
+        context.dataStore.edit { prefs ->
+            prefs[WORKOUT_HISTORY_KEY] = gson.toJson(sessions)
+        }
+    }
+
+    // Limpia duplicados del historial — llamar una vez al arrancar
+    suspend fun deduplicateWorkoutHistory() {
+        context.dataStore.edit { prefs ->
+            val currentJson = prefs[WORKOUT_HISTORY_KEY] ?: return@edit
+            val type = object : TypeToken<MutableList<WorkoutSession>>() {}.type
+            val history: MutableList<WorkoutSession> = gson.fromJson(currentJson, type) ?: return@edit
+            val deduplicated = history.distinctBy { it.id }.sortedBy { it.date }
+            if (deduplicated.size < history.size) {
+                prefs[WORKOUT_HISTORY_KEY] = gson.toJson(deduplicated)
+            }
+        }
+    }
+
     suspend fun saveWorkoutSession(session: WorkoutSession) {
         context.dataStore.edit { prefs ->
             val currentJson = prefs[WORKOUT_HISTORY_KEY] ?: ""
@@ -213,9 +233,11 @@ class SettingsStore(private val context: Context) {
             } else {
                 gson.fromJson(currentJson, type)
             }
-
-            history.add(session)
-            prefs[WORKOUT_HISTORY_KEY] = gson.toJson(history)
+            // No añadir si ya existe una sesión con el mismo ID
+            if (history.none { it.id == session.id }) {
+                history.add(session)
+                prefs[WORKOUT_HISTORY_KEY] = gson.toJson(history)
+            }
         }
     }
 

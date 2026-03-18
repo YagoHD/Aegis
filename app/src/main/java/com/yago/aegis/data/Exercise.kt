@@ -13,7 +13,7 @@ data class Exercise(
     val name: String,
     val type: String,        // Ejemplo: "COMPOUND" o "MACHINE"
     val muscleGroup: String, // Ejemplo: "LEGS"
-    val id: Long = System.currentTimeMillis(),
+    val id: Long = UUID.randomUUID().mostSignificantBits and Long.MAX_VALUE,
     val tags: List<String> = emptyList(),
     val iconName: String = "dumbbell",
     val notes: String = "",

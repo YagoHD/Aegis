@@ -136,10 +136,12 @@ class FirestoreDataSource {
     }
 
     suspend fun appendWorkoutSession(session: WorkoutSession) {
-        // Leemos el historial actual, añadimos la sesión y guardamos
         val current = getWorkoutHistory()?.toMutableList() ?: mutableListOf()
-        current.add(session)
-        saveWorkoutHistory(current)
+        // Evitar duplicados: solo añadir si el ID no existe ya en Firestore
+        if (current.none { it.id == session.id }) {
+            current.add(session)
+            saveWorkoutHistory(current)
+        }
     }
 
     // ─────────────────────────────────────────────
