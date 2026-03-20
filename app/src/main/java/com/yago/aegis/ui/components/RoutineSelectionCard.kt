@@ -63,12 +63,14 @@ fun RoutineSelectionCard(
                     letterSpacing = 0.5.sp
                 )
 
-                // 3. Última sesión (Gris Acero)
+                // 3. Última sesión — bronce si está pausada
+                val isPausedText = lastPerformedText.startsWith("⏸")
                 Text(
                     text = lastPerformedText.uppercase(),
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = if (isPausedText) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.secondary,
                     fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = if (isPausedText) FontWeight.Black else FontWeight.Bold,
                     letterSpacing = 0.5.sp
                 )
 

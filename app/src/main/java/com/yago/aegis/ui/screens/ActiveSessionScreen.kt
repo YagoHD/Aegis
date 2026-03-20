@@ -49,6 +49,7 @@ fun ActiveSessionScreen(
     workoutViewModel: WorkoutViewModel,
     routinesViewModel: RoutinesViewModel,
     onFinishWorkout: () -> Unit,
+    onBack: () -> Unit = {},
     profileViewModel: ProfileViewModel,
     onNavigateToSettings: () -> Unit = {}
 ) {
@@ -114,22 +115,89 @@ fun ActiveSessionScreen(
     )
 
     if (showCancelDialog) {
-        AegisAlertDialog(
-            title = "ABANDONAR SESIÓN",
-            confirmText = "CANCELAR ENTRENAMIENTO",
-            dismissText = "CONTINUAR",
-            onDismiss = { showCancelDialog = false },
-            onConfirm = {
-                showCancelDialog = false
-                workoutViewModel.cancelWorkout { onFinishWorkout() }
-            }
-        ) {
-            Text(
-                text = "Se perderá todo el progreso de esta sesión. Esta acción no se puede deshacer.",
-                color = MaterialTheme.colorScheme.secondary,
-                fontSize = 14.sp
-            )
-        }
+        // Diálogo personalizado con 3 opciones: Continuar / Pausar / Cancelar
+        AlertDialog(
+            onDismissRequest = { showCancelDialog = false },
+            containerColor = MaterialTheme.colorScheme.surface,
+            title = {
+                Text(
+                    "SALIR DE LA SESIÓN",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Black,
+                    letterSpacing = 1.sp
+                )
+            },
+            text = {
+                Text(
+                    "¿Qué quieres hacer con tu sesión actual?",
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 14.sp
+                )
+            },
+            confirmButton = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Opción 1: Continuar entrenando
+                    Button(
+                        onClick = { showCancelDialog = false },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        ),
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            "CONTINUAR ENTRENANDO",
+                            color = androidx.compose.ui.graphics.Color.Black,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Black,
+                            fontSize = 12.sp,
+                            letterSpacing = 1.sp
+                        )
+                    }
+                    // Opción 2: Pausar (salir sin perder datos)
+                    OutlinedButton(
+                        onClick = {
+                            showCancelDialog = false
+                            workoutViewModel.pauseWorkout()
+                            onBack()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+                        border = androidx.compose.foundation.BorderStroke(
+                            1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)
+                        )
+                    ) {
+                        Text(
+                            "PAUSAR — VOLVER MÁS TARDE",
+                            color = MaterialTheme.colorScheme.onBackground,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Black,
+                            fontSize = 12.sp,
+                            letterSpacing = 1.sp
+                        )
+                    }
+                    // Opción 3: Abandonar (perder datos)
+                    TextButton(
+                        onClick = {
+                            showCancelDialog = false
+                            workoutViewModel.cancelWorkout { onFinishWorkout() }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            "ABANDONAR SESIÓN",
+                            color = MaterialTheme.colorScheme.error,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+            },
+            dismissButton = {}
+        )
     }
 
     if (uncompletedWithData.isNotEmpty()) {
@@ -173,7 +241,10 @@ fun ActiveSessionScreen(
                 containerHeightPx = coords.size.height
             }
     ) {
-        Scaffold(
+        // Banner de sesión pausada
+    val isPaused by workoutViewModel.isPaused.collectAsState()
+
+    Scaffold(
             containerColor = MaterialTheme.colorScheme.background,
             topBar = {
                 AegisTopBar(

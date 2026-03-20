@@ -10,6 +10,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +31,9 @@ fun SelectRoutineScreen(
     onStartWorkout: (Int) -> Unit
 ) {
     val routines = routinesViewModel.routines
+    val activeSession by workoutViewModel.activeSession.collectAsState()
+    val isPaused by workoutViewModel.isPaused.collectAsState()
+    val pausedRoutineName = if (isPaused) activeSession?.routineName else null
 
     Scaffold(
         // Cambiamos BackgroundBlackGrey por el background puro del Theme (050505)
@@ -115,10 +120,12 @@ fun SelectRoutineScreen(
                             .joinToString("  ") { "#${it.uppercase()}" }
                     }
 
+                    val isThisPaused = pausedRoutineName == safeRoutine.name
                     RoutineSelectionCard(
                         routine = safeRoutine,
                         displayTags = routineTags,
-                        lastPerformedText = workoutViewModel.calculateLastPerformed(safeRoutine.lastCompletedDates).uppercase(),
+                        lastPerformedText = if (isThisPaused) "⏸ SESIÓN PAUSADA"
+                                           else workoutViewModel.calculateLastPerformed(safeRoutine.lastCompletedDates).uppercase(),
                         onStartClick = {
                             workoutViewModel.startWorkout(safeRoutine)
                             onStartWorkout(safeRoutine.id)

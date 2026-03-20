@@ -261,7 +261,8 @@ fun AegisNavigation(
                             popUpTo("active_session/{routineId}") { inclusive = true }
                         }
                     },
-                    onNavigateToSettings = { navController.navigate("workout_settings") }
+                    onNavigateToSettings = { navController.navigate("workout_settings") },
+                    onBack = { navController.popBackStack() }
                 )
             }
 

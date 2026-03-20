@@ -16,9 +16,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
@@ -26,6 +26,10 @@ class WorkoutViewModel(private val repository: UserRepository) : ViewModel() {
 
     private val _activeSession = MutableStateFlow<WorkoutSession?>(null)
     val activeSession: StateFlow<WorkoutSession?> = _activeSession.asStateFlow()
+
+    // Sesión pausada — el usuario puede navegar fuera y volver
+    private val _isPaused = MutableStateFlow(false)
+    val isPaused: StateFlow<Boolean> = _isPaused.asStateFlow()
 
     // Tiempo de inicio para calcular duración
     private var sessionStartTime: Long = 0L
@@ -112,43 +116,66 @@ class WorkoutViewModel(private val repository: UserRepository) : ViewModel() {
     // ─────────────────────────────────────────────
 
     fun startWorkout(routine: Routine) {
+        // Si ya hay sesión activa para esta rutina (ej: volvemos de Settings),
+        // no la reiniciamos — simplemente reanudamos
+        val current = _activeSession.value
+        if (current != null && current.routineName == routine.name) {
+            resumeWorkout()
+            return
+        }
+        _isPaused.value = false
         sessionStartTime = System.currentTimeMillis()
         viewModelScope.launch {
-            // Historial de esta rutina ordenado de más reciente a más antiguo
             val history = repository.workoutHistory.first()
             val routineHistory = history
-                .filter { it.routineName == routine.name }
-                .sortedByDescending { it.date }
+                .filter { session -> session.routineName == routine.name }
+                .sortedByDescending { session -> session.date }
 
             val progress = routine.exercises.map { exercise ->
-                // Buscar hacia atrás en el historial hasta encontrar la última vez
-                // que este ejercicio específico tuvo series completadas
-                val lastPerformanceText = routineHistory
-                    .mapNotNull { session ->
-                        session.exercisesProgress
-                            .find { it.exercise.name == exercise.name }
-                            ?.sets
-                            ?.filter { it.isCompleted }
-                            ?.takeIf { it.isNotEmpty() }
-                    }
-                    .firstOrNull()  // Primera sesión (más reciente) donde había datos
-                    ?.joinToString("   ") { set ->
-                        val w = when {
-                            set.weight == 0.0 -> "BW"
-                            set.weight % 1 == 0.0 -> "${set.weight.toInt()}kg"
-                            else -> "${"%.1f".format(set.weight)}kg"
+                // Para cada ejercicio, buscar hacia atrás hasta encontrar
+                // la sesión más reciente donde tuvo series completadas
+                var lastPerformanceText: String? = null
+                for (session in routineHistory) {
+                    val exerciseProgress = session.exercisesProgress
+                        .find { ep -> ep.exercise.name == exercise.name }
+                    if (exerciseProgress != null) {
+                        val completedSets = exerciseProgress.sets
+                            .filter { s -> s.isCompleted }
+                        if (completedSets.isNotEmpty()) {
+                            lastPerformanceText = completedSets.joinToString("   ") { s ->
+                                val w = when {
+                                    s.weight == 0.0 -> "BW"
+                                    s.weight % 1 == 0.0 -> "${s.weight.toInt()}kg"
+                                    else -> "${"%.1f".format(s.weight)}kg"
+                                }
+                                "${w} x ${s.reps}"
+                            }
+                            break
                         }
-                        "${w} x ${set.reps}"
                     }
-                    ?: exercise.lastPerformance  // Fallback si no hay historial en absoluto
+                }
 
                 ExerciseProgress(
-                    exercise = exercise.copy(lastPerformance = lastPerformanceText),
+                    exercise = exercise.copy(
+                        lastPerformance = lastPerformanceText ?: exercise.lastPerformance
+                    ),
                     sets = listOf(ExerciseSet())
                 )
             }
-            _activeSession.value = WorkoutSession(routineName = routine.name, exercisesProgress = progress)
+            _activeSession.value = WorkoutSession(
+                routineName = routine.name,
+                exercisesProgress = progress
+            )
         }
+    }
+
+    fun pauseWorkout() {
+        stopTimer()
+        _isPaused.value = true
+    }
+
+    fun resumeWorkout() {
+        _isPaused.value = false
     }
 
     fun addSet(exerciseId: Long) {
