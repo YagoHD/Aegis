@@ -25,7 +25,8 @@ import java.util.Locale
 fun ProgressionChartSection(
     currentMax: String,
     percentageGain: String,
-    dataPoints: List<Float>
+    dataPoints: List<Float>,
+    dateLabels: List<String> = emptyList()
 ) {
     val recentMonths = remember { getRecentMonths(5) }
     val orangeAegis = MaterialTheme.colorScheme.primary // Usamos el Bronce del tema
@@ -164,14 +165,15 @@ fun ProgressionChartSection(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Meses abajo: Etiquetas AegisSteel
+            // Etiquetas del eje X: fechas reales o meses si no hay datos
+            val labels = if (dateLabels.isNotEmpty()) dateLabels else recentMonths
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                recentMonths.forEach {
+                labels.forEach {
                     Text(
-                        text = it,
+                        text = it.uppercase(),
                         color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f),
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Black,
