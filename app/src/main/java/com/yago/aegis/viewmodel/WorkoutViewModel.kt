@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -112,10 +113,42 @@ class WorkoutViewModel(private val repository: UserRepository) : ViewModel() {
 
     fun startWorkout(routine: Routine) {
         sessionStartTime = System.currentTimeMillis()
-        val progress = routine.exercises.map { exercise ->
-            ExerciseProgress(exercise = exercise, sets = listOf(ExerciseSet()))
+        viewModelScope.launch {
+            // Historial de esta rutina ordenado de más reciente a más antiguo
+            val history = repository.workoutHistory.first()
+            val routineHistory = history
+                .filter { it.routineName == routine.name }
+                .sortedByDescending { it.date }
+
+            val progress = routine.exercises.map { exercise ->
+                // Buscar hacia atrás en el historial hasta encontrar la última vez
+                // que este ejercicio específico tuvo series completadas
+                val lastPerformanceText = routineHistory
+                    .mapNotNull { session ->
+                        session.exercisesProgress
+                            .find { it.exercise.name == exercise.name }
+                            ?.sets
+                            ?.filter { it.isCompleted }
+                            ?.takeIf { it.isNotEmpty() }
+                    }
+                    .firstOrNull()  // Primera sesión (más reciente) donde había datos
+                    ?.joinToString("   ") { set ->
+                        val w = when {
+                            set.weight == 0.0 -> "BW"
+                            set.weight % 1 == 0.0 -> "${set.weight.toInt()}kg"
+                            else -> "${"%.1f".format(set.weight)}kg"
+                        }
+                        "${w} x ${set.reps}"
+                    }
+                    ?: exercise.lastPerformance  // Fallback si no hay historial en absoluto
+
+                ExerciseProgress(
+                    exercise = exercise.copy(lastPerformance = lastPerformanceText),
+                    sets = listOf(ExerciseSet())
+                )
+            }
+            _activeSession.value = WorkoutSession(routineName = routine.name, exercisesProgress = progress)
         }
-        _activeSession.value = WorkoutSession(routineName = routine.name, exercisesProgress = progress)
     }
 
     fun addSet(exerciseId: Long) {
