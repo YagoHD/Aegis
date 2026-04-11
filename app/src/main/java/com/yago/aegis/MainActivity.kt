@@ -1,9 +1,9 @@
 package com.yago.aegis
 
 import android.os.Bundle
+import androidx.core.view.WindowCompat
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import com.yago.aegis.data.FirebaseAuthRepository
 import com.yago.aegis.data.SettingsStore
@@ -32,7 +32,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        // WindowCompat permite que el contenido suba con el teclado
+        // compatible con adjustResize en el Manifest
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             AegisTheme {
                 AegisNavigation(

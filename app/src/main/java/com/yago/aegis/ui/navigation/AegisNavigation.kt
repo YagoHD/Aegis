@@ -8,6 +8,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -54,13 +56,24 @@ fun AegisNavigation(
     }
 
     val startDest = when {
-        authViewModel.isLoggedIn -> "profile"   // Sesión activa → app directamente
-        else -> "welcome"                        // Sin sesión → welcome (login o registro)
+        !authViewModel.isLoggedIn -> "welcome"
+        !authRepository.isEmailVerified -> "email_verification"
+        else -> "profile"
     }
 
-    val onboardingRoutes = listOf("welcome", "identity", "metrics", "register")
-    val authRoutes = listOf("login", "welcome")
+    val onboardingRoutes = listOf("welcome", "identity", "metrics", "register", "email_verification")
+    val authRoutes = listOf("login", "welcome", "email_verification")
     val isSessionActive = currentRoute?.startsWith("active_session") == true
+
+    // Redirigir a verificación en cualquier momento si needsEmailVerification es true
+    val uiStateGlobal by authViewModel.uiState.collectAsState()
+    LaunchedEffect(uiStateGlobal.needsEmailVerification) {
+        if (uiStateGlobal.needsEmailVerification) {
+            navController.navigate("email_verification") {
+                popUpTo(0) { inclusive = false }
+            }
+        }
+    }
     val sharedStatsViewModel: StatsViewModel = viewModel(factory = StatsViewModel.Factory(userRepository))
 
     val showBottomBar = currentRoute != "settings" &&
@@ -77,7 +90,7 @@ fun AegisNavigation(
         NavHost(
             navController = navController,
             startDestination = startDest,
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier.padding(paddingValues).imePadding()
         ) {
             composable(
                 route = "login",
@@ -142,6 +155,25 @@ fun AegisNavigation(
                         }
                     },
                     onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable("email_verification") {
+                val email = authViewModel.currentUserEmail
+                EmailVerificationScreen(
+                    authViewModel = authViewModel,
+                    email = email,
+                    onVerified = {
+                        navController.navigate("profile") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
+                    onBack = {
+                        authViewModel.logout()
+                        navController.navigate("welcome") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
                 )
             }
 

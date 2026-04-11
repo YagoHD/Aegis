@@ -13,6 +13,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -288,8 +289,10 @@ fun ActiveSessionScreen(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 20.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                        .padding(horizontal = 20.dp)
+                        .imePadding(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 120.dp)
                 ) {
                     item { Spacer(modifier = Modifier.height(8.dp)) }
 

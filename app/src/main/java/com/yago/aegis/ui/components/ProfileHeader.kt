@@ -1,8 +1,12 @@
 package com.yago.aegis.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -13,6 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Icon
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -33,23 +40,39 @@ fun ProfileHeader(
         // --- AVATAR CON BORDE TÉCNICO ---
         Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier.size(130.dp) // Un poco más grande para dar presencia
+            modifier = Modifier.size(130.dp)
         ) {
-            AsyncImage(
-                model = profilePhotoUri ?: R.drawable.ic_launcher_foreground,
-                contentDescription = "Foto de perfil",
-                placeholder = painterResource(R.drawable.ic_launcher_foreground),
-                error = painterResource(R.drawable.ic_launcher_foreground),
-                modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape)
-                    // Borde fino de 1.dp: Elegancia y precisión
-                    .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape),
-                contentScale = ContentScale.Crop
-            )
-
-            // Opcional: Podrías añadir un segundo anillo decorativo muy fino
-            // con AegisSteel para dar un aspecto de "visor"
+            if (profilePhotoUri != null) {
+                // Foto real del usuario
+                AsyncImage(
+                    model = profilePhotoUri,
+                    contentDescription = "Foto de perfil",
+                    placeholder = painterResource(R.drawable.ic_launcher_foreground),
+                    error = painterResource(R.drawable.ic_launcher_foreground),
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(CircleShape)
+                        .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                // Sin foto — icono Person con estilo Aegis
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(CircleShape)
+                        .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                        .background(MaterialTheme.colorScheme.surface)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Avatar",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(64.dp)
+                    )
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(20.dp))

@@ -17,7 +17,8 @@ data class AuthUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val isSuccess: Boolean = false,
-    val successMessage: String? = null
+    val successMessage: String? = null,
+    val needsEmailVerification: Boolean = false,
 )
 
 class AuthViewModel(
@@ -37,8 +38,9 @@ class AuthViewModel(
             _uiState.value = AuthUiState(isLoading = true)
             when (val result = authRepository.registerWithEmail(email, password)) {
                 is AuthResult.Success -> {
+                    authRepository.sendVerificationEmail()
                     userRepository.syncOnLogin()
-                    _uiState.value = AuthUiState(isSuccess = true)
+                    _uiState.value = AuthUiState(needsEmailVerification = true)
                 }
                 is AuthResult.Error -> _uiState.value = AuthUiState(errorMessage = result.message)
             }
@@ -50,8 +52,13 @@ class AuthViewModel(
             _uiState.value = AuthUiState(isLoading = true)
             when (val result = authRepository.loginWithEmail(email, password)) {
                 is AuthResult.Success -> {
-                    userRepository.syncOnLogin()
-                    _uiState.value = AuthUiState(isSuccess = true)
+                    if (!authRepository.isEmailVerified) {
+                        authRepository.sendVerificationEmail()
+                        _uiState.value = AuthUiState(needsEmailVerification = true)
+                    } else {
+                        userRepository.syncOnLogin()
+                        _uiState.value = AuthUiState(isSuccess = true)
+                    }
                 }
                 is AuthResult.Error -> _uiState.value = AuthUiState(errorMessage = result.message)
             }
@@ -87,6 +94,28 @@ class AuthViewModel(
             when (val result = authRepository.sendPasswordResetEmail(email)) {
                 is SimpleResult.Success -> _uiState.value = AuthUiState(successMessage = "Email enviado. Revisa tu bandeja de entrada.")
                 is SimpleResult.Error -> _uiState.value = AuthUiState(errorMessage = result.message)
+            }
+        }
+    }
+
+    fun sendVerificationEmail() {
+        viewModelScope.launch {
+            authRepository.sendVerificationEmail()
+        }
+    }
+
+    fun checkEmailVerified(onVerified: () -> Unit) {
+        viewModelScope.launch {
+            authRepository.reloadUser()
+            if (authRepository.isEmailVerified) {
+                userRepository.syncOnLogin()
+                _uiState.value = AuthUiState(isSuccess = true)
+                onVerified()
+            } else {
+                _uiState.value = AuthUiState(
+                    needsEmailVerification = true,
+                    errorMessage = "Todavía no hemos detectado la verificación. Revisa tu bandeja de entrada."
+                )
             }
         }
     }

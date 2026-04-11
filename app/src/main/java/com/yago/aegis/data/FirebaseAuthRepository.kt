@@ -26,6 +26,28 @@ class FirebaseAuthRepository {
     val isEmailProvider: Boolean
         get() = auth.currentUser?.providerData?.any { it.providerId == "password" } == true
 
+    val isEmailVerified: Boolean
+        get() = auth.currentUser?.isEmailVerified == true
+
+    suspend fun reloadUser(): SimpleResult {
+        return try {
+            auth.currentUser?.reload()?.await()
+            SimpleResult.Success
+        } catch (e: Exception) {
+            SimpleResult.Error(friendlyError(e.message))
+        }
+    }
+
+    suspend fun sendVerificationEmail(): SimpleResult {
+        return try {
+            val user = auth.currentUser ?: return SimpleResult.Error("No hay sesión activa")
+            user.sendEmailVerification().await()
+            SimpleResult.Success
+        } catch (e: Exception) {
+            SimpleResult.Error(friendlyError(e.message))
+        }
+    }
+
     suspend fun registerWithEmail(email: String, password: String): AuthResult {
         return try {
             val result = auth.createUserWithEmailAndPassword(email, password).await()
