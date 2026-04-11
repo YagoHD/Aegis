@@ -15,6 +15,9 @@ import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.*
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,11 +48,12 @@ private val motivationalQuotes = listOf(
 fun WorkoutCompleteScreen(
     summary: WorkoutSummary,
     previousVolume: Double,
-    onFinish: () -> Unit,
+    onFinish: (notes: String) -> Unit,
     onNavigateToHistory: () -> Unit = {}
 ) {
     val scrollState = rememberScrollState()
     val quote = remember { motivationalQuotes.random() }
+    var sessionNotes by remember { mutableStateOf("") }
 
     // Animaciones de contador
     val animatedVolume = remember { Animatable(0f) }
@@ -313,6 +317,39 @@ fun WorkoutCompleteScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // ─── NOTAS DE SESIÓN ───
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = sessionNotes,
+                onValueChange = { sessionNotes = it },
+                placeholder = {
+                    Text(
+                        "¿Cómo fue el entrenamiento? Añade una nota...",
+                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f),
+                        fontSize = 13.sp,
+                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultMinSize(minHeight = 80.dp),
+                shape = RoundedCornerShape(8.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    cursorColor = MaterialTheme.colorScheme.primary,
+                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onBackground
+                ),
+                textStyle = TextStyle(fontSize = 13.sp),
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                maxLines = 4
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
             // ─── FRASE MOTIVACIONAL ───
             Text(
                 text = quote,
@@ -351,7 +388,7 @@ fun WorkoutCompleteScreen(
 
             // ─── BOTÓN FINISH SESSION ───
             Button(
-                onClick = onFinish,
+                onClick = { onFinish(sessionNotes) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp),

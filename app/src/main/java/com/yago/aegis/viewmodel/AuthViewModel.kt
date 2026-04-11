@@ -29,7 +29,10 @@ class AuthViewModel(
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
-    val isLoggedIn: Boolean get() = authRepository.isLoggedIn
+    // StateFlow reactivo — Navigation lo observa para recalcular startDest
+    private val _isLoggedIn = MutableStateFlow(authRepository.isLoggedIn)
+    val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
+
     val currentUserEmail: String? get() = authRepository.currentUser?.email
     val isEmailProvider: Boolean get() = authRepository.isEmailProvider
 
@@ -40,6 +43,7 @@ class AuthViewModel(
                 is AuthResult.Success -> {
                     authRepository.sendVerificationEmail()
                     userRepository.syncOnLogin()
+                    _isLoggedIn.value = true
                     _uiState.value = AuthUiState(needsEmailVerification = true)
                 }
                 is AuthResult.Error -> _uiState.value = AuthUiState(errorMessage = result.message)
@@ -54,9 +58,11 @@ class AuthViewModel(
                 is AuthResult.Success -> {
                     if (!authRepository.isEmailVerified) {
                         authRepository.sendVerificationEmail()
+                        _isLoggedIn.value = true
                         _uiState.value = AuthUiState(needsEmailVerification = true)
                     } else {
                         userRepository.syncOnLogin()
+                        _isLoggedIn.value = true
                         _uiState.value = AuthUiState(isSuccess = true)
                     }
                 }
@@ -71,6 +77,7 @@ class AuthViewModel(
             when (val result = authRepository.loginWithGoogle(account)) {
                 is AuthResult.Success -> {
                     userRepository.syncOnLogin()
+                    _isLoggedIn.value = true
                     _uiState.value = AuthUiState(isSuccess = true)
                 }
                 is AuthResult.Error -> _uiState.value = AuthUiState(errorMessage = result.message)
@@ -121,8 +128,12 @@ class AuthViewModel(
     }
 
     fun logout() {
-        authRepository.logout()
-        _uiState.value = AuthUiState()
+        viewModelScope.launch {
+            userRepository.clearLocalData()
+            authRepository.logout()
+            _isLoggedIn.value = false
+            _uiState.value = AuthUiState()
+        }
     }
 
     fun clearState() {

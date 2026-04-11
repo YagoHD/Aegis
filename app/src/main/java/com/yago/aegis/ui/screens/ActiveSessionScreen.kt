@@ -325,6 +325,11 @@ fun ActiveSessionScreen(
                     }
 
                     item {
+                        // Solo activo si hay al menos una serie con datos
+                        val hasAnyData = currentSession.exercisesProgress.any { prog ->
+                            prog.sets.any { it.weight > 0 || it.reps > 0 }
+                        }
+
                         Button(
                             onClick = {
                                 workoutViewModel.requestFinishWorkout()
@@ -335,22 +340,27 @@ fun ActiveSessionScreen(
                                     }
                                 }
                             },
+                            enabled = hasAnyData,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 16.dp, bottom = 100.dp)
                                 .height(60.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = Color.Black
+                                containerColor = if (hasAnyData) MaterialTheme.colorScheme.primary
+                                                 else MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+                                contentColor = if (hasAnyData) Color.Black
+                                               else MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+                                disabledContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
+                                disabledContentColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)
                             ),
                             shape = RoundedCornerShape(8.dp),
-                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+                            elevation = ButtonDefaults.buttonElevation(defaultElevation = if (hasAnyData) 4.dp else 0.dp)
                         ) {
                             Text(
-                                text = "FINALIZAR ENTRENAMIENTO",
+                                text = if (hasAnyData) "FINALIZAR ENTRENAMIENTO" else "INTRODUCE DATOS PARA FINALIZAR",
                                 style = MaterialTheme.typography.labelLarge.copy(
                                     fontWeight = FontWeight.Black,
-                                    fontSize = 15.sp,
+                                    fontSize = if (hasAnyData) 15.sp else 11.sp,
                                     letterSpacing = 1.sp
                                 )
                             )

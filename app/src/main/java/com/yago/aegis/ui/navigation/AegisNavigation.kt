@@ -54,9 +54,9 @@ fun AegisNavigation(
         Box(modifier = Modifier.fillMaxSize().background(Color.Black))
         return
     }
-
+    val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
     val startDest = when {
-        !authViewModel.isLoggedIn -> "welcome"
+        !isLoggedIn -> "welcome"
         !authRepository.isEmailVerified -> "email_verification"
         else -> "profile"
     }
@@ -233,9 +233,8 @@ fun AegisNavigation(
                     viewModel = profileViewModel,
                     authViewModel = authViewModel,
                     onLogout = {
-                        navController.navigate("welcome") {
-                            popUpTo(0) { inclusive = true }
-                        }
+                        authViewModel.logout()
+                        // La navegación la gestiona el LaunchedEffect(isLoggedIn)
                     }
                 )
             }
@@ -315,7 +314,8 @@ fun AegisNavigation(
                     WorkoutCompleteScreen(
                         summary = summary,
                         previousVolume = previousVolume,
-                        onFinish = {
+                        onFinish = { notes ->
+                            workoutViewModel.saveSessionNotes(notes)
                             workoutViewModel.clearSummary()
                             navController.navigate("profile") {
                                 popUpTo(0) { inclusive = true }

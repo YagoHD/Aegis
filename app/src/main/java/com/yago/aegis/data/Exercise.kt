@@ -54,7 +54,8 @@ data class WorkoutSession(
     val id: String = UUID.randomUUID().toString(),
     val routineName: String,
     val date: Long = System.currentTimeMillis(),
-    val exercisesProgress: List<ExerciseProgress>
+    val exercisesProgress: List<ExerciseProgress>,
+    val notes: String = ""  // Default "" — sesiones antiguas sin este campo no se rompen
 )
 
 // ICONOS Y UTILIDADES (Mantenemos tu lógica original aquí mismo)

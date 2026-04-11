@@ -222,6 +222,33 @@ private fun HistorySessionRow(session: WorkoutSession) {
                             }
                         }
                     }
+
+                    // ─── NOTAS DE SESIÓN (solo si existen y no están vacías) ───
+                    val notes = session.notes.orEmpty()
+                    if (notes.isNotBlank()) {
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f),
+                            modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)
+                        )
+                        Row(
+                            verticalAlignment = Alignment.Top,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "📝",
+                                fontSize = 11.sp,
+                                modifier = Modifier.padding(top = 1.dp, end = 6.dp)
+                            )
+                            Text(
+                                text = notes,
+                                color = MaterialTheme.colorScheme.secondary,
+                                fontSize = 12.sp,
+                                fontStyle = FontStyle.Italic,
+                                lineHeight = 18.sp,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
                 }
             }
         }

@@ -111,6 +111,11 @@ class SettingsStore(private val context: Context) {
     val timerPosX: Flow<Float> = context.dataStore.data.map { it[TIMER_POS_X] ?: -1f }
     val timerPosY: Flow<Float> = context.dataStore.data.map { it[TIMER_POS_Y] ?: -1f }
     // --- ESCRITURA (WRITE) ---
+    // Limpia todos los datos locales del usuario — llamar al hacer logout
+    suspend fun clearAll() {
+        context.dataStore.edit { it.clear() }
+    }
+
     suspend fun saveName(name: String) {
         context.dataStore.edit { it[USER_NAME] = name }
     }

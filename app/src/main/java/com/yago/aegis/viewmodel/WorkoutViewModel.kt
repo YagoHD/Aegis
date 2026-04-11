@@ -169,6 +169,21 @@ class WorkoutViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
+    fun updateSessionNotes(notes: String) {
+        _activeSession.update { it?.copy(notes = notes) }
+    }
+
+    fun saveSessionNotes(notes: String) {
+        // Actualiza las notas en la última sesión guardada en el historial
+        if (notes.isBlank()) return
+        viewModelScope.launch {
+            val history = repository.workoutHistory.first()
+            val lastSession = history.lastOrNull() ?: return@launch
+            val updated = lastSession.copy(notes = notes)
+            repository.updateWorkoutSession(updated)
+        }
+    }
+
     fun pauseWorkout() {
         stopTimer()
         _isPaused.value = true

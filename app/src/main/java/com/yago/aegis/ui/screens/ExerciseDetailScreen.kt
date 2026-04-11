@@ -54,18 +54,23 @@ fun ExerciseDetailScreen(
     }
 
     val percentageGain = remember(history, exerciseName) {
-        val allWeights = history.flatMap { session ->
-            session.exercisesProgress
-                .filter {
-                    it.exercise.id == exerciseId ||
-                    (exerciseName != null && it.exercise.name == exerciseName)
-                }
-                .flatMap { it.sets }
-                .map { it.weight }
-        }
-        if (allWeights.size >= 2) {
-            val first = allWeights.first()
-            val last = allWeights.last()
+        // Comparar el peso MÁXIMO de la primera sesión con el de la última
+        // Ignorar sesiones sin series completadas o sin datos de peso
+        val sessionMaxWeights = history
+            .mapNotNull { session ->
+                val maxW = session.exercisesProgress
+                    .filter {
+                        it.exercise.id == exerciseId ||
+                        (exerciseName != null && it.exercise.name == exerciseName)
+                    }
+                    .flatMap { it.sets }
+                    .filter { it.isCompleted && it.weight > 0 }
+                    .maxOfOrNull { it.weight }
+                maxW
+            }
+        if (sessionMaxWeights.size >= 2) {
+            val first = sessionMaxWeights.first()
+            val last = sessionMaxWeights.last()
             if (first == 0.0) "0%"
             else {
                 val gain = ((last - first) / first) * 100

@@ -144,6 +144,17 @@ class UserRepository(
         syncScope.launch { runCatching { firestore.saveExercises(currentList) } }
     }
 
+    suspend fun updateWorkoutSession(session: WorkoutSession) {
+        // Actualiza una sesión existente en el historial (ej: añadir notas)
+        val history = settingsStore.workoutHistory.first().toMutableList()
+        val idx = history.indexOfFirst { it.id == session.id }
+        if (idx >= 0) {
+            history[idx] = session
+            settingsStore.replaceWorkoutHistory(history)
+            syncScope.launch { runCatching { firestore.saveWorkoutHistory(history) } }
+        }
+    }
+
     suspend fun saveWorkoutSession(session: WorkoutSession) {
         settingsStore.saveWorkoutSession(session)
         syncScope.launch { runCatching { firestore.appendWorkoutSession(session) } }
@@ -212,6 +223,10 @@ class UserRepository(
                 )
             }
         }
+    }
+
+    suspend fun clearLocalData() {
+        settingsStore.clearAll()
     }
 
     suspend fun syncOnLogin() {
