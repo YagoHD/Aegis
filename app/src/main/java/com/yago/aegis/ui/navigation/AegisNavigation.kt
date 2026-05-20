@@ -1,9 +1,12 @@
 package com.yago.aegis.ui.navigation
 
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.navigation.NavBackStackEntry
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,10 +34,40 @@ import com.yago.aegis.ui.components.AegisBottomBar
 import com.yago.aegis.ui.components.SettingsMenu
 import com.yago.aegis.ui.screens.*
 import com.yago.aegis.viewmodel.AuthViewModel
+import com.yago.aegis.viewmodel.PlateCalculatorViewModel
 import com.yago.aegis.viewmodel.ProfileViewModel
 import com.yago.aegis.viewmodel.RoutinesViewModel
 import com.yago.aegis.viewmodel.StatsViewModel
 import com.yago.aegis.viewmodel.WorkoutViewModel
+
+private val TAB_ROUTES = listOf("stats", "routine", "train", "ejercicios", "profile")
+
+private val tabEnter: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
+    val from = TAB_ROUTES.indexOf(initialState.destination.route)
+    val to = TAB_ROUTES.indexOf(targetState.destination.route)
+    if (from == -1 || to == -1) EnterTransition.None
+    else slideInHorizontally(tween(220)) { if (to > from) it else -it }
+}
+
+private val tabExit: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
+    val from = TAB_ROUTES.indexOf(initialState.destination.route)
+    val to = TAB_ROUTES.indexOf(targetState.destination.route)
+    if (from == -1 || to == -1) ExitTransition.None
+    else slideOutHorizontally(tween(220)) { if (to > from) -it else it }
+}
+
+private val pushEnter: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
+    slideInHorizontally(tween(250)) { it }
+}
+private val pushExit: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
+    slideOutHorizontally(tween(250)) { -it }
+}
+private val pushPopEnter: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
+    slideInHorizontally(tween(250)) { -it }
+}
+private val pushPopExit: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
+    slideOutHorizontally(tween(250)) { it }
+}
 
 @Composable
 fun AegisNavigation(
@@ -75,6 +108,7 @@ fun AegisNavigation(
         }
     }
     val sharedStatsViewModel: StatsViewModel = viewModel(factory = StatsViewModel.Factory(userRepository))
+    val plateCalculatorViewModel: PlateCalculatorViewModel = viewModel(factory = PlateCalculatorViewModel.Factory(userRepository))
 
     val showBottomBar = currentRoute != "settings" &&
             !onboardingRoutes.contains(currentRoute) &&
@@ -82,7 +116,8 @@ fun AegisNavigation(
             !isSessionActive &&
             currentRoute != "workout_settings" &&
             currentRoute != "workout_complete" &&
-            currentRoute != "workout_history"
+            currentRoute != "workout_history" &&
+            currentRoute != "plate_calculator"
 
     Scaffold(
         bottomBar = { if (showBottomBar) AegisBottomBar(navController) }
@@ -179,16 +214,25 @@ fun AegisNavigation(
 
             composable(
                 route = "routine",
-                enterTransition = { slideIntoContainer(animationSpec = tween(300), towards = AnimatedContentTransitionScope.SlideDirection.Right) },
-                exitTransition = { slideOutOfContainer(animationSpec = tween(300), towards = AnimatedContentTransitionScope.SlideDirection.Left) }
+                enterTransition = tabEnter,
+                exitTransition = tabExit,
+                popEnterTransition = tabEnter,
+                popExitTransition = tabExit
             ) {
                 RoutineScreen(
                     routinesViewModel = routinesViewModel,
-                    onNavigateToEditRoutine = { id -> navController.navigate("edit_routine/$id") }
+                    onNavigateToEditRoutine = { id -> navController.navigate("edit_routine/$id") },
+                    onNavigateToNewRoutine = { id -> navController.navigate("edit_routine/$id?isNew=true") }
                 )
             }
 
-            composable("stats") {
+            composable(
+                route = "stats",
+                enterTransition = tabEnter,
+                exitTransition = tabExit,
+                popEnterTransition = tabEnter,
+                popExitTransition = tabExit
+            ) {
                 StatsScreen(
                     viewModel = sharedStatsViewModel,
                     onNavigateToSettings = { navController.navigate("stats_settings") },
@@ -196,20 +240,39 @@ fun AegisNavigation(
                     onNavigateToHistory = { navController.navigate("workout_history") }
                 )
             }
-            composable("stats_settings") { StatsSettingsScreen(viewModel = sharedStatsViewModel) }
+            composable(
+                route = "stats_settings",
+                enterTransition = pushEnter, exitTransition = pushExit,
+                popEnterTransition = pushPopEnter, popExitTransition = pushPopExit
+            ) { StatsSettingsScreen(viewModel = sharedStatsViewModel) }
 
             composable(
                 route = "profile",
-                enterTransition = { slideIntoContainer(animationSpec = tween(300), towards = AnimatedContentTransitionScope.SlideDirection.Left) },
-                exitTransition = { slideOutOfContainer(animationSpec = tween(300), towards = AnimatedContentTransitionScope.SlideDirection.Right) }
+                enterTransition = tabEnter,
+                exitTransition = tabExit,
+                popEnterTransition = tabEnter,
+                popExitTransition = tabExit
             ) {
                 MainProfileScreen(
                     viewModel = profileViewModel,
-                    onNavigateToSettings = { navController.navigate("settings") }
+                    onNavigateToSettings = { navController.navigate("settings") },
+                    onNavigateToTrain = {
+                        navController.navigate("train") {
+                            popUpTo(navController.graph.startDestinationId) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
                 )
             }
 
-            composable("ejercicios") {
+            composable(
+                route = "ejercicios",
+                enterTransition = tabEnter,
+                exitTransition = tabExit,
+                popEnterTransition = tabEnter,
+                popExitTransition = tabExit
+            ) {
                 ExercisesLibraryScreen(
                     routinesViewModel = routinesViewModel,
                     onNavigateToCreate = { navController.navigate("create_exercise") },
@@ -218,7 +281,9 @@ fun AegisNavigation(
             }
             composable(
                 route = "exercise_detail/{exerciseId}",
-                arguments = listOf(navArgument("exerciseId") { type = NavType.LongType })
+                arguments = listOf(navArgument("exerciseId") { type = NavType.LongType }),
+                enterTransition = pushEnter, exitTransition = pushExit,
+                popEnterTransition = pushPopEnter, popExitTransition = pushPopExit
             ) { backStackEntry ->
                 val exerciseId = backStackEntry.arguments?.getLong("exerciseId") ?: -1L
                 ExerciseDetailScreen(exerciseId = exerciseId, viewModel = sharedStatsViewModel, onBack = { navController.popBackStack() })
@@ -240,28 +305,65 @@ fun AegisNavigation(
             }
 
             composable(
-                route = "edit_routine/{routineId}",
-                arguments = listOf(navArgument("routineId") { type = NavType.IntType })
+                route = "edit_routine/{routineId}?isNew={isNew}",
+                arguments = listOf(
+                    navArgument("routineId") { type = NavType.IntType },
+                    navArgument("isNew") { type = NavType.BoolType; defaultValue = false }
+                ),
+                enterTransition = pushEnter, exitTransition = pushExit,
+                popEnterTransition = pushPopEnter, popExitTransition = pushPopExit
             ) { backStackEntry ->
                 val routineId = backStackEntry.arguments?.getInt("routineId") ?: -1
-                EditRoutineScreen(routineId = routineId, routinesViewModel = routinesViewModel, navController = navController, onNavigateBack = { navController.popBackStack() })
+                val isNew = backStackEntry.arguments?.getBoolean("isNew") ?: false
+                EditRoutineScreen(
+                    routineId = routineId,
+                    routinesViewModel = routinesViewModel,
+                    navController = navController,
+                    isNewRoutine = isNew,
+                    onNavigateBack = { navController.popBackStack() }
+                )
             }
 
-            composable(route = "add_exercise") {
-                AddExerciseScreen(routinesViewModel = routinesViewModel, onNavigateBack = { navController.popBackStack() }, onExerciseCreated = {})
+            composable(
+                route = "add_exercise?slotIndex={slotIndex}",
+                arguments = listOf(navArgument("slotIndex") { type = NavType.IntType; defaultValue = -1 }),
+                enterTransition = pushEnter, exitTransition = pushExit,
+                popEnterTransition = pushPopEnter, popExitTransition = pushPopExit
+            ) { backStackEntry ->
+                val slotIndex = backStackEntry.arguments?.getInt("slotIndex") ?: -1
+                AddExerciseScreen(
+                    routinesViewModel = routinesViewModel,
+                    slotIndex = slotIndex,
+                    onNavigateBack = { navController.popBackStack() },
+                    onExerciseCreated = {}
+                )
             }
 
-            composable("edit_exercise/{exerciseName}") { backStackEntry ->
+            composable(
+                route = "edit_exercise/{exerciseName}",
+                enterTransition = pushEnter, exitTransition = pushExit,
+                popEnterTransition = pushPopEnter, popExitTransition = pushPopExit
+            ) { backStackEntry ->
                 val exerciseName = backStackEntry.arguments?.getString("exerciseName")
                 val exercise = routinesViewModel.allExercises.collectAsState().value.find { it.name == exerciseName }
                 EditExerciseScreen(routinesViewModel = routinesViewModel, exerciseToEdit = exercise, onNavigateBack = { navController.popBackStack() })
             }
 
-            composable("create_exercise") {
+            composable(
+                route = "create_exercise",
+                enterTransition = pushEnter, exitTransition = pushExit,
+                popEnterTransition = pushPopEnter, popExitTransition = pushPopExit
+            ) {
                 EditExerciseScreen(routinesViewModel = routinesViewModel, exerciseToEdit = null, onNavigateBack = { navController.popBackStack() })
             }
 
-            composable("train") {
+            composable(
+                route = "train",
+                enterTransition = tabEnter,
+                exitTransition = tabExit,
+                popEnterTransition = tabEnter,
+                popExitTransition = tabExit
+            ) {
                 SelectRoutineScreen(
                     routinesViewModel = routinesViewModel,
                     workoutViewModel = workoutViewModel,
@@ -272,7 +374,8 @@ fun AegisNavigation(
                             restoreState = true
                         }
                     },
-                    onStartWorkout = { routineId -> navController.navigate("active_session/$routineId") }
+                    onStartWorkout = { routineId -> navController.navigate("active_session/$routineId") },
+                    onNavigateToPlateCalculator = { navController.navigate("plate_calculator") }
                 )
             }
 
@@ -293,6 +396,7 @@ fun AegisNavigation(
                         }
                     },
                     onNavigateToSettings = { navController.navigate("workout_settings") },
+                    onNavigateToPlateCalculator = { navController.navigate("plate_calculator") },
                     onBack = { navController.popBackStack() }
                 )
             }
@@ -332,7 +436,11 @@ fun AegisNavigation(
                 }
             }
 
-            composable("workout_history") {
+            composable(
+                route = "workout_history",
+                enterTransition = pushEnter, exitTransition = pushExit,
+                popEnterTransition = pushPopEnter, popExitTransition = pushPopExit
+            ) {
                 val history by sharedStatsViewModel.workoutHistory.collectAsState()
                 WorkoutHistoryScreen(
                     sessions = history,
@@ -340,7 +448,11 @@ fun AegisNavigation(
                 )
             }
 
-            composable("workout_settings") {
+            composable(
+                route = "workout_settings",
+                enterTransition = pushEnter, exitTransition = pushExit,
+                popEnterTransition = pushPopEnter, popExitTransition = pushPopExit
+            ) {
                 WorkoutSettingsScreen(
                     workoutViewModel = workoutViewModel,
                     onNavigateBack = { navController.popBackStack() },
@@ -350,6 +462,17 @@ fun AegisNavigation(
                         userRepository.updateTimerSound(sound)
                         userRepository.updateShowRestTimer(showTimer)
                     }
+                )
+            }
+
+            composable(
+                route = "plate_calculator",
+                enterTransition = pushEnter, exitTransition = pushExit,
+                popEnterTransition = pushPopEnter, popExitTransition = pushPopExit
+            ) {
+                PlateCalculatorScreen(
+                    viewModel = plateCalculatorViewModel,
+                    onBack = { navController.popBackStack() }
                 )
             }
         }

@@ -44,6 +44,8 @@ class UserRepository(
     val showRestTimer = settingsStore.showRestTimer
     val timerPosX = settingsStore.timerPosX
     val timerPosY = settingsStore.timerPosY
+    val availablePlates = settingsStore.availablePlates
+    val barWeight = settingsStore.barWeight
 
     fun getAllExercises(): Flow<List<Exercise>> = settingsStore.exerciseLibrary
 
@@ -176,6 +178,8 @@ class UserRepository(
         settingsStore.saveTimerPosition(x, y)
         // La posición es preferencia local, no se sincroniza con la nube
     }
+    suspend fun updateAvailablePlates(plates: List<Double>) = settingsStore.saveAvailablePlates(plates)
+    suspend fun updateBarWeight(weight: Float) = settingsStore.saveBarWeight(weight)
     suspend fun updateTargetDays(days: Int) {
         settingsStore.updateTargetDays(days)
         syncSettingsToCloud()

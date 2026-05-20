@@ -37,9 +37,11 @@ import com.yago.aegis.viewmodel.RoutinesViewModel
 @Composable
 fun AddExerciseScreen(
     routinesViewModel: RoutinesViewModel,
+    slotIndex: Int = -1,    // -1 = nuevo slot | >= 0 = añadir variante al slot existente
     onNavigateBack: () -> Unit,
     onExerciseCreated: (Exercise) -> Unit
 ) {
+    val isVariantMode = slotIndex >= 0
     val savedGlobalTags by routinesViewModel.globalTags.collectAsState()
     val libraryExercises by routinesViewModel.allExercises.collectAsState(initial = emptyList())
 
@@ -94,7 +96,7 @@ fun AddExerciseScreen(
     Scaffold(
         topBar = {
             AegisTopBar(
-                title = stringResource(R.string.title_new_exercise).uppercase(),
+                title = if (isVariantMode) "AÑADIR VARIANTE" else stringResource(R.string.title_new_exercise).uppercase(),
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -185,7 +187,7 @@ fun AddExerciseScreen(
                             )
 
                             routinesViewModel.saveOrUpdateExercise(newExercise)
-                            routinesViewModel.addExerciseToTemp(newExercise)
+                            routinesViewModel.addExerciseToTemp(newExercise, slotIndex)
 
                             // Reset de campos
                             exerciseName = ""
@@ -201,7 +203,7 @@ fun AddExerciseScreen(
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
-                        "CREAR Y AÑADIR A LA RUTINA",
+                        if (isVariantMode) "CREAR Y AÑADIR COMO VARIANTE" else "CREAR Y AÑADIR A LA RUTINA",
                         fontWeight = FontWeight.Black,
                         fontSize = 13.sp
                     )
@@ -270,14 +272,19 @@ fun AddExerciseScreen(
 
             // LISTA DE LIBRERÍA
             items(filteredExercises) { exercise ->
-                val isAlreadyInRoutine = routinesViewModel.tempExercises.any { it.id == exercise.id }
+                // Grisado si el ejercicio ya está en CUALQUIER slot (modo nuevo o variante).
+                // Un ejercicio solo puede aparecer una vez en toda la rutina para evitar
+                // IDs duplicados que causan crash en la sesión activa.
+                val isAlreadyInRoutine = routinesViewModel.tempSlots.any { slot ->
+                    slot.variants.any { it.id == exercise.id }
+                }
 
                 ExerciseCard(
                     exercise = exercise,
                     isAddMode = true,
                     onEdit = {
                         if (!isAlreadyInRoutine) {
-                            routinesViewModel.addExerciseToTemp(exercise)
+                            routinesViewModel.addExerciseToTemp(exercise, slotIndex)
                         }
                     },
                     onDelete = {},

@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.*
@@ -52,7 +53,8 @@ fun ActiveSessionScreen(
     onFinishWorkout: () -> Unit,
     onBack: () -> Unit = {},
     profileViewModel: ProfileViewModel,
-    onNavigateToSettings: () -> Unit = {}
+    onNavigateToSettings: () -> Unit = {},
+    onNavigateToPlateCalculator: () -> Unit = {}
 ) {
     val session by workoutViewModel.activeSession.collectAsState()
     val uncompletedWithData by workoutViewModel.uncompletedWithData.collectAsState()
@@ -261,6 +263,14 @@ fun ActiveSessionScreen(
                         }
                     },
                     actions = {
+                        IconButton(onClick = onNavigateToPlateCalculator) {
+                            Icon(
+                                imageVector = Icons.Default.Calculate,
+                                contentDescription = "Calculadora de platos",
+                                tint = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
                         IconButton(onClick = onNavigateToSettings) {
                             Icon(
                                 imageVector = Icons.Default.Settings,
@@ -298,7 +308,9 @@ fun ActiveSessionScreen(
 
                     itemsIndexed(
                         items = currentSession.exercisesProgress,
-                        key = { _, progress -> progress.exercise.id }
+                        // Key compuesta con índice para garantizar unicidad aunque
+                        // el usuario tenga el mismo ejercicio en dos slots por error
+                        key = { index, progress -> "${index}_${progress.exercise.id}" }
                     ) { index, progress ->
                         Column {
                             ExerciseSessionCard(
@@ -312,7 +324,10 @@ fun ActiveSessionScreen(
                                 },
                                 onToggleExercise = {
                                     workoutViewModel.toggleExerciseCompleted(progress.exercise.id)
-                                }
+                                },
+                                onSwitchVariant = if (progress.slotVariants.size > 1) { variantIndex ->
+                                    workoutViewModel.switchVariant(index, variantIndex)
+                                } else null
                             )
                             if (index < currentSession.exercisesProgress.lastIndex) {
                                 HorizontalDivider(

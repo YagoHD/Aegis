@@ -35,6 +35,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yago.aegis.BuildConfig
 import com.yago.aegis.R
 import com.yago.aegis.viewmodel.AuthViewModel
 import com.yago.aegis.viewmodel.ProfileViewModel
@@ -106,6 +107,7 @@ fun SettingsMenu(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 20.dp)
             .verticalScroll(scrollState)
     ) {
@@ -287,7 +289,18 @@ fun SettingsMenu(
             }
         }
 
-        Spacer(modifier = Modifier.height(100.dp))
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Text(
+            text = "AEGIS v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.35f),
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.sp,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+
+        Spacer(modifier = Modifier.height(60.dp))
     }
 }
 
