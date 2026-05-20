@@ -48,6 +48,8 @@ class SettingsStore(private val context: Context) {
         private val SHOW_REST_TIMER = booleanPreferencesKey("show_rest_timer")
         private val TIMER_POS_X = floatPreferencesKey("timer_pos_x")
         private val TIMER_POS_Y = floatPreferencesKey("timer_pos_y")
+        private val AVAILABLE_PLATES = stringPreferencesKey("available_plates")
+        private val BAR_WEIGHT = floatPreferencesKey("bar_weight")
     }
 
     // --- LECTURA (READ) ---
@@ -110,6 +112,15 @@ class SettingsStore(private val context: Context) {
     // -1f significa "usar posición por defecto (esquina inferior derecha)"
     val timerPosX: Flow<Float> = context.dataStore.data.map { it[TIMER_POS_X] ?: -1f }
     val timerPosY: Flow<Float> = context.dataStore.data.map { it[TIMER_POS_Y] ?: -1f }
+    val availablePlates: Flow<List<Double>> = context.dataStore.data.map { prefs ->
+        val json = prefs[AVAILABLE_PLATES] ?: ""
+        if (json.isEmpty()) listOf(1.25, 2.5, 5.0, 10.0, 15.0, 20.0, 25.0)
+        else {
+            val type = object : TypeToken<List<Double>>() {}.type
+            gson.fromJson(json, type)
+        }
+    }
+    val barWeight: Flow<Float> = context.dataStore.data.map { it[BAR_WEIGHT] ?: 20f }
     // --- ESCRITURA (WRITE) ---
     // Limpia todos los datos locales del usuario — llamar al hacer logout
     suspend fun clearAll() {
@@ -266,6 +277,12 @@ class SettingsStore(private val context: Context) {
     }
     suspend fun updateRestTimerSeconds(seconds: Int) {
         context.dataStore.edit { it[REST_TIMER_SECONDS] = seconds }
+    }
+    suspend fun saveAvailablePlates(plates: List<Double>) {
+        context.dataStore.edit { it[AVAILABLE_PLATES] = gson.toJson(plates) }
+    }
+    suspend fun saveBarWeight(weight: Float) {
+        context.dataStore.edit { it[BAR_WEIGHT] = weight }
     }
     suspend fun toggleStatSection(keyName: String, isEnabled: Boolean) {
         val key = when(keyName) {

@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.yago.aegis.data.ExerciseProgress
 import com.yago.aegis.data.ExerciseSet
 import com.yago.aegis.data.Routine
+import com.yago.aegis.data.effectiveSlots
+import com.yago.aegis.data.withSafeDefaults
 import com.yago.aegis.data.ExerciseSummary
 import com.yago.aegis.data.UserRepository
 import com.yago.aegis.data.WorkoutSession
@@ -131,18 +133,14 @@ class WorkoutViewModel(private val repository: UserRepository) : ViewModel() {
                 .filter { session -> session.routineName == routine.name }
                 .sortedByDescending { session -> session.date }
 
-            val progress = routine.exercises.map { exercise ->
-                // Para cada ejercicio, buscar hacia atrás hasta encontrar
-                // la sesión más reciente donde tuvo series completadas
-                var lastPerformanceText: String? = null
+            // Función auxiliar: busca el último rendimiento de un ejercicio dado su nombre
+            fun findLastPerformance(exerciseName: String): String? {
                 for (session in routineHistory) {
-                    val exerciseProgress = session.exercisesProgress
-                        .find { ep -> ep.exercise.name == exercise.name }
-                    if (exerciseProgress != null) {
-                        val completedSets = exerciseProgress.sets
-                            .filter { s -> s.isCompleted }
+                    val ep = session.exercisesProgress.find { it.exercise.name == exerciseName }
+                    if (ep != null) {
+                        val completedSets = ep.sets.filter { it.isCompleted }
                         if (completedSets.isNotEmpty()) {
-                            lastPerformanceText = completedSets.joinToString("   ") { s ->
+                            return completedSets.joinToString("   ") { s ->
                                 val w = when {
                                     s.weight == 0.0 -> "BW"
                                     s.weight % 1 == 0.0 -> "${s.weight.toInt()}kg"
@@ -150,18 +148,26 @@ class WorkoutViewModel(private val repository: UserRepository) : ViewModel() {
                                 }
                                 "${w} x ${s.reps}"
                             }
-                            break
                         }
                     }
                 }
+                return null
+            }
 
+            // Construir ExerciseProgress por slot — pre-carga el historial de TODAS las variantes
+            val progress = routine.effectiveSlots().map { slot ->
+                val variantsWithHistory = slot.variants.map { exercise ->
+                    exercise.copy(
+                        lastPerformance = findLastPerformance(exercise.name) ?: exercise.lastPerformance
+                    )
+                }
                 ExerciseProgress(
-                    exercise = exercise.copy(
-                        lastPerformance = lastPerformanceText ?: exercise.lastPerformance
-                    ),
-                    sets = listOf(ExerciseSet())
+                    exercise = variantsWithHistory.first(),
+                    sets = listOf(ExerciseSet()),
+                    slotVariants = variantsWithHistory   // cache de variantes con historial
                 )
             }
+
             _activeSession.value = WorkoutSession(
                 routineName = routine.name,
                 exercisesProgress = progress
@@ -232,6 +238,25 @@ class WorkoutViewModel(private val repository: UserRepository) : ViewModel() {
                     prog.copy(sets = prog.sets.map { it.copy(isCompleted = !allDone) })
                 } else prog
             })
+        }
+    }
+
+    /**
+     * Cambia la variante activa de un slot durante la sesión.
+     * Usa la posición del slot (slotPosition) para ser inmune a IDs duplicados.
+     * Resetea las series al cambiar (el usuario va a hacer un ejercicio diferente).
+     */
+    fun switchVariant(slotPosition: Int, newVariantIndex: Int) {
+        _activeSession.update { session ->
+            val list = session?.exercisesProgress?.toMutableList() ?: return@update session
+            val prog = list.getOrNull(slotPosition) ?: return@update session
+            if (prog.slotVariants.size <= 1) return@update session
+            val newVariant = prog.slotVariants.getOrNull(newVariantIndex) ?: return@update session
+            list[slotPosition] = prog.copy(
+                exercise = newVariant,
+                sets = listOf(ExerciseSet())
+            )
+            session.copy(exercisesProgress = list)
         }
     }
 
@@ -319,8 +344,10 @@ class WorkoutViewModel(private val repository: UserRepository) : ViewModel() {
     }
 
     fun getSafeRoutine(routine: Routine): Routine {
-        val currentIcon = routine.iconName ?: "dumbbell"
-        return if (currentIcon.isBlank()) routine.copy(iconName = "dumbbell") else routine.copy(iconName = currentIcon)
+        // Gson puede inyectar null en campos non-null al deserializar datos antiguos
+        val safe = routine.withSafeDefaults()
+        val currentIcon = safe.iconName ?: "dumbbell"
+        return if (currentIcon.isBlank()) safe.copy(iconName = "dumbbell") else safe.copy(iconName = currentIcon)
     }
 
     fun calculateLastPerformed(dates: List<Long>?): String {

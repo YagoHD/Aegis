@@ -29,6 +29,16 @@ data class ExerciseRecord(
     val reps: Int,
     val oneRepMax: Double
 )
+
+/**
+ * SLOT: Un hueco en la rutina que puede tener uno o más ejercicios alternativos.
+ * El usuario elige en tiempo de entreno cuál hace ese día.
+ */
+data class ExerciseSlot(
+    val id: String = java.util.UUID.randomUUID().toString(),
+    val variants: List<Exercise> = emptyList()
+)
+
 /**
  * EL REGISTRO: Lo que el usuario anota en cada serie durante el entreno.
  */
@@ -44,7 +54,9 @@ data class ExerciseSet(
  */
 data class ExerciseProgress(
     val exercise: Exercise,
-    val sets: List<ExerciseSet> = listOf(ExerciseSet())
+    val sets: List<ExerciseSet> = listOf(ExerciseSet()),
+    // Todas las variantes del slot (incluida la actual). Vacío = ejercicio sin variantes.
+    val slotVariants: List<Exercise> = emptyList()
 )
 
 /**

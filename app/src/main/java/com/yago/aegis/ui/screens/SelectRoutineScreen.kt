@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -28,7 +29,8 @@ fun SelectRoutineScreen(
     routinesViewModel: RoutinesViewModel,
     workoutViewModel: WorkoutViewModel,
     onNavigateToCreateRoutine: () -> Unit,
-    onStartWorkout: (Int) -> Unit
+    onStartWorkout: (Int) -> Unit,
+    onNavigateToPlateCalculator: () -> Unit = {}
 ) {
     val routines = routinesViewModel.routines
     val activeSession by workoutViewModel.activeSession.collectAsState()
@@ -40,8 +42,16 @@ fun SelectRoutineScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             AegisTopBar(
-                title = "SELECCIONA TU MISIÓN", // Un toque más agresivo/técnico
+                title = "SELECCIONA TU MISIÓN",
                 actions = {
+                    IconButton(onClick = onNavigateToPlateCalculator) {
+                        Icon(
+                            imageVector = Icons.Default.Calculate,
+                            contentDescription = "Calculadora de platos",
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
                 }
             )
         }

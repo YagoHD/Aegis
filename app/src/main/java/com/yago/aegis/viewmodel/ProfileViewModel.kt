@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -48,77 +49,51 @@ class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
     }
 
     private fun collectProfileData() {
+        // Grupo 1: métricas corporales — un solo update atómico
         viewModelScope.launch {
-            repository.userName.collect { name ->
-                _uiState.update { it.copy(user = it.user.copy(name = name)) }
+            combine(
+                repository.userName,
+                repository.currentMass,
+                repository.height,
+                repository.bodyFat,
+                repository.disciplineDay
+            ) { name, mass, height, fat, day ->
+                { user: UserProfile -> user.copy(name = name, currentMass = mass, height = height.toInt(), bodyFat = fat, disciplineDay = day) }
+            }.collect { update ->
+                _uiState.update { it.copy(user = update(it.user)) }
             }
         }
+
+        // Grupo 2: fotos — un solo update atómico
         viewModelScope.launch {
-            repository.currentMass.collect { mass ->
-                _uiState.update { it.copy(user = it.user.copy(currentMass = mass)) }
+            combine(
+                repository.avatarUri,
+                repository.basePhotoUri,
+                repository.actualPhotoUri,
+                repository.basePhotoDate,
+                repository.actualPhotoDate
+            ) { avatar, base, actual, baseDate, actualDate ->
+                { user: UserProfile -> user.copy(profilePhotoUri = avatar, basePhotoUri = base, actualPhotoUri = actual, basePhotoDate = baseDate, actualPhotoDate = actualDate) }
+            }.collect { update ->
+                _uiState.update { it.copy(user = update(it.user)) }
             }
         }
+
+        // Grupo 3: toggles de UI — un solo update atómico
         viewModelScope.launch {
-            repository.height.collect { h ->
-                _uiState.update { it.copy(user = it.user.copy(height = h.toInt())) }
+            combine(
+                repository.showBMI,
+                repository.showBodyFat,
+                repository.showVisualLog,
+                repository.showGirths
+            ) { bmi, fat, visual, girths ->
+                { state: ProfileUiState -> state.copy(showBMI = bmi, showBodyFat = fat, showVisualLog = visual, showGirths = girths) }
+            }.collect { update ->
+                _uiState.update { update(it) }
             }
         }
-        viewModelScope.launch {
-            repository.bodyFat.collect { fat ->
-                _uiState.update { it.copy(user = it.user.copy(bodyFat = fat)) }
-            }
-        }
-        // avatarUri recogida UNA sola vez (estaba duplicada en el código original)
-        viewModelScope.launch {
-            repository.avatarUri.collect { uri ->
-                _uiState.update { it.copy(user = it.user.copy(profilePhotoUri = uri)) }
-            }
-        }
-        viewModelScope.launch {
-            repository.basePhotoUri.collect { uri ->
-                _uiState.update { it.copy(user = it.user.copy(basePhotoUri = uri)) }
-            }
-        }
-        viewModelScope.launch {
-            repository.actualPhotoUri.collect { uri ->
-                _uiState.update { it.copy(user = it.user.copy(actualPhotoUri = uri)) }
-            }
-        }
-        viewModelScope.launch {
-            repository.basePhotoDate.collect { date ->
-                _uiState.update { it.copy(user = it.user.copy(basePhotoDate = date)) }
-            }
-        }
-        viewModelScope.launch {
-            repository.actualPhotoDate.collect { date ->
-                _uiState.update { it.copy(user = it.user.copy(actualPhotoDate = date)) }
-            }
-        }
-        viewModelScope.launch {
-            repository.disciplineDay.collect { days ->
-                _uiState.update { it.copy(user = it.user.copy(disciplineDay = days)) }
-            }
-        }
-        viewModelScope.launch {
-            repository.showBMI.collect { show ->
-                _uiState.update { it.copy(showBMI = show) }
-            }
-        }
-        viewModelScope.launch {
-            repository.showBodyFat.collect { show ->
-                _uiState.update { it.copy(showBodyFat = show) }
-            }
-        }
-        viewModelScope.launch {
-            repository.showVisualLog.collect { show ->
-                _uiState.update { it.copy(showVisualLog = show) }
-            }
-        }
-        viewModelScope.launch {
-            repository.showGirths.collect { show ->
-                _uiState.update { it.copy(showGirths = show) }
-            }
-        }
+
+        // Grupo 4: medidas personalizadas
         viewModelScope.launch {
             repository.customMeasures.collect { measures ->
                 _uiState.update { it.copy(customMeasures = measures) }

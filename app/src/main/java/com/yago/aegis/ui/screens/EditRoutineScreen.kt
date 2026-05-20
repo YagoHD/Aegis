@@ -2,9 +2,11 @@ package com.yago.aegis.ui.screens
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -20,9 +22,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.yago.aegis.R
+import com.yago.aegis.data.DefaultExercises
+import com.yago.aegis.data.ExerciseSlot
+import com.yago.aegis.data.effectiveSlots
+import com.yago.aegis.data.getExerciseIcon
 import com.yago.aegis.data.globalExerciseIcons
 import com.yago.aegis.ui.components.AegisTopBar
-import com.yago.aegis.ui.components.ExerciseCard
 import com.yago.aegis.viewmodel.RoutinesViewModel
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyColumnState
@@ -34,6 +39,7 @@ fun EditRoutineScreen(
     routinesViewModel: RoutinesViewModel,
     onNavigateBack: () -> Unit,
     navController: NavHostController,
+    isNewRoutine: Boolean = false,  // true si venimos de crear, false si editamos una existente
 ) {
     val originalRoutine = remember(routineId) {
         routinesViewModel.routines.find { it.id == routineId }
@@ -42,7 +48,7 @@ fun EditRoutineScreen(
     // --- LÓGICA DE REORDENAMIENTO ---
     val lazyListState = rememberLazyListState()
     val reorderableState = rememberReorderableLazyColumnState(lazyListState) { from, to ->
-        routinesViewModel.tempExercises.apply {
+        routinesViewModel.tempSlots.apply {
             // Restamos 4 porque hay 4 items antes de la lista (Spacer, Nombre, Iconos, Cabecera)
             add(to.index - 4, removeAt(from.index - 4))
         }
@@ -51,23 +57,32 @@ fun EditRoutineScreen(
     var tempName by remember { mutableStateOf(originalRoutine?.name ?: "") }
     var selectedIconName by remember { mutableStateOf(originalRoutine?.iconName ?: "dumbbell") }
 
+    // isNewRoutine viene del caller — true sólo cuando venimos del dialog de creación.
+    // Evita falsos positivos con rutinas antiguas que tengan 0 ejercicios guardados.
+
     LaunchedEffect(routineId) {
-        if (routinesViewModel.tempExercises.isEmpty()) {
+        if (routinesViewModel.tempSlots.isEmpty()) {
             originalRoutine?.let {
-                routinesViewModel.setTempExercises(it.exercises)
+                routinesViewModel.setTempSlots(it.effectiveSlots())
             }
         }
+    }
+
+    fun onBackPressed() {
+        if (isNewRoutine && routinesViewModel.tempSlots.isEmpty()) {
+            // Rutina recién creada, salimos sin añadir ejercicios → eliminarla para no dejar fantasmas
+            originalRoutine?.let { routinesViewModel.removeRoutine(it) }
+        }
+        routinesViewModel.clearTempExercises()
+        onNavigateBack()
     }
 
     Scaffold(
         topBar = {
             AegisTopBar(
-                title = tempName.uppercase(),
+                title = if (tempName.isBlank()) "NUEVA RUTINA" else tempName.uppercase(),
                 navigationIcon = {
-                    IconButton(onClick = {
-                        routinesViewModel.clearTempExercises()
-                        onNavigateBack()
-                    }) {
+                    IconButton(onClick = { onBackPressed() }) {
                         Icon(
                             Icons.Default.ArrowBack,
                             contentDescription = null,
@@ -165,7 +180,7 @@ fun EditRoutineScreen(
                         letterSpacing = 1.sp
                     )
                     Text(
-                        text = "${routinesViewModel.tempExercises.size} ${stringResource(R.string.label_added_suffix)}".uppercase(),
+                        text = "${routinesViewModel.tempSlots.size} ${stringResource(R.string.label_added_suffix)}".uppercase(),
                         color = MaterialTheme.colorScheme.primary,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
@@ -174,25 +189,24 @@ fun EditRoutineScreen(
                 }
             }
 
-            // LISTA REORDENABLE (A partir del ITEM 4)
-            items(
-                items = routinesViewModel.tempExercises,
-                key = { it.id }
-            ) { exercise ->
-                ReorderableItem(reorderableState, key = exercise.id) { isDragging ->
-                    // 1. Efecto visual de "elevación" al arrastrar
+            // LISTA REORDENABLE (A partir del ITEM 4) — cada ítem es un slot (con 1 o más variantes)
+            itemsIndexed(
+                items = routinesViewModel.tempSlots,
+                key = { _, slot -> slot.id }
+            ) { slotIndex, slot ->
+                ReorderableItem(reorderableState, key = slot.id) { isDragging ->
                     val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp)
-
                     Surface(
                         shadowElevation = elevation,
-                        shape = RoundedCornerShape(8.dp), // Ajustado a 8.dp para consistencia Obsidiana
+                        shape = RoundedCornerShape(8.dp),
                         color = Color.Transparent
                     ) {
-                        ExerciseCard(
-                            exercise = exercise,
-                            onDelete = { routinesViewModel.tempExercises.remove(exercise) },
+                        RoutineSlotCard(
+                            slot = slot,
+                            onDeleteSlot = { routinesViewModel.removeSlot(slotIndex) },
+                            onDeleteVariant = { variantIdx -> routinesViewModel.removeVariantFromSlot(slotIndex, variantIdx) },
+                            onAddVariant = { navController.navigate("add_exercise?slotIndex=$slotIndex") },
                             showReorderHandle = true,
-                            // ✅ CORRECTO: draggableHandle() se usa sin parámetros
                             dragHandleModifier = Modifier.draggableHandle()
                         )
                     }
@@ -202,7 +216,7 @@ fun EditRoutineScreen(
             // BOTÓN AÑADIR
             item {
                 Surface(
-                    onClick = { navController.navigate("add_exercise") },
+                    onClick = { navController.navigate("add_exercise?slotIndex=-1") },
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     shape = RoundedCornerShape(8.dp),
                     color = Color.Transparent,
@@ -228,35 +242,195 @@ fun EditRoutineScreen(
                 }
             }
 
-            // BOTÓN GUARDAR
+            // BOTÓN GUARDAR / CREAR
             item {
                 Button(
                     onClick = {
                         routinesViewModel.updateRoutineFull(
                             id = routineId,
                             newName = tempName,
-                            newExercises = routinesViewModel.tempExercises.toList(),
+                            newSlots = routinesViewModel.tempSlots.toList(),
                             newIconName = selectedIconName
                         )
                         routinesViewModel.clearTempExercises()
                         onNavigateBack()
                     },
+                    enabled = tempName.isNotBlank(),
                     modifier = Modifier.fillMaxWidth().height(60.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = Color.Black
+                        contentColor = Color.Black,
+                        disabledContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f),
+                        disabledContentColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Icon(Icons.Default.Save, contentDescription = null)
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        stringResource(R.string.btn_save_routine).uppercase(),
+                        if (isNewRoutine) "CREAR RUTINA"
+                        else stringResource(R.string.btn_save_routine).uppercase(),
                         fontWeight = FontWeight.Black,
                         letterSpacing = 1.sp
                     )
                 }
                 Spacer(modifier = Modifier.height(32.dp))
+            }
+        }
+    }
+}
+
+// ────────────────────────────────────────────────────────────
+// SLOT CARD — muestra un slot con su ejercicio principal y variantes
+// ────────────────────────────────────────────────────────────
+@Composable
+private fun RoutineSlotCard(
+    slot: ExerciseSlot,
+    onDeleteSlot: () -> Unit,
+    onDeleteVariant: (Int) -> Unit,   // índice dentro de slot.variants (1+ = variante)
+    onAddVariant: () -> Unit,
+    showReorderHandle: Boolean = false,
+    dragHandleModifier: Modifier = Modifier
+) {
+    val primaryExercise = slot.variants.firstOrNull() ?: return
+    val hasVariants = slot.variants.size > 1
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        border = BorderStroke(
+            1.dp,
+            if (hasVariants) MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+            else MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f)
+        )
+    ) {
+        Column {
+            // Fila principal
+            Row(
+                modifier = Modifier.padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Icono del ejercicio principal
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .background(MaterialTheme.colorScheme.background, RoundedCornerShape(4.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), RoundedCornerShape(4.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = getExerciseIcon(primaryExercise.iconName),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = primaryExercise.name.uppercase(),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontWeight = FontWeight.Black,
+                        fontSize = 13.sp,
+                        letterSpacing = 0.5.sp
+                    )
+                    if (hasVariants) {
+                        Text(
+                            text = "+ ${slot.variants.size - 1} variante${if (slot.variants.size > 2) "s" else ""}",
+                            color = MaterialTheme.colorScheme.primary,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.5.sp
+                        )
+                    } else {
+                        val tags = primaryExercise.tags.filter { it != DefaultExercises.BASE_TAG }
+                        Text(
+                            text = if (tags.isNotEmpty()) tags.joinToString(" • ").uppercase()
+                                   else "${primaryExercise.type} • ${primaryExercise.muscleGroup}".uppercase(),
+                            color = MaterialTheme.colorScheme.secondary,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        )
+                    }
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Añadir variante
+                    IconButton(onClick = onAddVariant, modifier = Modifier.size(36.dp)) {
+                        Icon(
+                            imageVector = Icons.Default.SwapHoriz,
+                            contentDescription = "Añadir variante",
+                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                    // Eliminar slot
+                    IconButton(onClick = onDeleteSlot, modifier = Modifier.size(36.dp)) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Eliminar",
+                            tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                    if (showReorderHandle) {
+                        Icon(
+                            imageVector = Icons.Default.DragHandle,
+                            contentDescription = "Reordenar",
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = dragHandleModifier
+                                .padding(start = 4.dp)
+                                .size(22.dp)
+                        )
+                    }
+                }
+            }
+
+            // Variantes adicionales (2.ª en adelante)
+            if (hasVariants) {
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 12.dp),
+                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f)
+                )
+                slot.variants.drop(1).forEachIndexed { idx, variant ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 56.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.SwapHoriz,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f),
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = variant.name.uppercase(),
+                            color = MaterialTheme.colorScheme.secondary,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.weight(1f)
+                        )
+                        IconButton(
+                            onClick = { onDeleteVariant(idx + 1) },
+                            modifier = Modifier.size(28.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Eliminar variante",
+                                tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(4.dp))
             }
         }
     }

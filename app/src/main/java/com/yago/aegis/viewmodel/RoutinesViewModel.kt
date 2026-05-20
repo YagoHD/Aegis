@@ -10,8 +10,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.yago.aegis.data.DefaultExercises
 import com.yago.aegis.data.Exercise
+import com.yago.aegis.data.ExerciseSlot
 import com.yago.aegis.data.Routine
 import com.yago.aegis.data.UserRepository
+import com.yago.aegis.data.effectiveSlots
+import com.yago.aegis.data.withSafeDefaults
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -31,7 +34,8 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
     var routines = mutableStateListOf<Routine>()
         private set
 
-    var tempExercises = mutableStateListOf<Exercise>()
+    // Slots temporales para edición de rutina (reemplaza tempExercises)
+    var tempSlots = mutableStateListOf<ExerciseSlot>()
         private set
 
     // Búsqueda en librería de ejercicios: movida aquí desde ExercisesLibraryScreen
@@ -92,7 +96,9 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
         viewModelScope.launch {
             repository.routines.collect { savedRoutines ->
                 routines.clear()
-                routines.addAll(savedRoutines)
+                // Gson bypasea los default values de Kotlin → los campos nuevos llegan null
+                // en rutinas persistidas antes de añadir exerciseSlots. Los corregimos aquí.
+                routines.addAll(savedRoutines.map { r -> r.withSafeDefaults() })
             }
         }
     }
@@ -107,36 +113,41 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
         viewModelScope.launch {
             val currentLibrary = repository.getAllExercises().first()
 
-            // Buscar en librería primero por ID, luego por nombre como fallback
-            // (los ejercicios en rutinas pueden tener IDs distintos a los de la librería
-            // si fueron creados en momentos diferentes — System.currentTimeMillis())
+            // Buscar en librería por ID, luego por nombre como fallback buscando en slots
             val exerciseInLibrary = currentLibrary.find { it.id == exerciseId }
                 ?: currentLibrary.find { libEx ->
-                    // Buscar el ejercicio cuyo nombre coincida con el de la sesión
                     routines.any { routine ->
-                        routine.exercises.any { it.id == exerciseId && it.name == libEx.name }
+                        routine.effectiveSlots().any { slot ->
+                            slot.variants.any { it.id == exerciseId && it.name == libEx.name }
+                        }
                     }
                 }
 
             exerciseInLibrary?.let { current ->
-                val updatedPR = if (new1RM > current.oneRepMax) {
+                val updatedPR = if (new1RM > current.oneRepMax)
                     kotlin.math.round(new1RM * 10) / 10.0
-                } else current.oneRepMax
+                else current.oneRepMax
                 repository.upsertExercise(current.copy(lastPerformance = summary, oneRepMax = updatedPR))
             }
 
-            // Actualizar en todas las rutinas — buscar por ID o por nombre
+            // Actualizar en todas las rutinas, buscando dentro de cada slot/variante
             val updatedRoutines = routines.map { routine ->
-                routine.copy(exercises = routine.exercises.map { exercise ->
-                    val matches = exercise.id == exerciseId ||
-                        (exerciseInLibrary != null && exercise.name == exerciseInLibrary.name)
-                    if (matches) {
-                        val updatedPR = if (new1RM > exercise.oneRepMax)
-                            kotlin.math.round(new1RM * 10) / 10.0
-                        else exercise.oneRepMax
-                        exercise.copy(lastPerformance = summary, oneRepMax = updatedPR)
-                    } else exercise
-                })
+                val updatedSlots = routine.effectiveSlots().map { slot ->
+                    slot.copy(variants = slot.variants.map { exercise ->
+                        val matches = exercise.id == exerciseId ||
+                            (exerciseInLibrary != null && exercise.name == exerciseInLibrary.name)
+                        if (matches) {
+                            val updatedPR = if (new1RM > exercise.oneRepMax)
+                                kotlin.math.round(new1RM * 10) / 10.0
+                            else exercise.oneRepMax
+                            exercise.copy(lastPerformance = summary, oneRepMax = updatedPR)
+                        } else exercise
+                    })
+                }
+                routine.copy(
+                    exerciseSlots = updatedSlots,
+                    exercises = updatedSlots.map { it.variants.first() }
+                )
             }
             routines.clear()
             routines.addAll(updatedRoutines)
@@ -146,10 +157,12 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
 
     // --- RUTINAS ---
 
-    fun addRoutine(name: String, iconName: String = "dumbbell") {
+    /** Crea una nueva rutina y devuelve su ID para navegar directamente al editor. */
+    fun addRoutine(name: String, iconName: String = "dumbbell"): Int {
         val newId = (routines.maxOfOrNull { it.id } ?: 0) + 1
-        routines.add(Routine(id = newId, name = name.uppercase(), exercises = emptyList(), iconName = iconName))
+        routines.add(Routine(id = newId, name = name.uppercase(), exercises = emptyList(), exerciseSlots = emptyList(), iconName = iconName))
         persistChanges()
+        return newId
     }
 
     fun removeRoutine(routine: Routine) {
@@ -157,12 +170,13 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
         persistChanges()
     }
 
-    fun updateRoutineFull(id: Int, newName: String, newExercises: List<Exercise>, newIconName: String) {
+    fun updateRoutineFull(id: Int, newName: String, newSlots: List<ExerciseSlot>, newIconName: String) {
         val index = routines.indexOfFirst { it.id == id }
         if (index != -1) {
             routines[index] = routines[index].copy(
                 name = newName.uppercase(),
-                exercises = newExercises,
+                exercises = newSlots.mapNotNull { it.variants.firstOrNull() }, // flat list for Gson compat
+                exerciseSlots = newSlots,
                 iconName = newIconName
             )
             persistChanges()
@@ -214,7 +228,13 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
 
     private fun removeExerciseFromAllRoutines(exerciseName: String) {
         val updated = routines.map { routine ->
-            routine.copy(exercises = routine.exercises.filterNot { it.name == exerciseName })
+            val updatedSlots = routine.effectiveSlots()
+                .map { slot -> slot.copy(variants = slot.variants.filterNot { it.name == exerciseName }) }
+                .filter { it.variants.isNotEmpty() }
+            routine.copy(
+                exerciseSlots = updatedSlots,
+                exercises = updatedSlots.map { it.variants.first() }
+            )
         }
         routines.clear()
         routines.addAll(updated)
@@ -243,22 +263,57 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
 
     // --- TEMPORAL (EDICIÓN DE RUTINA) ---
 
-    fun setTempExercises(exercises: List<Exercise>?) {
-        tempExercises.clear()
-        exercises?.let { tempExercises.addAll(it) }
+    /** Inicializa los slots temporales desde una lista de slots guardados. */
+    fun setTempSlots(slots: List<ExerciseSlot>) {
+        tempSlots.clear()
+        tempSlots.addAll(slots)
     }
 
-    fun addExerciseToTemp(exercise: Exercise) {
-        if (!tempExercises.any { it.id == exercise.id }) tempExercises.add(exercise)
+    /** Compat: inicializa slots a partir de la lista plana de ejercicios (rutinas antiguas). */
+    fun setTempExercises(exercises: List<Exercise>?) {
+        tempSlots.clear()
+        exercises?.forEach { tempSlots.add(ExerciseSlot(variants = listOf(it))) }
+    }
+
+    /**
+     * Añade un ejercicio a los slots temporales.
+     * slotIndex == -1 → nuevo slot con ese ejercicio como única variante.
+     * slotIndex >= 0  → añade como variante al slot existente en esa posición.
+     */
+    fun addExerciseToTemp(exercise: Exercise, slotIndex: Int = -1) {
+        // En ambos casos: bloquear si el ejercicio ya está en CUALQUIER slot de la rutina.
+        // Esto evita IDs duplicados en la sesión activa (crash en LazyColumn y switchVariant).
+        val alreadyUsed = tempSlots.any { slot -> slot.variants.any { it.id == exercise.id } }
+        if (alreadyUsed) return
+
+        if (slotIndex == -1) {
+            tempSlots.add(ExerciseSlot(variants = listOf(exercise)))
+        } else {
+            val slot = tempSlots.getOrNull(slotIndex) ?: return
+            tempSlots[slotIndex] = slot.copy(variants = slot.variants + exercise)
+        }
+    }
+
+    /** Elimina una variante de un slot. Si queda vacío, elimina el slot entero. */
+    fun removeVariantFromSlot(slotIndex: Int, variantIndex: Int) {
+        val slot = tempSlots.getOrNull(slotIndex) ?: return
+        val newVariants = slot.variants.toMutableList().also { it.removeAt(variantIndex) }
+        if (newVariants.isEmpty()) tempSlots.removeAt(slotIndex)
+        else tempSlots[slotIndex] = slot.copy(variants = newVariants)
+    }
+
+    /** Elimina un slot completo (todos sus ejercicios/variantes). */
+    fun removeSlot(slotIndex: Int) {
+        if (slotIndex in tempSlots.indices) tempSlots.removeAt(slotIndex)
     }
 
     fun clearTempExercises() {
-        tempExercises.clear()
+        tempSlots.clear()
     }
 
     fun moveExercise(from: Int, to: Int) {
-        if (from in tempExercises.indices && to in tempExercises.indices) {
-            tempExercises.apply { add(to, removeAt(from)) }
+        if (from in tempSlots.indices && to in tempSlots.indices) {
+            tempSlots.apply { add(to, removeAt(from)) }
         }
     }
 

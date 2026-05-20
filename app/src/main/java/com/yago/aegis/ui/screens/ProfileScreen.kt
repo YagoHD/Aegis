@@ -13,11 +13,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -30,7 +33,11 @@ import com.yago.aegis.viewmodel.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainProfileScreen(viewModel: ProfileViewModel, onNavigateToSettings: () -> Unit) {
+fun MainProfileScreen(
+    viewModel: ProfileViewModel,
+    onNavigateToSettings: () -> Unit,
+    onNavigateToTrain: () -> Unit = {}
+) {
     Scaffold(
         topBar = {
             AegisTopBar(
@@ -50,13 +57,13 @@ fun MainProfileScreen(viewModel: ProfileViewModel, onNavigateToSettings: () -> U
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
-            ProfileContent(viewModel)
+            ProfileContent(viewModel, onNavigateToTrain)
         }
     }
 }
 
 @Composable
-fun ProfileContent(viewModel: ProfileViewModel) {
+fun ProfileContent(viewModel: ProfileViewModel, onNavigateToTrain: () -> Unit = {}) {
     // Un solo collectAsState para todo el estado (UiState sellado)
     val state by viewModel.uiState.collectAsState()
     val user = state.user
@@ -97,6 +104,11 @@ fun ProfileContent(viewModel: ProfileViewModel) {
             disciplineDay = user.disciplineDay,
             profilePhotoUri = user.profilePhotoUri
         )
+
+        if (user.disciplineDay == 0) {
+            Spacer(modifier = Modifier.height(24.dp))
+            NewUserBanner(onNavigateToTrain)
+        }
 
         Spacer(modifier = Modifier.height(40.dp))
 
@@ -184,5 +196,57 @@ fun ProfileContent(viewModel: ProfileViewModel) {
                 launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             }
         )
+    }
+}
+
+@Composable
+private fun NewUserBanner(onNavigateToTrain: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
+            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Default.Bolt,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(28.dp)
+        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "BIENVENIDO A AEGIS",
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 1.5.sp
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Completa tu primer entrenamiento para empezar a ver tu progreso aquí.",
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                fontSize = 12.sp,
+                lineHeight = 17.sp
+            )
+        }
+        Surface(
+            onClick = onNavigateToTrain,
+            shape = RoundedCornerShape(8.dp),
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.wrapContentSize()
+        ) {
+            Text(
+                text = "IR",
+                color = Color.Black,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 1.sp,
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+            )
+        }
     }
 }

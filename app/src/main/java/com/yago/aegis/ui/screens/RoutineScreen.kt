@@ -56,7 +56,8 @@ import com.yago.aegis.viewmodel.RoutinesViewModel
 @Composable
 fun RoutineScreen(
     routinesViewModel: RoutinesViewModel,
-    onNavigateToEditRoutine: (Int) -> Unit
+    onNavigateToEditRoutine: (Int) -> Unit,
+    onNavigateToNewRoutine: (Int) -> Unit = onNavigateToEditRoutine,
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var textState by remember { mutableStateOf("") }
@@ -73,8 +74,9 @@ fun RoutineScreen(
             onDismiss = { showDialog = false },
             onConfirm = {
                 if (textState.isNotBlank()) {
-                    routinesViewModel.addRoutine(textState, selectedIconName)
+                    val newId = routinesViewModel.addRoutine(textState, selectedIconName)
                     showDialog = false
+                    onNavigateToNewRoutine(newId)  // ir directo al editor de ejercicios (modo creación)
                 }
             }
         ) {
