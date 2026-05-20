@@ -1,34 +1,61 @@
 package com.yago.aegis.ui.screens
 
+import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.*
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import com.yago.aegis.data.ExerciseSummary
 import com.yago.aegis.data.WorkoutSummary
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlin.math.roundToInt
 
 private val motivationalQuotes = listOf(
@@ -54,6 +81,28 @@ fun WorkoutCompleteScreen(
     val scrollState = rememberScrollState()
     val quote = remember { motivationalQuotes.random() }
     var sessionNotes by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+    // ─── PR detection ───
+    val hasNewPR = remember(summary) { summary.exercises.any { it.isNewPR } }
+    val prExercises = remember(summary) { summary.exercises.filter { it.isNewPR } }
+    var prBannerVisible by remember { mutableStateOf(false) }
+    val infiniteTransition = rememberInfiniteTransition(label = "pr_pulse")
+    val borderAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.4f, targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(900, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+        label = "border_alpha"
+    )
+    LaunchedEffect(hasNewPR) {
+        if (hasNewPR) {
+            delay(700)
+            prBannerVisible = true
+        }
+    }
+
+    // ─── Share card capture ───
+    val graphicsLayer = rememberGraphicsLayer()
 
     // Animaciones de contador
     val animatedVolume = remember { Animatable(0f) }
@@ -123,6 +172,17 @@ fun WorkoutCompleteScreen(
                 letterSpacing = 3.sp
             )
 
+            // ─── PR CELEBRATION BANNER ───
+            AnimatedVisibility(
+                visible = prBannerVisible,
+                enter = slideInVertically(tween(400)) { -it } + fadeIn(tween(400))
+            ) {
+                Column {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    PRCelebrationBanner(prExercises = prExercises, borderAlpha = borderAlpha)
+                }
+            }
+
             Spacer(modifier = Modifier.height(32.dp))
 
             // ─── TARJETA VOLUMEN TOTAL ───
@@ -144,7 +204,6 @@ fun WorkoutCompleteScreen(
                             fontWeight = FontWeight.Black,
                             letterSpacing = 2.sp
                         )
-                        // Badge de porcentaje
                         if (volumeDiff != null) {
                             Surface(
                                 color = if (volumeDiff >= 0)
@@ -186,7 +245,6 @@ fun WorkoutCompleteScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Barra comparativa
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -223,7 +281,6 @@ fun WorkoutCompleteScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Duración
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant,
                     shape = RoundedCornerShape(12.dp),
@@ -257,7 +314,6 @@ fun WorkoutCompleteScreen(
                     }
                 }
 
-                // Ejercicios
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant,
                     shape = RoundedCornerShape(12.dp),
@@ -317,8 +373,63 @@ fun WorkoutCompleteScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // ─── SHARE CARD ───
+            Text(
+                text = "COMPARTIR",
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.secondary,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 2.sp
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // La card se captura con graphicsLayer al dibujarse
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .drawWithContent {
+                        graphicsLayer.record {
+                            this@drawWithContent.drawContent()
+                        }
+                        drawLayer(graphicsLayer)
+                    }
+            ) {
+                WorkoutShareCard(summary = summary, previousVolume = previousVolume)
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = {
+                    coroutineScope.launch {
+                        val bitmap = graphicsLayer.toImageBitmap().asAndroidBitmap()
+                        shareWorkoutBitmap(context, bitmap)
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = Color.Black
+                )
+            ) {
+                Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = "COMPARTIR ENTRENAMIENTO",
+                    fontWeight = FontWeight.Black,
+                    fontSize = 13.sp,
+                    letterSpacing = 1.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
             // ─── NOTAS DE SESIÓN ───
-            Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
                 value = sessionNotes,
                 onValueChange = { sessionNotes = it },
@@ -327,7 +438,7 @@ fun WorkoutCompleteScreen(
                         "¿Cómo fue el entrenamiento? Añade una nota...",
                         color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f),
                         fontSize = 13.sp,
-                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                        fontStyle = FontStyle.Italic
                     )
                 },
                 modifier = Modifier
@@ -368,11 +479,11 @@ fun WorkoutCompleteScreen(
                 onClick = onNavigateToHistory,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                androidx.compose.material3.Icon(
-                    imageVector = androidx.compose.material.icons.Icons.Default.History,
+                Icon(
+                    imageVector = Icons.Default.History,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.secondary,
-                    modifier = androidx.compose.ui.Modifier.size(16.dp)
+                    modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
@@ -418,6 +529,331 @@ fun WorkoutCompleteScreen(
     }
 }
 
+// ─────────────────────────────────────────────
+// PR CELEBRATION BANNER
+// ─────────────────────────────────────────────
+
+@Composable
+private fun PRCelebrationBanner(prExercises: List<ExerciseSummary>, borderAlpha: Float) {
+    val gold = MaterialTheme.colorScheme.primary
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.5.dp, gold.copy(alpha = borderAlpha), RoundedCornerShape(12.dp)),
+        color = gold.copy(alpha = 0.07f),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.EmojiEvents,
+                contentDescription = null,
+                tint = gold,
+                modifier = Modifier.size(36.dp)
+            )
+            Spacer(modifier = Modifier.width(14.dp))
+            Column {
+                Text(
+                    text = "¡NUEVO RÉCORD!",
+                    color = gold,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.sp
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                val subtitle = when {
+                    prExercises.isEmpty() -> ""
+                    prExercises.size == 1 -> prExercises.first().name.uppercase()
+                    else -> "${prExercises.size} nuevos récords personales"
+                }
+                if (subtitle.isNotEmpty()) {
+                    Text(
+                        text = subtitle,
+                        color = gold.copy(alpha = 0.75f),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+    }
+}
+
+// ─────────────────────────────────────────────
+// WORKOUT SHARE CARD (se captura como imagen)
+// ─────────────────────────────────────────────
+
+private val ShareCardBg = Color(0xFF080808)
+private val ShareCardSurface = Color(0xFF161616)
+private val ShareBronze = Color(0xFFB39371)
+private val ShareAccent = Color(0xFFC4A882)  // bronce claro para énfasis
+
+@Composable
+private fun WorkoutShareCard(summary: WorkoutSummary, previousVolume: Double = 0.0) {
+    val dateStr = remember {
+        SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date())
+    }
+    val durationStr = remember(summary.durationMs) {
+        val totalMin = summary.durationMs / 60000
+        if (totalMin >= 60) "${totalMin / 60}h ${totalMin % 60}m" else "${totalMin}m"
+    }
+    val totalSets = remember(summary) { summary.exercises.sumOf { it.sets } }
+    val volumeDiff = remember(summary, previousVolume) {
+        if (previousVolume > 0 && summary.totalVolume > 0)
+            ((summary.totalVolume - previousVolume) / previousVolume * 100).toInt()
+        else null
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(ShareCardBg, RoundedCornerShape(16.dp))
+            .border(1.dp, ShareBronze.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
+            .padding(22.dp)
+    ) {
+        // Header: AEGIS logo + fecha
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "AEGIS",
+                color = ShareAccent,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Black,
+                fontStyle = FontStyle.Italic,
+                letterSpacing = 4.sp
+            )
+            Text(
+                text = dateStr.uppercase(),
+                color = ShareBronze.copy(alpha = 0.6f),
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        HorizontalDivider(color = ShareBronze.copy(alpha = 0.18f))
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Nombre de la rutina + badge % mejora
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
+        ) {
+            Text(
+                text = summary.routineName.uppercase(),
+                color = Color.White,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 0.5.sp,
+                lineHeight = 28.sp,
+                modifier = Modifier.weight(1f)
+            )
+            if (volumeDiff != null) {
+                Spacer(modifier = Modifier.width(8.dp))
+                Surface(
+                    color = if (volumeDiff >= 0) ShareBronze.copy(alpha = 0.15f)
+                            else Color(0xFF8B3A3A).copy(alpha = 0.2f),
+                    shape = RoundedCornerShape(6.dp),
+                    border = BorderStroke(
+                        0.5.dp,
+                        if (volumeDiff >= 0) ShareBronze.copy(alpha = 0.5f)
+                        else Color(0xFF9B4A4A).copy(alpha = 0.5f)
+                    )
+                ) {
+                    Text(
+                        text = if (volumeDiff >= 0) "↑ +$volumeDiff%" else "↓ $volumeDiff%",
+                        color = if (volumeDiff >= 0) ShareAccent else Color(0xFFBF7070),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Black,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(3.dp))
+        Text(
+            text = "Entrenamiento completado",
+            color = ShareBronze.copy(alpha = 0.7f),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium
+        )
+
+        Spacer(modifier = Modifier.height(18.dp))
+
+        // Stats chips (ahora 4: volumen, duración, ejercicios, sets)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            ShareStatChip(
+                value = formatVolumeShare(summary.totalVolume),
+                unit = "kg",
+                label = "VOLUMEN",
+                modifier = Modifier.weight(1f)
+            )
+            ShareStatChip(
+                value = durationStr,
+                unit = "",
+                label = "TIEMPO",
+                modifier = Modifier.weight(1f)
+            )
+            ShareStatChip(
+                value = "${summary.exerciseCount}",
+                unit = "",
+                label = "EJERC.",
+                modifier = Modifier.weight(1f)
+            )
+            ShareStatChip(
+                value = "$totalSets",
+                unit = "",
+                label = "SETS",
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        if (summary.exercises.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(18.dp))
+
+            // Lista de ejercicios (máx 5)
+            summary.exercises.take(5).forEach { exercise ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(5.dp)
+                            .background(ShareBronze, CircleShape)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = exercise.name.uppercase(),
+                        color = Color.White.copy(alpha = 0.88f),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.2.sp,
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (exercise.isNewPR) {
+                        Surface(
+                            color = ShareBronze.copy(alpha = 0.15f),
+                            shape = RoundedCornerShape(4.dp),
+                            border = BorderStroke(0.5.dp, ShareAccent.copy(alpha = 0.7f))
+                        ) {
+                            Text(
+                                text = "PR",
+                                color = ShareAccent,
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Black,
+                                modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
+                            )
+                        }
+                    } else {
+                        val detail = when {
+                            exercise.isBodyweight -> "${exercise.sets} sets · BW"
+                            exercise.maxWeight > 0 -> "${exercise.sets} × ${formatWeightShare(exercise.maxWeight)}kg"
+                            else -> "${exercise.sets} sets"
+                        }
+                        Text(
+                            text = detail,
+                            color = ShareBronze.copy(alpha = 0.55f),
+                            fontSize = 11.sp
+                        )
+                    }
+                }
+            }
+
+            if (summary.exercises.size > 5) {
+                Text(
+                    text = "+${summary.exercises.size - 5} más",
+                    color = ShareBronze.copy(alpha = 0.45f),
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(top = 4.dp, start = 15.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(18.dp))
+        HorizontalDivider(color = ShareBronze.copy(alpha = 0.13f))
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Entrenado con AEGIS",
+                color = ShareBronze.copy(alpha = 0.45f),
+                fontSize = 10.sp,
+                letterSpacing = 0.5.sp
+            )
+            if (summary.exercises.any { it.isNewPR }) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.EmojiEvents,
+                        contentDescription = null,
+                        tint = ShareAccent,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "NUEVO PR",
+                        color = ShareAccent,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.sp
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ShareStatChip(value: String, unit: String, label: String, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .background(ShareCardSurface, RoundedCornerShape(8.dp))
+            .padding(horizontal = 10.dp, vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(verticalAlignment = Alignment.Bottom) {
+            Text(
+                text = value,
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Black
+            )
+            if (unit.isNotEmpty()) {
+                Text(
+                    text = unit,
+                    color = ShareBronze.copy(alpha = 0.7f),
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(bottom = 2.dp, start = 2.dp)
+                )
+            }
+        }
+        Text(
+            text = label,
+            color = ShareBronze.copy(alpha = 0.55f),
+            fontSize = 8.sp,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 1.sp
+        )
+    }
+}
+
+// ─────────────────────────────────────────────
+// EXERCISE SUMMARY ROW (sin cambios)
+// ─────────────────────────────────────────────
+
 @Composable
 fun ExerciseSummaryRow(exercise: ExerciseSummary) {
     Surface(
@@ -429,7 +865,6 @@ fun ExerciseSummaryRow(exercise: ExerciseSummary) {
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Icono check
             Box(
                 modifier = Modifier
                     .size(32.dp)
@@ -466,15 +901,11 @@ fun ExerciseSummaryRow(exercise: ExerciseSummary) {
                 )
             }
 
-            // Badge NEW PR
             if (exercise.isNewPR) {
                 Surface(
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
                     shape = RoundedCornerShape(4.dp),
-                    border = androidx.compose.foundation.BorderStroke(
-                        1.dp,
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                    )
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
                 ) {
                     Text(
                         text = "NEW PR!",
@@ -490,6 +921,37 @@ fun ExerciseSummaryRow(exercise: ExerciseSummary) {
     }
 }
 
+// ─────────────────────────────────────────────
+// SHARE HELPER
+// ─────────────────────────────────────────────
+
+private fun shareWorkoutBitmap(context: Context, bitmap: Bitmap) {
+    try {
+        val file = File(context.cacheDir, "aegis_share.png")
+        FileOutputStream(file).use { out ->
+            bitmap.compress(Bitmap.CompressFormat.PNG, 95, out)
+        }
+        val uri = FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            file
+        )
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "image/png"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            putExtra(Intent.EXTRA_TEXT, "Entrenamiento completado 💪 #Aegis")
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        context.startActivity(Intent.createChooser(intent, "Compartir entrenamiento"))
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}
+
+// ─────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────
+
 private fun buildExerciseSubtitle(exercise: ExerciseSummary): String {
     val setsText = "${exercise.sets} sets"
     return if (exercise.isBodyweight) {
@@ -504,12 +966,18 @@ private fun buildExerciseSubtitle(exercise: ExerciseSummary): String {
     }
 }
 
-private fun formatVolume(volume: Double): String {
-    return when {
-        volume >= 1000 -> "%,.0f".format(volume)
-        else -> volume.toInt().toString()
-    }
+private fun formatVolume(volume: Double): String = when {
+    volume >= 1000 -> "%,.0f".format(volume)
+    else -> volume.toInt().toString()
 }
+
+private fun formatVolumeShare(volume: Double): String = when {
+    volume >= 1000 -> "%,.0f".format(volume)
+    else -> volume.toInt().toString()
+}
+
+private fun formatWeightShare(weight: Double): String =
+    if (weight % 1 == 0.0) weight.toInt().toString() else "%.1f".format(weight)
 
 private fun formatDuration(seconds: Long): String {
     val totalSeconds = seconds.coerceAtLeast(0)
