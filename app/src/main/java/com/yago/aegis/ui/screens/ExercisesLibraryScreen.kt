@@ -55,9 +55,9 @@ fun ExercisesLibraryScreen(
     // ─── DIÁLOGO cargar / eliminar base ───
     if (showLoadDefaultsDialog) {
         AegisAlertDialog(
-            title = if (hasDefaultExercises) "ELIMINAR EJERCICIOS BASE" else "CARGAR EJERCICIOS BASE",
-            confirmText = if (hasDefaultExercises) "ELIMINAR" else "CARGAR",
-            dismissText = "CANCELAR",
+            title = if (hasDefaultExercises) stringResource(R.string.delete_base_exercises_title) else stringResource(R.string.load_base_exercises_title),
+            confirmText = if (hasDefaultExercises) stringResource(R.string.btn_delete) else stringResource(R.string.btn_load),
+            dismissText = stringResource(R.string.btn_cancel),
             confirmButtonColor = if (hasDefaultExercises) MaterialTheme.colorScheme.error
                                  else MaterialTheme.colorScheme.primary,
             onDismiss = { showLoadDefaultsDialog = false },
@@ -69,9 +69,9 @@ fun ExercisesLibraryScreen(
         ) {
             Text(
                 text = if (hasDefaultExercises)
-                    "Se eliminarán todos los ejercicios de la sección BASE. Tus ejercicios personalizados no se verán afectados en ningún caso."
+                    stringResource(R.string.delete_base_exercises_message)
                 else
-                    "Se añadirán más de 60 ejercicios organizados por grupo muscular. Aparecerán en una sección separada y no afectarán a tus ejercicios.",
+                    stringResource(R.string.load_base_exercises_message),
                 color = MaterialTheme.colorScheme.secondary,
                 fontSize = 14.sp,
                 lineHeight = 20.sp
@@ -82,17 +82,17 @@ fun ExercisesLibraryScreen(
     // ─── DIÁLOGO eliminar ejercicio individual ───
     if (exerciseToDelete != null) {
         AegisAlertDialog(
-            title = "ELIMINAR EJERCICIO",
+            title = stringResource(R.string.delete_exercise_title),
             onConfirm = {
                 exerciseToDelete?.let { routinesViewModel.deleteExerciseFromLibrary(it) }
                 exerciseToDelete = null
             },
             onDismiss = { exerciseToDelete = null },
-            confirmText = "ELIMINAR",
+            confirmText = stringResource(R.string.btn_delete),
             confirmButtonColor = Color(0xFFB3261E)
         ) {
             Text(
-                text = "¿Estás seguro de que quieres eliminar '${exerciseToDelete?.name}'? Esta acción es irreversible.",
+                text = stringResource(R.string.delete_exercise_confirm, exerciseToDelete?.name ?: ""),
                 color = MaterialTheme.colorScheme.secondary,
                 fontSize = 14.sp,
                 lineHeight = 20.sp
@@ -131,7 +131,7 @@ fun ExercisesLibraryScreen(
                     ) {
                         Icon(Icons.Default.Add, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("CREAR", color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Black, fontSize = 11.sp, letterSpacing = 1.sp)
+                        Text(stringResource(R.string.btn_create), color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Black, fontSize = 11.sp, letterSpacing = 1.sp)
                     }
                 }
 
@@ -157,7 +157,7 @@ fun ExercisesLibraryScreen(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            if (hasDefaultExercises) "ELIMINAR BASE" else "CARGAR BASE",
+                            if (hasDefaultExercises) stringResource(R.string.btn_delete_base) else stringResource(R.string.btn_load_base),
                             color = baseColor, fontWeight = FontWeight.Black, fontSize = 11.sp, letterSpacing = 1.sp
                         )
                     }
@@ -176,7 +176,7 @@ fun ExercisesLibraryScreen(
                     value = routinesViewModel.librarySearchQuery,
                     onValueChange = { routinesViewModel.librarySearchQuery = it },
                     placeholder = {
-                        Text("BUSCAR...", color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+                        Text(stringResource(R.string.search_placeholder), color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
                             fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     },
                     modifier = Modifier.weight(1f),
@@ -250,7 +250,7 @@ fun ExercisesLibraryScreen(
                                 onClick = { routinesViewModel.selectedLibraryTag = "ALL" },
                                 contentPadding = PaddingValues(horizontal = 8.dp)
                             ) {
-                                Text("LIMPIAR", color = MaterialTheme.colorScheme.secondary, fontSize = 10.sp, fontWeight = FontWeight.Black)
+                                Text(stringResource(R.string.clear_filter_label).uppercase(), color = MaterialTheme.colorScheme.secondary, fontSize = 10.sp, fontWeight = FontWeight.Black)
                             }
                         }
                     }
@@ -274,7 +274,7 @@ fun ExercisesLibraryScreen(
                     if (userExercises.isNotEmpty() || !isFiltering) {
                         item {
                             SectionHeader(
-                                title = "MIS EJERCICIOS",
+                                title = stringResource(R.string.my_exercises_title),
                                 count = userExercises.size,
                                 isExpandable = false
                             )
@@ -285,7 +285,7 @@ fun ExercisesLibraryScreen(
                     if (userExercises.isEmpty() && !isFiltering) {
                         item {
                             Text(
-                                text = "Aún no tienes ejercicios propios. Pulsa CREAR para añadir el primero.",
+                                text = stringResource(R.string.empty_exercises_message),
                                 color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
                                 fontSize = 12.sp,
                                 fontStyle = FontStyle.Italic,
@@ -317,7 +317,7 @@ fun ExercisesLibraryScreen(
                         // ── SECCIÓN: EJERCICIOS BASE (plegable) ──
                         item {
                             SectionHeader(
-                                title = "EJERCICIOS BASE",
+                                title = stringResource(R.string.base_exercises_title),
                                 count = baseExercises.size,
                                 isExpandable = true,
                                 expanded = baseSectionExpanded,
@@ -350,7 +350,7 @@ fun ExercisesLibraryScreen(
                                     tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
                                     modifier = Modifier.size(36.dp))
                                 Spacer(modifier = Modifier.height(10.dp))
-                                Text("SIN RESULTADOS",
+                                Text(stringResource(R.string.no_search_results),
                                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
                                     fontSize = 11.sp, fontWeight = FontWeight.Black,
                                     letterSpacing = 1.sp, textAlign = TextAlign.Center)
@@ -417,10 +417,10 @@ private fun EmptyLibraryState() {
             modifier = Modifier.size(56.dp)
         )
         Spacer(modifier = Modifier.height(20.dp))
-        Text("LIBRERÍA VACÍA", color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f),
+        Text(stringResource(R.string.empty_library_title), color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f),
             fontSize = 13.sp, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
         Spacer(modifier = Modifier.height(8.dp))
-        Text("Carga los ejercicios base o crea\nlos tuyos desde cero.",
+        Text(stringResource(R.string.empty_library_instruction),
             color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f),
             fontSize = 13.sp, fontStyle = FontStyle.Italic,
             textAlign = TextAlign.Center, lineHeight = 20.sp)

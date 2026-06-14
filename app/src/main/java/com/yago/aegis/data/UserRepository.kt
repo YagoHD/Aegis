@@ -46,6 +46,8 @@ class UserRepository(
     val timerPosY = settingsStore.timerPosY
     val availablePlates = settingsStore.availablePlates
     val barWeight = settingsStore.barWeight
+    val bodyHistory: Flow<List<BodySnapshot>> = settingsStore.bodyHistory
+    val photoHistory: Flow<List<PhotoRecord>> = settingsStore.photoHistory
 
     fun getAllExercises(): Flow<List<Exercise>> = settingsStore.exerciseLibrary
 
@@ -91,6 +93,40 @@ class UserRepository(
     suspend fun updateActualPhotoDate(date: String) {
         settingsStore.saveActualPhotoDate(date)
         syncProfileToCloud()
+    }
+
+    /** Archiva la foto actual en el historial antes de reemplazarla. */
+    suspend fun archiveCurrentActualPhoto(dateLabel: String) {
+        val uri = settingsStore.actualPhotoUri.first() ?: return
+        settingsStore.addPhotoToHistory(
+            PhotoRecord(uri = uri, dateLabel = dateLabel)
+        )
+    }
+
+    /** Guarda una snapshot corporal del día. */
+    suspend fun saveBodySnapshot(snapshot: BodySnapshot) {
+        settingsStore.saveBodySnapshot(snapshot)
+    }
+
+    /**
+     * Calcula la racha de días consecutivos de entrenamiento desde el historial.
+     * Si el usuario ya entrenó hoy la cuenta; si no, arranca desde ayer.
+     */
+    suspend fun computeCurrentStreak(): Int {
+        val sessions = settingsStore.workoutHistory.first()
+        if (sessions.isEmpty()) return 0
+        val trainingDays = sessions
+            .map { java.time.Instant.ofEpochMilli(it.date)
+                .atZone(java.time.ZoneId.systemDefault()).toLocalDate() }
+            .toSet()
+        var checkDay = java.time.LocalDate.now()
+        if (!trainingDays.contains(checkDay)) checkDay = checkDay.minusDays(1)
+        var streak = 0
+        while (trainingDays.contains(checkDay)) {
+            streak++
+            checkDay = checkDay.minusDays(1)
+        }
+        return streak
     }
 
     suspend fun toggleBMI(enabled: Boolean) {

@@ -10,10 +10,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yago.aegis.R
 import com.yago.aegis.viewmodel.AuthViewModel
 import kotlinx.coroutines.delay
 
@@ -59,7 +61,7 @@ fun EmailVerificationScreen(
         Spacer(modifier = Modifier.height(28.dp))
 
         Text(
-            text = "VERIFICA TU CUENTA",
+            text = stringResource(R.string.verify_account_title),
             color = MaterialTheme.colorScheme.onBackground,
             fontSize = 22.sp,
             fontWeight = FontWeight.Black,
@@ -69,7 +71,7 @@ fun EmailVerificationScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "Hemos enviado un enlace de verificación a:",
+            text = stringResource(R.string.verification_email_sent),
             color = MaterialTheme.colorScheme.secondary,
             fontSize = 14.sp,
             textAlign = TextAlign.Center
@@ -95,7 +97,7 @@ fun EmailVerificationScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "Abre el enlace del correo y pulsa \"Ya lo verifiqué\" para continuar.",
+            text = stringResource(R.string.verification_instructions),
             color = MaterialTheme.colorScheme.secondary,
             fontSize = 13.sp,
             textAlign = TextAlign.Center,
@@ -130,7 +132,7 @@ fun EmailVerificationScreen(
             if (uiState.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.Black, strokeWidth = 2.dp)
             } else {
-                Text("YA LO VERIFIQUÉ", color = Color.Black, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
+                Text(stringResource(R.string.btn_verified), color = Color.Black, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
             }
         }
 
@@ -151,7 +153,7 @@ fun EmailVerificationScreen(
             )
         ) {
             Text(
-                text = if (cooldownText != null) "REENVIAR EN $cooldownText" else "REENVIAR CORREO",
+                text = if (cooldownText != null) stringResource(R.string.resend_cooldown_label, cooldownText) else stringResource(R.string.btn_resend_email),
                 color = if (resendCooldown == 0) MaterialTheme.colorScheme.onBackground
                         else MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
                 fontWeight = FontWeight.Black,
@@ -163,7 +165,7 @@ fun EmailVerificationScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         TextButton(onClick = onBack) {
-            Text("Usar otra cuenta", color = MaterialTheme.colorScheme.secondary, fontSize = 13.sp)
+            Text(stringResource(R.string.use_another_account), color = MaterialTheme.colorScheme.secondary, fontSize = 13.sp)
         }
     }
 }

@@ -21,9 +21,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yago.aegis.R
 import com.yago.aegis.data.WorkoutSession
 import com.yago.aegis.ui.components.AegisTopBar
 import java.text.SimpleDateFormat
@@ -41,8 +43,8 @@ fun WorkoutHistoryScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             AegisTopBar(
-                title = "HISTORIAL",
-                subtitle = "${sorted.size} SESIONES",
+                title = stringResource(R.string.history_screen_title),
+                subtitle = "${sorted.size} ${stringResource(R.string.sessions_suffix)}",
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -150,7 +152,7 @@ private fun HistorySessionRow(session: WorkoutSession) {
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "$dateStr · $exerciseCount ejercicios",
+                        text = "$dateStr · $exerciseCount ${stringResource(R.string.exercises_unit)}",
                         color = MaterialTheme.colorScheme.secondary,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Medium
@@ -184,7 +186,7 @@ private fun HistorySessionRow(session: WorkoutSession) {
 
                     if (completedExercises.isEmpty()) {
                         Text(
-                            "Sin ejercicios completados",
+                            stringResource(R.string.no_completed_exercises),
                             color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
                             fontSize = 12.sp,
                             fontStyle = FontStyle.Italic
@@ -272,7 +274,7 @@ private fun EmptyHistoryState() {
         )
         Spacer(modifier = Modifier.height(20.dp))
         Text(
-            text = "SIN HISTORIAL",
+            text = stringResource(R.string.empty_history_title),
             color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f),
             fontSize = 13.sp,
             fontWeight = FontWeight.Black,
@@ -280,7 +282,7 @@ private fun EmptyHistoryState() {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Completa tu primer entrenamiento\npara ver tu historial aquí.",
+            text = stringResource(R.string.empty_history_subtitle),
             color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f),
             fontSize = 13.sp,
             fontStyle = FontStyle.Italic,

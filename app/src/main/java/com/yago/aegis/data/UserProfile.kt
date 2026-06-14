@@ -11,5 +11,6 @@ data class UserProfile(
     val actualPhotoUri: String? = null,
     val profilePhotoUri: String? = null,
     val basePhotoDate: String? = null,
-    val actualPhotoDate: String? = null
+    val actualPhotoDate: String? = null,
+    val currentStreak: Int = 0
 )

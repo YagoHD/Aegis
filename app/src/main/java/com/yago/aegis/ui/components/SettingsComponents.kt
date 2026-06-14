@@ -84,9 +84,9 @@ fun SettingsMenu(
     // Diálogo de confirmación de logout
     if (showLogoutDialog) {
         AegisAlertDialog(
-            title = "CERRAR SESIÓN",
-            confirmText = "CERRAR SESIÓN",
-            dismissText = "CANCELAR",
+            title = stringResource(R.string.logout_label),
+            confirmText = stringResource(R.string.logout_label),
+            dismissText = stringResource(R.string.btn_cancel),
             onDismiss = { showLogoutDialog = false },
             onConfirm = {
                 showLogoutDialog = false
@@ -96,7 +96,7 @@ fun SettingsMenu(
             confirmButtonColor = MaterialTheme.colorScheme.error
         ) {
             Text(
-                "¿Estás seguro de que quieres cerrar sesión? Tus datos están guardados en la nube y podrás recuperarlos cuando vuelvas a iniciar sesión.",
+                stringResource(R.string.logout_confirmation),
                 color = MaterialTheme.colorScheme.secondary,
                 fontSize = 14.sp,
                 lineHeight = 20.sp
@@ -113,7 +113,7 @@ fun SettingsMenu(
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
-        SectionHeader(text = "DATOS DE USUARIO")
+        SectionHeader(text = stringResource(R.string.user_data_section_title))
 
         Row(
             modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
@@ -133,13 +133,13 @@ fun SettingsMenu(
             }
 
             AegisTextField(
-                label = "NOMBRE",
+                label = stringResource(R.string.name_label),
                 value = tempName,
                 onValueChange = { newValue ->
                     tempName = newValue
                     viewModel.updateName(newValue)
                 },
-                placeholder = "Introduce tu nombre...",
+                placeholder = stringResource(R.string.name_placeholder),
                 modifier = Modifier.weight(1f)
             )
         }
@@ -161,7 +161,7 @@ fun SettingsMenu(
 
         // --- SECCIÓN CUENTA (solo si hay authViewModel) ---
         if (authViewModel != null) {
-            SectionHeader(text = "CUENTA")
+            SectionHeader(text = stringResource(R.string.account_section_title))
             Spacer(modifier = Modifier.height(12.dp))
 
             Surface(
@@ -193,7 +193,7 @@ fun SettingsMenu(
                         ) {
                             Icon(Icons.Default.Lock, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(12.dp))
-                            Text("CAMBIAR CONTRASEÑA", color = MaterialTheme.colorScheme.onBackground, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                            Text(stringResource(R.string.change_password_label), color = MaterialTheme.colorScheme.onBackground, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                             Text("›", color = MaterialTheme.colorScheme.secondary, fontSize = 18.sp)
                         }
                         HorizontalDivider(color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f))
@@ -209,7 +209,7 @@ fun SettingsMenu(
                     ) {
                         Icon(Icons.Default.Logout, null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text("CERRAR SESIÓN", color = MaterialTheme.colorScheme.error, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.logout_label), color = MaterialTheme.colorScheme.error, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -262,10 +262,10 @@ fun SettingsMenu(
         ) {
             Box(modifier = Modifier.weight(1f)) {
                 AegisTextField(
-                    label = "NUEVA MÉTRICA",
+                    label = stringResource(R.string.new_metric_label),
                     value = newMeasureName,
                     onValueChange = { newMeasureName = it },
-                    placeholder = "Ej: Antebrazo",
+                    placeholder = stringResource(R.string.metric_placeholder),
                     modifier = Modifier.onFocusChanged {
                         if (it.isFocused) {
                             coroutineScope.launch {
@@ -317,6 +317,10 @@ fun ChangePasswordDialog(
     var newVisible by remember { mutableStateOf(false) }
     var localError by remember { mutableStateOf<String?>(null) }
 
+    val errorCurrentPasswordRequired = stringResource(R.string.error_current_password_required)
+    val errorNewPasswordLength = stringResource(R.string.error_new_password_length)
+    val errorPasswordsMismatch = stringResource(R.string.error_passwords_mismatch)
+
     LaunchedEffect(uiState.successMessage) {
         if (uiState.successMessage != null) {
             delay(1500)
@@ -329,7 +333,7 @@ fun ChangePasswordDialog(
         onDismissRequest = { onDismiss(); authViewModel.clearState() },
         containerColor = MaterialTheme.colorScheme.surface,
         title = {
-            Text("CAMBIAR CONTRASEÑA", color = MaterialTheme.colorScheme.onBackground, fontSize = 16.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+            Text(stringResource(R.string.change_password_dialog_title), color = MaterialTheme.colorScheme.onBackground, fontSize = 16.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -339,7 +343,7 @@ fun ChangePasswordDialog(
                     OutlinedTextField(
                         value = currentPassword,
                         onValueChange = { currentPassword = it; localError = null },
-                        label = { Text("CONTRASEÑA ACTUAL", fontSize = 11.sp) },
+                        label = { Text(stringResource(R.string.current_password_label), fontSize = 11.sp) },
                         leadingIcon = { Icon(Icons.Default.Lock, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(18.dp)) },
                         trailingIcon = {
                             IconButton(onClick = { currentVisible = !currentVisible }) {
@@ -366,7 +370,7 @@ fun ChangePasswordDialog(
                     OutlinedTextField(
                         value = newPassword,
                         onValueChange = { newPassword = it; localError = null },
-                        label = { Text("NUEVA CONTRASEÑA", fontSize = 11.sp) },
+                        label = { Text(stringResource(R.string.new_password_label), fontSize = 11.sp) },
                         leadingIcon = { Icon(Icons.Default.Lock, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(18.dp)) },
                         trailingIcon = {
                             IconButton(onClick = { newVisible = !newVisible }) {
@@ -393,7 +397,7 @@ fun ChangePasswordDialog(
                     OutlinedTextField(
                         value = confirmPassword,
                         onValueChange = { confirmPassword = it; localError = null },
-                        label = { Text("CONFIRMAR CONTRASEÑA", fontSize = 11.sp) },
+                        label = { Text(stringResource(R.string.confirm_password_label), fontSize = 11.sp) },
                         leadingIcon = { Icon(Icons.Default.Lock, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(18.dp)) },
                         visualTransformation = PasswordVisualTransformation(),
                         modifier = Modifier.fillMaxWidth(),
@@ -424,9 +428,9 @@ fun ChangePasswordDialog(
                 TextButton(
                     onClick = {
                         localError = when {
-                            currentPassword.isBlank() -> "Introduce tu contraseña actual"
-                            newPassword.length < 6 -> "La nueva contraseña debe tener al menos 6 caracteres"
-                            newPassword != confirmPassword -> "Las contraseñas no coinciden"
+                            currentPassword.isBlank() -> errorCurrentPasswordRequired
+                            newPassword.length < 6 -> errorNewPasswordLength
+                            newPassword != confirmPassword -> errorPasswordsMismatch
                             else -> null
                         }
                         if (localError == null) authViewModel.changePassword(currentPassword, newPassword)
@@ -436,7 +440,7 @@ fun ChangePasswordDialog(
                     if (uiState.isLoading) {
                         CircularProgressIndicator(modifier = Modifier.size(16.dp), color = MaterialTheme.colorScheme.primary, strokeWidth = 2.dp)
                     } else {
-                        Text("GUARDAR", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black)
+                        Text(stringResource(R.string.btn_save), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black)
                     }
                 }
             }
@@ -444,7 +448,7 @@ fun ChangePasswordDialog(
         dismissButton = {
             if (uiState.successMessage == null) {
                 TextButton(onClick = { onDismiss(); authViewModel.clearState() }) {
-                    Text("CANCELAR", color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.btn_cancel), color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
                 }
             }
         }

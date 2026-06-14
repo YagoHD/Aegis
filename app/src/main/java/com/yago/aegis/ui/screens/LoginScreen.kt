@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -61,7 +62,7 @@ fun LoginScreen(
             containerColor = MaterialTheme.colorScheme.surface,
             title = {
                 Text(
-                    "RECUPERAR CONTRASEÑA",
+                    stringResource(R.string.forgot_password_title),
                     color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Black,
@@ -79,7 +80,7 @@ fun LoginScreen(
                         )
                     } else {
                         Text(
-                            "Introduce tu correo y te enviaremos un enlace para restablecer tu contraseña.",
+                            stringResource(R.string.forgot_password_instructions),
                             color = MaterialTheme.colorScheme.secondary,
                             fontSize = 13.sp,
                             lineHeight = 18.sp
@@ -88,7 +89,7 @@ fun LoginScreen(
                         OutlinedTextField(
                             value = forgotEmail,
                             onValueChange = { forgotEmail = it },
-                            label = { Text("EMAIL") },
+                            label = { Text(stringResource(R.string.email_label)) },
                             leadingIcon = { Icon(Icons.Default.Email, null, tint = MaterialTheme.colorScheme.secondary) },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(8.dp),
@@ -110,7 +111,7 @@ fun LoginScreen(
                         forgotEmail = ""
                         authViewModel.clearState()
                     }) {
-                        Text("CERRAR", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black)
+                        Text(stringResource(R.string.btn_close), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black)
                     }
                 } else {
                     TextButton(
@@ -122,7 +123,7 @@ fun LoginScreen(
                         if (uiState.isLoading) {
                             CircularProgressIndicator(modifier = Modifier.size(16.dp), color = MaterialTheme.colorScheme.primary, strokeWidth = 2.dp)
                         } else {
-                            Text("ENVIAR EMAIL", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black)
+                            Text(stringResource(R.string.btn_send_email), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black)
                         }
                     }
                 }
@@ -134,7 +135,7 @@ fun LoginScreen(
                         forgotEmail = ""
                         authViewModel.clearState()
                     }) {
-                        Text("CANCELAR", color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.btn_cancel), color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -174,14 +175,14 @@ fun LoginScreen(
         Icon(imageVector = Icons.Default.Shield, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(64.dp))
         Spacer(modifier = Modifier.height(12.dp))
         Text("AEGIS", fontSize = 36.sp, fontWeight = FontWeight.Black, letterSpacing = 6.sp, color = MaterialTheme.colorScheme.onBackground)
-        Text("INICIA SESIÓN", fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 3.sp, color = MaterialTheme.colorScheme.secondary)
+        Text(stringResource(R.string.login_subtitle), fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 3.sp, color = MaterialTheme.colorScheme.secondary)
 
         Spacer(modifier = Modifier.weight(1f))
 
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("EMAIL") },
+            label = { Text(stringResource(R.string.email_label)) },
             leadingIcon = { Icon(Icons.Default.Email, null, tint = MaterialTheme.colorScheme.secondary) },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(8.dp),
@@ -195,7 +196,7 @@ fun LoginScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("CONTRASEÑA") },
+            label = { Text(stringResource(R.string.password_label)) },
             leadingIcon = { Icon(Icons.Default.Lock, null, tint = MaterialTheme.colorScheme.secondary) },
             trailingIcon = {
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -218,7 +219,7 @@ fun LoginScreen(
                 showForgotDialog = true
             }) {
                 Text(
-                    "¿OLVIDASTE TU CONTRASEÑA?",
+                    stringResource(R.string.forgot_password_btn),
                     color = MaterialTheme.colorScheme.secondary,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
@@ -248,7 +249,7 @@ fun LoginScreen(
             if (uiState.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.Black, strokeWidth = 2.dp)
             } else {
-                Text("INICIAR SESIÓN", fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                Text(stringResource(R.string.btn_login), fontWeight = FontWeight.Black, letterSpacing = 1.sp)
             }
         }
 
@@ -256,7 +257,7 @@ fun LoginScreen(
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f))
-            Text("  O  ", color = MaterialTheme.colorScheme.secondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.or_divider), color = MaterialTheme.colorScheme.secondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
             HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f))
         }
 
@@ -269,15 +270,15 @@ fun LoginScreen(
             shape = RoundedCornerShape(8.dp),
             border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f))
         ) {
-            Text("CONTINUAR CON GOOGLE", color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Black, letterSpacing = 1.sp, fontSize = 13.sp)
+            Text(stringResource(R.string.btn_google_login), color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Black, letterSpacing = 1.sp, fontSize = 13.sp)
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("¿No tienes cuenta?", color = MaterialTheme.colorScheme.secondary, fontSize = 13.sp)
+            Text(stringResource(R.string.no_account_question), color = MaterialTheme.colorScheme.secondary, fontSize = 13.sp)
             TextButton(onClick = onNavigateToRegister) {
-                Text("REGÍSTRATE", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black, fontSize = 13.sp)
+                Text(stringResource(R.string.btn_register), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black, fontSize = 13.sp)
             }
         }
 

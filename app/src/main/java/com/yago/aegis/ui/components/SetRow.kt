@@ -2,6 +2,8 @@ package com.yago.aegis.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -21,12 +23,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.yago.aegis.R
 import com.yago.aegis.data.ExerciseSet
 
 @Composable
@@ -45,6 +51,7 @@ fun SetRow(
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         // 1. INDICADOR TÁCTICO DE SERIE
+        val haptic = LocalHapticFeedback.current
         Box(
             modifier = Modifier
                 .size(38.dp)
@@ -56,7 +63,14 @@ fun SetRow(
                     width = 1.dp,
                     color = if (set.isCompleted) Color.Transparent else MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
                     shape = RoundedCornerShape(6.dp)
-                ),
+                )
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    if (!set.isCompleted) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onUpdate(set.weight, set.reps, !set.isCompleted)
+                },
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -70,7 +84,7 @@ fun SetRow(
         // 2. CAMPO PESO (KG)
         SetInputField(
             value = if (set.weight == 0.0) "" else set.weight.toString(),
-            label = "KG",
+            label = stringResource(R.string.label_kg),
             modifier = Modifier.weight(1f),
             isCompleted = set.isCompleted,
             onValueChange = { stringValue ->
@@ -87,7 +101,7 @@ fun SetRow(
         // 3. CAMPO REPETICIONES (REPS)
         SetInputField(
             value = if (set.reps == 0) "" else set.reps.toString(),
-            label = "REPS",
+            label = stringResource(R.string.label_reps),
             modifier = Modifier.weight(1f),
             isCompleted = set.isCompleted,
             onValueChange = { stringValue ->
@@ -104,7 +118,7 @@ fun SetRow(
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete Set",
+                    contentDescription = stringResource(R.string.set_row_delete_desc),
                     tint = MaterialTheme.colorScheme.error.copy(alpha = 0.5f),
                     modifier = Modifier.size(20.dp)
                 )

@@ -50,6 +50,8 @@ class SettingsStore(private val context: Context) {
         private val TIMER_POS_Y = floatPreferencesKey("timer_pos_y")
         private val AVAILABLE_PLATES = stringPreferencesKey("available_plates")
         private val BAR_WEIGHT = floatPreferencesKey("bar_weight")
+        private val BODY_HISTORY_KEY = stringPreferencesKey("body_history")
+        private val PHOTO_HISTORY_KEY = stringPreferencesKey("photo_history")
     }
 
     // --- LECTURA (READ) ---
@@ -121,6 +123,25 @@ class SettingsStore(private val context: Context) {
         }
     }
     val barWeight: Flow<Float> = context.dataStore.data.map { it[BAR_WEIGHT] ?: 20f }
+
+    val bodyHistory: Flow<List<BodySnapshot>> = context.dataStore.data.map { prefs ->
+        val json = prefs[BODY_HISTORY_KEY] ?: ""
+        if (json.isEmpty()) emptyList()
+        else {
+            val type = object : TypeToken<List<BodySnapshot>>() {}.type
+            gson.fromJson(json, type)
+        }
+    }
+
+    val photoHistory: Flow<List<PhotoRecord>> = context.dataStore.data.map { prefs ->
+        val json = prefs[PHOTO_HISTORY_KEY] ?: ""
+        if (json.isEmpty()) emptyList()
+        else {
+            val type = object : TypeToken<List<PhotoRecord>>() {}.type
+            gson.fromJson(json, type)
+        }
+    }
+
     // --- ESCRITURA (WRITE) ---
     // Limpia todos los datos locales del usuario — llamar al hacer logout
     suspend fun clearAll() {
@@ -293,5 +314,34 @@ class SettingsStore(private val context: Context) {
             else -> return
         }
         context.dataStore.edit { it[key] = isEnabled }
+    }
+
+    /** Añade o reemplaza la snapshot del día actual (solo una por día). */
+    suspend fun saveBodySnapshot(snapshot: BodySnapshot) {
+        context.dataStore.edit { prefs ->
+            val json = prefs[BODY_HISTORY_KEY] ?: ""
+            val type = object : TypeToken<MutableList<BodySnapshot>>() {}.type
+            val history: MutableList<BodySnapshot> = if (json.isEmpty()) mutableListOf()
+                                                     else gson.fromJson(json, type)
+            // Si ya hay un snapshot del mismo día, lo reemplazamos
+            val todayStart = snapshot.date / 86_400_000L
+            history.removeAll { it.date / 86_400_000L == todayStart }
+            history.add(snapshot)
+            history.sortBy { it.date }
+            prefs[BODY_HISTORY_KEY] = gson.toJson(history)
+        }
+    }
+
+    /** Archiva una foto en el historial visual. */
+    suspend fun addPhotoToHistory(record: PhotoRecord) {
+        context.dataStore.edit { prefs ->
+            val json = prefs[PHOTO_HISTORY_KEY] ?: ""
+            val type = object : TypeToken<MutableList<PhotoRecord>>() {}.type
+            val history: MutableList<PhotoRecord> = if (json.isEmpty()) mutableListOf()
+                                                    else gson.fromJson(json, type)
+            history.add(record)
+            history.sortBy { it.date }
+            prefs[PHOTO_HISTORY_KEY] = gson.toJson(history)
+        }
     }
 }

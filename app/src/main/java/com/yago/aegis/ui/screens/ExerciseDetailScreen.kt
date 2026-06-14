@@ -9,7 +9,9 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.yago.aegis.R
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.ProgressionChartSection
 import com.yago.aegis.ui.components.SectionHeader
@@ -114,12 +116,12 @@ fun ExerciseDetailScreen(
     Scaffold(
         topBar = {
             AegisTopBar(
-                title = exercise?.name?.uppercase() ?: "DETALLE",
+                title = exercise?.name?.uppercase() ?: stringResource(R.string.exercise_detail_title),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Atrás",
+                            contentDescription = stringResource(R.string.content_desc_back),
                             tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.8f)
                         )
                     }
@@ -152,22 +154,22 @@ fun ExerciseDetailScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     StatCard(
-                        title = "PR RECORD",
-                        mainValue = "${prRecord.toInt()} kg",
+                        title = stringResource(R.string.pr_record_title),
+                        mainValue = "${prRecord.toInt()} ${stringResource(R.string.label_kg_lower)}",
                         modifier = Modifier.weight(1f),
-                        subValue = "MAX HISTÓRICO",
+                        subValue = stringResource(R.string.max_historical_label),
                     )
                     StatCard(
-                        title = "ULTIMO ENTRENO",
+                        title = stringResource(R.string.last_workout_card_title),
                         mainValue = lastLiftFormatted,
                         modifier = Modifier.weight(1f),
-                        subValue = "ÚLTIMA SESIÓN",
+                        subValue = stringResource(R.string.last_session_label),
                     )
                 }
             }
 
             item {
-                SectionHeader(text = "HISTORIAL DE SETS")
+                SectionHeader(text = stringResource(R.string.sets_history_title))
                 Spacer(Modifier.height(16.dp))
             }
 

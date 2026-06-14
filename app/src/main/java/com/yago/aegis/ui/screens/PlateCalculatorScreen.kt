@@ -22,6 +22,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.res.stringResource
+import com.yago.aegis.R
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.viewmodel.PlateCalculatorViewModel
 
@@ -40,10 +42,10 @@ fun PlateCalculatorScreen(
     Scaffold(
         topBar = {
             AegisTopBar(
-                title = "CALCULADORA DE PLATOS",
+                title = stringResource(R.string.plate_calculator_title),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver", tint = MaterialTheme.colorScheme.onBackground)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.btn_back), tint = MaterialTheme.colorScheme.onBackground)
                     }
                 }
             )
@@ -62,12 +64,12 @@ fun PlateCalculatorScreen(
 
             // --- PESO OBJETIVO ---
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                PlateLabel("PESO OBJETIVO")
+                PlateLabel(stringResource(R.string.target_weight_label))
                 OutlinedTextField(
                     value = uiState.targetWeight,
                     onValueChange = { viewModel.setTargetWeight(it) },
                     placeholder = {
-                        Text("Ej: 100", color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f), fontSize = 24.sp)
+                        Text(stringResource(R.string.weight_placeholder), color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f), fontSize = 24.sp)
                     },
                     suffix = { Text("kg", color = MaterialTheme.colorScheme.secondary, fontSize = 20.sp) },
                     singleLine = true,
@@ -90,11 +92,12 @@ fun PlateCalculatorScreen(
 
             // --- PESO DE LA BARRA ---
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                PlateLabel("PESO DE LA BARRA")
+                PlateLabel(stringResource(R.string.bar_weight_label))
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     BAR_OPTIONS.forEach { option ->
                         val isSelected = barWeight == option
-                        val label = if (option == 0f) "Sin barra" else "${option.toInt()} kg"
+                        val noBarLabel = stringResource(R.string.no_bar_option)
+                        val label = if (option == 0f) noBarLabel else "${option.toInt()} kg"
                         Surface(
                             onClick = { viewModel.setBarWeight(option) },
                             modifier = Modifier.weight(1f),
@@ -120,7 +123,7 @@ fun PlateCalculatorScreen(
 
             // --- PLATOS DISPONIBLES ---
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                PlateLabel("PLATOS DISPONIBLES")
+                PlateLabel(stringResource(R.string.available_plates_label))
                 PlateGrid(
                     allPlates = ALL_PLATES,
                     selectedPlates = availablePlates,
@@ -131,7 +134,7 @@ fun PlateCalculatorScreen(
             // --- RESULTADO ---
             if (uiState.targetWeight.isNotEmpty()) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    PlateLabel("PLATOS POR LADO")
+                    PlateLabel(stringResource(R.string.plates_per_side_label))
                     ResultCard(
                         platesPerSide = uiState.platesPerSide,
                         remainder = uiState.remainder,
@@ -218,7 +221,7 @@ private fun ResultCard(
     ) {
         if (targetWeight < barWeight && targetWeight > 0) {
             Text(
-                "El peso objetivo es menor que la barra (${barWeight.toInt()} kg).",
+                stringResource(R.string.weight_below_bar_error, barWeight.toInt()),
                 color = MaterialTheme.colorScheme.error,
                 fontSize = 13.sp
             )
@@ -227,7 +230,7 @@ private fun ResultCard(
 
         if (platesPerSide.isEmpty() && targetWeight >= barWeight) {
             Text(
-                "Solo la barra: ${barWeight.toInt()} kg",
+                stringResource(R.string.bar_only_message, barWeight.toInt()),
                 color = MaterialTheme.colorScheme.primary,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Black
@@ -265,7 +268,7 @@ private fun ResultCard(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("TOTAL REAL", color = MaterialTheme.colorScheme.secondary, fontSize = 11.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+            Text(stringResource(R.string.total_real_label), color = MaterialTheme.colorScheme.secondary, fontSize = 11.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
             Text(
                 "${formatWeight(totalActual)} kg",
                 color = if (remainder > 0.001) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,

@@ -31,7 +31,8 @@ import com.yago.aegis.R
 fun ProfileHeader(
     name: String,
     disciplineDay: Int,
-    profilePhotoUri: String?
+    profilePhotoUri: String?,
+    currentStreak: Int = 0
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -88,20 +89,41 @@ fun ProfileHeader(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        // --- INDICADOR DE DISCIPLINA: El toque de 10% Bronce ---
-        Surface(
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), // Fondo sutil bronce
-            shape = RoundedCornerShape(4.dp),
+        // --- BADGES: DISCIPLINA + RACHA ---
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(top = 4.dp)
         ) {
-            Text(
-                text = stringResource(R.string.label_discipline_day, disciplineDay).uppercase(),
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.ExtraBold,
-                letterSpacing = 2.sp,
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
-            )
+            Surface(
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                shape = RoundedCornerShape(4.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.label_discipline_day, disciplineDay).uppercase(),
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 2.sp,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                )
+            }
+
+            if (currentStreak >= 2) {
+                Surface(
+                    color = MaterialTheme.colorScheme.error.copy(alpha = 0.12f),
+                    shape = RoundedCornerShape(4.dp)
+                ) {
+                    Text(
+                        text = "🔥 $currentStreak",
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.sp,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                    )
+                }
+            }
         }
     }
 }

@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -74,10 +75,10 @@ fun RegisterScreen(
 
     fun validateAndRegister() {
         localError = when {
-            email.isBlank() -> "Introduce tu correo"
-            !email.contains("@") -> "El correo no es válido"
-            password.length < 6 -> "La contraseña debe tener al menos 6 caracteres"
-            password != passwordConfirm -> "Las contraseñas no coinciden"
+            email.isBlank() -> context.getString(R.string.error_enter_email)
+            !email.contains("@") -> context.getString(R.string.error_invalid_email)
+            password.length < 6 -> context.getString(R.string.error_password_length)
+            password != passwordConfirm -> context.getString(R.string.error_passwords_no_match)
             else -> null
         }
         if (localError == null) authViewModel.register(email, password)
@@ -90,8 +91,8 @@ fun RegisterScreen(
             .padding(24.dp)
     ) {
         AegisTopBar(
-            title = "CREAR CUENTA",
-            subtitle = "PASO 04",
+            title = stringResource(R.string.create_account_title),
+            subtitle = stringResource(R.string.step_04_subtitle),
             navigationIcon = {
                 IconButton(onClick = onBack) {
                     Icon(
@@ -108,14 +109,14 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "GUARDA TU PROGRESO",
+            text = stringResource(R.string.save_progress_title),
             color = MaterialTheme.colorScheme.onBackground,
             fontSize = 22.sp,
             fontWeight = FontWeight.Black,
             letterSpacing = 2.sp
         )
         Text(
-            text = "Crea una cuenta para sincronizar tus datos en cualquier dispositivo.",
+            text = stringResource(R.string.create_account_desc),
             color = MaterialTheme.colorScheme.secondary,
             fontSize = 14.sp,
             lineHeight = 20.sp,
@@ -128,7 +129,7 @@ fun RegisterScreen(
         OutlinedTextField(
             value = email,
             onValueChange = { email = it; localError = null },
-            label = { Text("EMAIL") },
+            label = { Text(stringResource(R.string.email_label)) },
             leadingIcon = { Icon(Icons.Default.Email, null, tint = MaterialTheme.colorScheme.secondary) },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(8.dp),
@@ -143,7 +144,7 @@ fun RegisterScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it; localError = null },
-            label = { Text("CONTRASEÑA") },
+            label = { Text(stringResource(R.string.password_label)) },
             leadingIcon = { Icon(Icons.Default.Lock, null, tint = MaterialTheme.colorScheme.secondary) },
             trailingIcon = {
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -168,7 +169,7 @@ fun RegisterScreen(
         OutlinedTextField(
             value = passwordConfirm,
             onValueChange = { passwordConfirm = it; localError = null },
-            label = { Text("CONFIRMAR CONTRASEÑA") },
+            label = { Text(stringResource(R.string.confirm_password_label)) },
             leadingIcon = { Icon(Icons.Default.Lock, null, tint = MaterialTheme.colorScheme.secondary) },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
@@ -207,7 +208,7 @@ fun RegisterScreen(
             if (uiState.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.Black, strokeWidth = 2.dp)
             } else {
-                Text("CREAR CUENTA", fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                Text(stringResource(R.string.btn_create_account), fontWeight = FontWeight.Black, letterSpacing = 1.sp)
             }
         }
 
@@ -216,7 +217,7 @@ fun RegisterScreen(
         // Separador
         Row(verticalAlignment = Alignment.CenterVertically) {
             HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f))
-            Text("  O  ", color = MaterialTheme.colorScheme.secondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.or_divider), color = MaterialTheme.colorScheme.secondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
             HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f))
         }
 
@@ -231,7 +232,7 @@ fun RegisterScreen(
             border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f))
         ) {
             Text(
-                "CONTINUAR CON GOOGLE",
+                stringResource(R.string.btn_google_login),
                 color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Black,
                 letterSpacing = 1.sp,

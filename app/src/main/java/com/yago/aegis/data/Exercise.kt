@@ -17,6 +17,7 @@ data class Exercise(
     val tags: List<String> = emptyList(),
     val iconName: String = "dumbbell",
     val notes: String = "",
+    val isBodyweight: Boolean = false,
     val lastPerformance: String = "",
     val oneRepMax: Double = 0.0,    // Para mostrar "1RM: 115KG" en la lista
     val bestSet: String? = "--",     // Para mostrar el mejor récord histórico

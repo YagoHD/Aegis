@@ -14,8 +14,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.yago.aegis.R
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.SectionHeader
 import com.yago.aegis.ui.components.SettingsRow
@@ -45,7 +47,7 @@ fun StatsSettingsScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         // --- SECCIÓN 1: OBJETIVOS SEMANALES ---
-        SectionHeader(text = "PERSONALIZA TU PANTALLA")
+        SectionHeader(text = stringResource(R.string.stats_settings_title))
         Spacer(modifier = Modifier.height(16.dp))
 
         Surface(
@@ -54,7 +56,7 @@ fun StatsSettingsScreen(
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "DÍAS DE ENTRENAMIENTO SEMANAL",
+                    text = stringResource(R.string.weekly_training_days_title),
                     color = MaterialTheme.colorScheme.secondary,
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
                 )
@@ -93,7 +95,7 @@ fun StatsSettingsScreen(
         VerticalDividerSection()
 
         // --- SECCIÓN 2: VISIBILIDAD DE MÓDULOS ---
-        SectionHeader(text = "VISIBILIDAD DE MÓDULOS")
+        SectionHeader(text = stringResource(R.string.modules_visibility_title))
         Spacer(modifier = Modifier.height(12.dp))
 
         Surface(
@@ -101,10 +103,10 @@ fun StatsSettingsScreen(
             shape = RoundedCornerShape(12.dp)
         ) {
             Column(modifier = Modifier.padding(8.dp)) {
-                SettingsRow("VOLUMEN SEMANAL", showVolume) { viewModel.toggleVolumeCard(it) }
-                SettingsRow("DISCIPLINA SEMANAL", showDiscipline) { viewModel.toggleDisciplineCard(it) }
-                SettingsRow("EVOLUCIÓN DE CARGA", showEvolution) { viewModel.toggleEvolutionGraph(it) }
-                SettingsRow("ANÁLISIS POR EJERCICIO", showAnalytics) { viewModel.toggleAnalyticsList(it) }
+                SettingsRow(stringResource(R.string.volume_module_label), showVolume) { viewModel.toggleVolumeCard(it) }
+                SettingsRow(stringResource(R.string.discipline_module_label), showDiscipline) { viewModel.toggleDisciplineCard(it) }
+                SettingsRow(stringResource(R.string.evolution_graph_module_label), showEvolution) { viewModel.toggleEvolutionGraph(it) }
+                SettingsRow(stringResource(R.string.exercise_analytics_module_label), showAnalytics) { viewModel.toggleAnalyticsList(it) }
             }
         }
 

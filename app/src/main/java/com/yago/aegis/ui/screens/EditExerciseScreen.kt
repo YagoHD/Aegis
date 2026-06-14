@@ -41,6 +41,8 @@ fun EditExerciseScreen(
         exerciseToEdit?.tags?.let { tags -> addAll(tags.filter { it != DefaultExercises.BASE_TAG }) }
     } }
     var selectedIconName by remember { mutableStateOf(exerciseToEdit?.iconName ?: "dumbbell") }
+    var notes by remember { mutableStateOf(exerciseToEdit?.notes ?: "") }
+    var isBodyweight by remember { mutableStateOf(exerciseToEdit?.isBodyweight ?: false) }
 
     val savedGlobalTags by routinesViewModel.globalTags.collectAsState()
     var showTagDialog by remember { mutableStateOf(false) }
@@ -49,9 +51,9 @@ fun EditExerciseScreen(
     // 2. DIÁLOGO DE TAGS (Integrado en el sistema de diseño)
     if (showTagDialog) {
         AegisAlertDialog(
-            title = "NUEVO TAG",
-            confirmText = "AÑADIR",
-            dismissText = "CANCELAR",
+            title = stringResource(R.string.new_global_tag_title),
+            confirmText = stringResource(R.string.btn_save),
+            dismissText = stringResource(R.string.btn_cancel),
             onDismiss = { showTagDialog = false },
             onConfirm = {
                 if (newTagText.isNotBlank()) {
@@ -64,7 +66,7 @@ fun EditExerciseScreen(
             OutlinedTextField(
                 value = newTagText,
                 onValueChange = { newTagText = it },
-                placeholder = { Text("EJ: PECHO", color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)) },
+                placeholder = { Text(stringResource(R.string.tag_placeholder), color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)) },
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 textStyle = androidx.compose.ui.text.TextStyle(color = MaterialTheme.colorScheme.onBackground),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -83,12 +85,12 @@ fun EditExerciseScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             AegisTopBar(
-                title = if (exerciseToEdit == null) "NUEVO EJERCICIO" else "EDITAR EJERCICIO",
+                title = if (exerciseToEdit == null) stringResource(R.string.title_new_exercise) else stringResource(R.string.title_edit_exercise),
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Volver",
+                            contentDescription = stringResource(R.string.content_desc_back),
                             tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
@@ -107,6 +109,12 @@ fun EditExerciseScreen(
                             iconName = selectedIconName,
                             muscleGroup = selectedTags.firstOrNull() ?: "",
                             type = "",
+                            notes = notes.trim(),
+                            isBodyweight = isBodyweight,
+                            lastPerformance = exerciseToEdit?.lastPerformance ?: "",
+                            oneRepMax = exerciseToEdit?.oneRepMax ?: 0.0,
+                            bestSet = exerciseToEdit?.bestSet,
+                            history = exerciseToEdit?.history ?: emptyList()
                         )
                         routinesViewModel.saveOrUpdateExercise(updatedExercise)
                         onNavigateBack()
@@ -123,7 +131,7 @@ fun EditExerciseScreen(
                 )
             ) {
                 Text(
-                    text = if (exerciseToEdit == null) "CREAR" else "EDITAR",
+                    text = if (exerciseToEdit == null) stringResource(R.string.btn_create) else stringResource(R.string.btn_edit),
                     fontWeight = FontWeight.Black,
                     letterSpacing = 1.sp
                 )
@@ -141,11 +149,81 @@ fun EditExerciseScreen(
 
             // 1. NOMBRE DEL EJERCICIO
             item {
-                SectionLabel(stringResource(R.string.label_exercise_name).uppercase())
+                SectionLabel(stringResource(R.string.label_exercise_name))
                 EditInput(
                     value = exerciseName,
                     onValueChange = { exerciseName = it },
-                    placeholder = "EJ: PRESS BANCA INCLINADO"
+                    placeholder = stringResource(R.string.exercise_name_placeholder)
+                )
+            }
+
+            // 1b. TIPO: BODYWEIGHT
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        Text(
+                            text = stringResource(R.string.bodyweight_section_title),
+                            color = MaterialTheme.colorScheme.secondary,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 1.5.sp
+                        )
+                        Text(
+                            text = stringResource(R.string.bodyweight_description),
+                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+                            fontSize = 11.sp
+                        )
+                    }
+                    Switch(
+                        checked = isBodyweight,
+                        onCheckedChange = { isBodyweight = it },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.Black,
+                            checkedTrackColor = MaterialTheme.colorScheme.primary,
+                            uncheckedThumbColor = MaterialTheme.colorScheme.secondary,
+                            uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    )
+                }
+            }
+
+            // 1c. NOTAS DE FORMA
+            item {
+                SectionLabel(stringResource(R.string.form_notes_section_title))
+                OutlinedTextField(
+                    value = notes,
+                    onValueChange = { notes = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    placeholder = {
+                        Text(
+                            text = stringResource(R.string.form_notes_placeholder),
+                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f),
+                            fontSize = 11.sp,
+                            letterSpacing = 0.5.sp
+                        )
+                    },
+                    minLines = 2,
+                    maxLines = 4,
+                    textStyle = androidx.compose.ui.text.TextStyle(
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontSize = 13.sp
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+                        cursorColor = MaterialTheme.colorScheme.primary
+                    )
                 )
             }
 
@@ -169,7 +247,7 @@ fun EditExerciseScreen(
 
             // 3. SELECCIÓN DE ICONO
             item {
-                SectionLabel(stringResource(R.string.select_icon).uppercase())
+                SectionLabel(stringResource(R.string.select_icon))
                 FlowRow(
                     modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                     maxItemsInEachRow = 4,

@@ -18,11 +18,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.yago.aegis.R
 import com.yago.aegis.ui.components.AegisTextField
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.viewmodel.ProfileViewModel
@@ -67,8 +69,8 @@ fun IdentityScreen(
             .padding(24.dp)
     ) {
         AegisTopBar(
-            title = "IDENTIDAD",
-            subtitle = "PASO 02",
+            title = stringResource(R.string.identity_title),
+            subtitle = stringResource(R.string.step_02_subtitle),
             navigationIcon = {
                 IconButton(onClick = onBack) {
                     Icon(Icons.Default.ArrowBack, contentDescription = null, tint = MaterialTheme.colorScheme.onBackground)
@@ -110,7 +112,7 @@ fun IdentityScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "CONFIGURA TU AVATAR",
+            text = stringResource(R.string.configure_avatar_title),
             style = TextStyle(
                 color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 18.sp, // Un poco más pequeño para elegancia
@@ -124,19 +126,19 @@ fun IdentityScreen(
 
         // Form Section
         AegisTextField(
-            label = "NOMBRE DE USUARIO",
+            label = stringResource(R.string.username_label),
             value = name,
             onValueChange = { name = it },
-            placeholder = "Alexander Vance"
+            placeholder = stringResource(R.string.username_placeholder)
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
         AegisTextField(
-            label = "BIOGRAFÍA (OPCIONAL)",
+            label = stringResource(R.string.biography_label),
             value = bio,
             onValueChange = { bio = it },
-            placeholder = "Define tu filosofía...",
+            placeholder = stringResource(R.string.biography_placeholder),
             isSingleLine = false,
             modifier = Modifier.height(120.dp) // Ajustado para que quepa en pantallas pequeñas
         )
@@ -158,7 +160,7 @@ fun IdentityScreen(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    "CONTINUAR",
+                    stringResource(R.string.btn_continue),
                     color = Color.Black,
                     fontWeight = FontWeight.Black,
                     letterSpacing = 1.sp

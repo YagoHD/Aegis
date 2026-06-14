@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.yago.aegis.R
 import com.yago.aegis.data.Screen
 
 @Composable
@@ -74,7 +75,7 @@ fun AegisBottomBar(navController: NavHostController) {
                 ) {
                     Icon(
                         imageVector = Icons.Default.Bolt,
-                        contentDescription = "Empezar entrenamiento",
+                        contentDescription = stringResource(R.string.nav_start_training),
                         tint = Color.Black,
                         modifier = Modifier.size(30.dp)
                     )

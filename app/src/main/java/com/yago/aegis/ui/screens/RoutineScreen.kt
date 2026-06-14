@@ -68,9 +68,9 @@ fun RoutineScreen(
     // --- DIÁLOGO DE CREAR (ESTILO AEGIS) ---
     if (showDialog) {
         AegisAlertDialog(
-            title = "NUEVA RUTINA",
-            confirmText = "GUARDAR",
-            dismissText = "CANCELAR",
+            title = stringResource(R.string.create_routine_dialog_title),
+            confirmText = stringResource(R.string.btn_save),
+            dismissText = stringResource(R.string.btn_cancel),
             onDismiss = { showDialog = false },
             onConfirm = {
                 if (textState.isNotBlank()) {
@@ -85,7 +85,7 @@ fun RoutineScreen(
                     value = textState,
                     onValueChange = { textState = it },
                     placeholder = {
-                        Text("NOMBRE DE LA RUTINA",
+                        Text(stringResource(R.string.routine_name_placeholder),
                             fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f))
                     },
@@ -105,7 +105,7 @@ fun RoutineScreen(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Text(
-                    text = "SELECCIONA UN ICONO",
+                    text = stringResource(R.string.select_icon_instruction),
                     color = MaterialTheme.colorScheme.secondary,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Black,
@@ -135,7 +135,7 @@ fun RoutineScreen(
     // --- DIÁLOGO DE ELIMINAR ---
     if (routineToDelete != null) {
         AegisAlertDialog(
-            title = "ELIMINAR RUTINA",
+            title = stringResource(R.string.dialog_delete_routine_title),
             onConfirm = {
                 routineToDelete?.let { routinesViewModel.removeRoutine(it) }
                 routineToDelete = null
@@ -144,7 +144,7 @@ fun RoutineScreen(
             confirmButtonColor = MaterialTheme.colorScheme.error // Rojo táctico
         ) {
             Text(
-                text = "¿Estás seguro de que quieres eliminar '${routineToDelete?.name}'? Se perderán todos los ejercicios asignados.",
+                text = stringResource(R.string.dialog_delete_routine_confirm, routineToDelete?.name ?: ""),
                 color = MaterialTheme.colorScheme.secondary,
                 fontSize = 14.sp
             )
@@ -200,7 +200,7 @@ fun RoutineScreen(
                     Icon(Icons.Default.Add, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = "CREAR NUEVA RUTINA",
+                        text = stringResource(R.string.btn_create_routine),
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Black,
                         fontSize = 13.sp,

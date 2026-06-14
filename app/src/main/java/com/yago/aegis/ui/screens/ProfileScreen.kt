@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -46,7 +47,7 @@ fun MainProfileScreen(
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = "Ajustes",
+                            contentDescription = stringResource(R.string.content_desc_settings),
                             tint = MaterialTheme.colorScheme.onBackground,
                             modifier = Modifier.size(22.dp)
                         )
@@ -102,7 +103,8 @@ fun ProfileContent(viewModel: ProfileViewModel, onNavigateToTrain: () -> Unit = 
         ProfileHeader(
             name = user.name,
             disciplineDay = user.disciplineDay,
-            profilePhotoUri = user.profilePhotoUri
+            profilePhotoUri = user.profilePhotoUri,
+            currentStreak = user.currentStreak
         )
 
         if (user.disciplineDay == 0) {
@@ -172,6 +174,54 @@ fun ProfileContent(viewModel: ProfileViewModel, onNavigateToTrain: () -> Unit = 
             }
         }
 
+        // ── BOTÓN GUARDAR SNAPSHOT + HISTORIAL ──────────────────────────────
+        var snapshotSaved by remember { mutableStateOf(false) }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            TextButton(
+                onClick = {
+                    viewModel.saveBodySnapshot()
+                    snapshotSaved = true
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Save,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(14.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = if (snapshotSaved) stringResource(R.string.saved_today_label) else stringResource(R.string.save_today_btn),
+                    color = if (snapshotSaved) MaterialTheme.colorScheme.secondary
+                            else MaterialTheme.colorScheme.primary,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.sp
+                )
+            }
+        }
+
+        if (state.bodyHistory.isNotEmpty() || state.photoHistory.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = stringResource(R.string.evolution_section_title),
+                color = MaterialTheme.colorScheme.secondary,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 2.sp
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            BodyHistorySection(
+                bodyHistory = state.bodyHistory,
+                photoHistory = state.photoHistory,
+                customMeasures = state.customMeasures
+            )
+        }
+
         Spacer(modifier = Modifier.height(40.dp))
 
         if (state.showVisualLog) {
@@ -219,7 +269,7 @@ private fun NewUserBanner(onNavigateToTrain: () -> Unit) {
         )
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "BIENVENIDO A AEGIS",
+                text = stringResource(R.string.welcome_aegis_title),
                 color = MaterialTheme.colorScheme.primary,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Black,
@@ -227,7 +277,7 @@ private fun NewUserBanner(onNavigateToTrain: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Completa tu primer entrenamiento para empezar a ver tu progreso aquí.",
+                text = stringResource(R.string.welcome_first_workout_message),
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                 fontSize = 12.sp,
                 lineHeight = 17.sp
@@ -240,7 +290,7 @@ private fun NewUserBanner(onNavigateToTrain: () -> Unit) {
             modifier = Modifier.wrapContentSize()
         ) {
             Text(
-                text = "IR",
+                text = stringResource(R.string.btn_go),
                 color = Color.Black,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Black,

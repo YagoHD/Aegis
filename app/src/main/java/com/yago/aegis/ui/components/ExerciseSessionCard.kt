@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,6 +30,8 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.yago.aegis.R
 import com.yago.aegis.data.ExerciseProgress
 
 @Composable
@@ -46,6 +49,9 @@ fun ExerciseSessionCard(
         progress.slotVariants.indexOfFirst { it.id == progress.exercise.id }.coerceAtLeast(0)
     else 0
     val totalVariants = progress.slotVariants.size
+    val progressionSuggestion = remember(progress.exercise.lastPerformance, progress.exercise.isBodyweight) {
+        computeProgressionSuggestion(progress.exercise.lastPerformance, progress.exercise.isBodyweight)
+    }
 
     Column(
         modifier = Modifier
@@ -72,7 +78,7 @@ fun ExerciseSessionCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.ChevronLeft,
-                            contentDescription = "Variante anterior",
+                            contentDescription = stringResource(R.string.variant_prev_desc),
                             tint = if (canPrev) MaterialTheme.colorScheme.primary
                                    else MaterialTheme.colorScheme.secondary.copy(alpha = 0.25f),
                             modifier = Modifier.size(18.dp)
@@ -101,7 +107,7 @@ fun ExerciseSessionCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.ChevronRight,
-                            contentDescription = "Variante siguiente",
+                            contentDescription = stringResource(R.string.variant_next_desc),
                             tint = if (canNext) MaterialTheme.colorScheme.primary
                                    else MaterialTheme.colorScheme.secondary.copy(alpha = 0.25f),
                             modifier = Modifier.size(18.dp)
@@ -130,12 +136,27 @@ fun ExerciseSessionCard(
                 fontSize = 9.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 0.5.sp,
-                modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
+                modifier = Modifier.padding(start = 4.dp, top = 2.dp, bottom = 2.dp)
+            )
+        }
+
+        // Notas de forma — siempre debajo del bloque de variante para que no quede enterrado
+        if (progress.exercise.notes.isNotBlank()) {
+            Text(
+                text = progress.exercise.notes,
+                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.65f),
+                fontSize = 11.sp,
+                fontStyle = FontStyle.Italic,
+                lineHeight = 15.sp,
+                modifier = Modifier.padding(start = 4.dp, top = 2.dp, bottom = 2.dp)
             )
         }
 
         // --- TARJETA DE REFERENCIA (Look Acero) ---
-        LastSessionCard(lastSetsText = progress.exercise.lastPerformance)
+        LastSessionCard(
+            lastSetsText = progress.exercise.lastPerformance,
+            suggestion = progressionSuggestion
+        )
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -154,7 +175,7 @@ fun ExerciseSessionCard(
         TextButton(
             onClick = onAddSet,
             modifier = Modifier
-                .align(Alignment.Start) // Alineación a la izquierda para flujo de lectura técnico
+                .align(Alignment.Start)
                 .padding(top = 8.dp)
         ) {
             Icon(
@@ -165,7 +186,7 @@ fun ExerciseSessionCard(
             )
             Spacer(modifier = Modifier.width(6.dp))
             Text(
-                text = "AÑADIR SERIE",
+                text = stringResource(R.string.add_set_btn),
                 style = TextStyle(
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,
@@ -174,5 +195,42 @@ fun ExerciseSessionCard(
                 )
             )
         }
+    }
+}
+
+/**
+ * Calcula la sugerencia de progresión basándose en el último rendimiento.
+ * - isBodyweight=true (flag explícito) → siempre trata como bodyweight
+ * - Sin historial + bodyweight → mensaje de primer entrenamiento
+ * - Sin historial + con peso → null (no hay base para sugerir)
+ * - Con historial → parsea el texto y sugiere +2.5kg o +2 reps
+ */
+private fun computeProgressionSuggestion(lastPerformance: String, isBodyweight: Boolean = false): String? {
+    val sets = lastPerformance.split("   ").map { it.trim() }.filter { it.isNotBlank() }
+
+    // Sin historial: solo damos pista si es bodyweight conocido
+    if (sets.isEmpty()) {
+        return if (isBodyweight) "Primer entrenamiento — intenta el máximo de reps" else null
+    }
+
+    // Determinar si es bodyweight por flag o por el contenido histórico
+    val isBW = isBodyweight || sets.all { it.uppercase().startsWith("BW") }
+
+    return if (isBW) {
+        val maxReps = sets.mapNotNull { s ->
+            Regex("BW x (\\d+)", RegexOption.IGNORE_CASE).find(s)
+                ?.groupValues?.get(1)?.toIntOrNull()
+        }.maxOrNull() ?: return "Supera tu récord de reps"
+        "Prueba ${maxReps + 2} reps hoy"
+    } else {
+        val weights = sets.mapNotNull { s ->
+            Regex("([\\d.]+)kg x \\d+", RegexOption.IGNORE_CASE).find(s)
+                ?.groupValues?.get(1)?.toDoubleOrNull()
+        }
+        if (weights.isEmpty()) return null
+        val maxWeight = weights.max()
+        val suggested = maxWeight + 2.5
+        val fmt = if (suggested % 1.0 == 0.0) "${suggested.toInt()}" else "%.1f".format(suggested)
+        "Prueba ${fmt}kg hoy"
     }
 }

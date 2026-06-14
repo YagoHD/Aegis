@@ -9,7 +9,9 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.yago.aegis.R
 import com.yago.aegis.ui.components.*
 import com.yago.aegis.viewmodel.StatsViewModel
 
@@ -35,12 +37,12 @@ fun StatsScreen(
     Scaffold(
         topBar = {
             AegisTopBar(
-                title = "ESTADÍSTICAS",
+                title = stringResource(R.string.stats_title),
                 actions = {
                     IconButton(onClick = onNavigateToHistory) {
                         Icon(
                             imageVector = androidx.compose.material.icons.Icons.Default.History,
-                            contentDescription = "Historial",
+                            contentDescription = stringResource(R.string.history_desc),
                             tint = MaterialTheme.colorScheme.onBackground,
                             modifier = Modifier.size(22.dp)
                         )
@@ -48,7 +50,7 @@ fun StatsScreen(
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings",
+                            contentDescription = stringResource(R.string.settings_desc),
                         )
                     }
                 }
@@ -76,9 +78,9 @@ fun StatsScreen(
                     ) {
                         if (showDiscipline) {
                             StatCard(
-                                title = "DISCIPLINA SEMANAL",
+                                title = stringResource(R.string.weekly_discipline_title),
                                 mainValue = "${weeklyStats.first}/$targetDays",
-                                subValue = "SESIONES COMPLETADAS",
+                                subValue = stringResource(R.string.sessions_completed_label),
                                 modifier = Modifier.weight(1f),
                                 showProgress = true,
                                 progress = if (targetDays > 0) weeklyStats.first.toFloat() / targetDays else 0f
@@ -87,12 +89,12 @@ fun StatsScreen(
 
                         if (showVolume) {
                             StatCard(
-                                title = "VOLUMEN SEMANAL",
+                                title = stringResource(R.string.weekly_volume_title),
                                 mainValue = formatVolume(volumeStats.first),
                                 subValue = when {
-                                    volumeStats.second.isNaN() -> "SIN DATOS"
-                                    volumeStats.second >= 0 -> "+${volumeStats.second.toInt()}% VS PREV"
-                                    else -> "${volumeStats.second.toInt()}% VS PREV"
+                                    volumeStats.second.isNaN() -> stringResource(R.string.label_no_data)
+                                    volumeStats.second >= 0 -> stringResource(R.string.volume_gain_label, volumeStats.second.toInt().toString())
+                                    else -> stringResource(R.string.volume_loss_label, volumeStats.second.toInt().toString())
                                 },
                                 isPositive = volumeStats.second.isNaN() || volumeStats.second >= 0,
                                 modifier = Modifier.weight(1f)

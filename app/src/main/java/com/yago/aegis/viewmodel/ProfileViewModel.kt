@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.yago.aegis.data.BodyMeasure
+import com.yago.aegis.data.BodySnapshot
+import com.yago.aegis.data.PhotoRecord
 import com.yago.aegis.data.PhotoType
 import com.yago.aegis.data.UserProfile
 import com.yago.aegis.data.UserRepository
@@ -14,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -34,7 +37,9 @@ data class ProfileUiState(
     val showBodyFat: Boolean = true,
     val showVisualLog: Boolean = true,
     val showGirths: Boolean = true,
-    val customMeasures: List<BodyMeasure> = emptyList()
+    val customMeasures: List<BodyMeasure> = emptyList(),
+    val bodyHistory: List<BodySnapshot> = emptyList(),
+    val photoHistory: List<PhotoRecord> = emptyList()
 )
 
 class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
@@ -99,6 +104,24 @@ class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
                 _uiState.update { it.copy(customMeasures = measures) }
             }
         }
+
+        // Grupo 5: historial corporal + fotos
+        viewModelScope.launch {
+            repository.bodyHistory.collect { history ->
+                _uiState.update { it.copy(bodyHistory = history) }
+            }
+        }
+        viewModelScope.launch {
+            repository.photoHistory.collect { photos ->
+                _uiState.update { it.copy(photoHistory = photos) }
+            }
+        }
+
+        // Grupo 6: racha — computada una vez al arrancar (se actualiza al terminar entreno)
+        viewModelScope.launch {
+            val streak = repository.computeCurrentStreak()
+            _uiState.update { it.copy(user = it.user.copy(currentStreak = streak)) }
+        }
     }
 
     // --- ESCRITURA ---
@@ -158,10 +181,18 @@ class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
         viewModelScope.launch {
             when (type) {
                 PhotoType.BASE -> {
+                    // Archiva la foto base anterior antes de reemplazarla
+                    repository.archiveCurrentActualPhoto(
+                        _uiState.value.user.basePhotoDate ?: todayDate
+                    )
                     repository.updateBasePhoto(uri)
                     repository.updateBasePhotoDate(todayDate)
                 }
                 PhotoType.ACTUAL -> {
+                    // Archiva la foto actual anterior antes de reemplazarla
+                    repository.archiveCurrentActualPhoto(
+                        _uiState.value.user.actualPhotoDate ?: todayDate
+                    )
                     repository.updateActualPhoto(uri)
                     repository.updateActualPhotoDate(todayDate)
                 }
@@ -169,9 +200,34 @@ class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
+    /** Guarda un snapshot de las métricas actuales con la fecha de hoy. */
+    fun saveBodySnapshot() {
+        val state = _uiState.value
+        val snapshot = BodySnapshot(
+            date = System.currentTimeMillis(),
+            mass = state.user.currentMass,
+            bodyFat = state.user.bodyFat,
+            customMeasures = state.customMeasures
+        )
+        viewModelScope.launch { repository.saveBodySnapshot(snapshot) }
+    }
+
+    /** Recalcula y actualiza la racha tras finalizar un entreno. */
+    fun refreshStreak() {
+        viewModelScope.launch {
+            val streak = repository.computeCurrentStreak()
+            _uiState.update { it.copy(user = it.user.copy(currentStreak = streak)) }
+        }
+    }
+
     fun incrementDisciplineDay() {
         val newDay = _uiState.value.user.disciplineDay + 1
-        viewModelScope.launch { repository.updateDisciplineDay(newDay) }
+        viewModelScope.launch {
+            repository.updateDisciplineDay(newDay)
+            // Recalcula la racha justo después de guardar la sesión
+            val streak = repository.computeCurrentStreak()
+            _uiState.update { it.copy(user = it.user.copy(currentStreak = streak)) }
+        }
     }
 
     fun completeOnboarding() {

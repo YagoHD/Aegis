@@ -11,9 +11,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yago.aegis.R
 import com.yago.aegis.ui.components.AegisStepProgress
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.MetricInput
@@ -36,8 +38,8 @@ fun MetricsScreen(
     ) {
         // --- 1. NAVEGACIÓN Y PROGRESO ---
         AegisTopBar(
-            title = "PARÁMETROS",
-            subtitle = "PASO 03",
+            title = stringResource(R.string.metrics_title),
+            subtitle = stringResource(R.string.step_03_subtitle),
             navigationIcon = {
                 IconButton(onClick = onBack) {
                     Icon(
@@ -55,7 +57,7 @@ fun MetricsScreen(
 
         // --- 2. CABECERA TÉCNICA ---
         Text(
-            text = "MÉTRICAS CORPORALES",
+            text = stringResource(R.string.body_metrics_title),
             color = MaterialTheme.colorScheme.onBackground, // AegisWhite
             fontSize = 24.sp, // Ajustado para elegancia
             fontWeight = FontWeight.Black,
@@ -63,7 +65,7 @@ fun MetricsScreen(
         )
 
         Text(
-            text = "Introduce tus datos de precisión para calibrar tu perfil de rendimiento.",
+            text = stringResource(R.string.metrics_description),
             color = MaterialTheme.colorScheme.secondary, // AegisSteel
             fontSize = 14.sp,
             lineHeight = 20.sp,
@@ -85,7 +87,7 @@ fun MetricsScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         MetricInput(
-            label = "MASA ACTUAL",
+            label = stringResource(R.string.current_mass_label),
             unit = "KG",
             value = mass,
             onValueChange = { mass = it },
@@ -116,7 +118,7 @@ fun MetricsScreen(
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
         ) {
             Text(
-                text = "FINALIZAR CONFIGURACIÓN",
+                text = stringResource(R.string.btn_finalize_setup),
                 fontWeight = FontWeight.Black,
                 letterSpacing = 1.sp
             )

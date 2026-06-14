@@ -129,6 +129,7 @@ class WorkoutViewModel(private val repository: UserRepository) : ViewModel() {
         sessionStartTime = System.currentTimeMillis()
         viewModelScope.launch {
             val history = repository.workoutHistory.first()
+            val libraryExercises = repository.getAllExercises().first()
             val routineHistory = history
                 .filter { session -> session.routineName == routine.name }
                 .sortedByDescending { session -> session.date }
@@ -157,8 +158,13 @@ class WorkoutViewModel(private val repository: UserRepository) : ViewModel() {
             // Construir ExerciseProgress por slot — pre-carga el historial de TODAS las variantes
             val progress = routine.effectiveSlots().map { slot ->
                 val variantsWithHistory = slot.variants.map { exercise ->
+                    // Traer notes e isBodyweight frescos desde la librería (el ejercicio en la
+                    // rutina es una copia antigua que puede no tener los últimos cambios)
+                    val fresh = libraryExercises.find { it.id == exercise.id }
                     exercise.copy(
-                        lastPerformance = findLastPerformance(exercise.name) ?: exercise.lastPerformance
+                        lastPerformance = findLastPerformance(exercise.name) ?: exercise.lastPerformance,
+                        notes = fresh?.notes ?: exercise.notes,
+                        isBodyweight = fresh?.isBodyweight ?: exercise.isBodyweight
                     )
                 }
                 ExerciseProgress(

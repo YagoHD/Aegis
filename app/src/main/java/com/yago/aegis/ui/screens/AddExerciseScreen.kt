@@ -48,6 +48,8 @@ fun AddExerciseScreen(
     var exerciseName by remember { mutableStateOf("") }
     var selectedIconName by remember { mutableStateOf("dumbbell") }
     val selectedTags = remember { mutableStateListOf<String>() }
+    var notes by remember { mutableStateOf("") }
+    var isBodyweight by remember { mutableStateOf(false) }
 
     var showTagDialog by remember { mutableStateOf(false) }
     var newTagText by remember { mutableStateOf("") }
@@ -73,9 +75,9 @@ fun AddExerciseScreen(
     // --- DIÁLOGO DE TAGS (ESTILO UNIFICADO) ---
     if (showTagDialog) {
         AegisAlertDialog(
-            title = "NUEVO TAG GLOBAL",
-            confirmText = "GUARDAR",
-            dismissText = "CANCELAR",
+            title = stringResource(R.string.new_global_tag_title),
+            confirmText = stringResource(R.string.btn_save),
+            dismissText = stringResource(R.string.btn_cancel),
             onDismiss = { showTagDialog = false },
             onConfirm = {
                 if (newTagText.isNotBlank()) {
@@ -88,7 +90,7 @@ fun AddExerciseScreen(
             EditInput(
                 value = newTagText,
                 onValueChange = { newTagText = it },
-                placeholder = "EJ: PECHO"
+                placeholder = stringResource(R.string.tag_placeholder)
             )
         }
     }
@@ -96,7 +98,7 @@ fun AddExerciseScreen(
     Scaffold(
         topBar = {
             AegisTopBar(
-                title = if (isVariantMode) "AÑADIR VARIANTE" else stringResource(R.string.title_new_exercise).uppercase(),
+                title = if (isVariantMode) stringResource(R.string.title_add_variant) else stringResource(R.string.title_new_exercise),
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -122,11 +124,78 @@ fun AddExerciseScreen(
             // 1. SECCIÓN: CREACIÓN DE EJERCICIO
             item {
                 Column {
-                    SectionLabel(stringResource(R.string.label_exercise_name).uppercase())
+                    SectionLabel(stringResource(R.string.label_exercise_name))
                     EditInput(
                         value = exerciseName,
                         onValueChange = { exerciseName = it },
-                        placeholder = stringResource(R.string.hint_exercise_name).uppercase()
+                        placeholder = stringResource(R.string.exercise_name_placeholder)
+                    )
+                }
+            }
+
+            // 1b. TIPO: BODYWEIGHT
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        Text(
+                            text = stringResource(R.string.bodyweight_section_title),
+                            color = MaterialTheme.colorScheme.secondary,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 1.5.sp
+                        )
+                        Text(
+                            text = stringResource(R.string.bodyweight_description),
+                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+                            fontSize = 11.sp
+                        )
+                    }
+                    Switch(
+                        checked = isBodyweight,
+                        onCheckedChange = { isBodyweight = it },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.Black,
+                            checkedTrackColor = MaterialTheme.colorScheme.primary,
+                            uncheckedThumbColor = MaterialTheme.colorScheme.secondary,
+                            uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    )
+                }
+            }
+
+            // 1c. NOTAS DE FORMA
+            item {
+                Column {
+                    SectionLabel(stringResource(R.string.form_notes_section_title))
+                    OutlinedTextField(
+                        value = notes,
+                        onValueChange = { notes = it },
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                        placeholder = {
+                            Text(
+                                text = stringResource(R.string.form_notes_placeholder),
+                                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f),
+                                fontSize = 11.sp
+                            )
+                        },
+                        minLines = 2,
+                        maxLines = 4,
+                        textStyle = androidx.compose.ui.text.TextStyle(
+                            color = MaterialTheme.colorScheme.onBackground,
+                            fontSize = 13.sp
+                        ),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+                            cursorColor = MaterialTheme.colorScheme.primary
+                        )
                     )
                 }
             }
@@ -150,7 +219,7 @@ fun AddExerciseScreen(
             // 2. SECCIÓN: ICONOS (Usando el IconSelector que ya tenemos)
             item {
                 Column {
-                    SectionLabel(stringResource(R.string.select_icon).uppercase())
+                    SectionLabel(stringResource(R.string.select_icon))
                     FlowRow(
                         modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                         maxItemsInEachRow = 5,
@@ -177,13 +246,13 @@ fun AddExerciseScreen(
                             val hasTags = selectedTags.isNotEmpty()
 
                             val newExercise = Exercise(
-                                // id = System.currentTimeMillis(), // Asegúrate de generar un ID si el modelo lo requiere
                                 name = exerciseName.trim().uppercase(),
                                 type = if (hasTags) selectedTags.first() else "",
                                 muscleGroup = if (hasTags) selectedTags.first() else " ",
-                                tags = selectedTags.toList(), // Si está vacía, se guarda vacía []
+                                tags = selectedTags.toList(),
                                 iconName = selectedIconName,
-                                notes = ""
+                                notes = notes.trim(),
+                                isBodyweight = isBodyweight
                             )
 
                             routinesViewModel.saveOrUpdateExercise(newExercise)
@@ -193,6 +262,8 @@ fun AddExerciseScreen(
                             exerciseName = ""
                             selectedTags.clear()
                             selectedIconName = "dumbbell"
+                            notes = ""
+                            isBodyweight = false
                         }
                     },
                     modifier = Modifier.fillMaxWidth().height(56.dp),
@@ -203,7 +274,7 @@ fun AddExerciseScreen(
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
-                        if (isVariantMode) "CREAR Y AÑADIR COMO VARIANTE" else "CREAR Y AÑADIR A LA RUTINA",
+                        if (isVariantMode) stringResource(R.string.btn_create_and_add_variant) else stringResource(R.string.btn_create_and_add_routine),
                         fontWeight = FontWeight.Black,
                         fontSize = 13.sp
                     )
@@ -221,7 +292,7 @@ fun AddExerciseScreen(
                         color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
                     )
                     Text(
-                        text = "  OR SELECT FROM LIBRARY  ",
+                        text = "  ${stringResource(R.string.label_or_select_library)}  ",
                         color = MaterialTheme.colorScheme.secondary,
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Black,
@@ -241,7 +312,7 @@ fun AddExerciseScreen(
                     onValueChange = { searchQuery = it },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = {
-                        Text("Search exercises...",
+                        Text(stringResource(R.string.search_exercises_placeholder),
                             color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f),
                             fontSize = 13.sp)
                     },

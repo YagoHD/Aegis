@@ -1,11 +1,20 @@
 package com.yago.aegis.ui.screens
 
+import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.media.RingtoneManager
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.view.WindowManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -33,10 +42,16 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
+import com.yago.aegis.MainActivity
+import com.yago.aegis.R
 import com.yago.aegis.ui.components.AegisAlertDialog
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.ExerciseSessionCard
@@ -45,6 +60,9 @@ import com.yago.aegis.viewmodel.ProfileViewModel
 import com.yago.aegis.viewmodel.RoutinesViewModel
 import com.yago.aegis.viewmodel.WorkoutViewModel
 import kotlin.math.roundToInt
+
+private const val WORKOUT_NOTIFICATION_ID = 1001
+private const val WORKOUT_CHANNEL_ID = "aegis_workout_session"
 
 @Composable
 fun ActiveSessionScreen(
@@ -71,8 +89,41 @@ fun ActiveSessionScreen(
     var showCancelDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val density = LocalDensity.current
+    val view = LocalView.current
 
     val currentSession = session ?: return
+
+    // ── PANTALLA SIEMPRE ACTIVA ──────────────────────────────────────────────
+    DisposableEffect(Unit) {
+        val window = (view.context as? android.app.Activity)?.window
+        window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        onDispose {
+            window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+    }
+
+    // ── NOTIFICACIÓN DE SESIÓN ACTIVA ────────────────────────────────────────
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) showWorkoutNotification(context, currentSession.routineName)
+    }
+
+    DisposableEffect(currentSession.routineName) {
+        val hasPermission = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (hasPermission) {
+            showWorkoutNotification(context, currentSession.routineName)
+        } else {
+            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+
+        onDispose {
+            cancelWorkoutNotification(context)
+        }
+    }
 
     // Tamaño del contenedor (para calcular límites del drag)
     var containerWidthPx by remember { mutableStateOf(0) }
@@ -124,7 +175,7 @@ fun ActiveSessionScreen(
             containerColor = MaterialTheme.colorScheme.surface,
             title = {
                 Text(
-                    "SALIR DE LA SESIÓN",
+                    stringResource(R.string.exit_session_dialog_title),
                     color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = androidx.compose.ui.text.font.FontWeight.Black,
                     letterSpacing = 1.sp
@@ -132,7 +183,7 @@ fun ActiveSessionScreen(
             },
             text = {
                 Text(
-                    "¿Qué quieres hacer con tu sesión actual?",
+                    stringResource(R.string.exit_session_question),
                     color = MaterialTheme.colorScheme.secondary,
                     fontSize = 14.sp
                 )
@@ -154,7 +205,7 @@ fun ActiveSessionScreen(
                         shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
                     ) {
                         Text(
-                            "CONTINUAR ENTRENANDO",
+                            stringResource(R.string.btn_continue_training),
                             color = androidx.compose.ui.graphics.Color.Black,
                             fontWeight = androidx.compose.ui.text.font.FontWeight.Black,
                             fontSize = 12.sp,
@@ -175,7 +226,7 @@ fun ActiveSessionScreen(
                         )
                     ) {
                         Text(
-                            "PAUSAR — VOLVER MÁS TARDE",
+                            stringResource(R.string.btn_pause_session),
                             color = MaterialTheme.colorScheme.onBackground,
                             fontWeight = androidx.compose.ui.text.font.FontWeight.Black,
                             fontSize = 12.sp,
@@ -191,7 +242,7 @@ fun ActiveSessionScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            "ABANDONAR SESIÓN",
+                            stringResource(R.string.btn_abandon_session),
                             color = MaterialTheme.colorScheme.error,
                             fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
                             fontSize = 12.sp
@@ -205,9 +256,9 @@ fun ActiveSessionScreen(
 
     if (uncompletedWithData.isNotEmpty()) {
         AegisAlertDialog(
-            title = "EJERCICIOS SIN MARCAR",
-            confirmText = "MARCAR Y FINALIZAR",
-            dismissText = "REVISAR",
+            title = stringResource(R.string.uncompleted_exercises_title),
+            confirmText = stringResource(R.string.mark_complete_btn),
+            dismissText = stringResource(R.string.review_btn),
             onDismiss = { workoutViewModel.dismissUncompletedDialog() },
             onConfirm = {
                 workoutViewModel.forceFinishWorkout(routinesViewModel) {
@@ -218,7 +269,7 @@ fun ActiveSessionScreen(
         ) {
             Column {
                 Text(
-                    text = "Has introducido datos en los siguientes ejercicios pero no los has marcado como completados:",
+                    text = stringResource(R.string.uncompleted_exercises_message),
                     color = MaterialTheme.colorScheme.secondary,
                     fontSize = 14.sp,
                     modifier = Modifier.padding(bottom = 12.dp)
@@ -252,12 +303,12 @@ fun ActiveSessionScreen(
             topBar = {
                 AegisTopBar(
                     title = currentSession.routineName.uppercase(),
-                    subtitle = "SESIÓN EN CURSO",
+                    subtitle = stringResource(R.string.active_session_subtitle),
                     navigationIcon = {
                         IconButton(onClick = { showCancelDialog = true }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
+                                contentDescription = stringResource(R.string.content_desc_back),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
@@ -266,7 +317,7 @@ fun ActiveSessionScreen(
                         IconButton(onClick = onNavigateToPlateCalculator) {
                             Icon(
                                 imageVector = Icons.Default.Calculate,
-                                contentDescription = "Calculadora de platos",
+                                contentDescription = stringResource(R.string.calc_desc),
                                 tint = MaterialTheme.colorScheme.onBackground,
                                 modifier = Modifier.size(22.dp)
                             )
@@ -274,7 +325,7 @@ fun ActiveSessionScreen(
                         IconButton(onClick = onNavigateToSettings) {
                             Icon(
                                 imageVector = Icons.Default.Settings,
-                                contentDescription = "Ajustes entrenamiento",
+                                contentDescription = stringResource(R.string.settings_workout_desc),
                                 tint = MaterialTheme.colorScheme.onBackground,
                                 modifier = Modifier.size(22.dp)
                             )
@@ -372,7 +423,7 @@ fun ActiveSessionScreen(
                             elevation = ButtonDefaults.buttonElevation(defaultElevation = if (hasAnyData) 4.dp else 0.dp)
                         ) {
                             Text(
-                                text = if (hasAnyData) "FINALIZAR ENTRENAMIENTO" else "INTRODUCE DATOS PARA FINALIZAR",
+                                text = if (hasAnyData) stringResource(R.string.btn_finish_workout) else stringResource(R.string.btn_enter_data_to_finish),
                                 style = MaterialTheme.typography.labelLarge.copy(
                                     fontWeight = FontWeight.Black,
                                     fontSize = if (hasAnyData) 15.sp else 11.sp,
@@ -522,7 +573,7 @@ fun RestTimerFab(
                         letterSpacing = (-0.5).sp
                     )
                     Text(
-                        text = "REST",
+                        text = stringResource(R.string.rest_timer_label),
                         color = MaterialTheme.colorScheme.secondary,
                         fontSize = 8.sp,
                         fontWeight = FontWeight.Black,
@@ -533,13 +584,13 @@ fun RestTimerFab(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(
                         imageVector = Icons.Default.Timer,
-                        contentDescription = "Iniciar descanso",
+                        contentDescription = stringResource(R.string.start_rest_desc),
                         tint = if (isDragging) MaterialTheme.colorScheme.secondary
                         else MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(22.dp)
                     )
                     Text(
-                        text = if (isDragging) "MOVER" else "REST",
+                        text = if (isDragging) stringResource(R.string.move_timer_label) else stringResource(R.string.rest_timer_label),
                         color = MaterialTheme.colorScheme.secondary,
                         fontSize = 8.sp,
                         fontWeight = FontWeight.Black,
@@ -555,6 +606,53 @@ private fun formatTimerDisplay(seconds: Int): String {
     val m = seconds / 60
     val s = seconds % 60
     return if (m > 0) "$m:${s.toString().padStart(2, '0')}" else "${s}s"
+}
+
+private fun showWorkoutNotification(context: Context, routineName: String) {
+    val notificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+    // Crear canal si no existe (idempotente)
+    if (notificationManager.getNotificationChannel(WORKOUT_CHANNEL_ID) == null) {
+        val channel = NotificationChannel(
+            WORKOUT_CHANNEL_ID,
+            context.getString(R.string.notification_channel_name),
+            NotificationManager.IMPORTANCE_LOW   // Sin sonido — solo indicador persistente
+        ).apply {
+            description = context.getString(R.string.notification_channel_desc)
+            setShowBadge(false)
+        }
+        notificationManager.createNotificationChannel(channel)
+    }
+
+    // PendingIntent: al pulsar la notificación, vuelve a la app
+    val intent = Intent(context, MainActivity::class.java).apply {
+        flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+    }
+    val pendingIntent = PendingIntent.getActivity(
+        context,
+        0,
+        intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+
+    val notification = NotificationCompat.Builder(context, WORKOUT_CHANNEL_ID)
+        .setSmallIcon(R.mipmap.ic_launcher)
+        .setContentTitle(context.getString(R.string.notification_title, routineName.uppercase()))
+        .setContentText(context.getString(R.string.notification_text))
+        .setOngoing(true)               // No se puede descartar deslizando
+        .setSilent(true)                // Sin sonido ni vibración al mostrar
+        .setContentIntent(pendingIntent)
+        .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+        .build()
+
+    notificationManager.notify(WORKOUT_NOTIFICATION_ID, notification)
+}
+
+private fun cancelWorkoutNotification(context: Context) {
+    val notificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    notificationManager.cancel(WORKOUT_NOTIFICATION_ID)
 }
 
 private fun vibrate(context: Context) {

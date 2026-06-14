@@ -17,6 +17,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.R
@@ -76,7 +77,7 @@ fun WelcomeScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "\"Forja tu disciplina.\"",
+                text = stringResource(R.string.app_motto),
                 style = TextStyle(
                     color = AegisCream,
                     fontSize = 18.sp,
@@ -100,7 +101,7 @@ fun WelcomeScreen(
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
             ) {
                 Text(
-                    text = "CREAR CUENTA",
+                    text = stringResource(R.string.btn_create_account),
                     color = Color.Black,
                     fontWeight = FontWeight.Black,
                     fontSize = 14.sp,
@@ -123,7 +124,7 @@ fun WelcomeScreen(
                 )
             ) {
                 Text(
-                    text = "YA TENGO CUENTA",
+                    text = stringResource(R.string.btn_already_have_account),
                     color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.Black,
                     fontSize = 14.sp,

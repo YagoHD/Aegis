@@ -15,8 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yago.aegis.R
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.SectionHeader
 import com.yago.aegis.ui.components.SettingsRow
@@ -53,7 +55,7 @@ fun WorkoutSettingsScreen(
                 .verticalScroll(scrollState)
         ) {
             AegisTopBar(
-                title = "AJUSTES DE ENTRENAMIENTO",
+                title = stringResource(R.string.workout_settings_title),
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -70,7 +72,7 @@ fun WorkoutSettingsScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // ─── SECCIÓN TEMPORIZADOR ───
-                SectionHeader(text = "TEMPORIZADOR DE DESCANSO")
+                SectionHeader(text = stringResource(R.string.rest_timer_section_title))
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Mostrar/ocultar temporizador
@@ -79,7 +81,7 @@ fun WorkoutSettingsScreen(
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Column(modifier = Modifier.padding(8.dp)) {
-                        SettingsRow("MOSTRAR TEMPORIZADOR", showTimer) {
+                        SettingsRow(stringResource(R.string.show_timer_label), showTimer) {
                             showTimer = it
                             scope.launch { onSave(timerSeconds, vibrate, sound, it) }
                         }
@@ -90,7 +92,7 @@ fun WorkoutSettingsScreen(
 
                 // Selector de tiempo
                 Text(
-                    text = "TIEMPO DE DESCANSO",
+                    text = stringResource(R.string.rest_time_label),
                     color = MaterialTheme.colorScheme.secondary,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Black,
@@ -161,7 +163,7 @@ fun WorkoutSettingsScreen(
                 VerticalDividerSection()
 
                 // ─── SECCIÓN ALERTAS ───
-                SectionHeader(text = "ALERTA AL FINALIZAR")
+                SectionHeader(text = stringResource(R.string.alert_section_title))
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Surface(
@@ -169,12 +171,12 @@ fun WorkoutSettingsScreen(
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Column(modifier = Modifier.padding(8.dp)) {
-                        SettingsRow("VIBRACIÓN", vibrate) {
+                        SettingsRow(stringResource(R.string.vibration_label), vibrate) {
                             vibrate = it
                             scope.launch { onSave(timerSeconds, it, sound, showTimer) }
                         }
                         HorizontalDivider(color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f))
-                        SettingsRow("SONIDO", sound) {
+                        SettingsRow(stringResource(R.string.sound_label), sound) {
                             sound = it
                             scope.launch { onSave(timerSeconds, vibrate, it, showTimer) }
                         }
@@ -196,7 +198,7 @@ fun WorkoutSettingsScreen(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                "CONFIGURACIÓN ACTUAL",
+                                stringResource(R.string.current_config_label),
                                 color = MaterialTheme.colorScheme.secondary,
                                 fontSize = 9.sp,
                                 fontWeight = FontWeight.Black,
@@ -211,9 +213,9 @@ fun WorkoutSettingsScreen(
                             )
                         }
                         Column {
-                            if (vibrate) Text("· Vibración activada", color = MaterialTheme.colorScheme.secondary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                            if (sound) Text("· Sonido activado", color = MaterialTheme.colorScheme.secondary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                            if (!vibrate && !sound) Text("· Solo visual", color = MaterialTheme.colorScheme.secondary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            if (vibrate) Text(stringResource(R.string.vibration_enabled_badge), color = MaterialTheme.colorScheme.secondary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            if (sound) Text(stringResource(R.string.sound_enabled_badge), color = MaterialTheme.colorScheme.secondary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            if (!vibrate && !sound) Text(stringResource(R.string.visual_only_badge), color = MaterialTheme.colorScheme.secondary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }

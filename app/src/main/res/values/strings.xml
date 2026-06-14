@@ -1,10 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- App -->
     <string name="app_name">Aegis</string>
-    <string name="label_mass">Masa</string> <string name="label_body_fat">Grasa</string>
-    <string name="label_bmi">IMC</string>
-    <string name="label_girths">Medidas (cm)</string>
+    <string name="app_motto">\"Forja tu disciplina.\"</string>
+    <string name="app_version_label">AEGIS v%1$s (%2$d)</string>
+
+    <!-- Navigation -->
+    <string name="nav_profile">Perfil</string>
+    <string name="nav_routine">Rutinas</string>
+    <string name="nav_train">Entrenar</string>
+    <string name="nav_stats">Stats</string>
+    <string name="nav_exercices">Ejercicios</string>
+    <string name="nav_start_training">Empezar entrenamiento</string>
+
+    <!-- Common buttons -->
+    <string name="btn_save">GUARDAR</string>
+    <string name="btn_cancel">CANCELAR</string>
+    <string name="btn_yes">SÍ, ELIMINAR</string>
+    <string name="btn_no">CANCELAR</string>
+    <string name="btn_continue">CONTINUAR</string>
+    <string name="btn_create">CREAR</string>
+    <string name="btn_edit">EDITAR</string>
+    <string name="btn_delete">ELIMINAR</string>
+    <string name="btn_load">CARGAR</string>
+    <string name="btn_go">IR</string>
+    <string name="btn_close">CERRAR</string>
+    <string name="btn_send_email">ENVIAR EMAIL</string>
+    <string name="btn_back">Volver</string>
+    <string name="content_desc_back">Atrás</string>
+    <string name="content_desc_delete">Borrar</string>
+    <string name="content_desc_reorder">Reordenar</string>
+    <string name="content_desc_settings">Ajustes</string>
+
+    <!-- Common labels -->
     <string name="label_biometrics">BIOMETRÍA</string>
-    <string name="label_discipline_day">DÍAS DE DISCIPLINA %1$d</string>
+    <string name="label_mass">Masa</string>
+    <string name="label_body_fat">Grasa</string>
+    <string name="label_bmi">IMC</string>
+    <string name="label_height">Altura</string>
+    <string name="label_girths">Medidas (cm)</string>
     <string name="label_key_girths">MEDIDAS CLAVE (CM)</string>
     <string name="label_chest">Pecho</string>
     <string name="label_waist">Cintura</string>
@@ -14,57 +48,319 @@
     <string name="label_base">BASE</string>
     <string name="label_actual">ACTUAL</string>
     <string name="label_today">HOY</string>
+    <string name="label_exercises">EJERCICIOS</string>
+    <string name="label_added_suffix">AÑADIDOS</string>
+    <string name="label_routine_name">NOMBRE DE LA RUTINA</string>
+    <string name="label_exercise_name">NOMBRE DEL EJERCICIO</string>
+    <string name="label_tags_categories">TAGS Y CATEGORÍAS</string>
+    <string name="label_visual_reference">REFERENCIA VISUAL</string>
+    <string name="label_notes_optional">NOTAS (OPCIONAL)</string>
+    <string name="label_no_data">SIN DATOS</string>
+    <string name="label_kg">KG</string>
+    <string name="label_kg_lower">kg</string>
+    <string name="label_reps">REPS</string>
+    <string name="label_cm">CM</string>
+    <string name="label_percent">%</string>
+    <string name="label_bodyweight">Peso corporal</string>
+    <string name="label_discipline_day">DÍAS DE DISCIPLINA %1$d</string>
     <string name="date_placeholder">%1$s</string>
+
+    <!-- Profile screen -->
     <string name="profile_title">Perfil</string>
+    <string name="welcome_aegis_title">BIENVENIDO A AEGIS</string>
+    <string name="welcome_first_workout_message">Completa tu primer entrenamiento para empezar a ver tu progreso aquí.</string>
+    <string name="save_today_btn">GUARDAR HOY</string>
+    <string name="saved_today_label">✓ GUARDADO HOY</string>
+    <string name="evolution_section_title">EVOLUCIÓN</string>
+    <string name="history_photos_title">HISTORIAL FOTOS</string>
+    <string name="chart_weight_label">PESO</string>
+    <string name="chart_fat_label">GRASA</string>
+
+    <!-- Profile settings -->
     <string name="settings_title_interface">PERSONALIZAR INTERFAZ</string>
     <string name="settings_title_manage_measures">GESTIONAR MEDIDAS</string>
     <string name="settings_title_add_metric">AÑADIR NUEVA MÉTRICA</string>
     <string name="settings_label_body_fat">Mostrar Grasa Corporal</string>
     <string name="settings_label_bmi">Mostrar IMC (BMI)</string>
     <string name="settings_label_visual_log">Mostrar Log Visual</string>
+    <string name="settings_label_girths">Mostrar medidas corporales</string>
     <string name="settings_hint_new_measure">Nombre (ej: Cuádriceps)</string>
     <string name="settings_desc_delete">Borrar medida</string>
     <string name="settings_desc_add">Añadir medida</string>
-    <string name="settings_label_girths">Mostrar medidas corporales</string>
-    <string name="label_height">Altura</string>
     <string name="hint_height">Ej: 1.75</string>
     <string name="unit_meters">cm</string>
+    <string name="unit_centimeters">CM</string>
+    <string name="unit_kg">KG</string>
+
+    <!-- User / Account settings -->
+    <string name="user_data_section_title">DATOS DE USUARIO</string>
+    <string name="name_label">NOMBRE</string>
+    <string name="name_placeholder">Introduce tu nombre…</string>
+    <string name="account_section_title">CUENTA</string>
+    <string name="change_password_label">CAMBIAR CONTRASEÑA</string>
+    <string name="logout_label">CERRAR SESIÓN</string>
+    <string name="logout_confirmation">¿Estás seguro de que quieres cerrar sesión? Tus datos están guardados en la nube.</string>
+    <string name="change_password_dialog_title">CAMBIAR CONTRASEÑA</string>
+    <string name="current_password_label">CONTRASEÑA ACTUAL</string>
+    <string name="new_password_label">NUEVA CONTRASEÑA</string>
+    <string name="confirm_password_label">CONFIRMAR CONTRASEÑA</string>
+    <string name="error_current_password_required">Introduce tu contraseña actual</string>
+    <string name="error_new_password_length">La nueva contraseña debe tener al menos 6 caracteres</string>
+    <string name="error_passwords_mismatch">Las contraseñas no coinciden</string>
+    <string name="new_metric_label">NUEVA MÉTRICA</string>
+    <string name="metric_placeholder">Ej: Antebrazo</string>
+
+    <!-- Routine screen -->
     <string name="routine_title">Rutinas</string>
     <string name="btn_create_routine">CREAR NUEVA RUTINA</string>
     <string name="exercises_suffix">Ejercicios</string>
     <string name="dialog_new_routine">NUEVA RUTINA</string>
     <string name="dialog_routine_name_label">Nombre de la rutina</string>
-    <string name="btn_save">GUARDAR</string>
-    <string name="btn_cancel">CANCELAR</string>
-    <string name="content_desc_back">Atrás</string>
-    <string name="content_desc_delete">Borrar</string>
-    <string name="content_desc_reorder">Reordenar</string>
-    <string name="label_routine_name">NOMBRE DE LA RUTINA</string>
-    <string name="label_exercises">EJERCICIOS</string>
-    <string name="label_added_suffix">AÑADIDOS</string>
-    <string name="btn_add_exercise">AÑADIR EJERCICIO</string>
-    <string name="btn_save_routine">GUARDAR RUTINA</string>
-    <string name="nav_profile">Perfil</string>
-    <string name="nav_routine">Rutinas</string>
-    <string name="nav_stats">Stats</string>
-    <string name="nav_exercices">Ejercicios</string>
-    <string name="title_new_exercise">NUEVO EJERCICIO</string>
-    <string name="label_exercise_name">NOMBRE DEL EJERCICIO</string>
-    <string name="hint_exercise_name">ej. Press de Banca Inclinado</string>
-    <string name="label_tags_categories">TAGS Y CATEGORÍAS</string>
-    <string name="label_visual_reference">REFERENCIA VISUAL</string>
-    <string name="label_notes_optional">NOTAS (OPCIONAL)</string>
-    <string name="hint_notes">ej. Enfócate en el tempo y aprieta arriba</string>
-    <string name="btn_create_exercise">CREAR EJERCICIO</string>
-    <string name="label_or_select_library">O SELECCIONA DE LA LIBRERÍA</string>
-    <string name="select_library">O SELECCIONALO DE LA LIBRERIA</string>
     <string name="dialog_delete_title">Eliminar Rutina</string>
     <string name="dialog_delete_confirm">¿Estás seguro de que quieres eliminar la rutina %1$s?</string>
-    <string name="btn_yes">SÍ, ELIMINAR</string>
-    <string name="btn_no">CANCELAR</string>
+    <string name="dialog_delete_routine_confirm">¿Estás seguro de que quieres eliminar \'%1$s\'? Se perderán todos los ejercicios asignados.</string>
+    <string name="dialog_delete_routine_title">ELIMINAR RUTINA</string>
+    <string name="create_routine_dialog_title">NUEVA RUTINA</string>
+    <string name="routine_name_placeholder">NOMBRE DE LA RUTINA</string>
+    <string name="select_icon_instruction">SELECCIONA UN ICONO</string>
+
+    <!-- Edit routine -->
+    <string name="new_routine_fallback_title">NUEVA RUTINA</string>
+    <string name="btn_add_exercise">AÑADIR EJERCICIO</string>
+    <string name="btn_save_routine">GUARDAR RUTINA</string>
+    <string name="btn_create_routine_label">CREAR RUTINA</string>
+    <string name="variant_count_label">+ %1$d variante%2$s</string>
+    <string name="add_variant_desc">Añadir variante</string>
+    <string name="delete_variant_desc">Eliminar variante</string>
+
+    <!-- Select routine -->
+    <string name="select_routine_title">SELECCIONA TU MISIÓN</string>
+    <string name="your_routines_label">TUS RUTINAS</string>
+    <string name="routines_count_label">RUTINAS A ELEGIR</string>
+    <string name="new_routine_btn">NUEVA</string>
+    <string name="no_routines_message">SIN RUTINAS ACTIVAS</string>
+    <string name="paused_session_badge">⏸ SESIÓN PAUSADA</string>
+    <string name="plate_calculator_desc">Calculadora de platos</string>
+
+    <!-- Exercises library -->
     <string name="exercices_title">EJERCICIOS</string>
+    <string name="delete_base_exercises_title">ELIMINAR EJERCICIOS BASE</string>
+    <string name="load_base_exercises_title">CARGAR EJERCICIOS BASE</string>
+    <string name="delete_base_exercises_message">Se eliminarán todos los ejercicios de la sección BASE. Los tuyos propios no se verán afectados.</string>
+    <string name="load_base_exercises_message">Se añadirán más de 60 ejercicios organizados por grupo muscular. Tus ejercicios propios no se verán afectados.</string>
+    <string name="delete_exercise_title">ELIMINAR EJERCICIO</string>
+    <string name="delete_exercise_confirm">¿Estás seguro de que quieres eliminar \'%1$s\'? Esta acción es irreversible.</string>
+    <string name="btn_delete_base">ELIMINAR BASE</string>
+    <string name="btn_load_base">CARGAR BASE</string>
+    <string name="search_placeholder">BUSCAR…</string>
+    <string name="my_exercises_title">MIS EJERCICIOS</string>
+    <string name="empty_exercises_message">Aún no tienes ejercicios propios. Pulsa CREAR para añadir el primero.</string>
+    <string name="base_exercises_title">EJERCICIOS BASE</string>
+    <string name="no_search_results">SIN RESULTADOS</string>
+    <string name="empty_library_title">LIBRERÍA VACÍA</string>
+    <string name="empty_library_instruction">Carga los ejercicios base o crea\nlos tuyos desde cero.</string>
+    <string name="clear_filter_label">Limpiar</string>
+
+    <!-- Add / Edit exercise -->
+    <string name="title_new_exercise">NUEVO EJERCICIO</string>
+    <string name="title_edit_exercise">EDITAR EJERCICIO</string>
+    <string name="title_add_variant">AÑADIR VARIANTE</string>
+    <string name="hint_exercise_name">ej. Press de Banca Inclinado</string>
+    <string name="label_or_select_library">O SELECCIONA DE LA LIBRERÍA</string>
+    <string name="select_library">O SELECCIÓNALO DE LA LIBRERÍA</string>
     <string name="select_icon">SELECCIONA UN ICONO</string>
-    <string name="tags_title">TAGS Y CATEGORIAS</string>
-    <string name="nav_train" />
+    <string name="tags_title">TAGS Y CATEGORÍAS</string>
+    <string name="bodyweight_section_title">PESO CORPORAL</string>
+    <string name="bodyweight_description">Dominadas, fondos, pistols…</string>
+    <string name="form_notes_section_title">NOTAS DE FORMA</string>
+    <string name="form_notes_placeholder">EJ: ESCÁPULAS RETRAÍDAS, CODOS A 45°…</string>
+    <string name="hint_notes">ej. Enfócate en el tempo y aprieta arriba</string>
+    <string name="btn_create_exercise">CREAR EJERCICIO</string>
+    <string name="btn_create_and_add_variant">CREAR Y AÑADIR COMO VARIANTE</string>
+    <string name="btn_create_and_add_routine">CREAR Y AÑADIR A LA RUTINA</string>
+    <string name="new_global_tag_title">NUEVO TAG GLOBAL</string>
+    <string name="tag_placeholder">EJ: PECHO</string>
+    <string name="search_exercises_placeholder">Buscar ejercicios…</string>
+    <string name="exercise_name_placeholder">EJ: PRESS BANCA INCLINADO</string>
+
+    <!-- Active session -->
+    <string name="active_session_subtitle">SESIÓN EN CURSO</string>
+    <string name="exit_session_dialog_title">SALIR DE LA SESIÓN</string>
+    <string name="exit_session_question">¿Qué quieres hacer con tu sesión actual?</string>
+    <string name="btn_continue_training">CONTINUAR ENTRENANDO</string>
+    <string name="btn_pause_session">PAUSAR — VOLVER MÁS TARDE</string>
+    <string name="btn_abandon_session">ABANDONAR SESIÓN</string>
+    <string name="uncompleted_exercises_title">EJERCICIOS SIN MARCAR</string>
+    <string name="uncompleted_exercises_message">Has introducido datos en los siguientes ejercicios pero no los has marcado como completados:</string>
+    <string name="btn_finish_workout">FINALIZAR ENTRENAMIENTO</string>
+    <string name="btn_enter_data_to_finish">INTRODUCE DATOS PARA FINALIZAR</string>
+    <string name="rest_timer_label">REST</string>
+    <string name="move_timer_label">MOVER</string>
+    <string name="start_rest_desc">Iniciar descanso</string>
+    <string name="notification_title">Entrenando: %1$s</string>
+    <string name="notification_text">Sesión activa — toca para volver</string>
+    <string name="notification_channel_name">Sesión de entrenamiento</string>
+    <string name="notification_channel_desc">Indica que hay una sesión de entrenamiento activa</string>
+    <string name="set_row_delete_desc">Eliminar serie</string>
+    <string name="add_set_btn">AÑADIR SERIE</string>
+    <string name="variant_prev_desc">Variante anterior</string>
+    <string name="variant_next_desc">Variante siguiente</string>
+    <string name="mark_complete_btn">MARCAR Y FINALIZAR</string>
+    <string name="review_btn">REVISAR</string>
+    <string name="calc_desc">Calculadora de platos</string>
+    <string name="settings_workout_desc">Ajustes entrenamiento</string>
+
+    <!-- Workout complete -->
+    <string name="workout_complete_title">ENTRENAMIENTO\nCOMPLETADO</string>
+    <string name="new_pr_title">¡NUEVO RÉCORD!</string>
+    <string name="multiple_pr_label">nuevos récords personales</string>
+    <string name="total_volume_label">VOLUMEN TOTAL</string>
+    <string name="volume_comparison_label">Vs. %1$s kg de la última sesión</string>
+    <string name="duration_label">DURACIÓN</string>
+    <string name="exercises_label">EJERCICIOS</string>
+    <string name="sets_label">SERIES</string>
+    <string name="completed_exercises_section">EJERCICIOS COMPLETADOS</string>
+    <string name="share_section_label">COMPARTIR</string>
+    <string name="btn_share_workout">COMPARTIR ENTRENAMIENTO</string>
+    <string name="session_notes_placeholder">¿Cómo fue el entrenamiento? Añade una nota…</string>
+    <string name="view_full_history">VER HISTORIAL COMPLETO</string>
+    <string name="btn_finish_session">FINALIZAR SESIÓN</string>
+    <string name="share_intent_text">Entrenamiento completado 💪 #Aegis</string>
+    <string name="new_pr_badge">NUEVO PR</string>
+    <string name="bodyweight_label">Bodyweight</string>
+    <string name="share_card_subtitle">Entrenamiento completado</string>
+    <string name="trained_with_label">Entrenado con AEGIS</string>
+
+    <!-- Motivational quotes -->
+    <string name="quote_1">La disciplina es el puente entre metas y logros.</string>
+    <string name="quote_2">El dolor de hoy es la fuerza de mañana.</string>
+    <string name="quote_3">No pares cuando estés cansado. Para cuando hayas terminado.</string>
+    <string name="quote_4">Cada rep te acerca a quien quieres ser.</string>
+    <string name="quote_5">El único mal entrenamiento es el que no hiciste.</string>
+    <string name="quote_6">Forja tu disciplina. Construye tu legado.</string>
+    <string name="quote_7">El cuerpo logra lo que la mente cree.</string>
+    <string name="quote_8">Consistencia sobre intensidad. Siempre.</string>
+    <string name="quote_9">Los campeones se hacen cuando nadie mira.</string>
+    <string name="quote_10">Hoy superaste al de ayer. Eso es suficiente.</string>
+
+    <!-- Stats screen -->
+    <string name="stats_title">ESTADÍSTICAS</string>
+    <string name="history_desc">Historial</string>
+    <string name="settings_desc">Ajustes</string>
+    <string name="weekly_discipline_title">DISCIPLINA SEMANAL</string>
+    <string name="sessions_completed_label">SESIONES COMPLETADAS</string>
+    <string name="weekly_volume_title">VOLUMEN SEMANAL</string>
+    <string name="volume_gain_label">+%1$s%% VS PREV</string>
+    <string name="volume_loss_label">%1$s%% VS PREV</string>
+
+    <!-- Stats settings -->
+    <string name="stats_settings_title">PERSONALIZA TU PANTALLA</string>
+    <string name="weekly_training_days_title">DÍAS DE ENTRENAMIENTO SEMANAL</string>
+    <string name="modules_visibility_title">VISIBILIDAD DE MÓDULOS</string>
+    <string name="volume_module_label">VOLUMEN SEMANAL</string>
+    <string name="discipline_module_label">DISCIPLINA SEMANAL</string>
+    <string name="evolution_graph_module_label">EVOLUCIÓN DE CARGA</string>
+    <string name="exercise_analytics_module_label">ANÁLISIS POR EJERCICIO</string>
+
+    <!-- Workout history -->
+    <string name="history_screen_title">HISTORIAL</string>
+    <string name="sessions_suffix">SESIONES</string>
+    <string name="no_completed_exercises">Sin ejercicios completados</string>
+    <string name="empty_history_title">SIN HISTORIAL</string>
+    <string name="empty_history_subtitle">Completa tu primer entrenamiento\npara ver tu historial aquí.</string>
+    <string name="exercises_unit">ejercicios</string>
+
+    <!-- Exercise detail -->
+    <string name="exercise_detail_title">DETALLE</string>
+    <string name="pr_record_title">PR RÉCORD</string>
+    <string name="max_historical_label">MÁX. HISTÓRICO</string>
+    <string name="last_workout_card_title">ÚLTIMO ENTRENO</string>
+    <string name="last_session_label">ÚLTIMA SESIÓN</string>
+    <string name="sets_history_title">HISTORIAL DE SETS</string>
+
+    <!-- Welcome screen -->
+    <string name="btn_create_account">CREAR CUENTA</string>
+    <string name="btn_already_have_account">YA TENGO CUENTA</string>
+
+    <!-- Login screen -->
+    <string name="login_subtitle">INICIA SESIÓN</string>
+    <string name="email_label">EMAIL</string>
+    <string name="password_label">CONTRASEÑA</string>
+    <string name="forgot_password_btn">¿OLVIDASTE TU CONTRASEÑA?</string>
+    <string name="btn_login">INICIAR SESIÓN</string>
+    <string name="btn_google_login">CONTINUAR CON GOOGLE</string>
+    <string name="no_account_question">¿No tienes cuenta?</string>
+    <string name="btn_register">REGÍSTRATE</string>
+    <string name="forgot_password_title">RECUPERAR CONTRASEÑA</string>
+    <string name="forgot_password_instructions">Introduce tu correo y te enviaremos un enlace para restablecer tu contraseña.</string>
+    <string name="or_divider">O</string>
+
+    <!-- Register screen -->
+    <string name="create_account_title">CREAR CUENTA</string>
+    <string name="step_04_subtitle">PASO 04</string>
+    <string name="save_progress_title">GUARDA TU PROGRESO</string>
+    <string name="create_account_desc">Crea una cuenta para sincronizar tus datos en cualquier dispositivo.</string>
+    <string name="error_enter_email">Introduce tu correo</string>
+    <string name="error_invalid_email">El correo no es válido</string>
+    <string name="error_password_length">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="error_passwords_no_match">Las contraseñas no coinciden</string>
+
+    <!-- Identity screen -->
+    <string name="identity_title">IDENTIDAD</string>
+    <string name="step_02_subtitle">PASO 02</string>
+    <string name="configure_avatar_title">CONFIGURA TU AVATAR</string>
+    <string name="username_label">NOMBRE DE USUARIO</string>
+    <string name="username_placeholder">Alexander Vance</string>
+    <string name="biography_label">BIOGRAFÍA (OPCIONAL)</string>
+    <string name="biography_placeholder">Define tu filosofía…</string>
+
+    <!-- Metrics screen -->
+    <string name="metrics_title">PARÁMETROS</string>
+    <string name="step_03_subtitle">PASO 03</string>
+    <string name="body_metrics_title">MÉTRICAS CORPORALES</string>
+    <string name="metrics_description">Introduce tus datos de precisión para calibrar tu perfil de rendimiento.</string>
+    <string name="current_mass_label">MASA ACTUAL</string>
+    <string name="btn_finalize_setup">FINALIZAR CONFIGURACIÓN</string>
+
+    <!-- Email verification -->
+    <string name="verify_account_title">VERIFICA TU CUENTA</string>
+    <string name="verification_email_sent">Hemos enviado un enlace de verificación a:</string>
+    <string name="verification_instructions">Abre el enlace del correo y pulsa \"Ya lo verifiqué\" para continuar.</string>
+    <string name="btn_verified">YA LO VERIFIQUÉ</string>
+    <string name="btn_resend_email">REENVIAR CORREO</string>
+    <string name="resend_cooldown_label">REENVIAR EN %1$s</string>
+    <string name="use_another_account">Usar otra cuenta</string>
+
+    <!-- Workout settings -->
+    <string name="workout_settings_title">AJUSTES DE ENTRENAMIENTO</string>
+    <string name="rest_timer_section_title">TEMPORIZADOR DE DESCANSO</string>
+    <string name="show_timer_label">MOSTRAR TEMPORIZADOR</string>
+    <string name="rest_time_label">TIEMPO DE DESCANSO</string>
+    <string name="seconds_format">%1$ds</string>
+    <string name="alert_section_title">ALERTA AL FINALIZAR</string>
+    <string name="vibration_label">VIBRACIÓN</string>
+    <string name="sound_label">SONIDO</string>
+    <string name="current_config_label">CONFIGURACIÓN ACTUAL</string>
+    <string name="vibration_enabled_badge">· Vibración activada</string>
+    <string name="sound_enabled_badge">· Sonido activado</string>
+    <string name="visual_only_badge">· Solo visual</string>
+
+    <!-- Plate calculator -->
+    <string name="plate_calculator_title">CALCULADORA DE PLATOS</string>
+    <string name="target_weight_label">PESO OBJETIVO</string>
+    <string name="weight_placeholder">Ej: 100</string>
+    <string name="bar_weight_label">PESO DE LA BARRA</string>
+    <string name="no_bar_option">Sin barra</string>
+    <string name="available_plates_label">PLATOS DISPONIBLES</string>
+    <string name="plates_per_side_label">PLATOS POR LADO</string>
+    <string name="weight_below_bar_error">El peso objetivo es menor que la barra (%1$dkg).</string>
+    <string name="bar_only_message">Solo la barra: %1$dkg</string>
+    <string name="total_real_label">TOTAL REAL</string>
+
+    <!-- Session progress / Last session card -->
+    <string name="last_performance_title">ÚLTIMA SESIÓN</string>
+    <string name="progression_prefix">→</string>
+
+    <!-- Firebase -->
     <string name="default_web_client_id">322703265285-qke4qco28fmnp92utb5ob8l9sak16lkp.apps.googleusercontent.com</string>
 </resources>

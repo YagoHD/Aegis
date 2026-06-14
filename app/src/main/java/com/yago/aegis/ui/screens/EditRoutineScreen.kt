@@ -80,7 +80,7 @@ fun EditRoutineScreen(
     Scaffold(
         topBar = {
             AegisTopBar(
-                title = if (tempName.isBlank()) "NUEVA RUTINA" else tempName.uppercase(),
+                title = if (tempName.isBlank()) stringResource(R.string.new_routine_fallback_title) else tempName.uppercase(),
                 navigationIcon = {
                     IconButton(onClick = { onBackPressed() }) {
                         Icon(
@@ -141,7 +141,7 @@ fun EditRoutineScreen(
             item {
                 Column {
                     Text(
-                        text = stringResource(R.string.select_icon).uppercase(),
+                        text = stringResource(R.string.select_icon),
                         color = MaterialTheme.colorScheme.secondary,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Black,
@@ -268,8 +268,8 @@ fun EditRoutineScreen(
                     Icon(Icons.Default.Save, contentDescription = null)
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        if (isNewRoutine) "CREAR RUTINA"
-                        else stringResource(R.string.btn_save_routine).uppercase(),
+                        if (isNewRoutine) stringResource(R.string.btn_create_routine_label)
+                        else stringResource(R.string.btn_save_routine),
                         fontWeight = FontWeight.Black,
                         letterSpacing = 1.sp
                     )
@@ -339,7 +339,7 @@ private fun RoutineSlotCard(
                     )
                     if (hasVariants) {
                         Text(
-                            text = "+ ${slot.variants.size - 1} variante${if (slot.variants.size > 2) "s" else ""}",
+                            text = stringResource(R.string.variant_count_label, slot.variants.size - 1, if (slot.variants.size > 2) "s" else ""),
                             color = MaterialTheme.colorScheme.primary,
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Bold,
@@ -363,7 +363,7 @@ private fun RoutineSlotCard(
                     IconButton(onClick = onAddVariant, modifier = Modifier.size(36.dp)) {
                         Icon(
                             imageVector = Icons.Default.SwapHoriz,
-                            contentDescription = "Añadir variante",
+                            contentDescription = stringResource(R.string.add_variant_desc),
                             tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
                             modifier = Modifier.size(18.dp)
                         )
@@ -372,7 +372,7 @@ private fun RoutineSlotCard(
                     IconButton(onClick = onDeleteSlot, modifier = Modifier.size(36.dp)) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = "Eliminar",
+                            contentDescription = stringResource(R.string.content_desc_delete),
                             tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
                             modifier = Modifier.size(18.dp)
                         )
@@ -380,7 +380,7 @@ private fun RoutineSlotCard(
                     if (showReorderHandle) {
                         Icon(
                             imageVector = Icons.Default.DragHandle,
-                            contentDescription = "Reordenar",
+                            contentDescription = stringResource(R.string.content_desc_reorder),
                             tint = MaterialTheme.colorScheme.secondary,
                             modifier = dragHandleModifier
                                 .padding(start = 4.dp)
@@ -423,7 +423,7 @@ private fun RoutineSlotCard(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Close,
-                                contentDescription = "Eliminar variante",
+                                contentDescription = stringResource(R.string.delete_variant_desc),
                                 tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
                                 modifier = Modifier.size(14.dp)
                             )

@@ -16,9 +16,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yago.aegis.R
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.RoutineSelectionCard
 import com.yago.aegis.viewmodel.RoutinesViewModel
@@ -42,12 +44,12 @@ fun SelectRoutineScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             AegisTopBar(
-                title = "SELECCIONA TU MISIÓN",
+                title = stringResource(R.string.select_routine_title),
                 actions = {
                     IconButton(onClick = onNavigateToPlateCalculator) {
                         Icon(
                             imageVector = Icons.Default.Calculate,
-                            contentDescription = "Calculadora de platos",
+                            contentDescription = stringResource(R.string.plate_calculator_desc),
                             tint = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.size(22.dp)
                         )
@@ -73,14 +75,14 @@ fun SelectRoutineScreen(
                 ) {
                     Column {
                         Text(
-                            text = "TUS RUTINAS",
+                            text = stringResource(R.string.your_routines_label),
                             color = MaterialTheme.colorScheme.onBackground,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Black,
                             letterSpacing = 1.sp
                         )
                         Text(
-                            text = "${routines.size} RUTINAS A ELEGIR",
+                            text = "${routines.size} ${stringResource(R.string.routines_count_label)}",
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
@@ -102,7 +104,7 @@ fun SelectRoutineScreen(
                             Icon(Icons.Default.Add, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(14.dp))
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                "NUEVA",
+                                stringResource(R.string.new_routine_btn),
                                 color = MaterialTheme.colorScheme.primary,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Black
@@ -131,10 +133,11 @@ fun SelectRoutineScreen(
                     }
 
                     val isThisPaused = pausedRoutineName == safeRoutine.name
+                    val pausedBadge = stringResource(R.string.paused_session_badge)
                     RoutineSelectionCard(
                         routine = safeRoutine,
                         displayTags = routineTags,
-                        lastPerformedText = if (isThisPaused) "⏸ SESIÓN PAUSADA"
+                        lastPerformedText = if (isThisPaused) pausedBadge
                                            else workoutViewModel.calculateLastPerformed(safeRoutine.lastCompletedDates).uppercase(),
                         onStartClick = {
                             workoutViewModel.startWorkout(safeRoutine)
@@ -166,7 +169,7 @@ fun EmptyRoutinesPlaceholder() {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            "NO ACTIVE ROUTINES DETECTED",
+            stringResource(R.string.no_routines_message),
             color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,

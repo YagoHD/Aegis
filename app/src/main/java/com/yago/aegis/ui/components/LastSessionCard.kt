@@ -15,15 +15,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun LastSessionCard(lastSetsText: String) {
+fun LastSessionCard(lastSetsText: String, suggestion: String? = null) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            // Color de fondo ligeramente más profundo que la tarjeta principal
             .background(
                 color = MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
-                shape = RoundedCornerShape(4.dp) // Esquinas más técnicas
+                shape = RoundedCornerShape(4.dp)
             )
             .border(
                 width = 1.dp,
@@ -33,15 +32,12 @@ fun LastSessionCard(lastSetsText: String) {
             .padding(12.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            // Un pequeño indicador visual (como un LED de estado)
             Box(
                 modifier = Modifier
                     .size(6.dp)
                     .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(50))
             )
-
             Spacer(modifier = Modifier.width(8.dp))
-
             Text(
                 text = "ENTRENAMIENTO PREVIO",
                 color = MaterialTheme.colorScheme.primary,
@@ -55,14 +51,36 @@ fun LastSessionCard(lastSetsText: String) {
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        // El texto de las series con una fuente monoespaciada o técnica
         Text(
             text = if (lastSetsText.isEmpty()) "NO HAY DATOS" else lastSetsText,
-            color = if (lastSetsText.isEmpty()) MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f) else Color.White,
+            color = if (lastSetsText.isEmpty())
+                MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
+            else Color.White,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             letterSpacing = 0.5.sp,
             lineHeight = 20.sp
         )
+
+        // Sugerencia de progresión
+        if (suggestion != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "→",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Black
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = suggestion,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.3.sp
+                )
+            }
+        }
     }
 }

@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -47,6 +48,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
+import com.yago.aegis.R
 import com.yago.aegis.data.ExerciseSummary
 import com.yago.aegis.data.WorkoutSummary
 import kotlinx.coroutines.delay
@@ -58,18 +60,6 @@ import java.util.Date
 import java.util.Locale
 import kotlin.math.roundToInt
 
-private val motivationalQuotes = listOf(
-    "\"La disciplina es el puente entre metas y logros.\"",
-    "\"El dolor de hoy es la fuerza de mañana.\"",
-    "\"No pares cuando estés cansado. Para cuando hayas terminado.\"",
-    "\"Cada rep te acerca a quien quieres ser.\"",
-    "\"El único mal entrenamiento es el que no hiciste.\"",
-    "\"Forja tu disciplina. Construye tu legado.\"",
-    "\"El cuerpo logra lo que la mente cree.\"",
-    "\"Consistencia sobre intensidad. Siempre.\"",
-    "\"Los campeones se hacen cuando nadie mira.\"",
-    "\"Hoy superaste al de ayer. Eso es suficiente.\""
-)
 
 @Composable
 fun WorkoutCompleteScreen(
@@ -79,6 +69,18 @@ fun WorkoutCompleteScreen(
     onNavigateToHistory: () -> Unit = {}
 ) {
     val scrollState = rememberScrollState()
+    val motivationalQuotes = listOf(
+        stringResource(R.string.quote_1),
+        stringResource(R.string.quote_2),
+        stringResource(R.string.quote_3),
+        stringResource(R.string.quote_4),
+        stringResource(R.string.quote_5),
+        stringResource(R.string.quote_6),
+        stringResource(R.string.quote_7),
+        stringResource(R.string.quote_8),
+        stringResource(R.string.quote_9),
+        stringResource(R.string.quote_10)
+    )
     val quote = remember { motivationalQuotes.random() }
     var sessionNotes by remember { mutableStateOf("") }
     val context = LocalContext.current
@@ -152,7 +154,7 @@ fun WorkoutCompleteScreen(
 
             // ─── CABECERA ───
             Text(
-                text = "ENTRENAMIENTO\nCOMPLETADO",
+                text = stringResource(R.string.workout_complete_title),
                 fontSize = 42.sp,
                 fontWeight = FontWeight.Black,
                 fontStyle = FontStyle.Italic,
@@ -198,7 +200,7 @@ fun WorkoutCompleteScreen(
                         verticalAlignment = Alignment.Top
                     ) {
                         Text(
-                            text = "VOLUMEN TOTAL",
+                            text = stringResource(R.string.total_volume_label),
                             color = MaterialTheme.colorScheme.secondary,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Black,
@@ -235,7 +237,7 @@ fun WorkoutCompleteScreen(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "kg",
+                            text = stringResource(R.string.label_kg_lower),
                             color = MaterialTheme.colorScheme.secondary,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
@@ -265,7 +267,7 @@ fun WorkoutCompleteScreen(
                     if (previousVolume > 0) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Vs. ${formatVolume(previousVolume)} kg de la última sesión",
+                            text = stringResource(R.string.volume_comparison_label, formatVolume(previousVolume)),
                             color = MaterialTheme.colorScheme.secondary,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Medium
@@ -298,7 +300,7 @@ fun WorkoutCompleteScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "DURACION",
+                            text = stringResource(R.string.duration_label),
                             color = MaterialTheme.colorScheme.secondary,
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Black,
@@ -331,7 +333,7 @@ fun WorkoutCompleteScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "EJERCICIOS",
+                            text = stringResource(R.string.exercises_label),
                             color = MaterialTheme.colorScheme.secondary,
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Black,
@@ -356,7 +358,7 @@ fun WorkoutCompleteScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "EJERCICIOS COMPLETADOS",
+                    text = stringResource(R.string.completed_exercises_section),
                     color = MaterialTheme.colorScheme.secondary,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Black,
@@ -375,7 +377,7 @@ fun WorkoutCompleteScreen(
 
             // ─── SHARE CARD ───
             Text(
-                text = "COMPARTIR",
+                text = stringResource(R.string.share_section_label),
                 modifier = Modifier.fillMaxWidth(),
                 color = MaterialTheme.colorScheme.secondary,
                 fontSize = 10.sp,
@@ -420,7 +422,7 @@ fun WorkoutCompleteScreen(
                 Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = "COMPARTIR ENTRENAMIENTO",
+                    text = stringResource(R.string.btn_share_workout),
                     fontWeight = FontWeight.Black,
                     fontSize = 13.sp,
                     letterSpacing = 1.sp
@@ -435,7 +437,7 @@ fun WorkoutCompleteScreen(
                 onValueChange = { sessionNotes = it },
                 placeholder = {
                     Text(
-                        "¿Cómo fue el entrenamiento? Añade una nota...",
+                        stringResource(R.string.session_notes_placeholder),
                         color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f),
                         fontSize = 13.sp,
                         fontStyle = FontStyle.Italic
@@ -487,7 +489,7 @@ fun WorkoutCompleteScreen(
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = "VER HISTORIAL COMPLETO",
+                    text = stringResource(R.string.view_full_history),
                     color = MaterialTheme.colorScheme.secondary,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Black,
@@ -510,7 +512,7 @@ fun WorkoutCompleteScreen(
                 )
             ) {
                 Text(
-                    text = "FINALIZAR SESION",
+                    text = stringResource(R.string.btn_finish_session),
                     fontWeight = FontWeight.Black,
                     fontSize = 15.sp,
                     letterSpacing = 2.sp
@@ -556,17 +558,18 @@ private fun PRCelebrationBanner(prExercises: List<ExerciseSummary>, borderAlpha:
             Spacer(modifier = Modifier.width(14.dp))
             Column {
                 Text(
-                    text = "¡NUEVO RÉCORD!",
+                    text = stringResource(R.string.new_pr_title),
                     color = gold,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Black,
                     letterSpacing = 1.sp
                 )
                 Spacer(modifier = Modifier.height(2.dp))
+                val multiplePrLabel = stringResource(R.string.multiple_pr_label)
                 val subtitle = when {
                     prExercises.isEmpty() -> ""
                     prExercises.size == 1 -> prExercises.first().name.uppercase()
-                    else -> "${prExercises.size} nuevos récords personales"
+                    else -> "${prExercises.size} $multiplePrLabel"
                 }
                 if (subtitle.isNotEmpty()) {
                     Text(
@@ -679,7 +682,7 @@ private fun WorkoutShareCard(summary: WorkoutSummary, previousVolume: Double = 0
         }
         Spacer(modifier = Modifier.height(3.dp))
         Text(
-            text = "Entrenamiento completado",
+            text = stringResource(R.string.share_card_subtitle),
             color = ShareBronze.copy(alpha = 0.7f),
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium
@@ -789,7 +792,7 @@ private fun WorkoutShareCard(summary: WorkoutSummary, previousVolume: Double = 0
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Entrenado con AEGIS",
+                text = stringResource(R.string.trained_with_label),
                 color = ShareBronze.copy(alpha = 0.45f),
                 fontSize = 10.sp,
                 letterSpacing = 0.5.sp
@@ -804,7 +807,7 @@ private fun WorkoutShareCard(summary: WorkoutSummary, previousVolume: Double = 0
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "NUEVO PR",
+                        text = stringResource(R.string.new_pr_badge),
                         color = ShareAccent,
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Black,
@@ -939,7 +942,7 @@ private fun shareWorkoutBitmap(context: Context, bitmap: Bitmap) {
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "image/png"
             putExtra(Intent.EXTRA_STREAM, uri)
-            putExtra(Intent.EXTRA_TEXT, "Entrenamiento completado 💪 #Aegis")
+            putExtra(Intent.EXTRA_TEXT, context.getString(R.string.share_intent_text))
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         context.startActivity(Intent.createChooser(intent, "Compartir entrenamiento"))
@@ -952,10 +955,11 @@ private fun shareWorkoutBitmap(context: Context, bitmap: Bitmap) {
 // HELPERS
 // ─────────────────────────────────────────────
 
+@Composable
 private fun buildExerciseSubtitle(exercise: ExerciseSummary): String {
     val setsText = "${exercise.sets} sets"
     return if (exercise.isBodyweight) {
-        "$setsText · Bodyweight"
+        "$setsText · ${stringResource(R.string.bodyweight_label)}"
     } else if (exercise.maxWeight > 0) {
         val avgFormatted = if (exercise.avgWeight % 1 == 0.0) "${exercise.avgWeight.toInt()}" else "%.1f".format(exercise.avgWeight)
         val maxFormatted = if (exercise.maxWeight % 1 == 0.0) "${exercise.maxWeight.toInt()}" else "%.1f".format(exercise.maxWeight)
