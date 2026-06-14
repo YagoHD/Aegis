@@ -360,4 +360,37 @@
     <!-- Session progress / Last session card -->
     <string name="last_performance_title">LAST SESSION</string>
     <string name="progression_prefix">→</string>
+
+    <!-- Last performed (select routine) -->
+    <string name="last_performed_never">Never performed</string>
+    <string name="last_performed_today">Last: Today</string>
+    <string name="last_performed_yesterday">Last: Yesterday</string>
+    <string name="last_performed_days_ago">Last: %1$d days ago</string>
+
+    <!-- Auth messages &amp; errors -->
+    <string name="auth_msg_password_updated">Password updated successfully</string>
+    <string name="auth_msg_reset_sent">Email sent. Check your inbox.</string>
+    <string name="auth_msg_verification_not_detected">We haven\'t detected the verification yet. Check your inbox.</string>
+    <string name="auth_error_unknown">Something went wrong. Please try again.</string>
+    <string name="auth_error_email_in_use">This email is already registered</string>
+    <string name="auth_error_no_account">No account exists with this email</string>
+    <string name="auth_error_wrong_password">Incorrect password</string>
+    <string name="auth_error_invalid_email_format">The email format is not valid</string>
+    <string name="auth_error_weak_password">Password must be at least 6 characters</string>
+    <string name="auth_error_network">Connection error. Check your internet</string>
+    <string name="auth_error_recent_login">For security, please sign in again before continuing</string>
+    <string name="auth_error_no_session">No active session</string>
+    <string name="auth_error_no_email">Email not found</string>
+    <string name="email_fallback">your email</string>
+
+    <!-- Account deletion -->
+    <string name="delete_account_label">DELETE ACCOUNT</string>
+    <string name="delete_account_dialog_title">DELETE ACCOUNT</string>
+    <string name="delete_account_warning">This action is permanent. Your account and all your data (routines, exercises, history and metrics) will be deleted. This cannot be undone.</string>
+    <string name="delete_account_google_note">Confirm to delete your Google account and all your data.</string>
+    <string name="delete_account_confirm">DELETE PERMANENTLY</string>
+
+    <!-- Privacy policy -->
+    <string name="privacy_policy_label">PRIVACY POLICY</string>
+    <string name="privacy_policy_title">PRIVACY POLICY</string>
 </resources>

@@ -3,7 +3,14 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
+
+// Única fuente de verdad de la versión. Sube solo estos tres números por release;
+// versionCode se deriva automáticamente y siempre crece de forma monótona.
+val versionMajor = 1
+val versionMinor = 0
+val versionPatch = 0
 
 android {
     namespace = "com.yago.aegis"
@@ -15,8 +22,8 @@ android {
         applicationId = "com.yago.aegis"
         minSdk = 33
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = versionMajor * 10000 + versionMinor * 100 + versionPatch
+        versionName = "$versionMajor.$versionMinor.$versionPatch"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -71,6 +78,7 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.firebase:firebase-crashlytics")
 
     // Google Sign-In
     implementation("com.google.android.gms:play-services-auth:21.2.0")

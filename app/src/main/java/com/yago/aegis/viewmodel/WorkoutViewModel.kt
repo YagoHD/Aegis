@@ -1,8 +1,11 @@
 package com.yago.aegis.viewmodel
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.yago.aegis.R
 import com.yago.aegis.data.ExerciseProgress
 import com.yago.aegis.data.ExerciseSet
 import com.yago.aegis.data.Routine
@@ -24,7 +27,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
-class WorkoutViewModel(private val repository: UserRepository) : ViewModel() {
+class WorkoutViewModel(
+    application: Application,
+    private val repository: UserRepository
+) : AndroidViewModel(application) {
 
     private val _activeSession = MutableStateFlow<WorkoutSession?>(null)
     val activeSession: StateFlow<WorkoutSession?> = _activeSession.asStateFlow()
@@ -357,21 +363,25 @@ class WorkoutViewModel(private val repository: UserRepository) : ViewModel() {
     }
 
     fun calculateLastPerformed(dates: List<Long>?): String {
-        val safeDates = dates ?: return "Never performed"
-        if (safeDates.isEmpty()) return "Never performed"
+        val ctx = getApplication<Application>()
+        val safeDates = dates ?: return ctx.getString(R.string.last_performed_never)
+        if (safeDates.isEmpty()) return ctx.getString(R.string.last_performed_never)
         val diffInDays = TimeUnit.MILLISECONDS.toDays(System.currentTimeMillis() - safeDates.last())
         return when {
-            diffInDays < 1L -> "Last performed: Today"
-            diffInDays == 1L -> "Last performed: Yesterday"
-            else -> "Last performed: $diffInDays days ago"
+            diffInDays < 1L -> ctx.getString(R.string.last_performed_today)
+            diffInDays == 1L -> ctx.getString(R.string.last_performed_yesterday)
+            else -> ctx.getString(R.string.last_performed_days_ago, diffInDays.toInt())
         }
     }
 
-    class Factory(private val repository: UserRepository) : ViewModelProvider.Factory {
+    class Factory(
+        private val application: Application,
+        private val repository: UserRepository
+    ) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(WorkoutViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
-                return WorkoutViewModel(repository) as T
+                return WorkoutViewModel(application, repository) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")
         }

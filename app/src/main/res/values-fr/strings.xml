@@ -360,4 +360,37 @@
     <!-- Session progress / Last session card -->
     <string name="last_performance_title">DERNIÈRE SÉANCE</string>
     <string name="progression_prefix">→</string>
+
+    <!-- Last performed (select routine) -->
+    <string name="last_performed_never">Jamais réalisée</string>
+    <string name="last_performed_today">Dernière fois : Aujourd\'hui</string>
+    <string name="last_performed_yesterday">Dernière fois : Hier</string>
+    <string name="last_performed_days_ago">Dernière fois : il y a %1$d jours</string>
+
+    <!-- Auth messages &amp; errors -->
+    <string name="auth_msg_password_updated">Mot de passe mis à jour</string>
+    <string name="auth_msg_reset_sent">E-mail envoyé. Vérifiez votre boîte de réception.</string>
+    <string name="auth_msg_verification_not_detected">Nous n\'avons pas encore détecté la vérification. Vérifiez votre boîte de réception.</string>
+    <string name="auth_error_unknown">Une erreur s\'est produite. Réessayez.</string>
+    <string name="auth_error_email_in_use">Cet e-mail est déjà enregistré</string>
+    <string name="auth_error_no_account">Aucun compte n\'existe avec cet e-mail</string>
+    <string name="auth_error_wrong_password">Mot de passe incorrect</string>
+    <string name="auth_error_invalid_email_format">Le format de l\'e-mail n\'est pas valide</string>
+    <string name="auth_error_weak_password">Le mot de passe doit comporter au moins 6 caractères</string>
+    <string name="auth_error_network">Erreur de connexion. Vérifiez votre Internet</string>
+    <string name="auth_error_recent_login">Pour des raisons de sécurité, reconnectez-vous avant de continuer</string>
+    <string name="auth_error_no_session">Aucune session active</string>
+    <string name="auth_error_no_email">E-mail introuvable</string>
+    <string name="email_fallback">votre adresse e-mail</string>
+
+    <!-- Account deletion -->
+    <string name="delete_account_label">SUPPRIMER LE COMPTE</string>
+    <string name="delete_account_dialog_title">SUPPRIMER LE COMPTE</string>
+    <string name="delete_account_warning">Cette action est permanente. Votre compte et toutes vos données (programmes, exercices, historique et mesures) seront supprimés. Cette action est irréversible.</string>
+    <string name="delete_account_google_note">Confirmez pour supprimer votre compte Google et toutes vos données.</string>
+    <string name="delete_account_confirm">SUPPRIMER DÉFINITIVEMENT</string>
+
+    <!-- Privacy policy -->
+    <string name="privacy_policy_label">POLITIQUE DE CONFIDENTIALITÉ</string>
+    <string name="privacy_policy_title">POLITIQUE DE CONFIDENTIALITÉ</string>
 </resources>

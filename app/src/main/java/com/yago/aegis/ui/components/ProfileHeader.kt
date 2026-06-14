@@ -109,7 +109,7 @@ fun ProfileHeader(
                 )
             }
 
-            if (currentStreak >= 2) {
+            if (currentStreak >= 1) {
                 Surface(
                     color = MaterialTheme.colorScheme.error.copy(alpha = 0.12f),
                     shape = RoundedCornerShape(4.dp)

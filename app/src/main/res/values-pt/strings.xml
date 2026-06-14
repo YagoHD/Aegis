@@ -360,4 +360,37 @@
     <!-- Session progress / Last session card -->
     <string name="last_performance_title">ÚLTIMA SESSÃO</string>
     <string name="progression_prefix">→</string>
+
+    <!-- Last performed (select routine) -->
+    <string name="last_performed_never">Nunca realizada</string>
+    <string name="last_performed_today">Última vez: Hoje</string>
+    <string name="last_performed_yesterday">Última vez: Ontem</string>
+    <string name="last_performed_days_ago">Última vez: há %1$d dias</string>
+
+    <!-- Auth messages &amp; errors -->
+    <string name="auth_msg_password_updated">Palavra-passe atualizada com sucesso</string>
+    <string name="auth_msg_reset_sent">Email enviado. Verifica a tua caixa de entrada.</string>
+    <string name="auth_msg_verification_not_detected">Ainda não detetámos a verificação. Verifica a tua caixa de entrada.</string>
+    <string name="auth_error_unknown">Ocorreu um erro. Tenta novamente.</string>
+    <string name="auth_error_email_in_use">Este email já está registado</string>
+    <string name="auth_error_no_account">Não existe uma conta com este email</string>
+    <string name="auth_error_wrong_password">Palavra-passe incorreta</string>
+    <string name="auth_error_invalid_email_format">O formato do email não é válido</string>
+    <string name="auth_error_weak_password">A palavra-passe deve ter pelo menos 6 caracteres</string>
+    <string name="auth_error_network">Erro de ligação. Verifica a tua internet</string>
+    <string name="auth_error_recent_login">Por segurança, inicia sessão novamente antes de continuar</string>
+    <string name="auth_error_no_session">Sem sessão ativa</string>
+    <string name="auth_error_no_email">Email não encontrado</string>
+    <string name="email_fallback">o teu email</string>
+
+    <!-- Account deletion -->
+    <string name="delete_account_label">ELIMINAR CONTA</string>
+    <string name="delete_account_dialog_title">ELIMINAR CONTA</string>
+    <string name="delete_account_warning">Esta ação é permanente. A tua conta e todos os teus dados (rotinas, exercícios, histórico e medidas) serão eliminados. Não pode ser desfeita.</string>
+    <string name="delete_account_google_note">Confirma para eliminar a tua conta Google e todos os teus dados.</string>
+    <string name="delete_account_confirm">ELIMINAR DEFINITIVAMENTE</string>
+
+    <!-- Privacy policy -->
+    <string name="privacy_policy_label">POLÍTICA DE PRIVACIDADE</string>
+    <string name="privacy_policy_title">POLÍTICA DE PRIVACIDADE</string>
 </resources>

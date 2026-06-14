@@ -361,6 +361,39 @@
     <string name="last_performance_title">ÚLTIMA SESIÓN</string>
     <string name="progression_prefix">→</string>
 
+    <!-- Last performed (select routine) -->
+    <string name="last_performed_never">Nunca realizada</string>
+    <string name="last_performed_today">Última vez: Hoy</string>
+    <string name="last_performed_yesterday">Última vez: Ayer</string>
+    <string name="last_performed_days_ago">Última vez: hace %1$d días</string>
+
+    <!-- Auth messages &amp; errors -->
+    <string name="auth_msg_password_updated">Contraseña actualizada correctamente</string>
+    <string name="auth_msg_reset_sent">Email enviado. Revisa tu bandeja de entrada.</string>
+    <string name="auth_msg_verification_not_detected">Todavía no hemos detectado la verificación. Revisa tu bandeja de entrada.</string>
+    <string name="auth_error_unknown">Ha ocurrido un error. Inténtalo de nuevo.</string>
+    <string name="auth_error_email_in_use">Este correo ya está registrado</string>
+    <string name="auth_error_no_account">No existe una cuenta con este correo</string>
+    <string name="auth_error_wrong_password">Contraseña incorrecta</string>
+    <string name="auth_error_invalid_email_format">El correo no tiene un formato válido</string>
+    <string name="auth_error_weak_password">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="auth_error_network">Error de conexión. Comprueba tu internet</string>
+    <string name="auth_error_recent_login">Por seguridad, vuelve a iniciar sesión antes de continuar</string>
+    <string name="auth_error_no_session">No hay sesión activa</string>
+    <string name="auth_error_no_email">No se encontró el email</string>
+    <string name="email_fallback">tu correo electrónico</string>
+
+    <!-- Account deletion -->
+    <string name="delete_account_label">BORRAR CUENTA</string>
+    <string name="delete_account_dialog_title">BORRAR CUENTA</string>
+    <string name="delete_account_warning">Esta acción es permanente. Se borrarán tu cuenta y todos tus datos (rutinas, ejercicios, historial y métricas). No se puede deshacer.</string>
+    <string name="delete_account_google_note">Confirma para borrar tu cuenta de Google y todos tus datos.</string>
+    <string name="delete_account_confirm">BORRAR DEFINITIVAMENTE</string>
+
+    <!-- Privacy policy -->
+    <string name="privacy_policy_label">POLÍTICA DE PRIVACIDAD</string>
+    <string name="privacy_policy_title">POLÍTICA DE PRIVACIDAD</string>
+
     <!-- Firebase -->
     <string name="default_web_client_id">322703265285-qke4qco28fmnp92utb5ob8l9sak16lkp.apps.googleusercontent.com</string>
 </resources>

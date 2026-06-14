@@ -43,24 +43,23 @@ class StatsViewModel(private val repository: UserRepository) : ViewModel() {
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     // Disciplina semanal: (sesiones esta semana, objetivo)
+    // Usa semana de calendario (lunes 00:00) — misma definición que el volumen semanal.
     val weeklyDiscipline: Flow<Pair<Int, Int>> = combine(
         workoutHistory,
         repository.targetDaysPerWeek
     ) { history, target ->
-        val calendar = Calendar.getInstance()
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
-        calendar.set(Calendar.HOUR_OF_DAY, 0)
-        val startOfWeek = calendar.timeInMillis
+        val startOfWeek = startOfWeekMillis(0)
         val sessionsThisWeek = history.count { it.date >= startOfWeek }
         Pair(sessionsThisWeek, target)
     }
 
-    // Volumen semanal y comparativa con semana anterior
+    // Volumen semanal y comparativa con la semana anterior.
+    // Misma ventana lunes–domingo que la disciplina, para que ambos números cuadren.
     val weeklyVolumeStats: Flow<Pair<Double, Double>> = workoutHistory.map { history ->
-        val now = System.currentTimeMillis()
-        val oneWeekMs = 7 * 24 * 60 * 60 * 1000L
-        val thisWeekVol = history.filter { it.date >= (now - oneWeekMs) }.sumOf { calculateVolume(it) }
-        val lastWeekVol = history.filter { it.date in (now - 2 * oneWeekMs)..(now - oneWeekMs) }.sumOf { calculateVolume(it) }
+        val startOfThisWeek = startOfWeekMillis(0)
+        val startOfLastWeek = startOfWeekMillis(1)
+        val thisWeekVol = history.filter { it.date >= startOfThisWeek }.sumOf { calculateVolume(it) }
+        val lastWeekVol = history.filter { it.date in startOfLastWeek until startOfThisWeek }.sumOf { calculateVolume(it) }
         val diff = if (lastWeekVol > 0) ((thisWeekVol - lastWeekVol) / lastWeekVol) * 100 else 0.0
         Pair(thisWeekVol, diff)
     }
@@ -153,6 +152,20 @@ class StatsViewModel(private val repository: UserRepository) : ViewModel() {
         return session.exercisesProgress.sumOf { prog ->
             prog.sets.filter { it.isCompleted }.sumOf { it.weight * it.reps }
         }
+    }
+
+    // Inicio (lunes 00:00:00) de la semana actual menos [weeksAgo] semanas, en millis.
+    private fun startOfWeekMillis(weeksAgo: Int): Long {
+        val cal = Calendar.getInstance().apply {
+            firstDayOfWeek = Calendar.MONDAY
+            set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+            add(Calendar.WEEK_OF_YEAR, -weeksAgo)
+        }
+        return cal.timeInMillis
     }
 
     class Factory(private val repository: UserRepository) : ViewModelProvider.Factory {

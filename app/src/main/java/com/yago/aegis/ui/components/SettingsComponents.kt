@@ -14,9 +14,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -46,7 +48,9 @@ import kotlinx.coroutines.launch
 fun SettingsMenu(
     viewModel: ProfileViewModel,
     authViewModel: AuthViewModel? = null,
-    onLogout: (() -> Unit)? = null
+    onLogout: (() -> Unit)? = null,
+    onAccountDeleted: (() -> Unit)? = null,
+    onNavigateToPrivacy: (() -> Unit)? = null
 ) {
     val state by viewModel.uiState.collectAsState()
     val user = state.user
@@ -60,6 +64,7 @@ fun SettingsMenu(
     // Estados para diálogos
     var showChangePasswordDialog by remember { mutableStateOf(false) }
     var showLogoutDialog by remember { mutableStateOf(false) }
+    var showDeleteAccountDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val avatarLauncher = rememberLauncherForActivityResult(
@@ -78,6 +83,18 @@ fun SettingsMenu(
         ChangePasswordDialog(
             authViewModel = authViewModel,
             onDismiss = { showChangePasswordDialog = false }
+        )
+    }
+
+    // Diálogo de borrado de cuenta
+    if (showDeleteAccountDialog && authViewModel != null) {
+        DeleteAccountDialog(
+            authViewModel = authViewModel,
+            onDismiss = { showDeleteAccountDialog = false },
+            onDeleted = {
+                showDeleteAccountDialog = false
+                onAccountDeleted?.invoke()
+            }
         )
     }
 
@@ -211,6 +228,44 @@ fun SettingsMenu(
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(stringResource(R.string.logout_label), color = MaterialTheme.colorScheme.error, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     }
+                    HorizontalDivider(color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f))
+
+                    // Borrar cuenta (requisito de Google Play)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showDeleteAccountDialog = true }
+                            .padding(vertical = 14.dp, horizontal = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Default.DeleteForever, null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(stringResource(R.string.delete_account_label), color = MaterialTheme.colorScheme.error, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                        Text("›", color = MaterialTheme.colorScheme.secondary, fontSize = 18.sp)
+                    }
+                }
+            }
+
+            VerticalDividerSection()
+        }
+
+        // --- POLÍTICA DE PRIVACIDAD ---
+        if (onNavigateToPrivacy != null) {
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onNavigateToPrivacy() }
+                        .padding(vertical = 14.dp, horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Default.PrivacyTip, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(stringResource(R.string.privacy_policy_label), color = MaterialTheme.colorScheme.onBackground, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                    Text("›", color = MaterialTheme.colorScheme.secondary, fontSize = 18.sp)
                 }
             }
 
@@ -450,6 +505,102 @@ fun ChangePasswordDialog(
                 TextButton(onClick = { onDismiss(); authViewModel.clearState() }) {
                     Text(stringResource(R.string.btn_cancel), color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
                 }
+            }
+        }
+    )
+}
+
+@Composable
+fun DeleteAccountDialog(
+    authViewModel: AuthViewModel,
+    onDismiss: () -> Unit,
+    onDeleted: () -> Unit
+) {
+    val uiState by authViewModel.uiState.collectAsState()
+    val isEmailProvider = authViewModel.isEmailProvider
+    var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = { onDismiss(); authViewModel.clearState() },
+        containerColor = MaterialTheme.colorScheme.surface,
+        title = {
+            Text(
+                stringResource(R.string.delete_account_dialog_title),
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 1.sp
+            )
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    stringResource(R.string.delete_account_warning),
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 13.sp,
+                    lineHeight = 19.sp
+                )
+                if (isEmailProvider) {
+                    OutlinedTextField(
+                        value = password,
+                        onValueChange = { password = it },
+                        label = { Text(stringResource(R.string.password_label), fontSize = 11.sp) },
+                        leadingIcon = { Icon(Icons.Default.Lock, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(18.dp)) },
+                        trailingIcon = {
+                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                Icon(if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(18.dp))
+                            }
+                        },
+                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.background,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.background,
+                            focusedBorderColor = MaterialTheme.colorScheme.error,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
+                            focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                            cursorColor = MaterialTheme.colorScheme.error,
+                            focusedLabelColor = MaterialTheme.colorScheme.error,
+                            unfocusedLabelColor = MaterialTheme.colorScheme.secondary
+                        )
+                    )
+                } else {
+                    Text(
+                        stringResource(R.string.delete_account_google_note),
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontSize = 12.sp
+                    )
+                }
+                if (uiState.errorMessage != null) {
+                    Text(uiState.errorMessage!!, color = MaterialTheme.colorScheme.error, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    authViewModel.deleteAccount(
+                        currentPassword = if (isEmailProvider) password else null,
+                        onDeleted = onDeleted
+                    )
+                },
+                enabled = !uiState.isLoading && (!isEmailProvider || password.isNotBlank())
+            ) {
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.size(16.dp), color = MaterialTheme.colorScheme.error, strokeWidth = 2.dp)
+                } else {
+                    Text(stringResource(R.string.delete_account_confirm), color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Black)
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { onDismiss(); authViewModel.clearState() }) {
+                Text(stringResource(R.string.btn_cancel), color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
             }
         }
     )

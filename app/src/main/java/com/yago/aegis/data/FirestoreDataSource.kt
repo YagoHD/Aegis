@@ -214,4 +214,20 @@ class FirestoreDataSource {
             doc?.exists() == true
         } catch (e: Exception) { false }
     }
+
+    // ─────────────────────────────────────────────
+    // BORRADO DE CUENTA (RGPD / requisito de Google Play)
+    // ─────────────────────────────────────────────
+
+    /** Borra todos los documentos de datos del usuario en Firestore. */
+    suspend fun deleteAllUserData() {
+        val uid = userId ?: return
+        val collections = listOf("profile", "routines", "exercises", "history", "tags", "settings")
+        for (c in collections) {
+            runCatching {
+                db.collection("users").document(uid)
+                    .collection("data").document(c).delete().await()
+            }
+        }
+    }
 }

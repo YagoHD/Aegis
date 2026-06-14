@@ -360,4 +360,37 @@
     <!-- Session progress / Last session card -->
     <string name="last_performance_title">ULTIMA SESSIONE</string>
     <string name="progression_prefix">→</string>
+
+    <!-- Last performed (select routine) -->
+    <string name="last_performed_never">Mai eseguita</string>
+    <string name="last_performed_today">Ultima volta: Oggi</string>
+    <string name="last_performed_yesterday">Ultima volta: Ieri</string>
+    <string name="last_performed_days_ago">Ultima volta: %1$d giorni fa</string>
+
+    <!-- Auth messages &amp; errors -->
+    <string name="auth_msg_password_updated">Password aggiornata correttamente</string>
+    <string name="auth_msg_reset_sent">Email inviata. Controlla la posta in arrivo.</string>
+    <string name="auth_msg_verification_not_detected">Non abbiamo ancora rilevato la verifica. Controlla la posta in arrivo.</string>
+    <string name="auth_error_unknown">Si è verificato un errore. Riprova.</string>
+    <string name="auth_error_email_in_use">Questa email è già registrata</string>
+    <string name="auth_error_no_account">Non esiste un account con questa email</string>
+    <string name="auth_error_wrong_password">Password errata</string>
+    <string name="auth_error_invalid_email_format">Il formato dell\'email non è valido</string>
+    <string name="auth_error_weak_password">La password deve avere almeno 6 caratteri</string>
+    <string name="auth_error_network">Errore di connessione. Controlla la tua connessione</string>
+    <string name="auth_error_recent_login">Per sicurezza, accedi di nuovo prima di continuare</string>
+    <string name="auth_error_no_session">Nessuna sessione attiva</string>
+    <string name="auth_error_no_email">Email non trovata</string>
+    <string name="email_fallback">la tua email</string>
+
+    <!-- Account deletion -->
+    <string name="delete_account_label">ELIMINA ACCOUNT</string>
+    <string name="delete_account_dialog_title">ELIMINA ACCOUNT</string>
+    <string name="delete_account_warning">Questa azione è permanente. Il tuo account e tutti i tuoi dati (schede, esercizi, cronologia e misure) verranno eliminati. Non può essere annullata.</string>
+    <string name="delete_account_google_note">Conferma per eliminare il tuo account Google e tutti i tuoi dati.</string>
+    <string name="delete_account_confirm">ELIMINA DEFINITIVAMENTE</string>
+
+    <!-- Privacy policy -->
+    <string name="privacy_policy_label">INFORMATIVA SULLA PRIVACY</string>
+    <string name="privacy_policy_title">INFORMATIVA SULLA PRIVACY</string>
 </resources>

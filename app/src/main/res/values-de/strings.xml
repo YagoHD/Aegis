@@ -360,4 +360,37 @@
     <!-- Session progress / Last session card -->
     <string name="last_performance_title">LETZTE EINHEIT</string>
     <string name="progression_prefix">→</string>
+
+    <!-- Last performed (select routine) -->
+    <string name="last_performed_never">Nie ausgeführt</string>
+    <string name="last_performed_today">Zuletzt: Heute</string>
+    <string name="last_performed_yesterday">Zuletzt: Gestern</string>
+    <string name="last_performed_days_ago">Zuletzt: vor %1$d Tagen</string>
+
+    <!-- Auth messages &amp; errors -->
+    <string name="auth_msg_password_updated">Passwort erfolgreich aktualisiert</string>
+    <string name="auth_msg_reset_sent">E-Mail gesendet. Überprüfe deinen Posteingang.</string>
+    <string name="auth_msg_verification_not_detected">Wir haben die Verifizierung noch nicht erkannt. Überprüfe deinen Posteingang.</string>
+    <string name="auth_error_unknown">Ein Fehler ist aufgetreten. Versuche es erneut.</string>
+    <string name="auth_error_email_in_use">Diese E-Mail ist bereits registriert</string>
+    <string name="auth_error_no_account">Es existiert kein Konto mit dieser E-Mail</string>
+    <string name="auth_error_wrong_password">Falsches Passwort</string>
+    <string name="auth_error_invalid_email_format">Das E-Mail-Format ist ungültig</string>
+    <string name="auth_error_weak_password">Das Passwort muss mindestens 6 Zeichen haben</string>
+    <string name="auth_error_network">Verbindungsfehler. Überprüfe dein Internet</string>
+    <string name="auth_error_recent_login">Melde dich aus Sicherheitsgründen erneut an, bevor du fortfährst</string>
+    <string name="auth_error_no_session">Keine aktive Sitzung</string>
+    <string name="auth_error_no_email">E-Mail nicht gefunden</string>
+    <string name="email_fallback">deine E-Mail</string>
+
+    <!-- Account deletion -->
+    <string name="delete_account_label">KONTO LÖSCHEN</string>
+    <string name="delete_account_dialog_title">KONTO LÖSCHEN</string>
+    <string name="delete_account_warning">Diese Aktion ist dauerhaft. Dein Konto und alle deine Daten (Trainingspläne, Übungen, Verlauf und Maße) werden gelöscht. Dies kann nicht rückgängig gemacht werden.</string>
+    <string name="delete_account_google_note">Bestätige, um dein Google-Konto und alle deine Daten zu löschen.</string>
+    <string name="delete_account_confirm">ENDGÜLTIG LÖSCHEN</string>
+
+    <!-- Privacy policy -->
+    <string name="privacy_policy_label">DATENSCHUTZERKLÄRUNG</string>
+    <string name="privacy_policy_title">DATENSCHUTZERKLÄRUNG</string>
 </resources>

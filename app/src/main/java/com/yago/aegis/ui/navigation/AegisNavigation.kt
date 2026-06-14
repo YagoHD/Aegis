@@ -14,12 +14,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material3.Scaffold
+import android.app.Application
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -81,7 +83,8 @@ fun AegisNavigation(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val onboardingCompleted by profileViewModel.onboardingCompleted.collectAsState(initial = null)
-    val authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory(authRepository, userRepository))
+    val application = LocalContext.current.applicationContext as Application
+    val authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory(application, authRepository, userRepository))
 
     if (onboardingCompleted == null) {
         Box(modifier = Modifier.fillMaxSize().background(Color.Black))
@@ -117,7 +120,8 @@ fun AegisNavigation(
             currentRoute != "workout_settings" &&
             currentRoute != "workout_complete" &&
             currentRoute != "workout_history" &&
-            currentRoute != "plate_calculator"
+            currentRoute != "plate_calculator" &&
+            currentRoute != "privacy_policy"
 
     Scaffold(
         bottomBar = { if (showBottomBar) AegisBottomBar(navController) }
@@ -299,8 +303,12 @@ fun AegisNavigation(
                     authViewModel = authViewModel,
                     onLogout = {
                         authViewModel.logout()
-                        // La navegación la gestiona el LaunchedEffect(isLoggedIn)
-                    }
+                        navController.navigate("welcome") { popUpTo(0) { inclusive = true } }
+                    },
+                    onAccountDeleted = {
+                        navController.navigate("welcome") { popUpTo(0) { inclusive = true } }
+                    },
+                    onNavigateToPrivacy = { navController.navigate("privacy_policy") }
                 )
             }
 
@@ -474,6 +482,14 @@ fun AegisNavigation(
                     viewModel = plateCalculatorViewModel,
                     onBack = { navController.popBackStack() }
                 )
+            }
+
+            composable(
+                route = "privacy_policy",
+                enterTransition = pushEnter, exitTransition = pushExit,
+                popEnterTransition = pushPopEnter, popExitTransition = pushPopExit
+            ) {
+                PrivacyPolicyScreen(onBack = { navController.popBackStack() })
             }
         }
     }

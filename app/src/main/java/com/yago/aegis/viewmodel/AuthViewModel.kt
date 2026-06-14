@@ -1,9 +1,12 @@
 package com.yago.aegis.viewmodel
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.yago.aegis.R
 import com.yago.aegis.data.AuthResult
 import com.yago.aegis.data.FirebaseAuthRepository
 import com.yago.aegis.data.SimpleResult
@@ -22,12 +25,16 @@ data class AuthUiState(
 )
 
 class AuthViewModel(
+    application: Application,
     private val authRepository: FirebaseAuthRepository,
     private val userRepository: UserRepository
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
+
+    // Resuelve un ID de recurso al idioma activo del dispositivo.
+    private fun str(resId: Int): String = getApplication<Application>().getString(resId)
 
     // StateFlow reactivo — Navigation lo observa para recalcular startDest
     private val _isLoggedIn = MutableStateFlow(authRepository.isLoggedIn)
@@ -46,7 +53,7 @@ class AuthViewModel(
                     _isLoggedIn.value = true
                     _uiState.value = AuthUiState(needsEmailVerification = true)
                 }
-                is AuthResult.Error -> _uiState.value = AuthUiState(errorMessage = result.message)
+                is AuthResult.Error -> _uiState.value = AuthUiState(errorMessage = str(result.messageRes))
             }
         }
     }
@@ -66,7 +73,7 @@ class AuthViewModel(
                         _uiState.value = AuthUiState(isSuccess = true)
                     }
                 }
-                is AuthResult.Error -> _uiState.value = AuthUiState(errorMessage = result.message)
+                is AuthResult.Error -> _uiState.value = AuthUiState(errorMessage = str(result.messageRes))
             }
         }
     }
@@ -80,7 +87,7 @@ class AuthViewModel(
                     _isLoggedIn.value = true
                     _uiState.value = AuthUiState(isSuccess = true)
                 }
-                is AuthResult.Error -> _uiState.value = AuthUiState(errorMessage = result.message)
+                is AuthResult.Error -> _uiState.value = AuthUiState(errorMessage = str(result.messageRes))
             }
         }
     }
@@ -89,8 +96,30 @@ class AuthViewModel(
         viewModelScope.launch {
             _uiState.value = AuthUiState(isLoading = true)
             when (val result = authRepository.changePassword(currentPassword, newPassword)) {
-                is SimpleResult.Success -> _uiState.value = AuthUiState(successMessage = "Contraseña actualizada correctamente")
-                is SimpleResult.Error -> _uiState.value = AuthUiState(errorMessage = result.message)
+                is SimpleResult.Success -> _uiState.value = AuthUiState(successMessage = str(R.string.auth_msg_password_updated))
+                is SimpleResult.Error -> _uiState.value = AuthUiState(errorMessage = str(result.messageRes))
+            }
+        }
+    }
+
+    /**
+     * Borra la cuenta y todos los datos (nube + local) de forma permanente.
+     * El borrado en Firestore ocurre tras reautenticar y antes de eliminar la cuenta.
+     */
+    fun deleteAccount(currentPassword: String?, onDeleted: () -> Unit) {
+        viewModelScope.launch {
+            _uiState.value = AuthUiState(isLoading = true)
+            val result = authRepository.deleteAccount(currentPassword) {
+                userRepository.deleteCloudData()
+            }
+            when (result) {
+                is SimpleResult.Success -> {
+                    userRepository.clearLocalData()
+                    _isLoggedIn.value = false
+                    _uiState.value = AuthUiState()
+                    onDeleted()
+                }
+                is SimpleResult.Error -> _uiState.value = AuthUiState(errorMessage = str(result.messageRes))
             }
         }
     }
@@ -99,8 +128,8 @@ class AuthViewModel(
         viewModelScope.launch {
             _uiState.value = AuthUiState(isLoading = true)
             when (val result = authRepository.sendPasswordResetEmail(email)) {
-                is SimpleResult.Success -> _uiState.value = AuthUiState(successMessage = "Email enviado. Revisa tu bandeja de entrada.")
-                is SimpleResult.Error -> _uiState.value = AuthUiState(errorMessage = result.message)
+                is SimpleResult.Success -> _uiState.value = AuthUiState(successMessage = str(R.string.auth_msg_reset_sent))
+                is SimpleResult.Error -> _uiState.value = AuthUiState(errorMessage = str(result.messageRes))
             }
         }
     }
@@ -121,7 +150,7 @@ class AuthViewModel(
             } else {
                 _uiState.value = AuthUiState(
                     needsEmailVerification = true,
-                    errorMessage = "Todavía no hemos detectado la verificación. Revisa tu bandeja de entrada."
+                    errorMessage = str(R.string.auth_msg_verification_not_detected)
                 )
             }
         }
@@ -141,13 +170,14 @@ class AuthViewModel(
     }
 
     class Factory(
+        private val application: Application,
         private val authRepository: FirebaseAuthRepository,
         private val userRepository: UserRepository
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(AuthViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
-                return AuthViewModel(authRepository, userRepository) as T
+                return AuthViewModel(application, authRepository, userRepository) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")
         }

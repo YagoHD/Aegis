@@ -109,24 +109,47 @@ class UserRepository(
     }
 
     /**
-     * Calcula la racha de días consecutivos de entrenamiento desde el historial.
-     * Si el usuario ya entrenó hoy la cuenta; si no, arranca desde ayer.
+     * Racha de SEMANAS consecutivas cumpliendo el objetivo semanal de entrenamientos.
+     *
+     * El descanso es parte del entrenamiento: castigar los días libres (racha por días
+     * consecutivos) es contraproducente en una app de gym. En su lugar contamos semanas
+     * (lunes–domingo) en las que se alcanzó [targetDaysPerWeek]. La semana en curso, si
+     * aún no llega al objetivo, no rompe la racha — empezamos a contar desde la anterior.
      */
     suspend fun computeCurrentStreak(): Int {
         val sessions = settingsStore.workoutHistory.first()
         if (sessions.isEmpty()) return 0
+        val target = settingsStore.targetDaysPerWeek.first().coerceAtLeast(1)
+
+        val zone = java.time.ZoneId.systemDefault()
         val trainingDays = sessions
-            .map { java.time.Instant.ofEpochMilli(it.date)
-                .atZone(java.time.ZoneId.systemDefault()).toLocalDate() }
+            .map { java.time.Instant.ofEpochMilli(it.date).atZone(zone).toLocalDate() }
             .toSet()
-        var checkDay = java.time.LocalDate.now()
-        if (!trainingDays.contains(checkDay)) checkDay = checkDay.minusDays(1)
+
+        fun daysTrainedInWeek(monday: java.time.LocalDate): Int {
+            val sunday = monday.plusDays(6)
+            return trainingDays.count { !it.isBefore(monday) && !it.isAfter(sunday) }
+        }
+
+        // Lunes de la semana actual
+        var weekStart = java.time.LocalDate.now()
+            .with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+
+        // Si la semana en curso aún no cumple el objetivo, no rompe la racha:
+        // arrancamos el conteo desde la semana pasada.
+        if (daysTrainedInWeek(weekStart) < target) weekStart = weekStart.minusWeeks(1)
+
         var streak = 0
-        while (trainingDays.contains(checkDay)) {
+        while (daysTrainedInWeek(weekStart) >= target) {
             streak++
-            checkDay = checkDay.minusDays(1)
+            weekStart = weekStart.minusWeeks(1)
         }
         return streak
+    }
+
+    /** Borra todos los datos del usuario en Firestore (para borrado de cuenta). */
+    suspend fun deleteCloudData() {
+        runCatching { firestore.deleteAllUserData() }
     }
 
     suspend fun toggleBMI(enabled: Boolean) {

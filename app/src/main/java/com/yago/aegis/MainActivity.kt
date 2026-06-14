@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
         RoutinesViewModel.Factory(userRepository)
     }
     private val workoutViewModel: WorkoutViewModel by viewModels {
-        WorkoutViewModel.Factory(userRepository)
+        WorkoutViewModel.Factory(application, userRepository)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

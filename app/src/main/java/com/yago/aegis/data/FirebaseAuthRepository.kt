@@ -5,16 +5,19 @@ import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
+import com.yago.aegis.R
 import kotlinx.coroutines.tasks.await
 
+// Los errores cargan un ID de recurso (Int), no un String. El ViewModel lo
+// resuelve al idioma del dispositivo. Así nada de auth queda hardcodeado.
 sealed class AuthResult {
     data class Success(val user: FirebaseUser) : AuthResult()
-    data class Error(val message: String) : AuthResult()
+    data class Error(val messageRes: Int) : AuthResult()
 }
 
 sealed class SimpleResult {
     object Success : SimpleResult()
-    data class Error(val message: String) : SimpleResult()
+    data class Error(val messageRes: Int) : SimpleResult()
 }
 
 class FirebaseAuthRepository {
@@ -40,7 +43,7 @@ class FirebaseAuthRepository {
 
     suspend fun sendVerificationEmail(): SimpleResult {
         return try {
-            val user = auth.currentUser ?: return SimpleResult.Error("No hay sesión activa")
+            val user = auth.currentUser ?: return SimpleResult.Error(R.string.auth_error_no_session)
             user.sendEmailVerification().await()
             SimpleResult.Success
         } catch (e: Exception) {
@@ -79,12 +82,38 @@ class FirebaseAuthRepository {
     // Cambia la contraseña (requiere reautenticación con la contraseña actual)
     suspend fun changePassword(currentPassword: String, newPassword: String): SimpleResult {
         return try {
-            val user = auth.currentUser ?: return SimpleResult.Error("No hay sesión activa")
-            val email = user.email ?: return SimpleResult.Error("No se encontró el email")
+            val user = auth.currentUser ?: return SimpleResult.Error(R.string.auth_error_no_session)
+            val email = user.email ?: return SimpleResult.Error(R.string.auth_error_no_email)
             // Reautenticamos antes de cambiar la contraseña
             val credential = EmailAuthProvider.getCredential(email, currentPassword)
             user.reauthenticate(credential).await()
             user.updatePassword(newPassword).await()
+            SimpleResult.Success
+        } catch (e: Exception) {
+            SimpleResult.Error(friendlyError(e.message))
+        }
+    }
+
+    /**
+     * Borra la cuenta del usuario de forma permanente.
+     * Para usuarios de email reautentica con la contraseña antes de borrar.
+     * [onReauthenticated] se ejecuta tras reautenticar y ANTES de borrar la cuenta,
+     * para poder limpiar Firestore mientras la sesión sigue siendo válida.
+     */
+    suspend fun deleteAccount(
+        currentPassword: String?,
+        onReauthenticated: suspend () -> Unit
+    ): SimpleResult {
+        return try {
+            val user = auth.currentUser ?: return SimpleResult.Error(R.string.auth_error_no_session)
+            if (isEmailProvider && currentPassword != null) {
+                val email = user.email ?: return SimpleResult.Error(R.string.auth_error_no_email)
+                val credential = EmailAuthProvider.getCredential(email, currentPassword)
+                user.reauthenticate(credential).await()
+            }
+            // Borra los datos en la nube mientras seguimos autenticados
+            onReauthenticated()
+            user.delete().await()
             SimpleResult.Success
         } catch (e: Exception) {
             SimpleResult.Error(friendlyError(e.message))
@@ -105,17 +134,18 @@ class FirebaseAuthRepository {
         auth.signOut()
     }
 
-    private fun friendlyError(message: String?): String {
+    // Devuelve un ID de recurso de string; el ViewModel lo resuelve al idioma activo.
+    private fun friendlyError(message: String?): Int {
         return when {
-            message == null -> "Error desconocido"
-            message.contains("email address is already in use") -> "Este correo ya está registrado"
-            message.contains("no user record") -> "No existe una cuenta con este correo"
-            message.contains("password is invalid") || message.contains("wrong-password") -> "Contraseña incorrecta"
-            message.contains("badly formatted") -> "El correo no tiene un formato válido"
-            message.contains("weak-password") -> "La contraseña debe tener al menos 6 caracteres"
-            message.contains("network") -> "Error de conexión. Comprueba tu internet"
-            message.contains("requires-recent-login") -> "Por seguridad, vuelve a iniciar sesión antes de cambiar la contraseña"
-            else -> "Error: $message"
+            message == null -> R.string.auth_error_unknown
+            message.contains("email address is already in use") -> R.string.auth_error_email_in_use
+            message.contains("no user record") -> R.string.auth_error_no_account
+            message.contains("password is invalid") || message.contains("wrong-password") -> R.string.auth_error_wrong_password
+            message.contains("badly formatted") -> R.string.auth_error_invalid_email_format
+            message.contains("weak-password") -> R.string.auth_error_weak_password
+            message.contains("network") -> R.string.auth_error_network
+            message.contains("requires-recent-login") -> R.string.auth_error_recent_login
+            else -> R.string.auth_error_unknown
         }
     }
 }
