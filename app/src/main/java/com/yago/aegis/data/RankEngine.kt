@@ -67,6 +67,9 @@ object RankEngine {
                 val ex = libraryById[prog.exercise.id]
                     ?: libraryByName[normalize(prog.exercise.name)]
                     ?: prog.exercise
+                // ANTI-TRAMPAS: solo puntúan los ejercicios BASE (canónicos de la app).
+                // Los creados por el usuario no cuentan, aunque lleven etiquetas o %.
+                if (DefaultExercises.BASE_TAG !in (ex.tags ?: emptyList())) continue
                 val name = normalize(ex.name)
                 for (set in prog.sets) {
                     if (!set.isCompleted) continue

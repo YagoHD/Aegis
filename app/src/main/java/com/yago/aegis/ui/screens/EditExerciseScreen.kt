@@ -22,12 +22,10 @@ import androidx.compose.ui.unit.sp
 import com.yago.aegis.R
 import com.yago.aegis.data.DefaultExercises
 import com.yago.aegis.data.Exercise
-import com.yago.aegis.data.MuscleContribution
 import com.yago.aegis.data.globalExerciseIcons
 import com.yago.aegis.ui.components.AegisAlertDialog
 import com.yago.aegis.ui.components.AegisTagManager
 import com.yago.aegis.ui.components.AegisTopBar
-import com.yago.aegis.ui.components.CompetitiveMusclesEditor
 import com.yago.aegis.viewmodel.RoutinesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -45,11 +43,6 @@ fun EditExerciseScreen(
     var selectedIconName by remember { mutableStateOf(exerciseToEdit?.iconName ?: "dumbbell") }
     var notes by remember { mutableStateOf(exerciseToEdit?.notes ?: "") }
     var isBodyweight by remember { mutableStateOf(exerciseToEdit?.isBodyweight ?: false) }
-    val contributions = remember {
-        mutableStateListOf<MuscleContribution>().apply {
-            exerciseToEdit?.muscleContributions?.let { addAll(it) }
-        }
-    }
 
     val savedGlobalTags by routinesViewModel.globalTags.collectAsState()
     var showTagDialog by remember { mutableStateOf(false) }
@@ -122,7 +115,7 @@ fun EditExerciseScreen(
                             oneRepMax = exerciseToEdit?.oneRepMax ?: 0.0,
                             bestSet = exerciseToEdit?.bestSet,
                             history = exerciseToEdit?.history ?: emptyList(),
-                            muscleContributions = contributions.toList()
+                            muscleContributions = exerciseToEdit?.muscleContributions ?: emptyList()
                         )
                         routinesViewModel.saveOrUpdateExercise(updatedExercise)
                         onNavigateBack()
@@ -271,14 +264,6 @@ fun EditExerciseScreen(
                         )
                     }
                 }
-            }
-
-            // 4. MÚSCULOS COMPETITIVOS (★) — para que el ejercicio cuente en el Panteón
-            item {
-                CompetitiveMusclesEditor(
-                    value = contributions.toList(),
-                    onChange = { contributions.clear(); contributions.addAll(it) }
-                )
             }
 
             item { Spacer(modifier = Modifier.height(100.dp)) }
