@@ -70,3 +70,16 @@ enum class MuscleSubgroup(val display: String, val group: MuscleGroup) {
 
 /** True si una etiqueta es competitiva (empieza por ★). */
 fun String.isCompetitiveTag(): Boolean = startsWith(COMPETITIVE_TAG_PREFIX)
+
+/**
+ * Cuánto contribuye un ejercicio a un subgrupo muscular (eje de VOLUMEN del Panteón).
+ * [muscle] guarda el nombre del enum (ej. "PECHO_MEDIO") para ser robusto ante Gson:
+ * un valor desconocido simplemente no resuelve, no rompe el parseo de toda la librería.
+ * La suma de percent de un ejercicio debería rondar 100.
+ */
+data class MuscleContribution(
+    val muscle: String = "",
+    val percent: Int = 0
+) {
+    val subgroup: MuscleSubgroup? get() = MuscleSubgroup.entries.find { it.name == muscle }
+}
