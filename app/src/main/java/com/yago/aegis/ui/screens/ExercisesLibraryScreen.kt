@@ -29,6 +29,7 @@ import com.yago.aegis.data.Exercise
 import com.yago.aegis.ui.components.AegisAlertDialog
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.ExerciseCard
+import com.yago.aegis.ui.components.RoutinesExercisesToggle
 import com.yago.aegis.ui.components.TagFilterRow
 import com.yago.aegis.viewmodel.RoutinesViewModel
 
@@ -37,7 +38,8 @@ import com.yago.aegis.viewmodel.RoutinesViewModel
 fun ExercisesLibraryScreen(
     routinesViewModel: RoutinesViewModel,
     onNavigateToCreate: () -> Unit,
-    onNavigateToEdit: (String) -> Unit
+    onNavigateToEdit: (String) -> Unit,
+    onNavigateToRoutines: () -> Unit = {}
 ) {
     var exerciseToDelete by remember { mutableStateOf<Exercise?>(null) }
     var showLoadDefaultsDialog by remember { mutableStateOf(false) }
@@ -111,6 +113,14 @@ fun ExercisesLibraryScreen(
                 .padding(horizontal = 20.dp)
         ) {
             Spacer(modifier = Modifier.height(16.dp))
+
+            RoutinesExercisesToggle(
+                isRoutines = false,
+                onSelectRoutines = onNavigateToRoutines,
+                onSelectExercises = { }
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
 
             // ─── FILA DE BOTONES ───
             Row(

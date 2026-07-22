@@ -50,6 +50,7 @@ import com.yago.aegis.data.globalExerciseIcons
 import com.yago.aegis.ui.components.AegisAlertDialog
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.RoutineCard
+import com.yago.aegis.ui.components.RoutinesExercisesToggle
 import com.yago.aegis.viewmodel.RoutinesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -58,6 +59,7 @@ fun RoutineScreen(
     routinesViewModel: RoutinesViewModel,
     onNavigateToEditRoutine: (Int) -> Unit,
     onNavigateToNewRoutine: (Int) -> Unit = onNavigateToEditRoutine,
+    onNavigateToExercises: () -> Unit = {},
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var textState by remember { mutableStateOf("") }
@@ -162,6 +164,14 @@ fun RoutineScreen(
                 .padding(paddingValues)
                 .padding(horizontal = 24.dp) // Padding lateral de lujo
         ) {
+            Spacer(modifier = Modifier.height(12.dp))
+
+            RoutinesExercisesToggle(
+                isRoutines = true,
+                onSelectRoutines = { },
+                onSelectExercises = onNavigateToExercises
+            )
+
             Spacer(modifier = Modifier.height(16.dp))
 
             LazyColumn(

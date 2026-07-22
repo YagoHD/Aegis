@@ -402,6 +402,11 @@
     <string name="session_empty_hint">Adiciona o teu primeiro exercício para começar</string>
     <string name="already_added_label">ADICIONADO</string>
     <string name="create_exercise_named">CRIAR «%1$s»</string>
+    <string name="nav_panteon">Panteão</string>
+    <string name="coming_soon">EM BREVE</string>
+    <string name="sex_label">SEXO</string>
+    <string name="sex_male">HOMEM</string>
+    <string name="sex_female">MULHER</string>
 
     <!-- Active session lock -->
     <string name="active_session_lock_title">SESSÃO EM CURSO</string>

@@ -15,4 +15,5 @@ sealed class Screen(
     object Ejercicios : Screen("Ejercicios", R.string.nav_exercices, Icons.Default.FitnessCenter)
     object Profile : Screen("profile", R.string.nav_profile, Icons.Default.Person)
     object Train: Screen("train", R.string.nav_train, Icons.Default.Bolt)
+    object Panteon : Screen("panteon", R.string.nav_panteon, Icons.Default.MilitaryTech)
 }

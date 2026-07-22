@@ -174,6 +174,18 @@ fun SettingsMenu(
             modifier = Modifier.fillMaxWidth()
         )
 
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = stringResource(R.string.sex_label),
+            color = MaterialTheme.colorScheme.secondary,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 1.5.sp
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        SexSelector(selected = user.sex, onSelect = { viewModel.updateSex(it) })
+
         VerticalDividerSection()
 
         // --- SECCIÓN CUENTA (solo si hay authViewModel) ---

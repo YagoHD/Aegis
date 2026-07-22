@@ -26,7 +26,7 @@ import com.yago.aegis.data.Screen
 @Composable
 fun AegisBottomBar(navController: NavHostController) {
     val leftItems = listOf(Screen.Stats, Screen.Routine)
-    val rightItems = listOf(Screen.Ejercicios, Screen.Profile)
+    val rightItems = listOf(Screen.Panteon, Screen.Profile)
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -97,7 +97,9 @@ fun RowScope.AegisNavItem(
     navController: NavHostController
 ) {
     val labelText = stringResource(screen.labelRes)
-    val isSelected = currentRoute == screen.route
+    // Rutinas también se resalta cuando estás en la librería (ejercicios vive dentro).
+    val isSelected = currentRoute == screen.route ||
+            (screen == Screen.Routine && currentRoute == "ejercicios")
 
     NavigationBarItem(
         selected = isSelected,

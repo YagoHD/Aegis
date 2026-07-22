@@ -6,7 +6,8 @@
       "PowerShell($adb = \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\"; if \\(Test-Path $adb\\) { & $adb devices } else { Write-Output \"adb no encontrado en $adb\"; if \\(Get-Command adb -ErrorAction SilentlyContinue\\) { adb devices } else { Write-Output \"adb tampoco esta en PATH\" } })",
       "Bash(git commit -m ' *)",
       "PowerShell($adb = \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\"; & $adb devices)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git push *)"
     ]
   }
 }

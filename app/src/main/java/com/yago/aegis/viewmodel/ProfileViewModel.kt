@@ -105,6 +105,13 @@ class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
             }
         }
 
+        // Grupo 4b: sexo (para estándares del Panteón)
+        viewModelScope.launch {
+            repository.sex.collect { s ->
+                _uiState.update { it.copy(user = it.user.copy(sex = s)) }
+            }
+        }
+
         // Grupo 5: historial corporal + fotos
         viewModelScope.launch {
             repository.bodyHistory.collect { history ->
@@ -142,6 +149,10 @@ class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
 
     fun updateBodyFat(newFat: String) {
         viewModelScope.launch { repository.updateBodyFat(newFat) }
+    }
+
+    fun updateSex(value: String) {
+        viewModelScope.launch { repository.updateSex(value) }
     }
 
     fun updateHeight(newHeight: Double) {

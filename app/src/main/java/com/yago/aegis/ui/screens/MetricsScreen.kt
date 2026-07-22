@@ -19,15 +19,17 @@ import com.yago.aegis.R
 import com.yago.aegis.ui.components.AegisStepProgress
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.MetricInput
+import com.yago.aegis.ui.components.SexSelector
 
 
 @Composable
 fun MetricsScreen(
-    onComplete: (Double, String) -> Unit,
+    onComplete: (Double, String, String) -> Unit,
     onBack: () -> Unit
 ) {
     var height by remember { mutableStateOf("") }
     var mass by remember { mutableStateOf("") }
+    var sex by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -94,16 +96,29 @@ fun MetricsScreen(
             icon = Icons.Default.MonitorWeight
         )
 
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // --- SEXO (para estándares del Panteón) ---
+        Text(
+            text = stringResource(R.string.sex_label),
+            color = MaterialTheme.colorScheme.secondary,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 1.5.sp
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        SexSelector(selected = sex, onSelect = { sex = it })
+
         // El Spacer con weight empuja el botón al final sin necesidad de scroll
         Spacer(modifier = Modifier.weight(1f))
 
         // --- 4. BOTÓN DE FINALIZACIÓN (10% Bronce) ---
-        val isEnabled = height.isNotEmpty() && mass.isNotEmpty()
+        val isEnabled = height.isNotEmpty() && mass.isNotEmpty() && sex.isNotEmpty()
 
         Button(
             onClick = {
                 val h = height.toDoubleOrNull() ?: 0.0
-                if (h > 0.0 && mass.isNotEmpty()) onComplete(h, mass)
+                if (h > 0.0 && mass.isNotEmpty() && sex.isNotEmpty()) onComplete(h, mass, sex)
             },
             enabled = isEnabled,
             modifier = Modifier

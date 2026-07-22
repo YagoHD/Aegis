@@ -22,6 +22,7 @@ class UserRepository(
     val currentMass = settingsStore.currentMass
     val height = settingsStore.height
     val bodyFat = settingsStore.bodyFat
+    val sex = settingsStore.sex
     val customMeasures = settingsStore.customMeasures
     val basePhotoUri = settingsStore.basePhotoUri
     val basePhotoDate = settingsStore.basePhotoDate
@@ -70,6 +71,9 @@ class UserRepository(
         settingsStore.saveBodyFat(fat)
         syncProfileToCloud()
     }
+
+    // El sexo se guarda local por ahora; se añadirá al sync en la nube con el motor del Panteón.
+    suspend fun updateSex(value: String) = settingsStore.saveSex(value)
 
     suspend fun updateDisciplineDay(days: Int) {
         settingsStore.saveDisciplineDay(days)

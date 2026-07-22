@@ -26,6 +26,7 @@ class SettingsStore(private val context: Context) {
         val CURRENT_MASS = stringPreferencesKey("current_mass")
         val HEIGHT = doublePreferencesKey("height")
         val BODY_FAT = stringPreferencesKey("body_fat")
+        val SEX = stringPreferencesKey("sex")
         val CUSTOM_MEASURES = stringPreferencesKey("custom_measures")
         val BASE_PHOTO_URI = stringPreferencesKey("base_photo_uri")
         val ACTUAL_PHOTO_URI = stringPreferencesKey("actual_photo_uri")
@@ -64,6 +65,7 @@ class SettingsStore(private val context: Context) {
     val currentMass: Flow<String> = context.dataStore.data.map { it[CURRENT_MASS] ?: "0.0" }
     val height: Flow<Double> = context.dataStore.data.map { it[HEIGHT] ?: 0.0 }
     val bodyFat: Flow<String> = context.dataStore.data.map { it[BODY_FAT] ?: "0.0" }
+    val sex: Flow<String> = context.dataStore.data.map { it[SEX] ?: "UNSPECIFIED" }
     val basePhotoUri: Flow<String?> = context.dataStore.data.map { it[BASE_PHOTO_URI] }
     val actualPhotoUri: Flow<String?> = context.dataStore.data.map { it[ACTUAL_PHOTO_URI] }
     val basePhotoDate: Flow<String?> = context.dataStore.data.map { it[BASE_PHOTO_DATE] }
@@ -182,6 +184,10 @@ class SettingsStore(private val context: Context) {
 
     suspend fun saveBodyFat(fat: String) {
         context.dataStore.edit { it[BODY_FAT] = fat }
+    }
+
+    suspend fun saveSex(value: String) {
+        context.dataStore.edit { it[SEX] = value }
     }
     suspend fun saveOnboardingCompleted(completed: Boolean) {
         context.dataStore.edit { it[ONBOARDING_COMPLETED] = completed }

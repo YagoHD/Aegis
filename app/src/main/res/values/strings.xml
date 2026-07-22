@@ -409,6 +409,15 @@
     <string name="cancel_active_session_btn">CANCELAR SESIÓN</string>
     <string name="locked_label">BLOQUEADO</string>
 
+    <!-- Panteón (competitivo) -->
+    <string name="nav_panteon">Panteón</string>
+    <string name="coming_soon">PRÓXIMAMENTE</string>
+
+    <!-- Sexo (para estándares del Panteón) -->
+    <string name="sex_label">SEXO</string>
+    <string name="sex_male">HOMBRE</string>
+    <string name="sex_female">MUJER</string>
+
     <!-- Firebase -->
     <string name="default_web_client_id">322703265285-qke4qco28fmnp92utb5ob8l9sak16lkp.apps.googleusercontent.com</string>
 </resources>

@@ -42,7 +42,7 @@ import com.yago.aegis.viewmodel.RoutinesViewModel
 import com.yago.aegis.viewmodel.StatsViewModel
 import com.yago.aegis.viewmodel.WorkoutViewModel
 
-private val TAB_ROUTES = listOf("stats", "routine", "train", "ejercicios", "profile")
+private val TAB_ROUTES = listOf("stats", "routine", "train", "panteon", "profile")
 
 private val tabEnter: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
     val from = TAB_ROUTES.indexOf(initialState.destination.route)
@@ -175,9 +175,10 @@ fun AegisNavigation(
             }
             composable("metrics") {
                 MetricsScreen(
-                    onComplete = { height, mass ->
+                    onComplete = { height, mass, sex ->
                         profileViewModel.updateHeight(height)
                         profileViewModel.updateMass(mass)
+                        profileViewModel.updateSex(sex)
                         profileViewModel.completeOnboarding()
                         navController.navigate("register") {
                             popUpTo("welcome") { inclusive = false }
@@ -227,7 +228,14 @@ fun AegisNavigation(
                 RoutineScreen(
                     routinesViewModel = routinesViewModel,
                     onNavigateToEditRoutine = { id -> navController.navigate("edit_routine/$id") },
-                    onNavigateToNewRoutine = { id -> navController.navigate("edit_routine/$id?isNew=true") }
+                    onNavigateToNewRoutine = { id -> navController.navigate("edit_routine/$id?isNew=true") },
+                    onNavigateToExercises = {
+                        navController.navigate("ejercicios") {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
                 )
             }
 
@@ -281,8 +289,25 @@ fun AegisNavigation(
                 ExercisesLibraryScreen(
                     routinesViewModel = routinesViewModel,
                     onNavigateToCreate = { navController.navigate("create_exercise") },
-                    onNavigateToEdit = { exerciseName -> navController.navigate("edit_exercise/$exerciseName") }
+                    onNavigateToEdit = { exerciseName -> navController.navigate("edit_exercise/$exerciseName") },
+                    onNavigateToRoutines = {
+                        navController.navigate("routine") {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
                 )
+            }
+
+            composable(
+                route = "panteon",
+                enterTransition = tabEnter,
+                exitTransition = tabExit,
+                popEnterTransition = tabEnter,
+                popExitTransition = tabExit
+            ) {
+                PanteonScreen()
             }
             composable(
                 route = "exercise_detail/{exerciseId}",
