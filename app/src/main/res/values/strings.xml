@@ -418,6 +418,23 @@
     <string name="sex_male">HOMBRE</string>
     <string name="sex_female">MUJER</string>
 
+    <!-- Panteón: editor de músculos competitivos (en ejercicio) -->
+    <string name="competitive_muscles_title">MÚSCULOS (COMPETITIVO)</string>
+    <string name="competitive_muscles_hint">Marca los músculos que trabaja y su %. Cuenta para el Panteón; suma ~100.</string>
+    <string name="add_muscle_btn">AÑADIR MÚSCULO</string>
+    <string name="total_percent_label">TOTAL %1$d%%</string>
+
+    <!-- Panteón: pantalla -->
+    <string name="panteon_my_ranks">MIS RANGOS</string>
+    <string name="panteon_friends">AMIGOS</string>
+    <string name="panteon_league">LIGA</string>
+    <string name="panteon_subtitle">ÚLTIMOS 30 DÍAS</string>
+    <string name="highest_rank_label">RANGO MÁS ALTO</string>
+    <string name="to_improve_label">A MEJORAR</string>
+    <string name="panteon_empty">Completa entrenamientos para forjar tus rangos</string>
+    <string name="body_map_soon">MAPA CORPORAL PRÓXIMAMENTE</string>
+    <string name="next_tier_short">PRÓX.</string>
+
     <!-- Firebase -->
     <string name="default_web_client_id">322703265285-qke4qco28fmnp92utb5ob8l9sak16lkp.apps.googleusercontent.com</string>
 </resources>

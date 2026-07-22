@@ -36,6 +36,7 @@ import com.yago.aegis.ui.components.AegisBottomBar
 import com.yago.aegis.ui.components.SettingsMenu
 import com.yago.aegis.ui.screens.*
 import com.yago.aegis.viewmodel.AuthViewModel
+import com.yago.aegis.viewmodel.PanteonViewModel
 import com.yago.aegis.viewmodel.PlateCalculatorViewModel
 import com.yago.aegis.viewmodel.ProfileViewModel
 import com.yago.aegis.viewmodel.RoutinesViewModel
@@ -113,6 +114,7 @@ fun AegisNavigation(
     }
     val sharedStatsViewModel: StatsViewModel = viewModel(factory = StatsViewModel.Factory(userRepository))
     val plateCalculatorViewModel: PlateCalculatorViewModel = viewModel(factory = PlateCalculatorViewModel.Factory(userRepository))
+    val panteonViewModel: PanteonViewModel = viewModel(factory = PanteonViewModel.Factory(userRepository))
 
     val showBottomBar = currentRoute != "settings" &&
             !onboardingRoutes.contains(currentRoute) &&
@@ -307,7 +309,7 @@ fun AegisNavigation(
                 popEnterTransition = tabEnter,
                 popExitTransition = tabExit
             ) {
-                PanteonScreen()
+                PanteonScreen(viewModel = panteonViewModel)
             }
             composable(
                 route = "exercise_detail/{exerciseId}",
