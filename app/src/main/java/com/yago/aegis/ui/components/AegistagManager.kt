@@ -24,8 +24,9 @@ fun AegisTagManager(
     allTags: List<String>,
     selectedTags: Set<String>,
     onTagClick: (String) -> Unit,
-    onAddClick: () -> Unit,
-    onRemoveSelectedClick: () -> Unit,
+    onAddClick: () -> Unit = {},
+    onRemoveSelectedClick: () -> Unit = {},
+    allowEdit: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     val hasSelection = selectedTags.isNotEmpty()
@@ -39,38 +40,39 @@ fun AegisTagManager(
             // Usamos el estilo de cabecera que definimos para Settings
             SectionHeader(text = stringResource(R.string.tags_title))
 
-            Spacer(modifier = Modifier.weight(1f))
+            // Los tags son canónicos y fijos: solo se muestran los botones de
+            // añadir/eliminar si explícitamente se permite editar.
+            if (allowEdit) {
+                Spacer(modifier = Modifier.weight(1f))
 
-            // Botón Eliminar Seleccionados
-            // Solo brilla en color "error" si hay algo que borrar
-            IconButton(
-                onClick = onRemoveSelectedClick,
-                modifier = Modifier.size(28.dp),
-                enabled = hasSelection
-            ) {
-                Icon(
-                    imageVector = Icons.Default.RemoveCircleOutline,
-                    contentDescription = "Eliminar seleccionados",
-                    tint = if (hasSelection)
-                        MaterialTheme.colorScheme.error
-                    else MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+                IconButton(
+                    onClick = onRemoveSelectedClick,
+                    modifier = Modifier.size(28.dp),
+                    enabled = hasSelection
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.RemoveCircleOutline,
+                        contentDescription = "Eliminar seleccionados",
+                        tint = if (hasSelection)
+                            MaterialTheme.colorScheme.error
+                        else MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
 
-            Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(8.dp))
 
-            // Botón Añadir (Bronce Aegis)
-            IconButton(
-                onClick = onAddClick,
-                modifier = Modifier.size(28.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.AddCircleOutline,
-                    contentDescription = "Añadir nuevo",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(22.dp)
-                )
+                IconButton(
+                    onClick = onAddClick,
+                    modifier = Modifier.size(28.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AddCircleOutline,
+                        contentDescription = "Añadir nuevo",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
             }
         }
 

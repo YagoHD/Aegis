@@ -45,40 +45,6 @@ fun EditExerciseScreen(
     var isBodyweight by remember { mutableStateOf(exerciseToEdit?.isBodyweight ?: false) }
 
     val savedGlobalTags by routinesViewModel.globalTags.collectAsState()
-    var showTagDialog by remember { mutableStateOf(false) }
-    var newTagText by remember { mutableStateOf("") }
-
-    // 2. DIÁLOGO DE TAGS (Integrado en el sistema de diseño)
-    if (showTagDialog) {
-        AegisAlertDialog(
-            title = stringResource(R.string.new_global_tag_title),
-            confirmText = stringResource(R.string.btn_save),
-            dismissText = stringResource(R.string.btn_cancel),
-            onDismiss = { showTagDialog = false },
-            onConfirm = {
-                if (newTagText.isNotBlank()) {
-                    routinesViewModel.addGlobalTag(newTagText.uppercase())
-                    newTagText = ""
-                    showTagDialog = false
-                }
-            }
-        ) {
-            OutlinedTextField(
-                value = newTagText,
-                onValueChange = { newTagText = it },
-                placeholder = { Text(stringResource(R.string.tag_placeholder), color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)) },
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                textStyle = androidx.compose.ui.text.TextStyle(color = MaterialTheme.colorScheme.onBackground),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.background,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.background,
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)
-                ),
-                shape = RoundedCornerShape(8.dp)
-            )
-        }
-    }
 
     Scaffold(
         // ✅ Usamos el fondo del sistema (050505)
@@ -238,11 +204,7 @@ fun EditExerciseScreen(
                         if (selectedTags.contains(tag)) selectedTags.remove(tag)
                         else selectedTags.add(tag)
                     },
-                    onAddClick = { showTagDialog = true },
-                    onRemoveSelectedClick = {
-                        routinesViewModel.removeGlobalTags(selectedTags.toList())
-                        selectedTags.clear()
-                    }
+                    allowEdit = false
                 )
             }
 

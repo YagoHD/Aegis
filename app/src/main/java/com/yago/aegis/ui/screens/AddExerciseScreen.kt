@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.R
+import com.yago.aegis.data.AppTags
 import com.yago.aegis.data.DefaultExercises
 import com.yago.aegis.data.Exercise
 import com.yago.aegis.data.globalExerciseIcons
@@ -51,18 +52,11 @@ fun AddExerciseScreen(
     var notes by remember { mutableStateOf("") }
     var isBodyweight by remember { mutableStateOf(false) }
 
-    var showTagDialog by remember { mutableStateOf(false) }
-    var newTagText by remember { mutableStateOf("") }
     var searchQuery by remember { mutableStateOf("") }
     var selectedTag by remember { mutableStateOf("ALL") }
 
-    // Tags disponibles derivados de los ejercicios de la librería
-    val availableTags = remember(libraryExercises) {
-        libraryExercises.flatMap { it.tags }
-            .map { it.uppercase() }
-            .filter { it != DefaultExercises.BASE_TAG.uppercase() }
-            .distinct().sorted()
-    }
+    // Tags canónicos de la app (fijos)
+    val availableTags = AppTags.ALL
 
     // Filtro de búsqueda + tag
     val filteredExercises = libraryExercises.filter { exercise ->
@@ -70,29 +64,6 @@ fun AddExerciseScreen(
         val matchesTag = selectedTag == "ALL" || exercise.tags.any { it.uppercase() == selectedTag.uppercase() }
             || exercise.muscleGroup.uppercase() == selectedTag.uppercase()
         matchesQuery && matchesTag
-    }
-
-    // --- DIÁLOGO DE TAGS (ESTILO UNIFICADO) ---
-    if (showTagDialog) {
-        AegisAlertDialog(
-            title = stringResource(R.string.new_global_tag_title),
-            confirmText = stringResource(R.string.btn_save),
-            dismissText = stringResource(R.string.btn_cancel),
-            onDismiss = { showTagDialog = false },
-            onConfirm = {
-                if (newTagText.isNotBlank()) {
-                    routinesViewModel.addGlobalTag(newTagText.uppercase())
-                    newTagText = ""
-                    showTagDialog = false
-                }
-            }
-        ) {
-            EditInput(
-                value = newTagText,
-                onValueChange = { newTagText = it },
-                placeholder = stringResource(R.string.tag_placeholder)
-            )
-        }
     }
 
     Scaffold(
@@ -208,11 +179,7 @@ fun AddExerciseScreen(
                         if (selectedTags.contains(tag)) selectedTags.remove(tag)
                         else selectedTags.add(tag)
                     },
-                    onAddClick = { showTagDialog = true },
-                    onRemoveSelectedClick = {
-                        routinesViewModel.removeGlobalTags(selectedTags.toList())
-                        selectedTags.clear()
-                    }
+                    allowEdit = false
                 )
             }
 

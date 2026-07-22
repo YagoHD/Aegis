@@ -7,11 +7,13 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.yago.aegis.data.AppTags
 import com.yago.aegis.data.DefaultExercises
 import com.yago.aegis.data.Exercise
 import com.yago.aegis.data.UserRepository
 import com.yago.aegis.data.WorkoutSession
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -83,13 +85,8 @@ class StatsViewModel(private val repository: UserRepository) : ViewModel() {
     var searchQuery by mutableStateOf("")
     var selectedTag by mutableStateOf("ALL")
 
-    // Tags disponibles para el filtro en Stats
-    val availableStatsTags: StateFlow<List<String>> = allExercises.map { exercises ->
-        exercises.flatMap { it.tags }
-            .map { it.uppercase() }
-            .filter { it != DefaultExercises.BASE_TAG.uppercase() }
-            .distinct().sorted()
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    // Tags para el filtro en Stats: los canónicos de la app (fijos).
+    val availableStatsTags: StateFlow<List<String>> = MutableStateFlow(AppTags.ALL)
 
     val filteredExercises: Flow<List<Exercise>> = combine(
         allExercises,

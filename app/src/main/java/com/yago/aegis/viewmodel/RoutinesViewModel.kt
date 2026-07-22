@@ -8,6 +8,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.yago.aegis.data.AppTags
 import com.yago.aegis.data.DefaultExercises
 import com.yago.aegis.data.Exercise
 import com.yago.aegis.data.ExerciseSlot
@@ -15,6 +16,7 @@ import com.yago.aegis.data.Routine
 import com.yago.aegis.data.UserRepository
 import com.yago.aegis.data.effectiveSlots
 import com.yago.aegis.data.withSafeDefaults
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -28,8 +30,8 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
     val allExercises: StateFlow<List<Exercise>> = repository.getAllExercises()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val globalTags: StateFlow<List<String>> = repository.globalTags
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), listOf("PUSH", "PULL", "LEGS"))
+    // Tags canónicos de la app: FIJOS. El usuario no crea ni borra tags.
+    val globalTags: StateFlow<List<String>> = MutableStateFlow(AppTags.ALL)
 
     var routines = mutableStateListOf<Routine>()
         private set
@@ -42,16 +44,8 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
     var librarySearchQuery by mutableStateOf("")
     var selectedLibraryTag by mutableStateOf("ALL")
 
-    // Tags disponibles derivados de los ejercicios + tags globales
-    val availableLibraryTags: StateFlow<List<String>> = combine(
-        allExercises,
-        globalTags
-    ) { exercises, globals ->
-        val fromExercises = exercises.flatMap { it.tags }.map { it.uppercase() }
-        (globals.map { it.uppercase() } + fromExercises)
-            .filter { it != DefaultExercises.BASE_TAG.uppercase() }
-            .distinct().sorted()
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    // Filtro de la librería: solo los tags canónicos de la app (mismos para todos).
+    val availableLibraryTags: StateFlow<List<String>> = MutableStateFlow(AppTags.ALL)
 
     // Ejercicios del usuario (sin BASE_TAG)
     val filteredUserExercises: StateFlow<List<Exercise>> = combine(
