@@ -394,6 +394,21 @@
     <string name="privacy_policy_label">POLÍTICA DE PRIVACIDAD</string>
     <string name="privacy_policy_title">POLÍTICA DE PRIVACIDAD</string>
 
+    <!-- Custom / free workout -->
+    <string name="custom_workout_btn">ENTRENAMIENTO LIBRE</string>
+    <string name="custom_workout_dialog_title">ENTRENAMIENTO LIBRE</string>
+    <string name="custom_workout_name_placeholder">Ej: BRAZOS</string>
+    <string name="custom_workout_start_btn">EMPEZAR</string>
+    <string name="session_empty_hint">Añade tu primer ejercicio para empezar</string>
+    <string name="already_added_label">AÑADIDO</string>
+    <string name="create_exercise_named">CREAR «%1$s»</string>
+
+    <!-- Active session lock -->
+    <string name="active_session_lock_title">SESIÓN EN CURSO</string>
+    <string name="active_session_lock_message">Tienes una sesión activa: %1$s.\nFinalízala o cancélala antes de empezar otra.</string>
+    <string name="cancel_active_session_btn">CANCELAR SESIÓN</string>
+    <string name="locked_label">BLOQUEADO</string>
+
     <!-- Firebase -->
     <string name="default_web_client_id">322703265285-qke4qco28fmnp92utb5ob8l9sak16lkp.apps.googleusercontent.com</string>
 </resources>

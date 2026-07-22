@@ -7,20 +7,26 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Calculate
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.R
+import com.yago.aegis.ui.components.AegisAlertDialog
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.RoutineSelectionCard
 import com.yago.aegis.viewmodel.RoutinesViewModel
@@ -32,12 +38,80 @@ fun SelectRoutineScreen(
     workoutViewModel: WorkoutViewModel,
     onNavigateToCreateRoutine: () -> Unit,
     onStartWorkout: (Int) -> Unit,
-    onNavigateToPlateCalculator: () -> Unit = {}
+    onNavigateToPlateCalculator: () -> Unit = {},
+    onResumeSession: () -> Unit = {},
+    onStartCustomWorkout: (String) -> Unit = {}
 ) {
     val routines = routinesViewModel.routines
     val activeSession by workoutViewModel.activeSession.collectAsState()
     val isPaused by workoutViewModel.isPaused.collectAsState()
     val pausedRoutineName = if (isPaused) activeSession?.routineName else null
+
+    // Mientras haya una sesión activa se bloquea empezar cualquier OTRA rutina.
+    val activeName = activeSession?.routineName
+    val hasActiveSession = activeSession != null
+    var showLockedDialog by remember { mutableStateOf(false) }
+    var showCustomDialog by remember { mutableStateOf(false) }
+    var customName by remember { mutableStateOf("") }
+
+    if (showCustomDialog) {
+        AegisAlertDialog(
+            title = stringResource(R.string.custom_workout_dialog_title),
+            confirmText = stringResource(R.string.custom_workout_start_btn),
+            dismissText = stringResource(R.string.btn_cancel),
+            onDismiss = { showCustomDialog = false },
+            onConfirm = {
+                if (customName.isNotBlank()) {
+                    showCustomDialog = false
+                    onStartCustomWorkout(customName)
+                }
+            }
+        ) {
+            OutlinedTextField(
+                value = customName,
+                onValueChange = { customName = it },
+                placeholder = {
+                    Text(
+                        stringResource(R.string.custom_workout_name_placeholder),
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
+                    )
+                },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.background,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.background,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
+                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onBackground
+                ),
+                shape = RoundedCornerShape(8.dp)
+            )
+        }
+    }
+
+    if (showLockedDialog && activeName != null) {
+        AegisAlertDialog(
+            title = stringResource(R.string.active_session_lock_title),
+            confirmText = stringResource(R.string.cancel_active_session_btn),
+            dismissText = stringResource(R.string.btn_close),
+            onDismiss = { showLockedDialog = false },
+            onConfirm = {
+                showLockedDialog = false
+                workoutViewModel.cancelWorkout { }
+            },
+            confirmButtonColor = MaterialTheme.colorScheme.error
+        ) {
+            Text(
+                text = stringResource(R.string.active_session_lock_message, activeName),
+                color = MaterialTheme.colorScheme.secondary,
+                fontSize = 14.sp,
+                lineHeight = 20.sp
+            )
+        }
+    }
 
     Scaffold(
         // Cambiamos BackgroundBlackGrey por el background puro del Theme (050505)
@@ -64,6 +138,51 @@ fun SelectRoutineScreen(
                 .padding(paddingValues)
                 .padding(horizontal = 24.dp) // Mantenemos el padding de lujo
         ) {
+            // --- BANNER DE SESIÓN EN CURSO ---
+            if (hasActiveSession && activeName != null) {
+                item {
+                    ActiveSessionBanner(
+                        name = activeName,
+                        onResume = onResumeSession,
+                        onCancel = { workoutViewModel.cancelWorkout { } }
+                    )
+                }
+            }
+
+            // --- BOTÓN ENTRENAMIENTO LIBRE (oculto si hay sesión activa) ---
+            if (!hasActiveSession) {
+                item {
+                    Surface(
+                        onClick = {
+                            customName = ""
+                            showCustomDialog = true
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 20.dp)
+                            .height(52.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(Icons.Default.Bolt, contentDescription = null, tint = Color.Black)
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = stringResource(R.string.custom_workout_btn),
+                                color = Color.Black,
+                                fontWeight = FontWeight.Black,
+                                fontSize = 13.sp,
+                                letterSpacing = 1.5.sp
+                            )
+                        }
+                    }
+                }
+            }
+
             // --- CABECERA TÉCNICA ---
             item {
                 Row(
@@ -132,16 +251,26 @@ fun SelectRoutineScreen(
                             .joinToString("  ") { "#${it.uppercase()}" }
                     }
 
+                    val isThisActive = activeName == safeRoutine.name
                     val isThisPaused = pausedRoutineName == safeRoutine.name
+                    val isLocked = hasActiveSession && !isThisActive
                     val pausedBadge = stringResource(R.string.paused_session_badge)
                     RoutineSelectionCard(
                         routine = safeRoutine,
                         displayTags = routineTags,
+                        isLocked = isLocked,
+                        isActiveSession = isThisActive,
                         lastPerformedText = if (isThisPaused) pausedBadge
                                            else workoutViewModel.calculateLastPerformed(safeRoutine.lastCompletedDates).uppercase(),
                         onStartClick = {
-                            workoutViewModel.startWorkout(safeRoutine)
-                            onStartWorkout(safeRoutine.id)
+                            when {
+                                isLocked -> showLockedDialog = true
+                                isThisActive -> onResumeSession()
+                                else -> {
+                                    workoutViewModel.startWorkout(safeRoutine)
+                                    onStartWorkout(safeRoutine.id)
+                                }
+                            }
                         }
                     )
                     Spacer(modifier = Modifier.height(12.dp))
@@ -149,6 +278,73 @@ fun SelectRoutineScreen(
             }
 
             item { Spacer(modifier = Modifier.height(100.dp)) }
+        }
+    }
+}
+
+@Composable
+private fun ActiveSessionBanner(
+    name: String,
+    onResume: () -> Unit,
+    onCancel: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 20.dp),
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = stringResource(R.string.active_session_lock_title),
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 2.sp
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = name.uppercase(),
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 0.5.sp
+            )
+            Spacer(modifier = Modifier.height(14.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Button(
+                    onClick = onResume,
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = Color.Black
+                    ),
+                    shape = RoundedCornerShape(6.dp)
+                ) {
+                    Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = stringResource(R.string.btn_continue),
+                        fontWeight = FontWeight.Black,
+                        fontSize = 13.sp,
+                        letterSpacing = 1.sp
+                    )
+                }
+                TextButton(onClick = onCancel) {
+                    Text(
+                        text = stringResource(R.string.cancel_active_session_btn),
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 11.sp
+                    )
+                }
+            }
         }
     }
 }

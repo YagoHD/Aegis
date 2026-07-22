@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.yago.aegis.R
+import com.yago.aegis.data.Exercise
 import com.yago.aegis.data.ExerciseProgress
 import com.yago.aegis.data.ExerciseSet
 import com.yago.aegis.data.Routine
@@ -38,6 +39,11 @@ class WorkoutViewModel(
     // Sesión pausada — el usuario puede navegar fuera y volver
     private val _isPaused = MutableStateFlow(false)
     val isPaused: StateFlow<Boolean> = _isPaused.asStateFlow()
+
+    // ID de la rutina de la sesión activa. null = entrenamiento libre (sin rutina).
+    // Sirve para reanudar la sesión correcta desde la pantalla de selección.
+    private val _activeRoutineId = MutableStateFlow<Int?>(null)
+    val activeRoutineId: StateFlow<Int?> = _activeRoutineId.asStateFlow()
 
     // Tiempo de inicio para calcular duración
     private var sessionStartTime: Long = 0L
@@ -124,6 +130,7 @@ class WorkoutViewModel(
     // ─────────────────────────────────────────────
 
     fun startWorkout(routine: Routine) {
+        _activeRoutineId.value = routine.id
         // Si ya hay sesión activa para esta rutina (ej: volvemos de Settings),
         // no la reiniciamos — simplemente reanudamos
         val current = _activeSession.value
@@ -185,6 +192,65 @@ class WorkoutViewModel(
                 exercisesProgress = progress
             )
         }
+    }
+
+    /**
+     * Inicia un ENTRENAMIENTO LIBRE: una sesión vacía con nombre propio (ej: "BRAZOS").
+     * El usuario irá añadiendo ejercicios de la librería uno a uno mientras entrena.
+     */
+    fun startCustomWorkout(name: String) {
+        _activeRoutineId.value = null   // no proviene de ninguna rutina
+        _isPaused.value = false
+        sessionStartTime = System.currentTimeMillis()
+        _activeSession.value = WorkoutSession(
+            routineName = name.trim().ifBlank { "ENTRENAMIENTO LIBRE" }.uppercase(),
+            exercisesProgress = emptyList()
+        )
+    }
+
+    /** Añade un ejercicio de la librería a la sesión activa (entrenamiento libre o normal). */
+    fun addExerciseToSession(exercise: Exercise) {
+        val session = _activeSession.value ?: return
+        // Evitar IDs duplicados en la sesión (rompen las keys del LazyColumn y switchVariant)
+        if (session.exercisesProgress.any { it.exercise.id == exercise.id }) return
+        viewModelScope.launch {
+            val history = repository.workoutHistory.first()
+            val last = lastPerformanceOf(exercise.name, history)
+            _activeSession.update { s ->
+                s?.copy(
+                    exercisesProgress = s.exercisesProgress + ExerciseProgress(
+                        exercise = exercise.copy(lastPerformance = last ?: exercise.lastPerformance),
+                        sets = listOf(ExerciseSet())
+                    )
+                )
+            }
+        }
+    }
+
+    /** Quita un ejercicio de la sesión activa (por si se añadió por error). */
+    fun removeExerciseFromSession(exerciseId: Long) {
+        _activeSession.update { s ->
+            s?.copy(exercisesProgress = s.exercisesProgress.filterNot { it.exercise.id == exerciseId })
+        }
+    }
+
+    // Último rendimiento de un ejercicio en CUALQUIER sesión del historial (para el libre).
+    private fun lastPerformanceOf(exerciseName: String, history: List<WorkoutSession>): String? {
+        for (session in history.sortedByDescending { it.date }) {
+            val ep = session.exercisesProgress.find { it.exercise.name == exerciseName } ?: continue
+            val completed = ep.sets.filter { it.isCompleted }
+            if (completed.isNotEmpty()) {
+                return completed.joinToString("   ") { s ->
+                    val w = when {
+                        s.weight == 0.0 -> "BW"
+                        s.weight % 1 == 0.0 -> "${s.weight.toInt()}kg"
+                        else -> "${"%.1f".format(s.weight)}kg"
+                    }
+                    "${w} x ${s.reps}"
+                }
+            }
+        }
+        return null
     }
 
     fun updateSessionNotes(notes: String) {

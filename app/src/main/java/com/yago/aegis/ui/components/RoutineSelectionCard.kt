@@ -4,16 +4,20 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yago.aegis.R
 import com.yago.aegis.data.Routine
 import com.yago.aegis.data.getExerciseIcon
 
@@ -23,18 +27,22 @@ fun RoutineSelectionCard(
     displayTags: String,
     onStartClick: () -> Unit,
     lastPerformedText: String,
+    isLocked: Boolean = false,
+    isActiveSession: Boolean = false,
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 10.dp),
+            .padding(vertical = 10.dp)
+            .alpha(if (isLocked) 0.45f else 1f),
         shape = RoundedCornerShape(12.dp), // Esquinas más agresivas
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         ),
         border = BorderStroke(
             width = 1.dp,
-            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
+            color = if (isActiveSession) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                    else MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
         )
     ) {
         Box(modifier = Modifier.padding(16.dp)) {
@@ -94,26 +102,31 @@ fun RoutineSelectionCard(
 
                     Spacer(modifier = Modifier.width(12.dp))
 
-                    // Botón Start (El foco principal)
+                    // Botón de acción: BLOQUEADO / CONTINUAR / START según el estado
                     Button(
                         onClick = onStartClick,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = Color.Black
+                            containerColor = if (isLocked) MaterialTheme.colorScheme.surface
+                                             else MaterialTheme.colorScheme.primary,
+                            contentColor = if (isLocked) MaterialTheme.colorScheme.secondary else Color.Black
                         ),
                         shape = RoundedCornerShape(6.dp), // Botón más cuadrado = más serio
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = if (isLocked) 0.dp else 4.dp)
                     ) {
                         Text(
-                            text = "START",
+                            text = when {
+                                isLocked -> stringResource(R.string.locked_label)
+                                isActiveSession -> stringResource(R.string.btn_continue)
+                                else -> "START"
+                            },
                             fontWeight = FontWeight.Black,
                             fontSize = 13.sp,
                             letterSpacing = 1.sp
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Icon(
-                            imageVector = Icons.Default.PlayArrow,
+                            imageVector = if (isLocked) Icons.Default.Lock else Icons.Default.PlayArrow,
                             contentDescription = null,
                             modifier = Modifier.size(16.dp)
                         )

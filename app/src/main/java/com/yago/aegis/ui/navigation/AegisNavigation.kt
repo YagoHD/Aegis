@@ -99,7 +99,8 @@ fun AegisNavigation(
 
     val onboardingRoutes = listOf("welcome", "identity", "metrics", "register", "email_verification")
     val authRoutes = listOf("login", "welcome", "email_verification")
-    val isSessionActive = currentRoute?.startsWith("active_session") == true
+    val isSessionActive = currentRoute?.startsWith("active_session") == true ||
+            currentRoute == "custom_session"
 
     // Redirigir a verificación en cualquier momento si needsEmailVerification es true
     val uiStateGlobal by authViewModel.uiState.collectAsState()
@@ -383,7 +384,16 @@ fun AegisNavigation(
                         }
                     },
                     onStartWorkout = { routineId -> navController.navigate("active_session/$routineId") },
-                    onNavigateToPlateCalculator = { navController.navigate("plate_calculator") }
+                    onNavigateToPlateCalculator = { navController.navigate("plate_calculator") },
+                    onResumeSession = {
+                        val id = workoutViewModel.activeRoutineId.value
+                        if (id != null) navController.navigate("active_session/$id")
+                        else navController.navigate("custom_session")
+                    },
+                    onStartCustomWorkout = { name ->
+                        workoutViewModel.startCustomWorkout(name)
+                        navController.navigate("custom_session")
+                    }
                 )
             }
 
@@ -401,6 +411,23 @@ fun AegisNavigation(
                     onFinishWorkout = {
                         navController.navigate("workout_complete") {
                             popUpTo("active_session/{routineId}") { inclusive = true }
+                        }
+                    },
+                    onNavigateToSettings = { navController.navigate("workout_settings") },
+                    onNavigateToPlateCalculator = { navController.navigate("plate_calculator") },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            // Entrenamiento libre: la sesión ya se creó con startCustomWorkout antes de navegar
+            composable("custom_session") {
+                ActiveSessionScreen(
+                    workoutViewModel = workoutViewModel,
+                    routinesViewModel = routinesViewModel,
+                    profileViewModel = profileViewModel,
+                    onFinishWorkout = {
+                        navController.navigate("workout_complete") {
+                            popUpTo("custom_session") { inclusive = true }
                         }
                     },
                     onNavigateToSettings = { navController.navigate("workout_settings") },

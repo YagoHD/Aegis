@@ -13,6 +13,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import android.view.WindowManager
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
@@ -28,6 +29,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Timer
@@ -55,6 +57,7 @@ import com.yago.aegis.R
 import com.yago.aegis.ui.components.AegisAlertDialog
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.ExerciseSessionCard
+import com.yago.aegis.ui.components.SessionExercisePickerSheet
 import com.yago.aegis.ui.components.SessionProgressHeader
 import com.yago.aegis.viewmodel.ProfileViewModel
 import com.yago.aegis.viewmodel.RoutinesViewModel
@@ -87,11 +90,17 @@ fun ActiveSessionScreen(
     val savedPosY by workoutViewModel.timerPosY.collectAsState()
 
     var showCancelDialog by remember { mutableStateOf(false) }
+    var showExercisePicker by remember { mutableStateOf(false) }
+    val libraryExercises by routinesViewModel.allExercises.collectAsState()
     val context = LocalContext.current
     val density = LocalDensity.current
     val view = LocalView.current
 
     val currentSession = session ?: return
+
+    // El gesto de "atrás" abre el mismo diálogo que la flecha: así nunca se sale de
+    // la sesión sin pausarla/cancelarla, y no se pierden datos por accidente.
+    BackHandler(enabled = true) { showCancelDialog = true }
 
     // ── PANTALLA SIEMPRE ACTIVA ──────────────────────────────────────────────
     DisposableEffect(Unit) {
@@ -286,6 +295,26 @@ fun ActiveSessionScreen(
         }
     }
 
+    // Hoja para añadir ejercicios de la librería a la sesión (entrenamiento libre)
+    if (showExercisePicker) {
+        SessionExercisePickerSheet(
+            exercises = libraryExercises,
+            alreadyAddedIds = currentSession.exercisesProgress.map { it.exercise.id }.toSet(),
+            onPick = { ex ->
+                workoutViewModel.addExerciseToSession(ex)
+                showExercisePicker = false
+            },
+            onCreateExercise = { name ->
+                // Crea el ejercicio en la librería (queda guardado) y lo añade a la sesión
+                val newEx = com.yago.aegis.data.Exercise(name = name.uppercase(), type = "CUSTOM", muscleGroup = "")
+                routinesViewModel.saveOrUpdateExercise(newEx)
+                workoutViewModel.addExerciseToSession(newEx)
+                showExercisePicker = false
+            },
+            onDismiss = { showExercisePicker = false }
+        )
+    }
+
     // Box raíz para medir el tamaño disponible y posicionar el FAB con offset absoluto
     Box(
         modifier = Modifier
@@ -385,6 +414,52 @@ fun ActiveSessionScreen(
                                     modifier = Modifier.padding(top = 16.dp, start = 8.dp, end = 8.dp),
                                     thickness = 0.5.dp,
                                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
+                                )
+                            }
+                        }
+                    }
+
+                    // Estado vacío (entrenamiento libre sin ejercicios aún)
+                    if (currentSession.exercisesProgress.isEmpty()) {
+                        item {
+                            Text(
+                                text = stringResource(R.string.session_empty_hint),
+                                color = MaterialTheme.colorScheme.secondary,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 32.dp)
+                            )
+                        }
+                    }
+
+                    // Botón añadir ejercicio: imprescindible en el libre, útil en cualquier sesión
+                    item {
+                        Surface(
+                            onClick = { showExercisePicker = true },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp)
+                                .height(52.dp),
+                            color = Color.Transparent,
+                            shape = RoundedCornerShape(8.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Icon(Icons.Default.Add, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = stringResource(R.string.btn_add_exercise),
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 13.sp,
+                                    letterSpacing = 1.sp
                                 )
                             }
                         }

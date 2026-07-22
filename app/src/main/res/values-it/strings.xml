@@ -393,4 +393,19 @@
     <!-- Privacy policy -->
     <string name="privacy_policy_label">INFORMATIVA SULLA PRIVACY</string>
     <string name="privacy_policy_title">INFORMATIVA SULLA PRIVACY</string>
+
+    <!-- Custom / free workout -->
+    <string name="custom_workout_btn">ALLENAMENTO LIBERO</string>
+    <string name="custom_workout_dialog_title">ALLENAMENTO LIBERO</string>
+    <string name="custom_workout_name_placeholder">es. BRACCIA</string>
+    <string name="custom_workout_start_btn">INIZIA</string>
+    <string name="session_empty_hint">Aggiungi il tuo primo esercizio per iniziare</string>
+    <string name="already_added_label">AGGIUNTO</string>
+    <string name="create_exercise_named">CREA «%1$s»</string>
+
+    <!-- Active session lock -->
+    <string name="active_session_lock_title">SESSIONE IN CORSO</string>
+    <string name="active_session_lock_message">Hai una sessione attiva: %1$s.\nTerminala o annullala prima di iniziarne un\'altra.</string>
+    <string name="cancel_active_session_btn">ANNULLA SESSIONE</string>
+    <string name="locked_label">BLOCCATO</string>
 </resources>

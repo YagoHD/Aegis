@@ -393,4 +393,19 @@
     <!-- Privacy policy -->
     <string name="privacy_policy_label">PRIVACY POLICY</string>
     <string name="privacy_policy_title">PRIVACY POLICY</string>
+
+    <!-- Custom / free workout -->
+    <string name="custom_workout_btn">FREE WORKOUT</string>
+    <string name="custom_workout_dialog_title">FREE WORKOUT</string>
+    <string name="custom_workout_name_placeholder">e.g. ARMS</string>
+    <string name="custom_workout_start_btn">START</string>
+    <string name="session_empty_hint">Add your first exercise to begin</string>
+    <string name="already_added_label">ADDED</string>
+    <string name="create_exercise_named">CREATE «%1$s»</string>
+
+    <!-- Active session lock -->
+    <string name="active_session_lock_title">SESSION IN PROGRESS</string>
+    <string name="active_session_lock_message">You have an active session: %1$s.\nFinish or cancel it before starting another.</string>
+    <string name="cancel_active_session_btn">CANCEL SESSION</string>
+    <string name="locked_label">LOCKED</string>
 </resources>
