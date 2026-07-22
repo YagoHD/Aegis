@@ -8,7 +8,10 @@
       "PowerShell($adb = \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\"; & $adb devices)",
       "Bash(git add *)",
       "Bash(git push *)",
-      "PowerShell(Set-Location \"C:\\\\Users\\\\yagor\\\\Desktop\\\\Aegis\"; $f = \"app\\\\build\\\\test-results\\\\testDebugUnitTest\\\\TEST-com.yago.aegis.RankEngineTest.xml\"; if \\(Test-Path $f\\) { Select-String -Path $f -Pattern 'testsuite name|tests=|failures=|errors=|testcase name' | Select-Object -First 10 } else { Write-Output \"No report at $f\" })"
+      "PowerShell(Set-Location \"C:\\\\Users\\\\yagor\\\\Desktop\\\\Aegis\"; $f = \"app\\\\build\\\\test-results\\\\testDebugUnitTest\\\\TEST-com.yago.aegis.RankEngineTest.xml\"; if \\(Test-Path $f\\) { Select-String -Path $f -Pattern 'testsuite name|tests=|failures=|errors=|testcase name' | Select-Object -First 10 } else { Write-Output \"No report at $f\" })",
+      "PowerShell($adb = \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\"; & $adb logcat -d -t 400 2>&1 | Select-String -Pattern \"FATAL EXCEPTION|AndroidRuntime|com.yago.aegis|Caused by|Panteon|RankEngine|at com.yago\" | Select-Object -Last 40)",
+      "PowerShell($adb = \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\"; & $adb logcat -d -b crash 2>&1 | Select-Object -Last 80)",
+      "PowerShell($adb = \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\"; & $adb logcat -c; Write-Output \"Buffer de crashes limpiado\")"
     ]
   }
 }

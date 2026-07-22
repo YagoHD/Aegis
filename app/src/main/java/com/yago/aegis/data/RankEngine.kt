@@ -76,7 +76,9 @@ object RankEngine {
                     }
                     // Peso corporal como carga en ejercicios sin peso externo (calistenia).
                     val load = (if (set.weight > 0.0) set.weight else bodyweight) * set.reps
-                    for (contrib in ex.muscleContributions) {
+                    // Gson deja null los campos nuevos en datos antiguos → protegemos.
+                    val contribs = ex.muscleContributions ?: emptyList()
+                    for (contrib in contribs) {
                         val sub = contrib.subgroup ?: continue
                         subgroupVolume[sub] = (subgroupVolume[sub] ?: 0.0) + load * (contrib.percent / 100.0)
                     }
