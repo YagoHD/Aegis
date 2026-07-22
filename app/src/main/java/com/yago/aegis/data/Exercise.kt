@@ -22,8 +22,10 @@ data class Exercise(
     val oneRepMax: Double = 0.0,    // Para mostrar "1RM: 115KG" en la lista
     val bestSet: String? = "--",     // Para mostrar el mejor récord histórico
     val history: List<ExerciseRecord> = emptyList(),
-    // Contribución a subgrupos musculares para el Panteón (competitivo). Vacío = no puntúa.
-    val muscleContributions: List<MuscleContribution> = emptyList()
+    // Contribución a subgrupos musculares para el Panteón (competitivo). Vacío/null = no puntúa.
+    // NULLABLE a propósito: Gson deja null los campos nuevos en datos antiguos, y un campo
+    // no-nulo haría petar Exercise.copy() (valida no-null). Nullable lo tolera en toda la app.
+    val muscleContributions: List<MuscleContribution>? = emptyList()
 )
 
 data class ExerciseRecord(
