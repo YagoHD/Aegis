@@ -43,7 +43,7 @@ object StrengthStandards {
         std("PESO MUERTO RUMANO",          MuscleSubgroup.ISQUIOTIBIALES,     listOf(0.75, 1.00, 1.30, 1.70, 2.10, 2.60), 0.80),
         std("HIP THRUST",                  MuscleSubgroup.GLUTEO,             listOf(1.00, 1.50, 2.00, 2.50, 3.00, 3.75), 0.85),
         std("PESO MUERTO",                 MuscleSubgroup.LUMBAR,             listOf(1.00, 1.25, 1.50, 2.00, 2.50, 3.00), 0.80),
-        std("ELEVACIÓN DE TALONES DE PIE", MuscleSubgroup.GEMELOS,            listOf(0.75, 1.25, 1.75, 2.25, 2.75, 3.50), 0.85)
+        std("GEMELO DE PIE", MuscleSubgroup.GEMELOS,                          listOf(0.75, 1.25, 1.75, 2.25, 2.75, 3.50), 0.85)
     )
 
     /** Estándar cuyo ancla coincide con [exerciseName] (normaliza sufijo invisible y mayúsculas). */

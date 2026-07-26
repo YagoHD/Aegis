@@ -165,9 +165,12 @@ object DefaultExercises {
         ex("Patada de Glúteo Polea", "PIERNAS", "LEGS", listOf(c(GLUTEO, 85), c(ISQUIOTIBIALES, 15)), "layers"),
         ex("Abductor Máquina", "PIERNAS", "LEGS", listOf(c(GLUTEO, 100))),
         ex("Aductor Máquina", "PIERNAS", "LEGS", listOf(c(ADUCTORES, 100))),
-        ex("Elevación de Talones de Pie", "PIERNAS", "LEGS", listOf(c(GEMELOS, 100)), "body"),
-        ex("Elevación de Talones Sentado", "PIERNAS", "LEGS", listOf(c(GEMELOS, 100)), "body"),
-        ex("Elevación de Talones Prensa", "PIERNAS", "LEGS", listOf(c(GEMELOS, 100)))
+        ex("Gemelo de Pie", "PIERNAS", "LEGS", listOf(c(GEMELOS, 100)), "body"),
+        ex("Gemelo en Máquina de Pie", "PIERNAS", "LEGS", listOf(c(GEMELOS, 100))),
+        ex("Gemelo en Prensa", "PIERNAS", "LEGS", listOf(c(GEMELOS, 100))),
+        ex("Gemelo Burro", "PIERNAS", "LEGS", listOf(c(GEMELOS, 100)), "body"),
+        ex("Gemelo a una Pierna", "PIERNAS", "LEGS", listOf(c(GEMELOS, 100)), "body"),
+        ex("Sóleo Sentado", "PIERNAS", "LEGS", listOf(c(GEMELOS, 100)), "body")
     )
 
     // ─── CORE ────────────────────────────────────────────────────────────────
