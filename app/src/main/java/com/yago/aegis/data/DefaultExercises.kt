@@ -11,6 +11,10 @@ import com.yago.aegis.data.MuscleSubgroup.*
  *
  * BASE_TAG = "__base__" identifica los base. Los nombres llevan un Zero Width Space
  * invisible para no colisionar con nombres de usuario.
+ *
+ * La lista se curó a mano (nombres en español + % por músculo) usando como checklist
+ * el dataset abierto free-exercise-db (yuhonas/free-exercise-db, dominio público/CC0).
+ * No se importó en bruto: solo se añadieron los ejercicios distintos y comunes.
  */
 object DefaultExercises {
 
