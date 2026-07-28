@@ -6,9 +6,9 @@ import kotlin.math.roundToInt
 data class SubgroupRank(
     val subgroup: MuscleSubgroup,
     val tier: RankTier,
-    val ratio: Double,          // 1RM/peso del ancla (0 si no hay dato)
+    val ratio: Double,          // 1RM/peso del mejor ejercicio de ese músculo (0 si no hay dato)
     val progressToNext: Float,  // 0..1 dentro del tier
-    val approx: Boolean,        // true si no proviene de un ancla fiable
+    val approx: Boolean,        // true si no hay estándar (ya no ocurre: todos lo tienen)
     val windowVolume: Double    // volumen del músculo en la ventana (kg·reps)
 )
 
@@ -32,11 +32,13 @@ data class PanteonResult(
 /**
  * Motor de rango del Panteón.
  *
- * Eje FUERZA (tier): mejor 1RM (Epley) del ejercicio ancla en la ventana de 28 días,
- * dividido por el peso corporal → ratio → tier vía [TierProvider].
- * Eje VOLUMEN: reparte peso·reps por subgrupo según las contribuciones % (para mostrar
- * y para futuros afinados de decay). La propia ventana de 28 días ya actúa como decay:
- * si dejas de entrenar un músculo, su ancla sale de la ventana y cae a SIN_RANGO.
+ * Eje FUERZA (tier): para cada ejercicio BASE hecho en la ventana de 28 días se calcula
+ * su mejor 1RM (Epley); se enruta al MÚSCULO PRINCIPAL del ejercicio (la contribución %
+ * más alta) y el tier del subgrupo sale de su estándar (StrengthStandards, uno por músculo).
+ * Así CUALQUIER ejercicio base da rango a su músculo. Solo cuentan los BASE (anti-trampas).
+ *
+ * Eje VOLUMEN: reparte peso·reps por subgrupo según las contribuciones % (para mostrar).
+ * La ventana de 28 días actúa de decay natural.
  */
 object RankEngine {
 
@@ -54,61 +56,65 @@ object RankEngine {
         if (bodyweight <= 0.0) return PanteonResult.EMPTY
 
         val cutoff = nowMillis - WINDOW_DAYS.toLong() * 24L * 60L * 60L * 1000L
+        // Contribuciones CANÓNICAS por nombre (no dependemos de las guardadas, que Gson
+        // puede dejar null en datos antiguos).
+        val baseByName = DefaultExercises.getAll().associateBy { normalize(it.name) }
         val libraryById = library.associateBy { it.id }
         val libraryByName = library.associateBy { normalize(it.name) }
 
-        val best1RM = HashMap<String, Double>()               // ejercicio normalizado -> mejor 1RM
-        val subgroupVolume = HashMap<MuscleSubgroup, Double>() // subgrupo -> volumen en ventana
+        val best1RM = HashMap<String, Double>()               // ejercicio -> mejor 1RM
+        val subgroupVolume = HashMap<MuscleSubgroup, Double>() // subgrupo -> volumen
 
         for (session in history) {
             if (session.date < cutoff) continue
             for (prog in session.exercisesProgress) {
-                // Resuelve contribuciones frescas desde la librería (sesiones antiguas no las tienen).
                 val ex = libraryById[prog.exercise.id]
                     ?: libraryByName[normalize(prog.exercise.name)]
                     ?: prog.exercise
-                // ANTI-TRAMPAS: solo puntúan los ejercicios BASE (canónicos de la app).
-                // Los creados por el usuario no cuentan, aunque lleven etiquetas o %.
+                // ANTI-TRAMPAS: solo puntúan los ejercicios BASE.
                 if (DefaultExercises.BASE_TAG !in (ex.tags ?: emptyList())) continue
                 val name = normalize(ex.name)
+                val canonical = baseByName[name] ?: continue
+                val contribs = canonical.muscleContributions ?: emptyList()
                 for (set in prog.sets) {
                     if (!set.isCompleted) continue
                     if (set.weight > 0.0) {
                         val e1rm = set.weight * (1 + set.reps / 30.0)   // Epley
                         if (e1rm > (best1RM[name] ?: 0.0)) best1RM[name] = e1rm
                     }
-                    // Peso corporal como carga en ejercicios sin peso externo (calistenia).
                     val load = (if (set.weight > 0.0) set.weight else bodyweight) * set.reps
-                    // Gson deja null los campos nuevos en datos antiguos → protegemos.
-                    val contribs = ex.muscleContributions ?: emptyList()
-                    for (contrib in contribs) {
-                        val sub = contrib.subgroup ?: continue
-                        subgroupVolume[sub] = (subgroupVolume[sub] ?: 0.0) + load * (contrib.percent / 100.0)
+                    for (c in contribs) {
+                        val sub = c.subgroup ?: continue
+                        subgroupVolume[sub] = (subgroupVolume[sub] ?: 0.0) + load * (c.percent / 100.0)
                     }
                 }
             }
         }
 
-        val stdBySub = StrengthStandards.all.associateBy { it.subgroup }
+        // Cada ejercicio suma a CADA músculo que trabaja (directa o indirectamente):
+        // score del músculo = mejor de (1RM/peso × contribución%) entre sus ejercicios.
+        val subgroupScore = HashMap<MuscleSubgroup, Double>()
+        for ((name, best) in best1RM) {
+            if (best <= 0.0) continue
+            val contribs = baseByName[name]?.muscleContributions ?: continue
+            val ratio = best / bodyweight
+            for (c in contribs) {
+                val sub = c.subgroup ?: continue
+                val score = ratio * (c.percent / 100.0)
+                if (score > (subgroupScore[sub] ?: 0.0)) subgroupScore[sub] = score
+            }
+        }
 
         val subRanks = MuscleSubgroup.entries.map { sub ->
-            val std = stdBySub[sub]
-            val volume = subgroupVolume[sub] ?: 0.0
-            if (std != null) {
-                val best = best1RM[normalize(std.anchorName)] ?: 0.0
-                val ratio = if (best > 0.0) best / bodyweight else 0.0
-                SubgroupRank(
-                    subgroup = sub,
-                    tier = provider.tierFor(sub, ratio, sex),
-                    ratio = ratio,
-                    progressToNext = provider.progressToNext(sub, ratio, sex),
-                    approx = false,
-                    windowVolume = volume
-                )
-            } else {
-                // Sin ancla fiable: por ahora sin tier (aprox), pero se traza el volumen.
-                SubgroupRank(sub, RankTier.SIN_RANGO, 0.0, 0f, approx = true, windowVolume = volume)
-            }
+            val score = subgroupScore[sub] ?: 0.0
+            SubgroupRank(
+                subgroup = sub,
+                tier = provider.tierFor(sub, score, sex),
+                ratio = score,
+                progressToNext = provider.progressToNext(sub, score, sex),
+                approx = !provider.isAnchored(sub),
+                windowVolume = subgroupVolume[sub] ?: 0.0
+            )
         }
 
         val groups = MuscleGroup.entries.map { grp ->
@@ -126,11 +132,9 @@ object RankEngine {
         return PanteonResult(groups, strongest, weakest)
     }
 
-    /** Orden para comparar tiers; SIN_RANGO es el más bajo. */
     private fun tierRank(t: RankTier): Int =
         if (t == RankTier.SIN_RANGO) -1 else RankTier.ladder.indexOf(t)
 
-    /** Tier medio (redondeado) de una lista de tiers, ignorando SIN_RANGO. */
     private fun avgTier(tiers: List<RankTier>): RankTier {
         val idx = tiers.filter { it != RankTier.SIN_RANGO }.map { RankTier.ladder.indexOf(it) }
         if (idx.isEmpty()) return RankTier.SIN_RANGO
