@@ -43,7 +43,11 @@ object DefaultExercises {
         ex("Flexiones", "PECHO", "PUSH", listOf(c(PECHO_MEDIO, 60), c(TRICEPS, 25), c(DELTOIDE_ANTERIOR, 15)), "body"),
         ex("Flexiones Declinadas", "PECHO", "PUSH", listOf(c(PECHO_SUPERIOR, 55), c(TRICEPS, 25), c(DELTOIDE_ANTERIOR, 20)), "body"),
         ex("Pull Over Mancuerna", "PECHO", "PUSH", listOf(c(DORSAL, 40), c(PECHO_INFERIOR, 40), c(TRICEPS, 20))),
-        ex("Press Svend", "PECHO", "PUSH", listOf(c(PECHO_MEDIO, 90), c(DELTOIDE_ANTERIOR, 10)))
+        ex("Press Svend", "PECHO", "PUSH", listOf(c(PECHO_MEDIO, 90), c(DELTOIDE_ANTERIOR, 10))),
+        ex("Fondos Asistidos Máquina", "PECHO", "PUSH", listOf(c(PECHO_INFERIOR, 55), c(TRICEPS, 30), c(DELTOIDE_ANTERIOR, 15))),
+        ex("Press Landmine", "PECHO", "PUSH", listOf(c(PECHO_SUPERIOR, 55), c(DELTOIDE_ANTERIOR, 30), c(TRICEPS, 15))),
+        ex("Cruces Polea Media", "PECHO", "PUSH", listOf(c(PECHO_MEDIO, 85), c(DELTOIDE_ANTERIOR, 15)), "layers"),
+        ex("Aperturas Declinado Mancuernas", "PECHO", "PUSH", listOf(c(PECHO_INFERIOR, 85), c(DELTOIDE_ANTERIOR, 15)))
     )
 
     // ─── ESPALDA ─────────────────────────────────────────────────────────────
@@ -73,7 +77,11 @@ object DefaultExercises {
         ex("Encogimientos con Mancuernas", "ESPALDA", "PULL", listOf(c(TRAPECIO, 100))),
         ex("Encogimientos Máquina", "ESPALDA", "PULL", listOf(c(TRAPECIO, 100))),
         ex("Hiperextensiones", "ESPALDA", "PULL", listOf(c(LUMBAR, 55), c(GLUTEO, 25), c(ISQUIOTIBIALES, 20)), "body"),
-        ex("Buenos Días", "ESPALDA", "PULL", listOf(c(ISQUIOTIBIALES, 40), c(LUMBAR, 35), c(GLUTEO, 25)))
+        ex("Buenos Días", "ESPALDA", "PULL", listOf(c(ISQUIOTIBIALES, 40), c(LUMBAR, 35), c(GLUTEO, 25))),
+        ex("Peso Muerto Trap Bar", "ESPALDA", "PULL", listOf(c(CUADRICEPS, 25), c(GLUTEO, 25), c(LUMBAR, 20), c(ISQUIOTIBIALES, 20), c(TRAPECIO, 10))),
+        ex("Remo con Barra Supino", "ESPALDA", "PULL", listOf(c(DORSAL, 50), c(ROMBOIDES, 20), c(BICEPS, 20), c(TRAPECIO, 10))),
+        ex("Remo Meadows", "ESPALDA", "PULL", listOf(c(DORSAL, 55), c(ROMBOIDES, 20), c(BICEPS, 15), c(TRAPECIO, 10))),
+        ex("Encogimientos Multipower", "ESPALDA", "PULL", listOf(c(TRAPECIO, 100)))
     )
 
     // ─── HOMBROS ─────────────────────────────────────────────────────────────
@@ -93,7 +101,10 @@ object DefaultExercises {
         ex("Pájaro Polea", "HOMBROS", "PULL", listOf(c(DELTOIDE_POSTERIOR, 85), c(ROMBOIDES, 15)), "layers"),
         ex("Face Pull", "HOMBROS", "PULL", listOf(c(DELTOIDE_POSTERIOR, 55), c(ROMBOIDES, 25), c(TRAPECIO, 20)), "layers"),
         ex("Remo al Mentón", "HOMBROS", "PULL", listOf(c(DELTOIDE_LATERAL, 50), c(TRAPECIO, 30), c(BICEPS, 20))),
-        ex("Remo al Mentón Polea", "HOMBROS", "PULL", listOf(c(DELTOIDE_LATERAL, 50), c(TRAPECIO, 30), c(BICEPS, 20)), "layers")
+        ex("Remo al Mentón Polea", "HOMBROS", "PULL", listOf(c(DELTOIDE_LATERAL, 50), c(TRAPECIO, 30), c(BICEPS, 20)), "layers"),
+        ex("Press Landmine Hombro", "HOMBROS", "PUSH", listOf(c(DELTOIDE_ANTERIOR, 65), c(TRICEPS, 20), c(DELTOIDE_LATERAL, 15))),
+        ex("Elevación Lateral Inclinado", "HOMBROS", "PUSH", listOf(c(DELTOIDE_LATERAL, 90), c(DELTOIDE_POSTERIOR, 10))),
+        ex("Elevación en Y", "HOMBROS", "PULL", listOf(c(DELTOIDE_POSTERIOR, 45), c(TRAPECIO, 30), c(DELTOIDE_LATERAL, 25)))
     )
 
     // ─── BÍCEPS ──────────────────────────────────────────────────────────────
@@ -110,7 +121,11 @@ object DefaultExercises {
         ex("Curl Polea con Cuerda", "BÍCEPS", "PULL", listOf(c(BICEPS, 80), c(BRAQUIAL, 15), c(ANTEBRAZO, 5)), "layers"),
         ex("Curl Inclinado Mancuernas", "BÍCEPS", "PULL", listOf(c(BICEPS, 90), c(BRAQUIAL, 10))),
         ex("Curl Araña", "BÍCEPS", "PULL", listOf(c(BICEPS, 90), c(BRAQUIAL, 10))),
-        ex("Curl 21s", "BÍCEPS", "PULL", listOf(c(BICEPS, 90), c(BRAQUIAL, 10)))
+        ex("Curl 21s", "BÍCEPS", "PULL", listOf(c(BICEPS, 90), c(BRAQUIAL, 10))),
+        ex("Curl Máquina", "BÍCEPS", "PULL", listOf(c(BICEPS, 90), c(BRAQUIAL, 10))),
+        ex("Curl Bayesian", "BÍCEPS", "PULL", listOf(c(BICEPS, 90), c(BRAQUIAL, 10)), "layers"),
+        ex("Curl Inverso", "BÍCEPS", "PULL", listOf(c(ANTEBRAZO, 55), c(BRAQUIAL, 30), c(BICEPS, 15))),
+        ex("Curl Zottman", "BÍCEPS", "PULL", listOf(c(BICEPS, 50), c(ANTEBRAZO, 30), c(BRAQUIAL, 20)))
     )
 
     // ─── TRÍCEPS ─────────────────────────────────────────────────────────────
@@ -127,7 +142,11 @@ object DefaultExercises {
         ex("Patada de Tríceps", "TRÍCEPS", "PUSH", listOf(c(TRICEPS, 100))),
         ex("Patada Tríceps Polea", "TRÍCEPS", "PUSH", listOf(c(TRICEPS, 100)), "layers"),
         ex("Tríceps Máquina", "TRÍCEPS", "PUSH", listOf(c(TRICEPS, 100))),
-        ex("Press JM", "TRÍCEPS", "PUSH", listOf(c(TRICEPS, 80), c(PECHO_MEDIO, 20)))
+        ex("Press JM", "TRÍCEPS", "PUSH", listOf(c(TRICEPS, 80), c(PECHO_MEDIO, 20))),
+        ex("Flexiones Diamante", "TRÍCEPS", "PUSH", listOf(c(TRICEPS, 60), c(PECHO_MEDIO, 25), c(DELTOIDE_ANTERIOR, 15)), "body"),
+        ex("Fondos Máquina Tríceps", "TRÍCEPS", "PUSH", listOf(c(TRICEPS, 80), c(PECHO_INFERIOR, 10), c(DELTOIDE_ANTERIOR, 10))),
+        ex("Press Tate", "TRÍCEPS", "PUSH", listOf(c(TRICEPS, 100))),
+        ex("Extensión Tríceps Banda", "TRÍCEPS", "PUSH", listOf(c(TRICEPS, 100)))
     )
 
     // ─── ANTEBRAZO ───────────────────────────────────────────────────────────
@@ -135,7 +154,9 @@ object DefaultExercises {
         ex("Curl de Muñeca", "ANTEBRAZO", "PULL", listOf(c(ANTEBRAZO, 100))),
         ex("Curl de Muñeca Invertido", "ANTEBRAZO", "PULL", listOf(c(ANTEBRAZO, 100))),
         ex("Rueda de Antebrazo", "ANTEBRAZO", "PULL", listOf(c(ANTEBRAZO, 100))),
-        ex("Farmer Walk", "ANTEBRAZO", "PULL", listOf(c(ANTEBRAZO, 60), c(TRAPECIO, 40)), "run")
+        ex("Farmer Walk", "ANTEBRAZO", "PULL", listOf(c(ANTEBRAZO, 60), c(TRAPECIO, 40)), "run"),
+        ex("Curl de Muñeca Polea", "ANTEBRAZO", "PULL", listOf(c(ANTEBRAZO, 100)), "layers"),
+        ex("Agarre con Pinza", "ANTEBRAZO", "PULL", listOf(c(ANTEBRAZO, 100)))
     )
 
     // ─── PIERNAS ─────────────────────────────────────────────────────────────
@@ -170,7 +191,13 @@ object DefaultExercises {
         ex("Gemelo en Prensa", "PIERNAS", "LEGS", listOf(c(GEMELOS, 100))),
         ex("Gemelo Burro", "PIERNAS", "LEGS", listOf(c(GEMELOS, 100)), "body"),
         ex("Gemelo a una Pierna", "PIERNAS", "LEGS", listOf(c(GEMELOS, 100)), "body"),
-        ex("Sóleo Sentado", "PIERNAS", "LEGS", listOf(c(GEMELOS, 100)), "body")
+        ex("Sóleo Sentado", "PIERNAS", "LEGS", listOf(c(GEMELOS, 100)), "body"),
+        ex("Zancadas Inversas", "PIERNAS", "LEGS", listOf(c(CUADRICEPS, 45), c(GLUTEO, 40), c(ISQUIOTIBIALES, 15)), "run"),
+        ex("Prensa a una Pierna", "PIERNAS", "LEGS", listOf(c(CUADRICEPS, 60), c(GLUTEO, 30), c(ISQUIOTIBIALES, 10))),
+        ex("Peso Muerto a una Pierna", "PIERNAS", "LEGS", listOf(c(ISQUIOTIBIALES, 45), c(GLUTEO, 40), c(LUMBAR, 15))),
+        ex("Sentadilla Pistol", "PIERNAS", "LEGS", listOf(c(CUADRICEPS, 60), c(GLUTEO, 30), c(ISQUIOTIBIALES, 10)), "body"),
+        ex("Curl Femoral Nórdico", "PIERNAS", "LEGS", listOf(c(ISQUIOTIBIALES, 100)), "body"),
+        ex("Sentadilla Zercher", "PIERNAS", "LEGS", listOf(c(CUADRICEPS, 55), c(GLUTEO, 30), c(LUMBAR, 15)))
     )
 
     // ─── CORE ────────────────────────────────────────────────────────────────
@@ -185,7 +212,14 @@ object DefaultExercises {
         ex("Rueda Abdominal", "CORE", "CORE", listOf(c(ABDOMEN, 80), c(OBLICUOS, 20))),
         ex("Giro Ruso", "CORE", "CORE", listOf(c(OBLICUOS, 80), c(ABDOMEN, 20)), "body"),
         ex("Oblicuos en Polea", "CORE", "CORE", listOf(c(OBLICUOS, 85), c(ABDOMEN, 15)), "layers"),
-        ex("Sit Up", "CORE", "CORE", listOf(c(ABDOMEN, 85), c(OBLICUOS, 15)), "body")
+        ex("Sit Up", "CORE", "CORE", listOf(c(ABDOMEN, 85), c(OBLICUOS, 15)), "body"),
+        ex("Elevación de Piernas Tumbado", "CORE", "CORE", listOf(c(ABDOMEN, 85), c(OBLICUOS, 15)), "body"),
+        ex("Crunch Bicicleta", "CORE", "CORE", listOf(c(ABDOMEN, 60), c(OBLICUOS, 40)), "body"),
+        ex("V-Up", "CORE", "CORE", listOf(c(ABDOMEN, 80), c(OBLICUOS, 20)), "body"),
+        ex("Mountain Climber", "CORE", "CORE", listOf(c(ABDOMEN, 70), c(OBLICUOS, 30)), "run"),
+        ex("Dragon Flag", "CORE", "CORE", listOf(c(ABDOMEN, 85), c(OBLICUOS, 15)), "body"),
+        ex("Pallof Press", "CORE", "CORE", listOf(c(OBLICUOS, 70), c(ABDOMEN, 30)), "layers"),
+        ex("Suitcase Carry", "CORE", "CORE", listOf(c(OBLICUOS, 60), c(ANTEBRAZO, 40)), "run")
     )
 
     private fun c(sub: MuscleSubgroup, percent: Int) = MuscleContribution(sub.name, percent)
