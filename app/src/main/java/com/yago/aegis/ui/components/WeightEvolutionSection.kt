@@ -22,9 +22,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yago.aegis.R
 
 @Composable
 fun WeightEvolutionSection(monthlyData: List<Pair<String, Double>>) {
@@ -39,7 +41,7 @@ fun WeightEvolutionSection(monthlyData: List<Pair<String, Double>>) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "EVOLUCIÓN DE CARGA",
+                text = stringResource(R.string.evolution_graph_module_label),
                 color = MaterialTheme.colorScheme.secondary, // AegisSteel
                 fontSize = 9.sp,
                 fontWeight = FontWeight.Black,
@@ -53,7 +55,7 @@ fun WeightEvolutionSection(monthlyData: List<Pair<String, Double>>) {
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f))
             ) {
                 Text(
-                    text = "ÚLTIMOS 3 MESES",
+                    text = stringResource(R.string.last_3_months),
                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f),
                     fontSize = 8.sp,

@@ -20,9 +20,11 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yago.aegis.R
 import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
@@ -55,7 +57,7 @@ fun ProgressionChartSection(
             ) {
                 Column {
                     Text(
-                        text = "PROGRESO TEMPORAL",
+                        text = stringResource(R.string.temporal_progress_title),
                         color = MaterialTheme.colorScheme.secondary,
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Black,

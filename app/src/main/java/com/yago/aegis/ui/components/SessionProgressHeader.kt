@@ -11,9 +11,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yago.aegis.R
 import com.yago.aegis.data.WorkoutSession
 
 @Composable
@@ -42,7 +44,7 @@ fun SessionProgressHeader(session: WorkoutSession) {
             verticalAlignment = Alignment.Bottom
         ) {
             Text(
-                text = "PROGRESO",
+                text = stringResource(R.string.session_progress_label),
                 color = MaterialTheme.colorScheme.secondary,
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Black,
@@ -91,7 +93,7 @@ fun SessionProgressHeader(session: WorkoutSession) {
         // --- SUBTEXTO INFORMATIVO ---
         if (progressPercent > 0f) {
             Text(
-                text = "${(progressPercent * 100).toInt()}% COMPLETED",
+                text = stringResource(R.string.percent_completed_format, (progressPercent * 100).toInt()),
                 modifier = Modifier.padding(top = 6.dp),
                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
                 style = MaterialTheme.typography.labelSmall.copy(

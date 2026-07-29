@@ -4,9 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yago.aegis.R
 import com.yago.aegis.data.WorkoutSession
 import java.text.SimpleDateFormat
 import java.util.*
@@ -65,8 +67,8 @@ fun HistorySessionCard(
             )
 
             Text("SET", modifier = Modifier.weight(1f), style = headerStyle)
-            Text("PESO", modifier = Modifier.weight(1f), style = headerStyle, textAlign = TextAlign.Center)
-            Text("REPETICIONES", modifier = Modifier.weight(1f), style = headerStyle, textAlign = TextAlign.End)
+            Text(stringResource(R.string.history_col_weight), modifier = Modifier.weight(1f), style = headerStyle, textAlign = TextAlign.Center)
+            Text(stringResource(R.string.history_col_reps), modifier = Modifier.weight(1f), style = headerStyle, textAlign = TextAlign.End)
         }
 
         // Listado de cada Set con separadores sutiles

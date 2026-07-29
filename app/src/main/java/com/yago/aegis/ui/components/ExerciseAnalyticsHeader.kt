@@ -37,7 +37,7 @@ fun ExerciseAnalyticsHeader(
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-            text = "ANÁLISIS DE RENDIMIENTO",
+            text = stringResource(R.string.analytics_perf_title),
             color = MaterialTheme.colorScheme.secondary,
             fontSize = 9.sp,
             fontWeight = FontWeight.Black,
@@ -52,7 +52,7 @@ fun ExerciseAnalyticsHeader(
             modifier = Modifier.fillMaxWidth(),
             placeholder = {
                 Text(
-                    "FILTRAR EJERCICIOS...",
+                    stringResource(R.string.filter_exercises_placeholder),
                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f),
                     style = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
                 )

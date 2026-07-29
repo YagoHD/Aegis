@@ -27,6 +27,9 @@ fun Routine.withSafeDefaults() = copy(
 fun Routine.effectiveSlots(): List<ExerciseSlot> {
     val safeSlots = if (exerciseSlots == null) emptyList() else exerciseSlots
     val safeExercises = if (exercises == null) emptyList() else exercises
-    return if (safeSlots.isNotEmpty()) safeSlots
+    val slots = if (safeSlots.isNotEmpty()) safeSlots
     else safeExercises.map { ex -> ExerciseSlot(variants = listOf(ex)) }
+    // Descarta slots sin variantes (datos corruptos/Gson) para no romper `.first()` aguas abajo
+    // (arranque de sesión, guardado de rutina). Un slot vacío no aporta nada.
+    return slots.filter { it.variants != null && it.variants.isNotEmpty() }
 }

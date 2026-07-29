@@ -8,9 +8,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yago.aegis.R
 import com.yago.aegis.data.PhotoType
 
 @Composable
@@ -30,7 +32,7 @@ fun PhotoSourceDialog(
         ),
         title = {
             Text(
-                text = "LOG VISUAL",
+                text = stringResource(R.string.visual_log_title),
                 color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Black,
@@ -39,7 +41,7 @@ fun PhotoSourceDialog(
         },
         text = {
             Text(
-                text = "Selecciona el registro de progreso que deseas actualizar:",
+                text = stringResource(R.string.photo_dialog_message),
                 color = MaterialTheme.colorScheme.secondary, // AegisSteel
                 fontSize = 14.sp,
                 lineHeight = 20.sp
@@ -49,7 +51,7 @@ fun PhotoSourceDialog(
             // El botón principal (Actual) destaca más
             TextButton(onClick = { onConfirm(PhotoType.ACTUAL) }) {
                 Text(
-                    text = "ESTADO ACTUAL",
+                    text = stringResource(R.string.photo_state_actual),
                     color = MaterialTheme.colorScheme.primary, // AegisBronze
                     fontWeight = FontWeight.Black,
                     letterSpacing = 1.sp
@@ -59,7 +61,7 @@ fun PhotoSourceDialog(
         dismissButton = {
             TextButton(onClick = { onConfirm(PhotoType.BASE) }) {
                 Text(
-                    text = "ESTADO BASE",
+                    text = stringResource(R.string.photo_state_base),
                     color = MaterialTheme.colorScheme.secondary, // Más sutil que el actual
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp

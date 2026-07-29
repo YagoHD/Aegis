@@ -47,7 +47,7 @@ fun ProfileHeader(
                 // Foto real del usuario
                 AsyncImage(
                     model = profilePhotoUri,
-                    contentDescription = "Foto de perfil",
+                    contentDescription = stringResource(R.string.desc_profile_photo),
                     placeholder = painterResource(R.drawable.ic_launcher_foreground),
                     error = painterResource(R.drawable.ic_launcher_foreground),
                     modifier = Modifier

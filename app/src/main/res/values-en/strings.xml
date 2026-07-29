@@ -431,8 +431,26 @@
     <string name="previous_workout_label">PREVIOUS WORKOUT</string>
 
     <!-- Stats: exercise filters -->
+    <string name="analytics_perf_title">PERFORMANCE ANALYSIS</string>
+    <string name="filter_exercises_placeholder">FILTER EXERCISES...</string>
     <string name="filter_with_data">WITH DATA</string>
     <string name="filter_routine_label">ROUTINE</string>
     <string name="filter_all_routines">ALL</string>
     <string name="stats_empty_filtered">No exercises match the filter</string>
+    <!-- QA: previously hardcoded texts (i18n) -->
+    <string name="session_progress_label">PROGRESS</string>
+    <string name="percent_completed_format">%1$d%% COMPLETED</string>
+    <string name="last_3_months">LAST 3 MONTHS</string>
+    <string name="temporal_progress_title">PROGRESS OVER TIME</string>
+    <string name="history_col_weight">WEIGHT</string>
+    <string name="history_col_reps">REPS</string>
+    <string name="more_count_format">+%1$d more</string>
+    <string name="visual_log_title">VISUAL LOG</string>
+    <string name="photo_dialog_message">Select the progress record you want to update:</string>
+    <string name="photo_state_actual">CURRENT STATE</string>
+    <string name="photo_state_base">BASE STATE</string>
+    <string name="desc_add_new">Add</string>
+    <string name="desc_delete_selected">Delete selected</string>
+    <string name="desc_profile_photo">Profile photo</string>
+    <string name="desc_start_rest">Start rest</string>
 </resources>

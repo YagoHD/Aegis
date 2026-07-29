@@ -23,9 +23,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yago.aegis.R
 import com.yago.aegis.data.Exercise
 import com.yago.aegis.data.getExerciseIcon
 
@@ -97,7 +99,7 @@ fun ExerciseStatRow(
             // 3. SECCIÓN DE DATOS (En lugar de iconos, mostramos el PR)
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = "PR RECORD",
+                    text = stringResource(R.string.pr_record_title),
                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f),
                     fontSize = 8.sp,
                     fontWeight = FontWeight.Bold,

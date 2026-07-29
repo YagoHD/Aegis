@@ -774,7 +774,7 @@ private fun WorkoutShareCard(summary: WorkoutSummary, previousVolume: Double = 0
 
             if (summary.exercises.size > 5) {
                 Text(
-                    text = "+${summary.exercises.size - 5} más",
+                    text = stringResource(R.string.more_count_format, summary.exercises.size - 5),
                     color = ShareBronze.copy(alpha = 0.45f),
                     fontSize = 11.sp,
                     modifier = Modifier.padding(top = 4.dp, start = 15.dp)
@@ -911,7 +911,7 @@ fun ExerciseSummaryRow(exercise: ExerciseSummary) {
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
                 ) {
                     Text(
-                        text = "NEW PR!",
+                        text = stringResource(R.string.new_pr_badge),
                         color = MaterialTheme.colorScheme.primary,
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Black,

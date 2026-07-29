@@ -52,7 +52,7 @@ fun AegisTagManager(
                 ) {
                     Icon(
                         imageVector = Icons.Default.RemoveCircleOutline,
-                        contentDescription = "Eliminar seleccionados",
+                        contentDescription = stringResource(R.string.desc_delete_selected),
                         tint = if (hasSelection)
                             MaterialTheme.colorScheme.error
                         else MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
@@ -68,7 +68,7 @@ fun AegisTagManager(
                 ) {
                     Icon(
                         imageVector = Icons.Default.AddCircleOutline,
-                        contentDescription = "Añadir nuevo",
+                        contentDescription = stringResource(R.string.desc_add_new),
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(22.dp)
                     )

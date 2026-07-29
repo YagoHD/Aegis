@@ -14,9 +14,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yago.aegis.R
 import com.yago.aegis.data.DefaultExercises
 import com.yago.aegis.data.Exercise
 import com.yago.aegis.data.getExerciseIcon
@@ -99,7 +101,7 @@ fun ExerciseCard(
                     IconButton(onClick = onEdit ?: {}) {
                         Icon(
                             imageVector = Icons.Default.AddCircle,
-                            contentDescription = "Add",
+                            contentDescription = stringResource(R.string.desc_add_new),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(24.dp)
                         )
@@ -108,7 +110,7 @@ fun ExerciseCard(
                     IconButton(onClick = onDelete) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete",
+                            contentDescription = stringResource(R.string.content_desc_delete),
                             tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
                             modifier = Modifier.size(19.dp)
                         )
@@ -119,7 +121,7 @@ fun ExerciseCard(
                 if (showReorderHandle) {
                     Icon(
                         imageVector = Icons.Default.DragHandle,
-                        contentDescription = "Reorder",
+                        contentDescription = stringResource(R.string.content_desc_reorder),
                         tint = MaterialTheme.colorScheme.secondary,
                         modifier = dragHandleModifier // ✅ Aquí aplicamos el arrastre
                             .padding(start = 8.dp)

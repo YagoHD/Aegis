@@ -431,8 +431,26 @@
     <string name="previous_workout_label">SÉANCE PRÉCÉDENTE</string>
 
     <!-- Stats : filtres d'exercices -->
+    <string name="analytics_perf_title">ANALYSE DE PERFORMANCE</string>
+    <string name="filter_exercises_placeholder">FILTRER LES EXERCICES...</string>
     <string name="filter_with_data">AVEC DONNÉES</string>
     <string name="filter_routine_label">ROUTINE</string>
     <string name="filter_all_routines">TOUTES</string>
     <string name="stats_empty_filtered">Aucun exercice ne correspond au filtre</string>
+    <!-- QA : textes auparavant codés en dur (i18n) -->
+    <string name="session_progress_label">PROGRESSION</string>
+    <string name="percent_completed_format">%1$d%% TERMINÉ</string>
+    <string name="last_3_months">3 DERNIERS MOIS</string>
+    <string name="temporal_progress_title">PROGRESSION TEMPORELLE</string>
+    <string name="history_col_weight">POIDS</string>
+    <string name="history_col_reps">RÉPÉTITIONS</string>
+    <string name="more_count_format">+%1$d de plus</string>
+    <string name="visual_log_title">JOURNAL VISUEL</string>
+    <string name="photo_dialog_message">Sélectionne le suivi de progression à mettre à jour :</string>
+    <string name="photo_state_actual">ÉTAT ACTUEL</string>
+    <string name="photo_state_base">ÉTAT DE BASE</string>
+    <string name="desc_add_new">Ajouter</string>
+    <string name="desc_delete_selected">Supprimer la sélection</string>
+    <string name="desc_profile_photo">Photo de profil</string>
+    <string name="desc_start_rest">Démarrer le repos</string>
 </resources>

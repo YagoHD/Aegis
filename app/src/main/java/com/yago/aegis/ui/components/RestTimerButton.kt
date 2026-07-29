@@ -26,9 +26,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yago.aegis.R
 import kotlinx.coroutines.delay
 
 @Composable
@@ -135,7 +137,7 @@ fun RestTimerButton(
                     letterSpacing = 0.sp
                 )
                 Text(
-                    text = "REST",
+                    text = stringResource(R.string.rest_timer_label),
                     color = MaterialTheme.colorScheme.secondary,
                     fontSize = 8.sp,
                     fontWeight = FontWeight.Bold,
@@ -146,7 +148,7 @@ fun RestTimerButton(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(
                     imageVector = Icons.Default.Timer,
-                    contentDescription = "Iniciar descanso",
+                    contentDescription = stringResource(R.string.desc_start_rest),
                     tint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.size(20.dp)
                 )
