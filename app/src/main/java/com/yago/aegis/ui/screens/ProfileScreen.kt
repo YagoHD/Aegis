@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.R
+import com.yago.aegis.data.LevelState
 import com.yago.aegis.data.PhotoType
 import com.yago.aegis.ui.components.*
 import com.yago.aegis.viewmodel.ProfileViewModel
@@ -106,6 +107,9 @@ fun ProfileContent(viewModel: ProfileViewModel, onNavigateToTrain: () -> Unit = 
             profilePhotoUri = user.profilePhotoUri,
             currentStreak = user.currentStreak
         )
+
+        Spacer(modifier = Modifier.height(20.dp))
+        LevelCard(level = state.level)
 
         if (user.disciplineDay == 0) {
             Spacer(modifier = Modifier.height(24.dp))
@@ -296,6 +300,64 @@ private fun NewUserBanner(onNavigateToTrain: () -> Unit) {
                 fontWeight = FontWeight.Black,
                 letterSpacing = 1.sp,
                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+            )
+        }
+    }
+}
+
+/** Nivel y barra de XP del usuario (premia constancia, independiente del Panteón). */
+@Composable
+private fun LevelCard(level: LevelState) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f), RoundedCornerShape(16.dp))
+            .padding(horizontal = 18.dp, vertical = 16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.Bolt,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = stringResource(R.string.level_label, level.level),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.sp
+                )
+            }
+            Text(
+                text = stringResource(R.string.xp_format, level.xpIntoLevel, level.xpForLevel),
+                color = MaterialTheme.colorScheme.secondary,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(8.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.08f))
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(level.progress)
+                    .height(8.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(MaterialTheme.colorScheme.primary)
             )
         }
     }

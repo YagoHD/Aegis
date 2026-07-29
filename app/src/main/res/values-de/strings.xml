@@ -413,4 +413,20 @@
     <string name="active_session_lock_message">Du hast ein aktives Training: %1$s.\nBeende oder brich es ab, bevor du ein neues startest.</string>
     <string name="cancel_active_session_btn">TRAINING ABBRECHEN</string>
     <string name="locked_label">GESPERRT</string>
+    <!-- Gamification: Level / XP -->
+    <string name="level_label">LEVEL %1$d</string>
+    <string name="xp_format">%1$d / %2$d XP</string>
+
+    <!-- Muskelermüdung (nach Aktualität geschätzt) -->
+    <string name="fatigue_alta">HOHE ERMÜDUNG</string>
+    <string name="fatigue_media">MITTLERE ERMÜDUNG</string>
+    <string name="fatigue_baja">GERINGE ERMÜDUNG</string>
+    <string name="fatigue_descansado">ERHOLT</string>
+    <string name="fatigue_trained_days">Vor %1$d T</string>
+    <string name="fatigue_trained_today">Heute</string>
+    <string name="fatigue_trained_yesterday">Gestern</string>
+
+    <!-- Ghost: zu schlagendes Ziel in der Einheit -->
+    <string name="ghost_target">ZU SCHLAGEN</string>
+    <string name="previous_workout_label">VORHERIGES TRAINING</string>
 </resources>

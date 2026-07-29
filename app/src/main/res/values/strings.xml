@@ -435,6 +435,23 @@
     <string name="body_map_soon">MAPA CORPORAL PRÓXIMAMENTE</string>
     <string name="next_tier_short">PRÓX.</string>
 
+    <!-- Gamificación: nivel / XP -->
+    <string name="level_label">NIVEL %1$d</string>
+    <string name="xp_format">%1$d / %2$d XP</string>
+
+    <!-- Fatiga muscular (estimada por recencia) -->
+    <string name="fatigue_alta">FATIGA ALTA</string>
+    <string name="fatigue_media">FATIGA MEDIA</string>
+    <string name="fatigue_baja">FATIGA BAJA</string>
+    <string name="fatigue_descansado">DESCANSADO</string>
+    <string name="fatigue_trained_days">Hace %1$d d</string>
+    <string name="fatigue_trained_today">Hoy</string>
+    <string name="fatigue_trained_yesterday">Ayer</string>
+
+    <!-- Ghost: marca a batir en la sesión -->
+    <string name="ghost_target">A BATIR</string>
+    <string name="previous_workout_label">ENTRENAMIENTO PREVIO</string>
+
     <!-- Firebase -->
     <string name="default_web_client_id">322703265285-qke4qco28fmnp92utb5ob8l9sak16lkp.apps.googleusercontent.com</string>
 </resources>

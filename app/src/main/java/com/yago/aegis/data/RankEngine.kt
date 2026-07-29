@@ -2,14 +2,17 @@ package com.yago.aegis.data
 
 import kotlin.math.roundToInt
 
+/** Fatiga estimada de un músculo (no recuperación real: heurística por recencia). */
+enum class Fatigue { ALTA, MEDIA, BAJA, DESCANSADO, SIN_DATOS }
+
 /** Rango de un subgrupo muscular. */
 data class SubgroupRank(
     val subgroup: MuscleSubgroup,
     val tier: RankTier,
-    val ratio: Double,          // 1RM/peso del mejor ejercicio de ese músculo (0 si no hay dato)
-    val progressToNext: Float,  // 0..1 dentro del tier
-    val approx: Boolean,        // true si no hay estándar (ya no ocurre: todos lo tienen)
-    val windowVolume: Double    // volumen del músculo en la ventana (kg·reps)
+    val ratio: Double,
+    val progressToNext: Float,
+    val approx: Boolean,
+    val windowVolume: Double
 )
 
 /** Rango agregado de un grupo muscular. */
@@ -17,7 +20,9 @@ data class GroupRank(
     val group: MuscleGroup,
     val tier: RankTier,
     val progressToNext: Float,
-    val subgroups: List<SubgroupRank>
+    val subgroups: List<SubgroupRank>,
+    val daysSinceTrained: Int = -1,      // -1 = sin datos en la ventana
+    val fatigue: Fatigue = Fatigue.SIN_DATOS
 )
 
 /** Resultado completo del Panteón para un usuario. */
@@ -32,17 +37,19 @@ data class PanteonResult(
 /**
  * Motor de rango del Panteón.
  *
- * Eje FUERZA (tier): para cada ejercicio BASE hecho en la ventana de 28 días se calcula
- * su mejor 1RM (Epley); se enruta al MÚSCULO PRINCIPAL del ejercicio (la contribución %
- * más alta) y el tier del subgrupo sale de su estándar (StrengthStandards, uno por músculo).
- * Así CUALQUIER ejercicio base da rango a su músculo. Solo cuentan los BASE (anti-trampas).
+ * Eje FUERZA (tier): cada ejercicio base suma a CADA músculo que trabaja
+ * (score = 1RM Epley/peso × contribución%). El tier del subgrupo sale del mejor score
+ * vs su estándar (por sexo). DECAIMIENTO PROGRESIVO: las marcas pierden peso con la edad
+ * (100% ≤28d, 95% ≤35d, 90% ≤42d, 80% ≤56d, 65% ≤70d, 50% ≤84d, 0 después) para no
+ * castigar de golpe una pausa/lesión.
  *
- * Eje VOLUMEN: reparte peso·reps por subgrupo según las contribuciones % (para mostrar).
- * La ventana de 28 días actúa de decay natural.
+ * FATIGA: por grupo, días desde el último entreno de ese músculo → nivel estimado.
+ * Solo cuentan los ejercicios BASE (anti-trampas).
  */
 object RankEngine {
 
-    const val WINDOW_DAYS = 28
+    const val DECAY_WINDOW_DAYS = 84
+    private const val DAY_MS = 24L * 60L * 60L * 1000L
     private const val ZWS = "​"
 
     fun compute(
@@ -55,46 +62,50 @@ object RankEngine {
     ): PanteonResult {
         if (bodyweight <= 0.0) return PanteonResult.EMPTY
 
-        val cutoff = nowMillis - WINDOW_DAYS.toLong() * 24L * 60L * 60L * 1000L
-        // Contribuciones CANÓNICAS por nombre (no dependemos de las guardadas, que Gson
-        // puede dejar null en datos antiguos).
+        val cutoff = nowMillis - DECAY_WINDOW_DAYS.toLong() * DAY_MS
         val baseByName = DefaultExercises.getAll().associateBy { normalize(it.name) }
         val libraryById = library.associateBy { it.id }
         val libraryByName = library.associateBy { normalize(it.name) }
 
-        val best1RM = HashMap<String, Double>()               // ejercicio -> mejor 1RM
-        val subgroupVolume = HashMap<MuscleSubgroup, Double>() // subgrupo -> volumen
+        val bestDecayed1RM = HashMap<String, Double>()          // ejercicio -> mejor 1RM decaído
+        val subgroupVolume = HashMap<MuscleSubgroup, Double>()  // volumen (últimos 28d)
+        val subgroupLastTrained = HashMap<MuscleSubgroup, Int>() // días desde último entreno
 
         for (session in history) {
             if (session.date < cutoff) continue
+            val daysAgo = ((nowMillis - session.date) / DAY_MS).toInt().coerceAtLeast(0)
+            val recency = recencyFactor(daysAgo.toLong())
+            if (recency <= 0.0) continue
             for (prog in session.exercisesProgress) {
                 val ex = libraryById[prog.exercise.id]
                     ?: libraryByName[normalize(prog.exercise.name)]
                     ?: prog.exercise
-                // ANTI-TRAMPAS: solo puntúan los ejercicios BASE.
                 if (DefaultExercises.BASE_TAG !in (ex.tags ?: emptyList())) continue
                 val name = normalize(ex.name)
-                val canonical = baseByName[name] ?: continue
-                val contribs = canonical.muscleContributions ?: emptyList()
+                val contribs = baseByName[name]?.muscleContributions ?: emptyList()
                 for (set in prog.sets) {
                     if (!set.isCompleted) continue
                     if (set.weight > 0.0) {
-                        val e1rm = set.weight * (1 + set.reps / 30.0)   // Epley
-                        if (e1rm > (best1RM[name] ?: 0.0)) best1RM[name] = e1rm
+                        val e1rm = set.weight * (1 + set.reps / 30.0) * recency
+                        if (e1rm > (bestDecayed1RM[name] ?: 0.0)) bestDecayed1RM[name] = e1rm
                     }
                     val load = (if (set.weight > 0.0) set.weight else bodyweight) * set.reps
                     for (c in contribs) {
                         val sub = c.subgroup ?: continue
-                        subgroupVolume[sub] = (subgroupVolume[sub] ?: 0.0) + load * (c.percent / 100.0)
+                        // Volumen solo de los últimos 28 días (para la fatiga/actividad reciente)
+                        if (daysAgo <= 28) {
+                            subgroupVolume[sub] = (subgroupVolume[sub] ?: 0.0) + load * (c.percent / 100.0)
+                        }
+                        val prev = subgroupLastTrained[sub]
+                        if (prev == null || daysAgo < prev) subgroupLastTrained[sub] = daysAgo
                     }
                 }
             }
         }
 
-        // Cada ejercicio suma a CADA músculo que trabaja (directa o indirectamente):
-        // score del músculo = mejor de (1RM/peso × contribución%) entre sus ejercicios.
+        // Score por músculo = mejor (1RM decaído/peso × contribución%) entre sus ejercicios.
         val subgroupScore = HashMap<MuscleSubgroup, Double>()
-        for ((name, best) in best1RM) {
+        for ((name, best) in bestDecayed1RM) {
             if (best <= 0.0) continue
             val contribs = baseByName[name]?.muscleContributions ?: continue
             val ratio = best / bodyweight
@@ -122,7 +133,9 @@ object RankEngine {
             val ranked = subs.filter { it.tier != RankTier.SIN_RANGO }
             val tier = avgTier(ranked.map { it.tier })
             val progress = if (ranked.isEmpty()) 0f else ranked.map { it.progressToNext }.average().toFloat()
-            GroupRank(grp, tier, progress, subs)
+            // Fatiga: días desde el entreno más reciente de cualquier músculo del grupo.
+            val daysSince = subs.mapNotNull { subgroupLastTrained[it.subgroup] }.minOrNull() ?: -1
+            GroupRank(grp, tier, progress, subs, daysSince, fatigueFor(daysSince))
         }
 
         val strongest = groups.filter { it.tier != RankTier.SIN_RANGO }
@@ -130,6 +143,25 @@ object RankEngine {
         val weakest = groups.minByOrNull { tierRank(it.tier) }
 
         return PanteonResult(groups, strongest, weakest)
+    }
+
+    /** Peso de una marca según su antigüedad (decaimiento progresivo). */
+    fun recencyFactor(daysAgo: Long): Double = when {
+        daysAgo <= 28 -> 1.0
+        daysAgo <= 35 -> 0.95
+        daysAgo <= 42 -> 0.90
+        daysAgo <= 56 -> 0.80
+        daysAgo <= 70 -> 0.65
+        daysAgo <= 84 -> 0.50
+        else -> 0.0
+    }
+
+    private fun fatigueFor(daysSince: Int): Fatigue = when {
+        daysSince < 0 -> Fatigue.SIN_DATOS
+        daysSince <= 1 -> Fatigue.ALTA
+        daysSince <= 3 -> Fatigue.MEDIA
+        daysSince <= 6 -> Fatigue.BAJA
+        else -> Fatigue.DESCANSADO
     }
 
     private fun tierRank(t: RankTier): Int =

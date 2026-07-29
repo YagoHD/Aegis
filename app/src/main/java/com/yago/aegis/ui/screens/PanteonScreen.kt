@@ -27,13 +27,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.R
+import com.yago.aegis.data.Fatigue
 import com.yago.aegis.data.GroupRank
 import com.yago.aegis.data.RankTier
 import com.yago.aegis.data.SubgroupRank
@@ -216,6 +220,8 @@ private fun GroupRow(g: GroupRank) {
                     letterSpacing = 0.5.sp,
                     modifier = Modifier.weight(1f)
                 )
+                FatigueChip(g.fatigue, g.daysSinceTrained)
+                Spacer(modifier = Modifier.width(8.dp))
                 RankBadge(g.tier)
                 Spacer(modifier = Modifier.width(8.dp))
                 Icon(
@@ -278,6 +284,45 @@ private fun RankBadge(tier: RankTier, small: Boolean = false) {
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
         )
     }
+}
+
+/** Indicador compacto de fatiga: punto de color (nivel) + recencia del último entreno. */
+@Composable
+private fun FatigueChip(fatigue: Fatigue, daysSince: Int) {
+    if (fatigue == Fatigue.SIN_DATOS) return
+    val color = fatigueColor(fatigue)
+    val levelLabel = when (fatigue) {
+        Fatigue.ALTA -> stringResource(R.string.fatigue_alta)
+        Fatigue.MEDIA -> stringResource(R.string.fatigue_media)
+        Fatigue.BAJA -> stringResource(R.string.fatigue_baja)
+        else -> stringResource(R.string.fatigue_descansado)
+    }
+    val recency = when {
+        daysSince <= 0 -> stringResource(R.string.fatigue_trained_today)
+        daysSince == 1 -> stringResource(R.string.fatigue_trained_yesterday)
+        else -> stringResource(R.string.fatigue_trained_days, daysSince)
+    }
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.semantics { contentDescription = levelLabel }
+    ) {
+        Box(modifier = Modifier.size(7.dp).clip(CircleShape).background(color))
+        Spacer(modifier = Modifier.width(5.dp))
+        Text(
+            text = recency,
+            color = MaterialTheme.colorScheme.secondary,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+private fun fatigueColor(fatigue: Fatigue): Color = when (fatigue) {
+    Fatigue.ALTA -> Color(0xFFE5533D)
+    Fatigue.MEDIA -> Color(0xFFD4AF37)
+    Fatigue.BAJA -> Color(0xFF7FB069)
+    else -> MaterialTheme.colorScheme.secondary
 }
 
 @Composable

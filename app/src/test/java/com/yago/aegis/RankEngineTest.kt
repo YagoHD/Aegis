@@ -4,6 +4,7 @@ import com.yago.aegis.data.DefaultExercises
 import com.yago.aegis.data.Exercise
 import com.yago.aegis.data.ExerciseProgress
 import com.yago.aegis.data.ExerciseSet
+import com.yago.aegis.data.Fatigue
 import com.yago.aegis.data.MuscleGroup
 import com.yago.aegis.data.RankEngine
 import com.yago.aegis.data.RankTier
@@ -61,10 +62,60 @@ class RankEngineTest {
 
     @Test
     fun staleData_isIgnored() {
-        // Mismo levantamiento fuerte pero hace 40 días -> fuera de la ventana de 28 días
-        val history = listOf(sessionWith(bench(), weight = 120.0, reps = 5, daysAgo = 40))
+        // Hace 90 días -> más allá de la ventana de decaimiento (84 d) -> no cuenta
+        val history = listOf(sessionWith(bench(), weight = 120.0, reps = 5, daysAgo = 90))
         val r = RankEngine.compute(history, library, bodyweight = 80.0, sex = "MALE")
         val pecho = r.groups.first { it.group == MuscleGroup.PECHO }
         assertEquals(RankTier.SIN_RANGO, pecho.tier)
+    }
+
+    @Test
+    fun decay_countsBeyond28DaysButFades() {
+        // A 60 días la marca decae (×0.65) pero SIGUE contando -> ya no hay corte duro a los 28 d
+        val history = listOf(sessionWith(bench(), weight = 120.0, reps = 5, daysAgo = 60))
+        val r = RankEngine.compute(history, library, bodyweight = 80.0, sex = "MALE")
+        val pecho = r.groups.first { it.group == MuscleGroup.PECHO }
+        assertTrue(pecho.tier != RankTier.SIN_RANGO)
+    }
+
+    @Test
+    fun recencyCurve_matchesSpec() {
+        assertEquals(1.0, RankEngine.recencyFactor(0), 0.0001)
+        assertEquals(1.0, RankEngine.recencyFactor(28), 0.0001)
+        assertEquals(0.95, RankEngine.recencyFactor(35), 0.0001)
+        assertEquals(0.90, RankEngine.recencyFactor(42), 0.0001)
+        assertEquals(0.80, RankEngine.recencyFactor(56), 0.0001)
+        assertEquals(0.65, RankEngine.recencyFactor(70), 0.0001)
+        assertEquals(0.50, RankEngine.recencyFactor(84), 0.0001)
+        assertEquals(0.0, RankEngine.recencyFactor(85), 0.0001)
+    }
+
+    @Test
+    fun fatigue_recentTrainingIsHigh() {
+        val history = listOf(sessionWith(bench(), weight = 80.0, reps = 5, daysAgo = 0))
+        val r = RankEngine.compute(history, library, bodyweight = 80.0, sex = "MALE")
+        val pecho = r.groups.first { it.group == MuscleGroup.PECHO }
+        assertEquals(0, pecho.daysSinceTrained)
+        assertEquals(Fatigue.ALTA, pecho.fatigue)
+    }
+
+    @Test
+    fun fatigue_oldTrainingIsRested() {
+        // Entrenado hace 10 días (dentro de la ventana) -> descansado
+        val history = listOf(sessionWith(bench(), weight = 80.0, reps = 5, daysAgo = 10))
+        val r = RankEngine.compute(history, library, bodyweight = 80.0, sex = "MALE")
+        val pecho = r.groups.first { it.group == MuscleGroup.PECHO }
+        assertEquals(10, pecho.daysSinceTrained)
+        assertEquals(Fatigue.DESCANSADO, pecho.fatigue)
+    }
+
+    @Test
+    fun fatigue_untrainedGroupHasNoData() {
+        val history = listOf(sessionWith(bench(), weight = 80.0, reps = 5, daysAgo = 0))
+        val r = RankEngine.compute(history, library, bodyweight = 80.0, sex = "MALE")
+        // La pierna no se entrenó -> sin datos de fatiga
+        val pierna = r.groups.first { it.group == MuscleGroup.PIERNA }
+        assertEquals(-1, pierna.daysSinceTrained)
+        assertEquals(Fatigue.SIN_DATOS, pierna.fatigue)
     }
 }

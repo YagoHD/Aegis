@@ -413,4 +413,20 @@
     <string name="active_session_lock_message">Hai una sessione attiva: %1$s.\nTerminala o annullala prima di iniziarne un\'altra.</string>
     <string name="cancel_active_session_btn">ANNULLA SESSIONE</string>
     <string name="locked_label">BLOCCATO</string>
+    <!-- Gamification: livello / XP -->
+    <string name="level_label">LIVELLO %1$d</string>
+    <string name="xp_format">%1$d / %2$d XP</string>
+
+    <!-- Affaticamento muscolare (stimato per recenza) -->
+    <string name="fatigue_alta">FATICA ALTA</string>
+    <string name="fatigue_media">FATICA MEDIA</string>
+    <string name="fatigue_baja">FATICA BASSA</string>
+    <string name="fatigue_descansado">RIPOSATO</string>
+    <string name="fatigue_trained_days">%1$d g fa</string>
+    <string name="fatigue_trained_today">Oggi</string>
+    <string name="fatigue_trained_yesterday">Ieri</string>
+
+    <!-- Ghost: obiettivo da battere nella sessione -->
+    <string name="ghost_target">DA BATTERE</string>
+    <string name="previous_workout_label">ALLENAMENTO PRECEDENTE</string>
 </resources>

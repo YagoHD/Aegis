@@ -413,4 +413,20 @@
     <string name="active_session_lock_message">You have an active session: %1$s.\nFinish or cancel it before starting another.</string>
     <string name="cancel_active_session_btn">CANCEL SESSION</string>
     <string name="locked_label">LOCKED</string>
+    <!-- Gamification: level / XP -->
+    <string name="level_label">LEVEL %1$d</string>
+    <string name="xp_format">%1$d / %2$d XP</string>
+
+    <!-- Muscle fatigue (estimated by recency) -->
+    <string name="fatigue_alta">HIGH FATIGUE</string>
+    <string name="fatigue_media">MEDIUM FATIGUE</string>
+    <string name="fatigue_baja">LOW FATIGUE</string>
+    <string name="fatigue_descansado">RESTED</string>
+    <string name="fatigue_trained_days">%1$dd ago</string>
+    <string name="fatigue_trained_today">Today</string>
+    <string name="fatigue_trained_yesterday">Yesterday</string>
+
+    <!-- Ghost: target to beat in the session -->
+    <string name="ghost_target">BEAT THIS</string>
+    <string name="previous_workout_label">PREVIOUS WORKOUT</string>
 </resources>

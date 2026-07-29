@@ -5,10 +5,13 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.yago.aegis.data.BodyMeasure
 import com.yago.aegis.data.BodySnapshot
+import com.yago.aegis.data.LevelState
+import com.yago.aegis.data.LevelSystem
 import com.yago.aegis.data.PhotoRecord
 import com.yago.aegis.data.PhotoType
 import com.yago.aegis.data.UserProfile
 import com.yago.aegis.data.UserRepository
+import com.yago.aegis.data.WorkoutSession
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -39,7 +42,8 @@ data class ProfileUiState(
     val showGirths: Boolean = true,
     val customMeasures: List<BodyMeasure> = emptyList(),
     val bodyHistory: List<BodySnapshot> = emptyList(),
-    val photoHistory: List<PhotoRecord> = emptyList()
+    val photoHistory: List<PhotoRecord> = emptyList(),
+    val level: LevelState = LevelState()
 )
 
 class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
@@ -49,8 +53,17 @@ class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
 
     val onboardingCompleted: Flow<Boolean> = repository.onboardingCompleted
 
+    // Estado para recalcular nivel/XP cuando cambian historial o racha (llegan por vías distintas)
+    private var latestHistory: List<WorkoutSession> = emptyList()
+    private var latestStreak: Int = 0
+
     init {
         collectProfileData()
+    }
+
+    private fun recomputeLevel() {
+        val level = LevelSystem.compute(latestHistory, latestStreak)
+        _uiState.update { it.copy(level = level) }
     }
 
     private fun collectProfileData() {
@@ -124,10 +137,19 @@ class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
             }
         }
 
+        // Grupo 5b: historial de entrenos → nivel/XP (reactivo)
+        viewModelScope.launch {
+            repository.workoutHistory.collect { history ->
+                latestHistory = history
+                recomputeLevel()
+            }
+        }
+
         // Grupo 6: racha — computada una vez al arrancar (se actualiza al terminar entreno)
         viewModelScope.launch {
-            val streak = repository.computeCurrentStreak()
-            _uiState.update { it.copy(user = it.user.copy(currentStreak = streak)) }
+            latestStreak = repository.computeCurrentStreak()
+            _uiState.update { it.copy(user = it.user.copy(currentStreak = latestStreak)) }
+            recomputeLevel()
         }
     }
 
@@ -226,8 +248,9 @@ class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
     /** Recalcula y actualiza la racha tras finalizar un entreno. */
     fun refreshStreak() {
         viewModelScope.launch {
-            val streak = repository.computeCurrentStreak()
-            _uiState.update { it.copy(user = it.user.copy(currentStreak = streak)) }
+            latestStreak = repository.computeCurrentStreak()
+            _uiState.update { it.copy(user = it.user.copy(currentStreak = latestStreak)) }
+            recomputeLevel()
         }
     }
 
@@ -236,8 +259,9 @@ class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
         viewModelScope.launch {
             repository.updateDisciplineDay(newDay)
             // Recalcula la racha justo después de guardar la sesión
-            val streak = repository.computeCurrentStreak()
-            _uiState.update { it.copy(user = it.user.copy(currentStreak = streak)) }
+            latestStreak = repository.computeCurrentStreak()
+            _uiState.update { it.copy(user = it.user.copy(currentStreak = latestStreak)) }
+            recomputeLevel()
         }
     }
 
