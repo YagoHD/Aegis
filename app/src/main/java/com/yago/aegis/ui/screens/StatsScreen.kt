@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.yago.aegis.R
 import com.yago.aegis.ui.components.*
 import com.yago.aegis.viewmodel.StatsViewModel
@@ -32,6 +33,7 @@ fun StatsScreen(
     val filteredList by viewModel.filteredExercises.collectAsState(initial = emptyList())
     val availableTags by viewModel.availableStatsTags.collectAsState(initial = emptyList())
     val monthlyData by viewModel.monthlyVolumeEvolution.collectAsState(initial = emptyList())
+    val routines by viewModel.routines.collectAsState()
 
     // Usamos Scaffold para que la TopBar esté fija y el contenido haga scroll debajo
     Scaffold(
@@ -119,8 +121,28 @@ fun StatsScreen(
                         onSearchChange = { viewModel.searchQuery = it },
                         availableTags = availableTags,
                         selectedTag = viewModel.selectedTag,
-                        onTagSelected = { viewModel.selectedTag = it }
+                        onTagSelected = { viewModel.selectedTag = it },
+                        onlyWithData = viewModel.showOnlyWithData,
+                        onToggleOnlyWithData = { viewModel.showOnlyWithData = !viewModel.showOnlyWithData },
+                        routines = routines,
+                        selectedRoutineId = viewModel.selectedRoutineId,
+                        onRoutineSelected = { viewModel.selectedRoutineId = it }
                     )
+                }
+
+                // Aviso cuando el filtro no devuelve ningún ejercicio
+                if (filteredList.isEmpty()) {
+                    item {
+                        Text(
+                            text = stringResource(R.string.stats_empty_filtered),
+                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 24.dp),
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                            fontSize = 13.sp
+                        )
+                    }
                 }
 
                 // Usamos un espaciado menor entre las filas de ejercicios (8.dp)

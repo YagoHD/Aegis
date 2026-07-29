@@ -177,23 +177,24 @@ private fun EmptyRanks() {
 
 @Composable
 private fun SummaryCard(label: String, group: GroupRank?, modifier: Modifier = Modifier) {
+    // Sin altura fija: el contenido fluye para que el tag de rango se vea entero (antes se cortaba).
     Surface(
-        modifier = modifier.height(90.dp),
+        modifier = modifier,
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
     ) {
-        Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.SpaceBetween) {
+        Column(modifier = Modifier.padding(14.dp)) {
             Text(label, color = MaterialTheme.colorScheme.secondary, fontSize = 9.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
-            Column {
-                Text(
-                    text = group?.group?.display?.uppercase() ?: "—",
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Black
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                RankBadge(group?.tier ?: RankTier.SIN_RANGO)
-            }
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = group?.group?.display?.uppercase() ?: "—",
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Black,
+                maxLines = 1
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            RankBadge(group?.tier ?: RankTier.SIN_RANGO)
         }
     }
 }
@@ -271,7 +272,9 @@ private fun SubgroupRow(s: SubgroupRank) {
 @Composable
 private fun RankBadge(tier: RankTier, small: Boolean = false) {
     val isRanked = tier != RankTier.SIN_RANGO
+    // Ancho fijo + texto centrado -> todos los tags miden igual (Oro no queda más pequeño que Platino)
     Surface(
+        modifier = Modifier.width(if (small) 78.dp else 96.dp),
         shape = RoundedCornerShape(4.dp),
         color = if (isRanked) Color(tier.colorHex) else MaterialTheme.colorScheme.surface
     ) {
@@ -281,7 +284,11 @@ private fun RankBadge(tier: RankTier, small: Boolean = false) {
             fontSize = if (small) 8.sp else 10.sp,
             fontWeight = FontWeight.Black,
             letterSpacing = 1.sp,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 3.dp)
         )
     }
 }

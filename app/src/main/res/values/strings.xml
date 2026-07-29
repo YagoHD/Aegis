@@ -452,6 +452,12 @@
     <string name="ghost_target">A BATIR</string>
     <string name="previous_workout_label">ENTRENAMIENTO PREVIO</string>
 
+    <!-- Stats: filtros de ejercicios -->
+    <string name="filter_with_data">CON DATOS</string>
+    <string name="filter_routine_label">RUTINA</string>
+    <string name="filter_all_routines">TODAS</string>
+    <string name="stats_empty_filtered">Ningún ejercicio coincide con el filtro</string>
+
     <!-- Firebase -->
     <string name="default_web_client_id">322703265285-qke4qco28fmnp92utb5ob8l9sak16lkp.apps.googleusercontent.com</string>
 </resources>

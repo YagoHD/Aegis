@@ -10,8 +10,11 @@ import androidx.lifecycle.viewModelScope
 import com.yago.aegis.data.AppTags
 import com.yago.aegis.data.DefaultExercises
 import com.yago.aegis.data.Exercise
+import com.yago.aegis.data.Routine
 import com.yago.aegis.data.UserRepository
 import com.yago.aegis.data.WorkoutSession
+import com.yago.aegis.data.effectiveSlots
+import com.yago.aegis.data.withSafeDefaults
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -84,21 +87,53 @@ class StatsViewModel(private val repository: UserRepository) : ViewModel() {
     // Búsqueda y filtro de ejercicios (estado UI local al ViewModel)
     var searchQuery by mutableStateOf("")
     var selectedTag by mutableStateOf("ALL")
+    // Filtro: mostrar solo ejercicios con datos (algún set completado en el historial)
+    var showOnlyWithData by mutableStateOf(false)
+    // Filtro: ejercicios de una rutina concreta (null = todas)
+    var selectedRoutineId by mutableStateOf<Int?>(null)
 
     // Tags para el filtro en Stats: los canónicos de la app (fijos).
     val availableStatsTags: StateFlow<List<String>> = MutableStateFlow(AppTags.ALL)
 
+    // Rutinas del usuario (para el filtro "por rutina"). withSafeDefaults evita listas null de Gson.
+    val routines: StateFlow<List<Routine>> = repository.routines
+        .map { list -> list.map { it.withSafeDefaults() } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    private data class StatsFilters(
+        val query: String,
+        val tag: String,
+        val onlyWithData: Boolean,
+        val routineId: Int?
+    )
+
     val filteredExercises: Flow<List<Exercise>> = combine(
         allExercises,
         workoutHistory,
-        snapshotFlow { searchQuery },
-        snapshotFlow { selectedTag }
-    ) { library, history, query, tag ->
+        routines,
+        snapshotFlow { StatsFilters(searchQuery, selectedTag, showOnlyWithData, selectedRoutineId) }
+    ) { library, history, routineList, f ->
+        // Ejercicios con datos: nombres (normalizados) con al menos un set completado.
+        val trainedNames: Set<String> = history.asSequence()
+            .flatMap { it.exercisesProgress.asSequence() }
+            .filter { prog -> prog.sets.any { it.isCompleted } }
+            .map { normalizeName(it.exercise.name) }
+            .toSet()
+        // Ejercicios de la rutina seleccionada (por nombre, robusto a recargas de base).
+        val routineNames: Set<String>? = f.routineId?.let { rid ->
+            routineList.firstOrNull { it.id == rid }
+                ?.effectiveSlots()
+                ?.flatMap { slot -> slot.variants.map { normalizeName(it.name) } }
+                ?.toSet() ?: emptySet()
+        }
         library.filter { exercise ->
-            val matchesQuery = exercise.name.contains(query, ignoreCase = true)
-            val matchesTag = tag == "ALL" || exercise.tags.any { it.uppercase() == tag.uppercase() }
-                || exercise.muscleGroup.uppercase() == tag.uppercase()
-            matchesQuery && matchesTag
+            val matchesQuery = exercise.name.contains(f.query, ignoreCase = true)
+            val matchesTag = f.tag == "ALL" || exercise.tags.any { it.uppercase() == f.tag.uppercase() }
+                || exercise.muscleGroup.uppercase() == f.tag.uppercase()
+            val name = normalizeName(exercise.name)
+            val matchesData = !f.onlyWithData || name in trainedNames
+            val matchesRoutine = routineNames == null || name in routineNames
+            matchesQuery && matchesTag && matchesData && matchesRoutine
         }.map { exercise ->
             val maxWeight = history
                 .flatMap { it.exercisesProgress }
@@ -109,6 +144,9 @@ class StatsViewModel(private val repository: UserRepository) : ViewModel() {
             exercise.copy(oneRepMax = maxWeight)
         }
     }
+
+    // Normaliza nombres para comparar (quita el Zero Width Space de los base y espacios).
+    private fun normalizeName(name: String): String = name.replace("​", "").trim().uppercase()
 
     fun getExerciseHistory(exerciseId: Long): Flow<List<WorkoutSession>> {
         return workoutHistory.map { history ->

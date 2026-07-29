@@ -429,4 +429,10 @@
     <!-- Ghost: alvo a bater na sessão -->
     <string name="ghost_target">A BATER</string>
     <string name="previous_workout_label">TREINO ANTERIOR</string>
+
+    <!-- Stats: filtros de exercícios -->
+    <string name="filter_with_data">COM DADOS</string>
+    <string name="filter_routine_label">ROTINA</string>
+    <string name="filter_all_routines">TODAS</string>
+    <string name="stats_empty_filtered">Nenhum exercício corresponde ao filtro</string>
 </resources>

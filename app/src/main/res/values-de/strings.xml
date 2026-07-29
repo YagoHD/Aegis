@@ -429,4 +429,10 @@
     <!-- Ghost: zu schlagendes Ziel in der Einheit -->
     <string name="ghost_target">ZU SCHLAGEN</string>
     <string name="previous_workout_label">VORHERIGES TRAINING</string>
+
+    <!-- Stats: Übungsfilter -->
+    <string name="filter_with_data">MIT DATEN</string>
+    <string name="filter_routine_label">ROUTINE</string>
+    <string name="filter_all_routines">ALLE</string>
+    <string name="stats_empty_filtered">Keine Übung entspricht dem Filter</string>
 </resources>
