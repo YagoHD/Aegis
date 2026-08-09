@@ -53,6 +53,10 @@ class SettingsStore(private val context: Context) {
         private val BAR_WEIGHT = floatPreferencesKey("bar_weight")
         private val BODY_HISTORY_KEY = stringPreferencesKey("body_history")
         private val PHOTO_HISTORY_KEY = stringPreferencesKey("photo_history")
+        // Sesión de entreno en curso (para no perderla si Android mata el proceso o se abre otra instancia)
+        private val ACTIVE_SESSION_KEY = stringPreferencesKey("active_session")
+        private val ACTIVE_ROUTINE_ID_KEY = stringPreferencesKey("active_routine_id")
+        private val ACTIVE_SESSION_START_KEY = longPreferencesKey("active_session_start")
     }
 
     // --- LECTURA (READ) ---
@@ -86,6 +90,15 @@ class SettingsStore(private val context: Context) {
             gson.fromJson(json, type)
         }
     }
+
+    // Sesión de entreno en curso (null = ninguna). Se restaura al abrir la app.
+    val activeSession: Flow<WorkoutSession?> = context.dataStore.data.map { prefs ->
+        prefs[ACTIVE_SESSION_KEY]?.takeIf { it.isNotEmpty() }?.let { json ->
+            runCatching { gson.fromJson(json, WorkoutSession::class.java) }.getOrNull()
+        }
+    }
+    val activeRoutineId: Flow<Int?> = context.dataStore.data.map { it[ACTIVE_ROUTINE_ID_KEY]?.toIntOrNull() }
+    val activeSessionStart: Flow<Long> = context.dataStore.data.map { it[ACTIVE_SESSION_START_KEY] ?: 0L }
     val globalTags: Flow<List<String>> = context.dataStore.data.map { prefs ->
         val json = prefs[GLOBAL_TAGS_KEY] ?: ""
         if (json.isEmpty()) listOf("PULL", "PUSH", "LEGS")
@@ -243,6 +256,22 @@ class SettingsStore(private val context: Context) {
     suspend fun saveRoutines(list: List<Routine>) {
         val json = gson.toJson(list)
         context.dataStore.edit { it[ROUTINES_KEY] = json }
+    }
+
+    /** Guarda (o borra, si session=null) la sesión de entreno en curso para poder restaurarla. */
+    suspend fun saveActiveSession(session: WorkoutSession?, routineId: Int?, startTime: Long) {
+        context.dataStore.edit { prefs ->
+            if (session == null) {
+                prefs.remove(ACTIVE_SESSION_KEY)
+                prefs.remove(ACTIVE_ROUTINE_ID_KEY)
+                prefs.remove(ACTIVE_SESSION_START_KEY)
+            } else {
+                prefs[ACTIVE_SESSION_KEY] = gson.toJson(session)
+                if (routineId != null) prefs[ACTIVE_ROUTINE_ID_KEY] = routineId.toString()
+                else prefs.remove(ACTIVE_ROUTINE_ID_KEY)
+                prefs[ACTIVE_SESSION_START_KEY] = startTime
+            }
+        }
     }
     suspend fun saveDisciplineDay(days: Int) {
         context.dataStore.edit { it[DISCIPLINE_DAY] = days }

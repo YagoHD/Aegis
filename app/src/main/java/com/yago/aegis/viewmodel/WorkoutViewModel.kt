@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
@@ -62,6 +63,33 @@ class WorkoutViewModel(
 
     private val _uncompletedWithData = MutableStateFlow<List<ExerciseProgress>>(emptyList())
     val uncompletedWithData: StateFlow<List<ExerciseProgress>> = _uncompletedWithData.asStateFlow()
+
+    init {
+        viewModelScope.launch { restoreAndPersistSession() }
+    }
+
+    /**
+     * Restaura la sesión en curso si Android mató el proceso o se abrió otra instancia de la app,
+     * y a partir de ahí persiste cada cambio (debounce para no escribir en DataStore en cada tecla).
+     */
+    @OptIn(kotlinx.coroutines.FlowPreview::class)
+    private suspend fun restoreAndPersistSession() {
+        if (_activeSession.value == null) {
+            val saved = repository.activeSession.first()
+            if (saved != null) {
+                _activeSession.value = saved
+                _activeRoutineId.value = repository.activeRoutineId.first()
+                sessionStartTime = repository.activeSessionStart.first().takeIf { it > 0L }
+                    ?: System.currentTimeMillis()
+                _isPaused.value = true   // aparece como reanudable en la pantalla de selección
+            }
+        }
+        // A partir de aquí (tras restaurar) empezamos a persistir cambios, evitando una
+        // carrera en la que el primer emit nulo borre la sesión guardada antes de restaurarla.
+        _activeSession
+            .debounce(400)
+            .collect { repository.saveActiveSession(it, _activeRoutineId.value, sessionStartTime) }
+    }
 
     // ─────────────────────────────────────────────
     // TIMER DE DESCANSO
@@ -417,6 +445,8 @@ class WorkoutViewModel(
                 exercises = exerciseSummaries
             )
             _activeSession.value = null
+            _activeRoutineId.value = null
+            repository.saveActiveSession(null, null, 0L)  // borra inmediatamente la sesión persistida
             onComplete()
         }
     }
@@ -424,6 +454,8 @@ class WorkoutViewModel(
     fun cancelWorkout(onComplete: () -> Unit) {
         stopTimer()
         _activeSession.value = null
+        _activeRoutineId.value = null
+        viewModelScope.launch { repository.saveActiveSession(null, null, 0L) }
         onComplete()
     }
 

@@ -34,6 +34,12 @@ class UserRepository(
     val exerciseLibrary: Flow<List<Exercise>> = settingsStore.exerciseLibrary
     val globalTags: Flow<List<String>> = settingsStore.globalTags
     val workoutHistory: Flow<List<WorkoutSession>> = settingsStore.workoutHistory
+    // Sesión de entreno en curso (persistida para no perderla si muere el proceso)
+    val activeSession: Flow<WorkoutSession?> = settingsStore.activeSession
+    val activeRoutineId: Flow<Int?> = settingsStore.activeRoutineId
+    val activeSessionStart: Flow<Long> = settingsStore.activeSessionStart
+    suspend fun saveActiveSession(session: WorkoutSession?, routineId: Int?, startTime: Long) =
+        settingsStore.saveActiveSession(session, routineId, startTime)
     val showVolumeCard = settingsStore.showVolumeCard
     val showDisciplineCard = settingsStore.showDisciplineCard
     val showEvolutionGraph = settingsStore.showEvolutionGraph
