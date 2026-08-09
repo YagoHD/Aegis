@@ -121,6 +121,8 @@ fun SetRow(
             label = stringResource(R.string.label_reps),
             modifier = Modifier.weight(1f),
             isCompleted = set.isCompleted,
+            // Reserva el mismo hueco que el "= X kg" del peso para que ambos cuadros queden alineados
+            reserveSubLabelSpace = loadType != LoadType.NORMAL,
             onValueChange = { stringValue ->
                 val reps = stringValue.toIntOrNull() ?: 0
                 onUpdate(set.weight, reps, set.isCompleted, set.loadModifier)
@@ -160,7 +162,8 @@ fun SetInputField(
     isCompleted: Boolean,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    subLabel: String? = null
+    subLabel: String? = null,
+    reserveSubLabelSpace: Boolean = false
 ) {
     // Estado local para manejar el texto mientras el usuario escribe (evita errores con el punto decimal)
     var textValue by remember(value) { mutableStateOf(value) }
@@ -228,11 +231,19 @@ fun SetInputField(
             }
         )
 
-        // Subtexto: peso efectivo (corporal/asistido)
+        // Subtexto: peso efectivo (corporal/asistido). Si no hay, se puede reservar el hueco
+        // para que el campo de al lado (reps) quede a la misma altura.
         if (subLabel != null) {
             Text(
                 text = subLabel,
                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+        } else if (reserveSubLabelSpace) {
+            Text(
+                text = " ",
                 fontSize = 9.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(top = 2.dp)
