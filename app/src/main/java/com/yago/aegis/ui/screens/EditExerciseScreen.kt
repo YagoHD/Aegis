@@ -70,12 +70,18 @@ fun EditExerciseScreen(
             Button(
                 onClick = {
                     if (exerciseName.isNotBlank()) {
+                        // Anti-trampas: si era un ejercicio BASE, conserva su BASE_TAG al editar.
+                        // Sin esto, editar (p.ej. el tipo de carga) lo saca de la base -> se va a
+                        // "Mis ejercicios" y deja de contar para el Panteón.
+                        val wasBase = exerciseToEdit?.tags?.contains(DefaultExercises.BASE_TAG) == true
+                        val finalTags = if (wasBase) selectedTags.toList() + DefaultExercises.BASE_TAG
+                                        else selectedTags.toList()
                         val updatedExercise = Exercise(
                             id = exerciseToEdit?.id ?: System.currentTimeMillis(),
                             name = exerciseName,
-                            tags = selectedTags.toList(),
+                            tags = finalTags,
                             iconName = selectedIconName,
-                            muscleGroup = selectedTags.firstOrNull() ?: "",
+                            muscleGroup = if (wasBase) (exerciseToEdit?.muscleGroup ?: "") else (selectedTags.firstOrNull() ?: ""),
                             type = "",
                             notes = notes.trim(),
                             isBodyweight = loadType == com.yago.aegis.data.LoadType.BODYWEIGHT,
