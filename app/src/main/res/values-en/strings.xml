@@ -453,4 +453,14 @@
     <string name="desc_delete_selected">Delete selected</string>
     <string name="desc_profile_photo">Profile photo</string>
     <string name="desc_start_rest">Start rest</string>
+    <!-- Load type (normal / bodyweight / assisted) -->
+    <string name="load_type_label">LOAD TYPE</string>
+    <string name="load_type_normal">NORMAL</string>
+    <string name="load_type_bodyweight">BODYWEIGHT</string>
+    <string name="load_type_assisted">ASSISTED</string>
+    <string name="load_type_normal_desc">External weight: barbell, dumbbell or machine.</string>
+    <string name="load_type_bodyweight_desc">Adds your bodyweight. Add extra load if you use a plate or belt.</string>
+    <string name="load_type_assisted_desc">Subtracts the assistance from your bodyweight (pull-up or dip machine).</string>
+    <string name="label_lastre">ADDED</string>
+    <string name="label_asistencia">ASSIST</string>
 </resources>

@@ -453,4 +453,14 @@
     <string name="desc_delete_selected">Supprimer la sélection</string>
     <string name="desc_profile_photo">Photo de profil</string>
     <string name="desc_start_rest">Démarrer le repos</string>
+    <!-- Type de charge (normal / poids du corps / assisté) -->
+    <string name="load_type_label">TYPE DE CHARGE</string>
+    <string name="load_type_normal">NORMAL</string>
+    <string name="load_type_bodyweight">CORPS</string>
+    <string name="load_type_assisted">ASSISTÉ</string>
+    <string name="load_type_normal_desc">Poids externe : barre, haltère ou machine.</string>
+    <string name="load_type_bodyweight_desc">Ajoute ton poids de corps. Ajoute du lest si tu utilises un disque ou une ceinture.</string>
+    <string name="load_type_assisted_desc">Soustrait l\'assistance de ton poids de corps (machine à tractions ou dips).</string>
+    <string name="label_lastre">LEST</string>
+    <string name="label_asistencia">ASSIST.</string>
 </resources>

@@ -33,16 +33,19 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
 import com.yago.aegis.R
 import com.yago.aegis.data.ExerciseProgress
+import com.yago.aegis.data.resolveLoadType
 
 @Composable
 fun ExerciseSessionCard(
     progress: ExerciseProgress,
     onAddSet: () -> Unit,
-    onUpdateSet: (String, Double, Int, Boolean) -> Unit,
+    onUpdateSet: (String, Double, Int, Boolean, Double) -> Unit,
     onDeleteSet: (String) -> Unit,
     onToggleExercise: () -> Unit,
-    onSwitchVariant: ((Int) -> Unit)? = null   // newVariantIndex
+    onSwitchVariant: ((Int) -> Unit)? = null,  // newVariantIndex
+    bodyweight: Double = 0.0
 ) {
+    val loadType = progress.exercise.resolveLoadType()
     val isExerciseDone = progress.sets.isNotEmpty() && progress.sets.all { it.isCompleted }
     val hasVariants = progress.slotVariants.size > 1 && onSwitchVariant != null
     val currentVariantIndex = if (hasVariants)
@@ -166,7 +169,9 @@ fun ExerciseSessionCard(
                 index = index + 1,
                 set = set,
                 totalSets = progress.sets.size,
-                onUpdate = { w, r, c -> onUpdateSet(set.id, w, r, c) },
+                loadType = loadType,
+                bodyweight = bodyweight,
+                onUpdate = { w, r, c, m -> onUpdateSet(set.id, w, r, c, m) },
                 onDelete = { onDeleteSet(set.id) }
             )
         }

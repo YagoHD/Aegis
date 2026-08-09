@@ -453,4 +453,14 @@
     <string name="desc_delete_selected">Ausgewählte löschen</string>
     <string name="desc_profile_photo">Profilfoto</string>
     <string name="desc_start_rest">Pause starten</string>
+    <!-- Lasttyp (normal / Körpergewicht / unterstützt) -->
+    <string name="load_type_label">LASTTYP</string>
+    <string name="load_type_normal">NORMAL</string>
+    <string name="load_type_bodyweight">KÖRPER</string>
+    <string name="load_type_assisted">ASSIST.</string>
+    <string name="load_type_normal_desc">Externes Gewicht: Langhantel, Kurzhantel oder Maschine.</string>
+    <string name="load_type_bodyweight_desc">Addiert dein Körpergewicht. Zusatzlast eintragen, wenn du Scheibe oder Gürtel nutzt.</string>
+    <string name="load_type_assisted_desc">Zieht die Hilfe von deinem Körpergewicht ab (Klimmzug-/Dip-Maschine).</string>
+    <string name="label_lastre">ZUSATZ</string>
+    <string name="label_asistencia">HILFE</string>
 </resources>

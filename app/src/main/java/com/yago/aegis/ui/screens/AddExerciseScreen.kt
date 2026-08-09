@@ -32,6 +32,7 @@ import com.yago.aegis.ui.components.TagFilterRow
 import com.yago.aegis.ui.components.AegisTagManager
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.ExerciseCard
+import com.yago.aegis.ui.components.LoadTypeSelector
 import com.yago.aegis.viewmodel.RoutinesViewModel
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
@@ -50,7 +51,7 @@ fun AddExerciseScreen(
     var selectedIconName by remember { mutableStateOf("dumbbell") }
     val selectedTags = remember { mutableStateListOf<String>() }
     var notes by remember { mutableStateOf("") }
-    var isBodyweight by remember { mutableStateOf(false) }
+    var loadType by remember { mutableStateOf(com.yago.aegis.data.LoadType.NORMAL) }
 
     var searchQuery by remember { mutableStateOf("") }
     var selectedTag by remember { mutableStateOf("ALL") }
@@ -104,38 +105,12 @@ fun AddExerciseScreen(
                 }
             }
 
-            // 1b. TIPO: BODYWEIGHT
+            // 1b. TIPO DE CARGA: Normal / Peso corporal / Asistido
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Column {
-                        Text(
-                            text = stringResource(R.string.bodyweight_section_title),
-                            color = MaterialTheme.colorScheme.secondary,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 1.5.sp
-                        )
-                        Text(
-                            text = stringResource(R.string.bodyweight_description),
-                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
-                            fontSize = 11.sp
-                        )
-                    }
-                    Switch(
-                        checked = isBodyweight,
-                        onCheckedChange = { isBodyweight = it },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color.Black,
-                            checkedTrackColor = MaterialTheme.colorScheme.primary,
-                            uncheckedThumbColor = MaterialTheme.colorScheme.secondary,
-                            uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    )
-                }
+                LoadTypeSelector(
+                    selected = loadType,
+                    onSelect = { loadType = it }
+                )
             }
 
             // 1c. NOTAS DE FORMA
@@ -219,7 +194,8 @@ fun AddExerciseScreen(
                                 tags = selectedTags.toList(),
                                 iconName = selectedIconName,
                                 notes = notes.trim(),
-                                isBodyweight = isBodyweight
+                                isBodyweight = loadType == com.yago.aegis.data.LoadType.BODYWEIGHT,
+                                loadType = loadType.name
                             )
 
                             routinesViewModel.saveOrUpdateExercise(newExercise)
@@ -230,7 +206,7 @@ fun AddExerciseScreen(
                             selectedTags.clear()
                             selectedIconName = "dumbbell"
                             notes = ""
-                            isBodyweight = false
+                            loadType = com.yago.aegis.data.LoadType.NORMAL
                         }
                     },
                     modifier = Modifier.fillMaxWidth().height(56.dp),

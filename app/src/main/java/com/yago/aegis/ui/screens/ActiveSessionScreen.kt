@@ -78,6 +78,7 @@ fun ActiveSessionScreen(
     onNavigateToPlateCalculator: () -> Unit = {}
 ) {
     val session by workoutViewModel.activeSession.collectAsState()
+    val bodyweight by workoutViewModel.bodyweight.collectAsState()
     val uncompletedWithData by workoutViewModel.uncompletedWithData.collectAsState()
     val timerSeconds by workoutViewModel.timerSeconds.collectAsState()
     val timerRunning by workoutViewModel.timerRunning.collectAsState()
@@ -395,9 +396,10 @@ fun ActiveSessionScreen(
                         Column {
                             ExerciseSessionCard(
                                 progress = progress,
+                                bodyweight = bodyweight,
                                 onAddSet = { workoutViewModel.addSet(progress.exercise.id) },
-                                onUpdateSet = { setId, w, r, c ->
-                                    workoutViewModel.updateSet(progress.exercise.id, setId, w, r, c)
+                                onUpdateSet = { setId, w, r, c, m ->
+                                    workoutViewModel.updateSet(progress.exercise.id, setId, w, r, c, m)
                                 },
                                 onDeleteSet = { setId ->
                                     workoutViewModel.removeSet(progress.exercise.id, setId)

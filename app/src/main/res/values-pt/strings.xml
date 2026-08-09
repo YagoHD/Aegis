@@ -453,4 +453,14 @@
     <string name="desc_delete_selected">Eliminar selecionados</string>
     <string name="desc_profile_photo">Foto de perfil</string>
     <string name="desc_start_rest">Iniciar descanso</string>
+    <!-- Tipo de carga (normal / peso corporal / assistido) -->
+    <string name="load_type_label">TIPO DE CARGA</string>
+    <string name="load_type_normal">NORMAL</string>
+    <string name="load_type_bodyweight">CORPORAL</string>
+    <string name="load_type_assisted">ASSISTIDO</string>
+    <string name="load_type_normal_desc">Peso externo: barra, haltere ou máquina.</string>
+    <string name="load_type_bodyweight_desc">Soma o teu peso corporal. Adiciona lastro se usares disco ou cinto.</string>
+    <string name="load_type_assisted_desc">Subtrai a assistência ao teu peso corporal (máquina de elevações ou fundos).</string>
+    <string name="label_lastre">LASTRO</string>
+    <string name="label_asistencia">ASSIST.</string>
 </resources>

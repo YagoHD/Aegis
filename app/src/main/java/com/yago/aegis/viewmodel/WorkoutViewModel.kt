@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
@@ -35,6 +36,11 @@ class WorkoutViewModel(
 
     private val _activeSession = MutableStateFlow<WorkoutSession?>(null)
     val activeSession: StateFlow<WorkoutSession?> = _activeSession.asStateFlow()
+
+    // Peso corporal del perfil (para calcular la carga efectiva de ejercicios corporales/asistidos)
+    val bodyweight: StateFlow<Double> = repository.currentMass
+        .map { it.toDoubleOrNull() ?: 0.0 }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
 
     // Sesión pausada — el usuario puede navegar fuera y volver
     private val _isPaused = MutableStateFlow(false)
@@ -285,12 +291,12 @@ class WorkoutViewModel(
         }
     }
 
-    fun updateSet(exerciseId: Long, setId: String, weight: Double, reps: Int, completed: Boolean) {
+    fun updateSet(exerciseId: Long, setId: String, weight: Double, reps: Int, completed: Boolean, loadModifier: Double = 0.0) {
         _activeSession.update { session ->
             session?.copy(exercisesProgress = session.exercisesProgress.map { prog ->
                 if (prog.exercise.id == exerciseId) {
                     prog.copy(sets = prog.sets.map { set ->
-                        if (set.id == setId) set.copy(weight = weight, reps = reps, isCompleted = completed) else set
+                        if (set.id == setId) set.copy(weight = weight, reps = reps, isCompleted = completed, loadModifier = loadModifier) else set
                     })
                 } else prog
             })

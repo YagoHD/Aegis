@@ -25,8 +25,33 @@ data class Exercise(
     // Contribución a subgrupos musculares para el Panteón (competitivo). Vacío/null = no puntúa.
     // NULLABLE a propósito: Gson deja null los campos nuevos en datos antiguos, y un campo
     // no-nulo haría petar Exercise.copy() (valida no-null). Nullable lo tolera en toda la app.
-    val muscleContributions: List<MuscleContribution>? = emptyList()
+    val muscleContributions: List<MuscleContribution>? = emptyList(),
+    // Tipo de carga: "NORMAL" | "BODYWEIGHT" | "ASSISTED". null = derivar de isBodyweight (retrocompat Gson).
+    val loadType: String? = null
 )
+
+/** Cómo se carga un ejercicio: con peso externo, con el peso corporal, o asistido (resta). */
+enum class LoadType { NORMAL, BODYWEIGHT, ASSISTED }
+
+/** Resuelve el tipo de carga efectivo (cae en isBodyweight para datos antiguos sin loadType). */
+fun Exercise.resolveLoadType(): LoadType = when (loadType) {
+    "BODYWEIGHT" -> LoadType.BODYWEIGHT
+    "ASSISTED" -> LoadType.ASSISTED
+    "NORMAL" -> LoadType.NORMAL
+    else -> if (isBodyweight) LoadType.BODYWEIGHT else LoadType.NORMAL
+}
+
+/**
+ * Peso EFECTIVO de una serie según el tipo de carga.
+ * - NORMAL: el peso tecleado ([modifier] es el propio peso).
+ * - BODYWEIGHT: peso corporal + lastre.
+ * - ASSISTED: peso corporal − asistencia (mínimo 0).
+ */
+fun effectiveWeight(type: LoadType, bodyweight: Double, modifier: Double): Double = when (type) {
+    LoadType.NORMAL -> modifier
+    LoadType.BODYWEIGHT -> (bodyweight + modifier).coerceAtLeast(0.0)
+    LoadType.ASSISTED -> (bodyweight - modifier).coerceAtLeast(0.0)
+}
 
 data class ExerciseRecord(
     val date: Long,
@@ -50,8 +75,9 @@ data class ExerciseSlot(
 data class ExerciseSet(
     val id: String = UUID.randomUUID().toString(),
     val reps: Int = 0,
-    val weight: Double = 0.0,
-    val isCompleted: Boolean = false
+    val weight: Double = 0.0,        // peso EFECTIVO (en corporal/asistido ya incluye el peso corporal)
+    val isCompleted: Boolean = false,
+    val loadModifier: Double = 0.0   // lastre (+) o asistencia introducidos por el usuario; el signo lo da el loadType
 )
 
 /**

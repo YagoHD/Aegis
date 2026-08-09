@@ -23,9 +23,11 @@ import com.yago.aegis.R
 import com.yago.aegis.data.DefaultExercises
 import com.yago.aegis.data.Exercise
 import com.yago.aegis.data.globalExerciseIcons
+import com.yago.aegis.data.resolveLoadType
 import com.yago.aegis.ui.components.AegisAlertDialog
 import com.yago.aegis.ui.components.AegisTagManager
 import com.yago.aegis.ui.components.AegisTopBar
+import com.yago.aegis.ui.components.LoadTypeSelector
 import com.yago.aegis.viewmodel.RoutinesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -42,7 +44,7 @@ fun EditExerciseScreen(
     } }
     var selectedIconName by remember { mutableStateOf(exerciseToEdit?.iconName ?: "dumbbell") }
     var notes by remember { mutableStateOf(exerciseToEdit?.notes ?: "") }
-    var isBodyweight by remember { mutableStateOf(exerciseToEdit?.isBodyweight ?: false) }
+    var loadType by remember { mutableStateOf(exerciseToEdit?.resolveLoadType() ?: com.yago.aegis.data.LoadType.NORMAL) }
 
     val savedGlobalTags by routinesViewModel.globalTags.collectAsState()
 
@@ -76,7 +78,8 @@ fun EditExerciseScreen(
                             muscleGroup = selectedTags.firstOrNull() ?: "",
                             type = "",
                             notes = notes.trim(),
-                            isBodyweight = isBodyweight,
+                            isBodyweight = loadType == com.yago.aegis.data.LoadType.BODYWEIGHT,
+                            loadType = loadType.name,
                             lastPerformance = exerciseToEdit?.lastPerformance ?: "",
                             oneRepMax = exerciseToEdit?.oneRepMax ?: 0.0,
                             bestSet = exerciseToEdit?.bestSet,
@@ -124,40 +127,13 @@ fun EditExerciseScreen(
                 )
             }
 
-            // 1b. TIPO: BODYWEIGHT
+            // 1b. TIPO DE CARGA: Normal / Peso corporal / Asistido
             item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Column {
-                        Text(
-                            text = stringResource(R.string.bodyweight_section_title),
-                            color = MaterialTheme.colorScheme.secondary,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 1.5.sp
-                        )
-                        Text(
-                            text = stringResource(R.string.bodyweight_description),
-                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
-                            fontSize = 11.sp
-                        )
-                    }
-                    Switch(
-                        checked = isBodyweight,
-                        onCheckedChange = { isBodyweight = it },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color.Black,
-                            checkedTrackColor = MaterialTheme.colorScheme.primary,
-                            uncheckedThumbColor = MaterialTheme.colorScheme.secondary,
-                            uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    )
-                }
+                LoadTypeSelector(
+                    selected = loadType,
+                    onSelect = { loadType = it },
+                    modifier = Modifier.padding(vertical = 4.dp)
+                )
             }
 
             // 1c. NOTAS DE FORMA

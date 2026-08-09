@@ -34,15 +34,30 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
 import com.yago.aegis.R
 import com.yago.aegis.data.ExerciseSet
+import com.yago.aegis.data.LoadType
+import com.yago.aegis.data.effectiveWeight
 
 @Composable
 fun SetRow(
     index: Int,
     set: ExerciseSet,
-    onUpdate: (Double, Int, Boolean) -> Unit,
+    onUpdate: (weight: Double, reps: Int, completed: Boolean, modifier: Double) -> Unit,
     onDelete: () -> Unit,
-    totalSets: Int
+    totalSets: Int,
+    loadType: LoadType = LoadType.NORMAL,
+    bodyweight: Double = 0.0
 ) {
+    // Valor que se muestra en el primer campo: peso directo (NORMAL) o lastre/asistencia (BW/ASSISTED)
+    val fieldValue = if (loadType == LoadType.NORMAL) set.weight else set.loadModifier
+    val fieldLabel = when (loadType) {
+        LoadType.NORMAL -> stringResource(R.string.label_kg)
+        LoadType.BODYWEIGHT -> stringResource(R.string.label_lastre)
+        LoadType.ASSISTED -> stringResource(R.string.label_asistencia)
+    }
+    // Subtexto con el peso efectivo (solo en corporal/asistido, para que el usuario vea la carga real)
+    val effectiveHint = if (loadType != LoadType.NORMAL)
+        "= ${fmtKg(effectiveWeight(loadType, bodyweight, set.loadModifier))} kg" else null
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -69,7 +84,7 @@ fun SetRow(
                     indication = null
                 ) {
                     if (!set.isCompleted) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onUpdate(set.weight, set.reps, !set.isCompleted)
+                    onUpdate(set.weight, set.reps, !set.isCompleted, set.loadModifier)
                 },
             contentAlignment = Alignment.Center
         ) {
@@ -81,19 +96,21 @@ fun SetRow(
             )
         }
 
-        // 2. CAMPO PESO (KG)
+        // 2. CAMPO PESO / LASTRE / ASISTENCIA
         SetInputField(
-            value = if (set.weight == 0.0) "" else set.weight.toString(),
-            label = stringResource(R.string.label_kg),
+            value = if (fieldValue == 0.0) "" else fmtKg(fieldValue),
+            label = fieldLabel,
+            subLabel = effectiveHint,
             modifier = Modifier.weight(1f),
             isCompleted = set.isCompleted,
             onValueChange = { stringValue ->
-                // Solo actualizamos el valor numérico real si es un número válido (no termina en punto)
                 if (stringValue.isNotEmpty() && !stringValue.endsWith(".")) {
-                    val weight = stringValue.toDoubleOrNull() ?: 0.0
-                    onUpdate(weight, set.reps, set.isCompleted)
+                    val entered = stringValue.toDoubleOrNull() ?: 0.0
+                    val (eff, mod) = resolveWeights(loadType, bodyweight, entered)
+                    onUpdate(eff, set.reps, set.isCompleted, mod)
                 } else if (stringValue.isEmpty()) {
-                    onUpdate(0.0, set.reps, set.isCompleted)
+                    val (eff, mod) = resolveWeights(loadType, bodyweight, 0.0)
+                    onUpdate(eff, set.reps, set.isCompleted, mod)
                 }
             }
         )
@@ -106,7 +123,7 @@ fun SetRow(
             isCompleted = set.isCompleted,
             onValueChange = { stringValue ->
                 val reps = stringValue.toIntOrNull() ?: 0
-                onUpdate(set.weight, reps, set.isCompleted)
+                onUpdate(set.weight, reps, set.isCompleted, set.loadModifier)
             }
         )
 
@@ -129,13 +146,21 @@ fun SetRow(
     }
 }
 
+/** Devuelve (pesoEfectivo, modificador) para el tipo de carga a partir de lo tecleado. */
+private fun resolveWeights(loadType: LoadType, bodyweight: Double, entered: Double): Pair<Double, Double> =
+    if (loadType == LoadType.NORMAL) entered to 0.0
+    else effectiveWeight(loadType, bodyweight, entered) to entered
+
+private fun fmtKg(v: Double): String = if (v % 1.0 == 0.0) v.toInt().toString() else "%.1f".format(v)
+
 @Composable
 fun SetInputField(
     value: String,
     label: String,
     isCompleted: Boolean,
     onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    subLabel: String? = null
 ) {
     // Estado local para manejar el texto mientras el usuario escribe (evita errores con el punto decimal)
     var textValue by remember(value) { mutableStateOf(value) }
@@ -202,5 +227,16 @@ fun SetInputField(
                 }
             }
         )
+
+        // Subtexto: peso efectivo (corporal/asistido)
+        if (subLabel != null) {
+            Text(
+                text = subLabel,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+        }
     }
 }

@@ -477,6 +477,17 @@
     <string name="desc_profile_photo">Foto de perfil</string>
     <string name="desc_start_rest">Iniciar descanso</string>
 
+    <!-- Tipo de carga (normal / peso corporal / asistido) -->
+    <string name="load_type_label">TIPO DE CARGA</string>
+    <string name="load_type_normal">NORMAL</string>
+    <string name="load_type_bodyweight">CORPORAL</string>
+    <string name="load_type_assisted">ASISTIDO</string>
+    <string name="load_type_normal_desc">Peso externo: barra, mancuerna o máquina.</string>
+    <string name="load_type_bodyweight_desc">Suma tu peso corporal. Añade lastre si usas disco o cinturón.</string>
+    <string name="load_type_assisted_desc">Resta la asistencia a tu peso corporal (máquina de dominadas o fondos).</string>
+    <string name="label_lastre">LASTRE</string>
+    <string name="label_asistencia">ASIST.</string>
+
     <!-- Firebase -->
     <string name="default_web_client_id">322703265285-qke4qco28fmnp92utb5ob8l9sak16lkp.apps.googleusercontent.com</string>
 </resources>
