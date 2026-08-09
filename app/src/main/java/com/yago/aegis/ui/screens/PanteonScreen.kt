@@ -1,6 +1,8 @@
 package com.yago.aegis.ui.screens
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -29,11 +31,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.R
@@ -183,18 +187,28 @@ private fun SummaryCard(label: String, group: GroupRank?, modifier: Modifier = M
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
     ) {
-        Column(modifier = Modifier.padding(14.dp)) {
-            Text(label, color = MaterialTheme.colorScheme.secondary, fontSize = 9.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
-            Spacer(modifier = Modifier.height(10.dp))
-            Text(
-                text = group?.group?.display?.uppercase() ?: "—",
-                color = MaterialTheme.colorScheme.onBackground,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Black,
-                maxLines = 1
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            RankBadge(group?.tier ?: RankTier.SIN_RANGO)
+        val tier = group?.tier ?: RankTier.SIN_RANGO
+        Row(modifier = Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+            RankMedal(tier, 52.dp)
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                Text(label, color = MaterialTheme.colorScheme.secondary, fontSize = 9.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = group?.group?.display?.uppercase() ?: "—",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Black,
+                    maxLines = 1
+                )
+                Text(
+                    text = tier.display.uppercase(),
+                    color = if (tier == RankTier.SIN_RANGO) MaterialTheme.colorScheme.secondary else Color(tier.colorHex),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp
+                )
+            }
         }
     }
 }
@@ -223,7 +237,7 @@ private fun GroupRow(g: GroupRank) {
                 )
                 FatigueChip(g.fatigue, g.daysSinceTrained)
                 Spacer(modifier = Modifier.width(8.dp))
-                RankBadge(g.tier)
+                RankMedal(g.tier, 44.dp)
                 Spacer(modifier = Modifier.width(8.dp))
                 Icon(
                     if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
@@ -267,6 +281,27 @@ private fun SubgroupRow(s: SubgroupRank) {
         }
         RankBadge(s.tier, small = true)
     }
+}
+
+/** Medalla (imagen) del tier. Se usa en las tarjetas resumen y en las filas de grupo. */
+@Composable
+private fun RankMedal(tier: RankTier, size: Dp) {
+    Image(
+        painter = painterResource(medalRes(tier)),
+        contentDescription = tier.display,
+        modifier = Modifier.size(size)
+    )
+}
+
+@DrawableRes
+private fun medalRes(tier: RankTier): Int = when (tier) {
+    RankTier.BRONCE -> R.drawable.rank_bronce
+    RankTier.PLATA -> R.drawable.rank_plata
+    RankTier.ORO -> R.drawable.rank_oro
+    RankTier.PLATINO -> R.drawable.rank_platino
+    RankTier.DIAMANTE -> R.drawable.rank_diamante
+    RankTier.TITAN -> R.drawable.rank_titan
+    RankTier.SIN_RANGO -> R.drawable.rank_sin_rango
 }
 
 @Composable
