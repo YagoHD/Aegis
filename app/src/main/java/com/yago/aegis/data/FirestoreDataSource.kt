@@ -11,13 +11,24 @@ import kotlinx.coroutines.tasks.await
  * FirestoreDataSource gestiona toda la lectura y escritura en Firestore.
  *
  * Estructura en Firestore:
- * users/{userId}/
- *   ├── profile      → nombre, peso, altura, grasa, medidas, fotos
+ * users/{userId}/data/
+ *   ├── profile      → nombre, peso, altura, grasa, medidas, fechas de foto
  *   ├── routines     → lista de rutinas con sus ejercicios
  *   ├── exercises    → librería de ejercicios
  *   ├── history      → historial de entrenamientos
  *   ├── tags         → tags globales
- *   └── settings     → preferencias de UI
+ *   ├── settings     → preferencias de UI + temporizador (descanso/vibración/sonido)
+ *   ├── bodyHistory  → snapshots corporales (peso/medidas)
+ *   └── photoHistory → registro de fotos SIN imágenes (solo fechas; las URIs no viajan)
+ *
+ * Política de sincronización (US-02):
+ *  - DE CUENTA (sincroniza): perfil, sexo, ajustes de stats, temporizador, rutinas,
+ *    ejercicios, historial, tags, historial corporal y registro de fotos.
+ *  - LOCAL POR DISPOSITIVO (no sincroniza): posición del timer flotante, discos y peso
+ *    de barra (calculadora), sesión activa en curso, y las IMÁGENES de las fotos (URIs).
+ *  - NO SINCRONIZABLE: nada más por ahora.
+ * Conflicto: perfil/ajustes y colecciones = documento con updatedAt (la nube gana al
+ * iniciar sesión si existe); historial/cuerpo/fotos = merge por id/fecha.
  */
 class FirestoreDataSource {
 
@@ -179,7 +190,10 @@ class FirestoreDataSource {
         showDisciplineCard: Boolean,
         showEvolutionGraph: Boolean,
         showAnalyticsList: Boolean,
-        targetDaysPerWeek: Int
+        targetDaysPerWeek: Int,
+        restTimerSeconds: Int,
+        timerVibrate: Boolean,
+        timerSound: Boolean
     ) {
         userDoc("settings")?.set(
             mapOf(
@@ -192,9 +206,45 @@ class FirestoreDataSource {
                 "showEvolutionGraph" to showEvolutionGraph,
                 "showAnalyticsList" to showAnalyticsList,
                 "targetDaysPerWeek" to targetDaysPerWeek,
+                "restTimerSeconds" to restTimerSeconds,
+                "timerVibrate" to timerVibrate,
+                "timerSound" to timerSound,
                 "updatedAt" to System.currentTimeMillis()
             )
         )?.await()
+    }
+
+    // ─────────────────────────────────────────────
+    // HISTORIAL CORPORAL Y REGISTRO DE FOTOS (US-02)
+    // ─────────────────────────────────────────────
+
+    suspend fun saveBodyHistory(list: List<BodySnapshot>) {
+        userDoc("bodyHistory")?.set(
+            mapOf("data" to gson.toJson(list), "updatedAt" to System.currentTimeMillis())
+        )?.await()
+    }
+
+    suspend fun getBodyHistory(): List<BodySnapshot>? {
+        return try {
+            val doc = userDoc("bodyHistory")?.get()?.await() ?: return null
+            val json = doc.getString("data") ?: return null
+            gson.fromJson(json, object : TypeToken<List<BodySnapshot>>() {}.type)
+        } catch (e: Exception) { null }
+    }
+
+    /** Registro de fotos SIN las imágenes (las URIs locales no viajan; se guardan vacías). */
+    suspend fun savePhotoHistory(list: List<PhotoRecord>) {
+        userDoc("photoHistory")?.set(
+            mapOf("data" to gson.toJson(list), "updatedAt" to System.currentTimeMillis())
+        )?.await()
+    }
+
+    suspend fun getPhotoHistory(): List<PhotoRecord>? {
+        return try {
+            val doc = userDoc("photoHistory")?.get()?.await() ?: return null
+            val json = doc.getString("data") ?: return null
+            gson.fromJson(json, object : TypeToken<List<PhotoRecord>>() {}.type)
+        } catch (e: Exception) { null }
     }
 
     suspend fun getSettings(): Map<String, Any>? {
@@ -222,7 +272,7 @@ class FirestoreDataSource {
     /** Borra todos los documentos de datos del usuario en Firestore. */
     suspend fun deleteAllUserData() {
         val uid = userId ?: return
-        val collections = listOf("profile", "routines", "exercises", "history", "tags", "settings")
+        val collections = listOf("profile", "routines", "exercises", "history", "tags", "settings", "bodyHistory", "photoHistory")
         for (c in collections) {
             runCatching {
                 db.collection("users").document(uid)

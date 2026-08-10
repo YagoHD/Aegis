@@ -130,11 +130,14 @@ class UserRepository(
         settingsStore.addPhotoToHistory(
             PhotoRecord(uri = uri, dateLabel = dateLabel)
         )
+        // Sube el registro (sin las imágenes) — US-02
+        pushInBackground { firestore.savePhotoHistory(photoHistoryForCloud(settingsStore.photoHistory.first())) }
     }
 
     /** Guarda una snapshot corporal del día. */
     suspend fun saveBodySnapshot(snapshot: BodySnapshot) {
         settingsStore.saveBodySnapshot(snapshot)
+        pushInBackground { firestore.saveBodyHistory(settingsStore.bodyHistory.first()) }
     }
 
     /**
@@ -308,7 +311,10 @@ class UserRepository(
                 showDisciplineCard = settingsStore.showDisciplineCard.first(),
                 showEvolutionGraph = settingsStore.showEvolutionGraph.first(),
                 showAnalyticsList = settingsStore.showAnalyticsList.first(),
-                targetDaysPerWeek = settingsStore.targetDaysPerWeek.first()
+                targetDaysPerWeek = settingsStore.targetDaysPerWeek.first(),
+                restTimerSeconds = settingsStore.restTimerSeconds.first(),
+                timerVibrate = settingsStore.timerVibrate.first(),
+                timerSound = settingsStore.timerSound.first()
             )
         }
     }
@@ -384,6 +390,30 @@ class UserRepository(
             (data["showVisualLog"] as? Boolean)?.let { settingsStore.saveShowVisualLog(it) }
             (data["showGirths"] as? Boolean)?.let { settingsStore.saveShowGirths(it) }
             (data["targetDaysPerWeek"] as? Long)?.toInt()?.let { settingsStore.updateTargetDays(it) }
+            // Secciones de stats (antes se subían pero no se descargaban)
+            (data["showVolumeCard"] as? Boolean)?.let { settingsStore.toggleStatSection("volume", it) }
+            (data["showDisciplineCard"] as? Boolean)?.let { settingsStore.toggleStatSection("discipline", it) }
+            (data["showEvolutionGraph"] as? Boolean)?.let { settingsStore.toggleStatSection("evolution", it) }
+            (data["showAnalyticsList"] as? Boolean)?.let { settingsStore.toggleStatSection("analytics", it) }
+            // Temporizador (US-02: de cuenta)
+            (data["restTimerSeconds"] as? Long)?.toInt()?.let { settingsStore.updateRestTimerSeconds(it) }
+            (data["timerVibrate"] as? Boolean)?.let { settingsStore.saveTimerVibrate(it) }
+            (data["timerSound"] as? Boolean)?.let { settingsStore.saveTimerSound(it) }
+        }
+        // Historial corporal (US-02): merge por fecha
+        firestore.getBodyHistory()?.let { cloud ->
+            val local = settingsStore.bodyHistory.first()
+            val merged = (local + cloud).distinctBy { it.date }.sortedBy { it.date }
+            settingsStore.saveBodyHistory(merged)
+            pushInBackground { firestore.saveBodyHistory(merged) }
+        }
+        // Registro de fotos (US-02): merge por fecha, conservando la URI LOCAL si la hay
+        firestore.getPhotoHistory()?.let { cloud ->
+            val byDate = settingsStore.photoHistory.first().associateBy { it.date }.toMutableMap()
+            for (p in cloud) if (!byDate.containsKey(p.date)) byDate[p.date] = p
+            val merged = byDate.values.sortedBy { it.date }
+            settingsStore.savePhotoHistory(merged)
+            pushInBackground { firestore.savePhotoHistory(photoHistoryForCloud(merged)) }
         }
     }
 
@@ -411,9 +441,18 @@ class UserRepository(
             showDisciplineCard = settingsStore.showDisciplineCard.first(),
             showEvolutionGraph = settingsStore.showEvolutionGraph.first(),
             showAnalyticsList = settingsStore.showAnalyticsList.first(),
-            targetDaysPerWeek = settingsStore.targetDaysPerWeek.first()
+            targetDaysPerWeek = settingsStore.targetDaysPerWeek.first(),
+            restTimerSeconds = settingsStore.restTimerSeconds.first(),
+            timerVibrate = settingsStore.timerVibrate.first(),
+            timerSound = settingsStore.timerSound.first()
         )
+        firestore.saveBodyHistory(settingsStore.bodyHistory.first())
+        firestore.savePhotoHistory(photoHistoryForCloud(settingsStore.photoHistory.first()))
     }
+
+    // El registro de fotos viaja SIN las imágenes: vaciamos la URI local (no resuelve en otro móvil)
+    private fun photoHistoryForCloud(list: List<PhotoRecord>): List<PhotoRecord> =
+        list.map { it.copy(uri = "") }
 }
 
 // Extensiones para workout settings — añadidas al final del archivo

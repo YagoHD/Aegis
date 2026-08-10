@@ -379,4 +379,14 @@ class SettingsStore(private val context: Context) {
             prefs[PHOTO_HISTORY_KEY] = gson.toJson(history)
         }
     }
+
+    /** Reemplaza el historial corporal completo (usado al descargar/mergear de la nube). */
+    suspend fun saveBodyHistory(list: List<BodySnapshot>) {
+        context.dataStore.edit { it[BODY_HISTORY_KEY] = gson.toJson(list.sortedBy { s -> s.date }) }
+    }
+
+    /** Reemplaza el registro de fotos completo (usado al descargar/mergear de la nube). */
+    suspend fun savePhotoHistory(list: List<PhotoRecord>) {
+        context.dataStore.edit { it[PHOTO_HISTORY_KEY] = gson.toJson(list.sortedBy { p -> p.date }) }
+    }
 }
