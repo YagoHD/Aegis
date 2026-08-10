@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 class UserRepository(
     private val settingsStore: SettingsStore,
-    private val firestore: FirestoreDataSource = FirestoreDataSource()
+    private val firestore: CloudDataSource = FirestoreDataSource()
 ) {
     private val syncScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 

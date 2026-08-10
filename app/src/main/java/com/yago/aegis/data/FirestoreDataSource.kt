@@ -30,7 +30,7 @@ import kotlinx.coroutines.tasks.await
  * Conflicto: perfil/ajustes y colecciones = documento con updatedAt (la nube gana al
  * iniciar sesión si existe); historial/cuerpo/fotos = merge por id/fecha.
  */
-class FirestoreDataSource {
+class FirestoreDataSource : CloudDataSource {
 
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
@@ -48,7 +48,7 @@ class FirestoreDataSource {
     // PERFIL
     // ─────────────────────────────────────────────
 
-    suspend fun saveProfile(
+    override suspend fun saveProfile(
         name: String,
         mass: String,
         height: Double,
@@ -74,7 +74,7 @@ class FirestoreDataSource {
         )?.await()
     }
 
-    suspend fun getProfile(): Map<String, Any>? {
+    override suspend fun getProfile(): Map<String, Any>? {
         return try {
             userDoc("profile")?.get()?.await()?.data
         } catch (e: Exception) { null }
@@ -84,7 +84,7 @@ class FirestoreDataSource {
     // RUTINAS
     // ─────────────────────────────────────────────
 
-    suspend fun saveRoutines(routines: List<Routine>) {
+    override suspend fun saveRoutines(routines: List<Routine>) {
         userDoc("routines")?.set(
             mapOf(
                 "data" to gson.toJson(routines),
@@ -93,7 +93,7 @@ class FirestoreDataSource {
         )?.await()
     }
 
-    suspend fun getRoutines(): List<Routine>? {
+    override suspend fun getRoutines(): List<Routine>? {
         return try {
             val doc = userDoc("routines")?.get()?.await() ?: return null
             val json = doc.getString("data") ?: return null
@@ -106,7 +106,7 @@ class FirestoreDataSource {
     // LIBRERÍA DE EJERCICIOS
     // ─────────────────────────────────────────────
 
-    suspend fun saveExercises(exercises: List<Exercise>) {
+    override suspend fun saveExercises(exercises: List<Exercise>) {
         userDoc("exercises")?.set(
             mapOf(
                 "data" to gson.toJson(exercises),
@@ -115,7 +115,7 @@ class FirestoreDataSource {
         )?.await()
     }
 
-    suspend fun getExercises(): List<Exercise>? {
+    override suspend fun getExercises(): List<Exercise>? {
         return try {
             val doc = userDoc("exercises")?.get()?.await() ?: return null
             val json = doc.getString("data") ?: return null
@@ -128,7 +128,7 @@ class FirestoreDataSource {
     // HISTORIAL DE ENTRENAMIENTOS
     // ─────────────────────────────────────────────
 
-    suspend fun saveWorkoutHistory(history: List<WorkoutSession>) {
+    override suspend fun saveWorkoutHistory(history: List<WorkoutSession>) {
         userDoc("history")?.set(
             mapOf(
                 "data" to gson.toJson(history),
@@ -137,7 +137,7 @@ class FirestoreDataSource {
         )?.await()
     }
 
-    suspend fun getWorkoutHistory(): List<WorkoutSession>? {
+    override suspend fun getWorkoutHistory(): List<WorkoutSession>? {
         return try {
             val doc = userDoc("history")?.get()?.await() ?: return null
             val json = doc.getString("data") ?: return null
@@ -146,7 +146,7 @@ class FirestoreDataSource {
         } catch (e: Exception) { null }
     }
 
-    suspend fun appendWorkoutSession(session: WorkoutSession) {
+    override suspend fun appendWorkoutSession(session: WorkoutSession) {
         val current = getWorkoutHistory()?.toMutableList() ?: mutableListOf()
         // Evitar duplicados: solo añadir si el ID no existe ya en Firestore
         if (current.none { it.id == session.id }) {
@@ -159,7 +159,7 @@ class FirestoreDataSource {
     // TAGS GLOBALES
     // ─────────────────────────────────────────────
 
-    suspend fun saveTags(tags: List<String>) {
+    override suspend fun saveTags(tags: List<String>) {
         userDoc("tags")?.set(
             mapOf(
                 "data" to gson.toJson(tags),
@@ -168,7 +168,7 @@ class FirestoreDataSource {
         )?.await()
     }
 
-    suspend fun getTags(): List<String>? {
+    override suspend fun getTags(): List<String>? {
         return try {
             val doc = userDoc("tags")?.get()?.await() ?: return null
             val json = doc.getString("data") ?: return null
@@ -181,7 +181,7 @@ class FirestoreDataSource {
     // PREFERENCIAS DE UI
     // ─────────────────────────────────────────────
 
-    suspend fun saveSettings(
+    override suspend fun saveSettings(
         showBMI: Boolean,
         showBodyFat: Boolean,
         showVisualLog: Boolean,
@@ -218,13 +218,13 @@ class FirestoreDataSource {
     // HISTORIAL CORPORAL Y REGISTRO DE FOTOS (US-02)
     // ─────────────────────────────────────────────
 
-    suspend fun saveBodyHistory(list: List<BodySnapshot>) {
+    override suspend fun saveBodyHistory(list: List<BodySnapshot>) {
         userDoc("bodyHistory")?.set(
             mapOf("data" to gson.toJson(list), "updatedAt" to System.currentTimeMillis())
         )?.await()
     }
 
-    suspend fun getBodyHistory(): List<BodySnapshot>? {
+    override suspend fun getBodyHistory(): List<BodySnapshot>? {
         return try {
             val doc = userDoc("bodyHistory")?.get()?.await() ?: return null
             val json = doc.getString("data") ?: return null
@@ -233,13 +233,13 @@ class FirestoreDataSource {
     }
 
     /** Registro de fotos SIN las imágenes (las URIs locales no viajan; se guardan vacías). */
-    suspend fun savePhotoHistory(list: List<PhotoRecord>) {
+    override suspend fun savePhotoHistory(list: List<PhotoRecord>) {
         userDoc("photoHistory")?.set(
             mapOf("data" to gson.toJson(list), "updatedAt" to System.currentTimeMillis())
         )?.await()
     }
 
-    suspend fun getPhotoHistory(): List<PhotoRecord>? {
+    override suspend fun getPhotoHistory(): List<PhotoRecord>? {
         return try {
             val doc = userDoc("photoHistory")?.get()?.await() ?: return null
             val json = doc.getString("data") ?: return null
@@ -247,7 +247,7 @@ class FirestoreDataSource {
         } catch (e: Exception) { null }
     }
 
-    suspend fun getSettings(): Map<String, Any>? {
+    override suspend fun getSettings(): Map<String, Any>? {
         return try {
             userDoc("settings")?.get()?.await()?.data
         } catch (e: Exception) { null }
@@ -258,7 +258,7 @@ class FirestoreDataSource {
     // ─────────────────────────────────────────────
 
     /** Devuelve true si el usuario ya tiene datos en Firestore */
-    suspend fun hasCloudData(): Boolean {
+    override suspend fun hasCloudData(): Boolean {
         return try {
             val doc = userDoc("profile")?.get()?.await()
             doc?.exists() == true
@@ -270,7 +270,7 @@ class FirestoreDataSource {
     // ─────────────────────────────────────────────
 
     /** Borra todos los documentos de datos del usuario en Firestore. */
-    suspend fun deleteAllUserData() {
+    override suspend fun deleteAllUserData() {
         val uid = userId ?: return
         val collections = listOf("profile", "routines", "exercises", "history", "tags", "settings", "bodyHistory", "photoHistory")
         for (c in collections) {
