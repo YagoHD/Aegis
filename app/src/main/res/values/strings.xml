@@ -488,6 +488,11 @@
     <string name="label_lastre">LASTRE</string>
     <string name="label_asistencia">ASIST.</string>
 
+    <!-- Sincronización (US-01) -->
+    <string name="sync_syncing">Sincronizando…</string>
+    <string name="sync_error">Error al sincronizar con la nube</string>
+    <string name="sync_retry">Reintentar</string>
+
     <!-- Firebase -->
     <string name="default_web_client_id">322703265285-qke4qco28fmnp92utb5ob8l9sak16lkp.apps.googleusercontent.com</string>
 </resources>

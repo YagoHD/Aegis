@@ -463,4 +463,8 @@
     <string name="load_type_assisted_desc">Soustrait l\'assistance de ton poids de corps (machine à tractions ou dips).</string>
     <string name="label_lastre">LEST</string>
     <string name="label_asistencia">ASSIST.</string>
+    <!-- Synchro (US-01) -->
+    <string name="sync_syncing">Synchronisation…</string>
+    <string name="sync_error">Échec de la synchronisation</string>
+    <string name="sync_retry">Réessayer</string>
 </resources>

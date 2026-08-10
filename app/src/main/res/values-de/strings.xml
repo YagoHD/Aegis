@@ -463,4 +463,8 @@
     <string name="load_type_assisted_desc">Zieht die Hilfe von deinem Körpergewicht ab (Klimmzug-/Dip-Maschine).</string>
     <string name="label_lastre">ZUSATZ</string>
     <string name="label_asistencia">HILFE</string>
+    <!-- Sync (US-01) -->
+    <string name="sync_syncing">Synchronisiere…</string>
+    <string name="sync_error">Synchronisierung fehlgeschlagen</string>
+    <string name="sync_retry">Erneut versuchen</string>
 </resources>

@@ -4,6 +4,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -12,6 +15,22 @@ class UserRepository(
     private val firestore: FirestoreDataSource = FirestoreDataSource()
 ) {
     private val syncScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    // US-01: estado observable de sincronización. La escritura local nunca se bloquea por esto.
+    private val _syncState = MutableStateFlow<SyncState>(SyncState.Idle)
+    val syncState: StateFlow<SyncState> = _syncState.asStateFlow()
+
+    /**
+     * Envío a la nube en 2º plano: no bloquea, no flip a "Syncing" (para no parpadear en cada
+     * guardado), pero deja de ser silencioso — marca Error si falla y se recupera a Success.
+     */
+    private fun pushInBackground(block: suspend () -> Unit) {
+        syncScope.launch {
+            runCatching { block() }
+                .onFailure { _syncState.value = SyncState.Error(it.message ?: "Error de sincronización") }
+                .onSuccess { if (_syncState.value is SyncState.Error) _syncState.value = SyncState.Success }
+        }
+    }
 
     val userName = settingsStore.userName
     val showBMI = settingsStore.showBMI
@@ -187,17 +206,17 @@ class UserRepository(
 
     suspend fun updateRoutines(list: List<Routine>) {
         settingsStore.saveRoutines(list)
-        syncScope.launch { runCatching { firestore.saveRoutines(list) } }
+        pushInBackground { firestore.saveRoutines(list) }
     }
 
     suspend fun updateExerciseLibrary(list: List<Exercise>) {
         settingsStore.saveExerciseLibrary(list)
-        syncScope.launch { runCatching { firestore.saveExercises(list) } }
+        pushInBackground { firestore.saveExercises(list) }
     }
 
     suspend fun updateGlobalTags(tags: List<String>) {
         settingsStore.saveGlobalTags(tags)
-        syncScope.launch { runCatching { firestore.saveTags(tags) } }
+        pushInBackground { firestore.saveTags(tags) }
     }
 
     suspend fun upsertExercise(exercise: Exercise) {
@@ -205,14 +224,14 @@ class UserRepository(
         val index = currentList.indexOfFirst { it.id == exercise.id }
         if (index != -1) currentList[index] = exercise else currentList.add(exercise)
         settingsStore.saveExerciseLibrary(currentList)
-        syncScope.launch { runCatching { firestore.saveExercises(currentList) } }
+        pushInBackground { firestore.saveExercises(currentList) }
     }
 
     suspend fun deleteExercise(exercise: Exercise) {
         val currentList = settingsStore.exerciseLibrary.first().toMutableList()
         currentList.removeAll { it.name.equals(exercise.name, ignoreCase = true) }
         settingsStore.saveExerciseLibrary(currentList)
-        syncScope.launch { runCatching { firestore.saveExercises(currentList) } }
+        pushInBackground { firestore.saveExercises(currentList) }
     }
 
     suspend fun updateWorkoutSession(session: WorkoutSession) {
@@ -222,13 +241,13 @@ class UserRepository(
         if (idx >= 0) {
             history[idx] = session
             settingsStore.replaceWorkoutHistory(history)
-            syncScope.launch { runCatching { firestore.saveWorkoutHistory(history) } }
+            pushInBackground { firestore.saveWorkoutHistory(history) }
         }
     }
 
     suspend fun saveWorkoutSession(session: WorkoutSession) {
         settingsStore.saveWorkoutSession(session)
-        syncScope.launch { runCatching { firestore.appendWorkoutSession(session) } }
+        pushInBackground { firestore.appendWorkoutSession(session) }
     }
 
     suspend fun updateTimerVibrate(enabled: Boolean) {
@@ -264,37 +283,33 @@ class UserRepository(
     }
 
     private fun syncProfileToCloud() {
-        syncScope.launch {
-            runCatching {
-                firestore.saveProfile(
-                    name = settingsStore.userName.first(),
-                    mass = settingsStore.currentMass.first(),
-                    height = settingsStore.height.first(),
-                    bodyFat = settingsStore.bodyFat.first(),
-                    disciplineDay = settingsStore.disciplineDay.first(),
-                    customMeasures = settingsStore.customMeasures.first(),
-                    basePhotoDate = settingsStore.basePhotoDate.first(),
-                    actualPhotoDate = settingsStore.actualPhotoDate.first()
-                )
-            }
+        pushInBackground {
+            firestore.saveProfile(
+                name = settingsStore.userName.first(),
+                mass = settingsStore.currentMass.first(),
+                height = settingsStore.height.first(),
+                bodyFat = settingsStore.bodyFat.first(),
+                disciplineDay = settingsStore.disciplineDay.first(),
+                customMeasures = settingsStore.customMeasures.first(),
+                basePhotoDate = settingsStore.basePhotoDate.first(),
+                actualPhotoDate = settingsStore.actualPhotoDate.first()
+            )
         }
     }
 
     private fun syncSettingsToCloud() {
-        syncScope.launch {
-            runCatching {
-                firestore.saveSettings(
-                    showBMI = settingsStore.showBMI.first(),
-                    showBodyFat = settingsStore.showBodyFat.first(),
-                    showVisualLog = settingsStore.showVisualLog.first(),
-                    showGirths = settingsStore.showGirths.first(),
-                    showVolumeCard = settingsStore.showVolumeCard.first(),
-                    showDisciplineCard = settingsStore.showDisciplineCard.first(),
-                    showEvolutionGraph = settingsStore.showEvolutionGraph.first(),
-                    showAnalyticsList = settingsStore.showAnalyticsList.first(),
-                    targetDaysPerWeek = settingsStore.targetDaysPerWeek.first()
-                )
-            }
+        pushInBackground {
+            firestore.saveSettings(
+                showBMI = settingsStore.showBMI.first(),
+                showBodyFat = settingsStore.showBodyFat.first(),
+                showVisualLog = settingsStore.showVisualLog.first(),
+                showGirths = settingsStore.showGirths.first(),
+                showVolumeCard = settingsStore.showVolumeCard.first(),
+                showDisciplineCard = settingsStore.showDisciplineCard.first(),
+                showEvolutionGraph = settingsStore.showEvolutionGraph.first(),
+                showAnalyticsList = settingsStore.showAnalyticsList.first(),
+                targetDaysPerWeek = settingsStore.targetDaysPerWeek.first()
+            )
         }
     }
 
@@ -303,6 +318,7 @@ class UserRepository(
     }
 
     suspend fun syncOnLogin() {
+        _syncState.value = SyncState.Syncing
         runCatching {
             // 1. Limpiar duplicados del historial local
             settingsStore.deduplicateWorkoutHistory()
@@ -321,8 +337,16 @@ class UserRepository(
             } else {
                 uploadToCloud()
             }
+        }.onSuccess {
+            _syncState.value = SyncState.Success
+        }.onFailure {
+            // Los datos locales quedan intactos; el usuario puede reintentar.
+            _syncState.value = SyncState.Error(it.message ?: "No se pudo sincronizar con la nube")
         }
     }
+
+    /** Reintenta la sincronización (US-01: acción "Reintentar sincronización"). */
+    suspend fun retrySync() = syncOnLogin()
 
     private suspend fun downloadFromCloud() {
         firestore.getProfile()?.let { data ->
@@ -351,7 +375,7 @@ class UserRepository(
             // Sobrescribir el historial local completo con la versión limpia
             settingsStore.replaceWorkoutHistory(merged)
             // Sincronizar la versión limpia a Firestore también
-            syncScope.launch { runCatching { firestore.saveWorkoutHistory(merged) } }
+            pushInBackground { firestore.saveWorkoutHistory(merged) }
         }
         firestore.getTags()?.let { settingsStore.saveGlobalTags(it) }
         firestore.getSettings()?.let { data ->

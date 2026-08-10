@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import com.yago.aegis.R
 import com.yago.aegis.data.LevelState
 import com.yago.aegis.data.PhotoType
+import com.yago.aegis.data.SyncState
 import com.yago.aegis.ui.components.*
 import com.yago.aegis.viewmodel.ProfileViewModel
 
@@ -69,6 +71,7 @@ fun ProfileContent(viewModel: ProfileViewModel, onNavigateToTrain: () -> Unit = 
     // Un solo collectAsState para todo el estado (UiState sellado)
     val state by viewModel.uiState.collectAsState()
     val user = state.user
+    val syncState by viewModel.syncState.collectAsState()
     val imc = viewModel.calcularBMI()
     val scrollState = rememberScrollState()
     val context = LocalContext.current
@@ -110,6 +113,8 @@ fun ProfileContent(viewModel: ProfileViewModel, onNavigateToTrain: () -> Unit = 
 
         Spacer(modifier = Modifier.height(20.dp))
         LevelCard(level = state.level)
+
+        SyncIndicator(syncState = syncState, onRetry = { viewModel.retrySync() })
 
         if (user.disciplineDay == 0) {
             Spacer(modifier = Modifier.height(24.dp))
@@ -360,5 +365,62 @@ private fun LevelCard(level: LevelState) {
                     .background(MaterialTheme.colorScheme.primary)
             )
         }
+    }
+}
+
+/** Indicador discreto de sincronización (US-01): solo visible al sincronizar o en error. */
+@Composable
+private fun SyncIndicator(syncState: SyncState, onRetry: () -> Unit) {
+    when (syncState) {
+        is SyncState.Syncing -> {
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(14.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stringResource(R.string.sync_syncing),
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 11.sp
+                )
+            }
+        }
+        is SyncState.Error -> {
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CloudOff,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.85f),
+                    modifier = Modifier.size(14.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stringResource(R.string.sync_error),
+                    color = MaterialTheme.colorScheme.error.copy(alpha = 0.9f),
+                    fontSize = 11.sp,
+                    modifier = Modifier.weight(1f)
+                )
+                TextButton(
+                    onClick = onRetry,
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.sync_retry),
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 0.5.sp
+                    )
+                }
+            }
+        }
+        else -> { /* Idle / Success: discreto, no se muestra nada */ }
     }
 }

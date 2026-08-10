@@ -463,4 +463,8 @@
     <string name="load_type_assisted_desc">Subtracts the assistance from your bodyweight (pull-up or dip machine).</string>
     <string name="label_lastre">ADDED</string>
     <string name="label_asistencia">ASSIST</string>
+    <!-- Sync (US-01) -->
+    <string name="sync_syncing">Syncing…</string>
+    <string name="sync_error">Couldn\'t sync with the cloud</string>
+    <string name="sync_retry">Retry</string>
 </resources>

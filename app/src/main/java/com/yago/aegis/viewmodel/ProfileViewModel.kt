@@ -53,6 +53,10 @@ class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
 
     val onboardingCompleted: Flow<Boolean> = repository.onboardingCompleted
 
+    // US-01: estado de sincronización observable para la UI + acción de reintento
+    val syncState: StateFlow<com.yago.aegis.data.SyncState> = repository.syncState
+    fun retrySync() = viewModelScope.launch { repository.retrySync() }
+
     // Estado para recalcular nivel/XP cuando cambian historial o racha (llegan por vías distintas)
     private var latestHistory: List<WorkoutSession> = emptyList()
     private var latestStreak: Int = 0

@@ -463,4 +463,8 @@
     <string name="load_type_assisted_desc">Sottrae l\'assistenza dal tuo peso corporeo (macchina per trazioni o dip).</string>
     <string name="label_lastre">ZAVORRA</string>
     <string name="label_asistencia">ASSIST.</string>
+    <!-- Sync (US-01) -->
+    <string name="sync_syncing">Sincronizzazione…</string>
+    <string name="sync_error">Sincronizzazione non riuscita</string>
+    <string name="sync_retry">Riprova</string>
 </resources>
