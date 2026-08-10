@@ -5,9 +5,6 @@ import androidx.core.view.WindowCompat
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import com.yago.aegis.data.FirebaseAuthRepository
-import com.yago.aegis.data.SettingsStore
-import com.yago.aegis.data.UserRepository
 import com.yago.aegis.ui.navigation.AegisNavigation
 import com.yago.aegis.ui.theme.AegisTheme
 import com.yago.aegis.viewmodel.ProfileViewModel
@@ -16,18 +13,19 @@ import com.yago.aegis.viewmodel.WorkoutViewModel
 
 class MainActivity : ComponentActivity() {
 
-    private val settingsStore by lazy { SettingsStore(applicationContext) }
-    private val userRepository by lazy { UserRepository(settingsStore) }
-    private val authRepository by lazy { FirebaseAuthRepository() }
+    // US-05: las dependencias vienen del AppContainer (creado en AegisApplication),
+    // no se instancian aquí. Los ViewModels siguen Activity-scoped para conservar el
+    // estado compartido de la sesión activa y sobrevivir a cambios de configuración.
+    private val container get() = (application as AegisApplication).container
 
     private val profileViewModel: ProfileViewModel by viewModels {
-        ProfileViewModel.Factory(userRepository)
+        ProfileViewModel.Factory(container.userRepository)
     }
     private val routinesViewModel: RoutinesViewModel by viewModels {
-        RoutinesViewModel.Factory(userRepository)
+        RoutinesViewModel.Factory(container.userRepository)
     }
     private val workoutViewModel: WorkoutViewModel by viewModels {
-        WorkoutViewModel.Factory(application, userRepository)
+        WorkoutViewModel.Factory(application, container.userRepository)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,8 +39,8 @@ class MainActivity : ComponentActivity() {
                     profileViewModel = profileViewModel,
                     routinesViewModel = routinesViewModel,
                     workoutViewModel = workoutViewModel,
-                    userRepository = userRepository,
-                    authRepository = authRepository
+                    userRepository = container.userRepository,
+                    authRepository = container.authRepository
                 )
             }
         }
