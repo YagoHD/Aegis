@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.data.Routine
 import com.yago.aegis.R
-import com.yago.aegis.data.globalExerciseIcons
+import com.yago.aegis.ui.globalExerciseIcons
 import com.yago.aegis.ui.components.AegisAlertDialog
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.RoutineCard

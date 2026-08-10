@@ -25,8 +25,8 @@ import com.yago.aegis.R
 import com.yago.aegis.data.DefaultExercises
 import com.yago.aegis.data.ExerciseSlot
 import com.yago.aegis.data.effectiveSlots
-import com.yago.aegis.data.getExerciseIcon
-import com.yago.aegis.data.globalExerciseIcons
+import com.yago.aegis.ui.getExerciseIcon
+import com.yago.aegis.ui.globalExerciseIcons
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.viewmodel.RoutinesViewModel
 import sh.calvin.reorderable.ReorderableItem

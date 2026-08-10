@@ -26,7 +26,7 @@ import com.yago.aegis.R
 import com.yago.aegis.data.AppTags
 import com.yago.aegis.data.DefaultExercises
 import com.yago.aegis.data.Exercise
-import com.yago.aegis.data.globalExerciseIcons
+import com.yago.aegis.ui.globalExerciseIcons
 import com.yago.aegis.ui.components.AegisAlertDialog
 import com.yago.aegis.ui.components.TagFilterRow
 import com.yago.aegis.ui.components.AegisTagManager

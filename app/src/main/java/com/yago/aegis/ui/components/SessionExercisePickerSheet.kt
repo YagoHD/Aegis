@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.R
 import com.yago.aegis.data.Exercise
-import com.yago.aegis.data.getExerciseIcon
+import com.yago.aegis.ui.getExerciseIcon
 
 /**
  * Hoja inferior para añadir ejercicios de la librería a la sesión activa.

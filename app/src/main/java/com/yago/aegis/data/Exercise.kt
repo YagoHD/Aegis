@@ -1,9 +1,5 @@
 package com.yago.aegis.data
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.vector.ImageVector
 import java.util.UUID
 
 /**
@@ -101,22 +97,4 @@ data class WorkoutSession(
     val notes: String = ""  // Default "" — sesiones antiguas sin este campo no se rompen
 )
 
-// ICONOS Y UTILIDADES (Mantenemos tu lógica original aquí mismo)
-val globalExerciseIcons = listOf(
-    "dumbbell" to Icons.Default.FitnessCenter,
-    "body" to Icons.Default.AccessibilityNew,
-    "kick" to Icons.Default.SportsMartialArts,
-    "run" to Icons.Default.DirectionsRun,
-    "walk" to Icons.Default.DirectionsWalk,
-    "chart" to Icons.Default.ShowChart,
-    "timer" to Icons.Default.Timer,
-    "yoga" to Icons.Default.SelfImprovement,
-    "bolt" to Icons.Default.Bolt,
-    "layers" to Icons.Default.Layers
-)
-
-@Composable
-fun getExerciseIcon(iconName: String): ImageVector {
-    return globalExerciseIcons.find { it.first == iconName }?.second
-        ?: Icons.Default.FitnessCenter
-}
+// (El mapeo de iconos vive ahora en la capa UI: com.yago.aegis.ui.ExerciseIcons)
