@@ -98,7 +98,10 @@ class UserRepository(
     }
 
     // El sexo se guarda local por ahora; se añadirá al sync en la nube con el motor del Panteón.
-    suspend fun updateSex(value: String) = settingsStore.saveSex(value)
+    suspend fun updateSex(value: String) {
+        settingsStore.saveSex(value)
+        syncProfileToCloud()   // el sexo es de cuenta (afecta a los estándares del Panteón)
+    }
 
     suspend fun updateDisciplineDay(days: Int) {
         settingsStore.saveDisciplineDay(days)
@@ -292,6 +295,7 @@ class UserRepository(
                 mass = settingsStore.currentMass.first(),
                 height = settingsStore.height.first(),
                 bodyFat = settingsStore.bodyFat.first(),
+                sex = settingsStore.sex.first(),
                 disciplineDay = settingsStore.disciplineDay.first(),
                 customMeasures = settingsStore.customMeasures.first(),
                 basePhotoDate = settingsStore.basePhotoDate.first(),
@@ -360,6 +364,7 @@ class UserRepository(
             data["mass"]?.toString()?.let { settingsStore.saveMass(it) }
             (data["height"] as? Double)?.let { settingsStore.saveHeight(it) }
             data["bodyFat"]?.toString()?.let { settingsStore.saveBodyFat(it) }
+            data["sex"]?.toString()?.takeIf { it.isNotEmpty() }?.let { settingsStore.saveSex(it) }
             (data["disciplineDay"] as? Long)?.toInt()?.let { settingsStore.saveDisciplineDay(it) }
             data["basePhotoDate"]?.toString()?.takeIf { it.isNotEmpty() }?.let { settingsStore.saveBasePhotoDate(it) }
             data["actualPhotoDate"]?.toString()?.takeIf { it.isNotEmpty() }?.let { settingsStore.saveActualPhotoDate(it) }
@@ -414,6 +419,7 @@ class UserRepository(
             mass = settingsStore.currentMass.first(),
             height = settingsStore.height.first(),
             bodyFat = settingsStore.bodyFat.first(),
+            sex = settingsStore.sex.first(),
             disciplineDay = settingsStore.disciplineDay.first(),
             customMeasures = settingsStore.customMeasures.first(),
             basePhotoDate = settingsStore.basePhotoDate.first(),

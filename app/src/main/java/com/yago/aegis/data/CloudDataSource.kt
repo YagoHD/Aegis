@@ -7,7 +7,7 @@ package com.yago.aegis.data
  */
 interface CloudDataSource {
     suspend fun saveProfile(
-        name: String, mass: String, height: Double, bodyFat: String,
+        name: String, mass: String, height: Double, bodyFat: String, sex: String,
         disciplineDay: Int, customMeasures: List<BodyMeasure>,
         basePhotoDate: String?, actualPhotoDate: String?
     )

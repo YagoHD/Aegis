@@ -53,6 +53,7 @@ class FirestoreDataSource : CloudDataSource {
         mass: String,
         height: Double,
         bodyFat: String,
+        sex: String,
         disciplineDay: Int,
         customMeasures: List<BodyMeasure>,
         basePhotoDate: String?,
@@ -64,6 +65,7 @@ class FirestoreDataSource : CloudDataSource {
                 "mass" to mass,
                 "height" to height,
                 "bodyFat" to bodyFat,
+                "sex" to sex,
                 "disciplineDay" to disciplineDay,
                 "customMeasures" to gson.toJson(customMeasures),
                 "basePhotoDate" to (basePhotoDate ?: ""),
@@ -74,11 +76,10 @@ class FirestoreDataSource : CloudDataSource {
         )?.await()
     }
 
-    override suspend fun getProfile(): Map<String, Any>? {
-        return try {
-            userDoc("profile")?.get()?.await()?.data
-        } catch (e: Exception) { null }
-    }
+    // Los getters NO capturan excepciones: un error de red/Firebase se PROPAGA para que la
+    // sincronización lo marque como Error. "Documento inexistente" devuelve null sin excepción.
+    override suspend fun getProfile(): Map<String, Any>? =
+        userDoc("profile")?.get()?.await()?.data
 
     // ─────────────────────────────────────────────
     // RUTINAS
@@ -94,12 +95,9 @@ class FirestoreDataSource : CloudDataSource {
     }
 
     override suspend fun getRoutines(): List<Routine>? {
-        return try {
-            val doc = userDoc("routines")?.get()?.await() ?: return null
-            val json = doc.getString("data") ?: return null
-            val type = object : TypeToken<List<Routine>>() {}.type
-            gson.fromJson(json, type)
-        } catch (e: Exception) { null }
+        val doc = userDoc("routines")?.get()?.await() ?: return null
+        val json = doc.getString("data") ?: return null
+        return gson.fromJson(json, object : TypeToken<List<Routine>>() {}.type)
     }
 
     // ─────────────────────────────────────────────
@@ -116,12 +114,9 @@ class FirestoreDataSource : CloudDataSource {
     }
 
     override suspend fun getExercises(): List<Exercise>? {
-        return try {
-            val doc = userDoc("exercises")?.get()?.await() ?: return null
-            val json = doc.getString("data") ?: return null
-            val type = object : TypeToken<List<Exercise>>() {}.type
-            gson.fromJson(json, type)
-        } catch (e: Exception) { null }
+        val doc = userDoc("exercises")?.get()?.await() ?: return null
+        val json = doc.getString("data") ?: return null
+        return gson.fromJson(json, object : TypeToken<List<Exercise>>() {}.type)
     }
 
     // ─────────────────────────────────────────────
@@ -138,12 +133,9 @@ class FirestoreDataSource : CloudDataSource {
     }
 
     override suspend fun getWorkoutHistory(): List<WorkoutSession>? {
-        return try {
-            val doc = userDoc("history")?.get()?.await() ?: return null
-            val json = doc.getString("data") ?: return null
-            val type = object : TypeToken<List<WorkoutSession>>() {}.type
-            gson.fromJson(json, type)
-        } catch (e: Exception) { null }
+        val doc = userDoc("history")?.get()?.await() ?: return null
+        val json = doc.getString("data") ?: return null
+        return gson.fromJson(json, object : TypeToken<List<WorkoutSession>>() {}.type)
     }
 
     override suspend fun appendWorkoutSession(session: WorkoutSession) {
@@ -169,12 +161,9 @@ class FirestoreDataSource : CloudDataSource {
     }
 
     override suspend fun getTags(): List<String>? {
-        return try {
-            val doc = userDoc("tags")?.get()?.await() ?: return null
-            val json = doc.getString("data") ?: return null
-            val type = object : TypeToken<List<String>>() {}.type
-            gson.fromJson(json, type)
-        } catch (e: Exception) { null }
+        val doc = userDoc("tags")?.get()?.await() ?: return null
+        val json = doc.getString("data") ?: return null
+        return gson.fromJson(json, object : TypeToken<List<String>>() {}.type)
     }
 
     // ─────────────────────────────────────────────
@@ -225,11 +214,9 @@ class FirestoreDataSource : CloudDataSource {
     }
 
     override suspend fun getBodyHistory(): List<BodySnapshot>? {
-        return try {
-            val doc = userDoc("bodyHistory")?.get()?.await() ?: return null
-            val json = doc.getString("data") ?: return null
-            gson.fromJson(json, object : TypeToken<List<BodySnapshot>>() {}.type)
-        } catch (e: Exception) { null }
+        val doc = userDoc("bodyHistory")?.get()?.await() ?: return null
+        val json = doc.getString("data") ?: return null
+        return gson.fromJson(json, object : TypeToken<List<BodySnapshot>>() {}.type)
     }
 
     /** Registro de fotos SIN las imágenes (las URIs locales no viajan; se guardan vacías). */
@@ -240,30 +227,22 @@ class FirestoreDataSource : CloudDataSource {
     }
 
     override suspend fun getPhotoHistory(): List<PhotoRecord>? {
-        return try {
-            val doc = userDoc("photoHistory")?.get()?.await() ?: return null
-            val json = doc.getString("data") ?: return null
-            gson.fromJson(json, object : TypeToken<List<PhotoRecord>>() {}.type)
-        } catch (e: Exception) { null }
+        val doc = userDoc("photoHistory")?.get()?.await() ?: return null
+        val json = doc.getString("data") ?: return null
+        return gson.fromJson(json, object : TypeToken<List<PhotoRecord>>() {}.type)
     }
 
-    override suspend fun getSettings(): Map<String, Any>? {
-        return try {
-            userDoc("settings")?.get()?.await()?.data
-        } catch (e: Exception) { null }
-    }
+    override suspend fun getSettings(): Map<String, Any>? =
+        userDoc("settings")?.get()?.await()?.data
 
     // ─────────────────────────────────────────────
     // COMPROBACIÓN DE DATOS EN NUBE
     // ─────────────────────────────────────────────
 
     /** Devuelve true si el usuario ya tiene datos en Firestore */
-    override suspend fun hasCloudData(): Boolean {
-        return try {
-            val doc = userDoc("profile")?.get()?.await()
-            doc?.exists() == true
-        } catch (e: Exception) { false }
-    }
+    // Propaga el error de red (para que la sync lo marque como Error en vez de asumir "sin datos").
+    override suspend fun hasCloudData(): Boolean =
+        userDoc("profile")?.get()?.await()?.exists() == true
 
     // ─────────────────────────────────────────────
     // BORRADO DE CUENTA (RGPD / requisito de Google Play)
