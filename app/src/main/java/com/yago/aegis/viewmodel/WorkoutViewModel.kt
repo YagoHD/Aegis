@@ -12,6 +12,9 @@ import com.yago.aegis.data.ExerciseSet
 import com.yago.aegis.data.Routine
 import com.yago.aegis.data.effectiveSlots
 import com.yago.aegis.data.withSafeDefaults
+import com.yago.aegis.data.withAddedSet
+import com.yago.aegis.data.withUpdatedSet
+import com.yago.aegis.data.withRemovedSet
 import com.yago.aegis.data.ExerciseSummary
 import com.yago.aegis.data.UserRepository
 import com.yago.aegis.data.WorkoutSession
@@ -312,34 +315,15 @@ class WorkoutViewModel(
     }
 
     fun addSet(exerciseId: Long) {
-        _activeSession.update { session ->
-            session?.copy(exercisesProgress = session.exercisesProgress.map { prog ->
-                if (prog.exercise.id == exerciseId) prog.copy(sets = prog.sets + ExerciseSet()) else prog
-            })
-        }
+        _activeSession.update { it?.withAddedSet(exerciseId) }
     }
 
     fun updateSet(exerciseId: Long, setId: String, weight: Double, reps: Int, completed: Boolean, loadModifier: Double = 0.0) {
-        _activeSession.update { session ->
-            session?.copy(exercisesProgress = session.exercisesProgress.map { prog ->
-                if (prog.exercise.id == exerciseId) {
-                    prog.copy(sets = prog.sets.map { set ->
-                        if (set.id == setId) set.copy(weight = weight, reps = reps, isCompleted = completed, loadModifier = loadModifier) else set
-                    })
-                } else prog
-            })
-        }
+        _activeSession.update { it?.withUpdatedSet(exerciseId, setId, weight, reps, completed, loadModifier) }
     }
 
     fun removeSet(exerciseId: Long, setId: String) {
-        _activeSession.update { session ->
-            session?.copy(exercisesProgress = session.exercisesProgress.map { prog ->
-                if (prog.exercise.id == exerciseId) {
-                    val newSets = prog.sets.filter { it.id != setId }
-                    prog.copy(sets = if (newSets.isEmpty()) listOf(ExerciseSet()) else newSets)
-                } else prog
-            })
-        }
+        _activeSession.update { it?.withRemovedSet(exerciseId, setId) }
     }
 
     fun toggleExerciseCompleted(exerciseId: Long) {
@@ -405,20 +389,17 @@ class WorkoutViewModel(
                             val w = if (set.weight % 1 == 0.0) set.weight.toInt() else set.weight
                             "${w}kg x ${set.reps}"
                         }
-                        val best1RM = completedSets.maxOf { it.weight * (1 + (it.reps / 30.0)) }
                         routinesViewModel?.updateExercisePerformance(
                             exerciseId = progress.exercise.id,
                             summary = summary,
-                            new1RM = best1RM
+                            new1RM = com.yago.aegis.data.WorkoutStats.best1RM(progress)
                         )
                     }
                 }
             }
             // Calcular resumen post-entrenamiento
             val durationMs = System.currentTimeMillis() - sessionStartTime
-            val totalVolume = session.exercisesProgress.sumOf { prog ->
-                prog.sets.filter { it.isCompleted }.sumOf { it.weight * it.reps }
-            }
+            val totalVolume = com.yago.aegis.data.WorkoutStats.sessionVolume(session)
             val completedExercises = session.exercisesProgress.filter { prog ->
                 prog.sets.any { it.isCompleted }
             }

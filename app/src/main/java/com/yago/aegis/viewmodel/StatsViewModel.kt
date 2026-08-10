@@ -183,11 +183,8 @@ class StatsViewModel(private val repository: UserRepository) : ViewModel() {
 
     // --- UTILIDADES PRIVADAS ---
 
-    private fun calculateVolume(session: WorkoutSession): Double {
-        return session.exercisesProgress.sumOf { prog ->
-            prog.sets.filter { it.isCompleted }.sumOf { it.weight * it.reps }
-        }
-    }
+    private fun calculateVolume(session: WorkoutSession): Double =
+        com.yago.aegis.data.WorkoutStats.sessionVolume(session)
 
     // Inicio (lunes 00:00:00) de la semana actual menos [weeksAgo] semanas, en millis.
     private fun startOfWeekMillis(weeksAgo: Int): Long {

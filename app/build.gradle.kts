@@ -91,3 +91,11 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
+
+// US-08: ejecuta las pruebas unitarias (JVM puro: dominio/lógica). No inicializa Firebase
+// ni necesita dispositivo. Uso: ./gradlew unitTests
+tasks.register("unitTests") {
+    group = "verification"
+    description = "Ejecuta las pruebas unitarias de lógica/dominio sin Firebase real ni dispositivo."
+    dependsOn("testDebugUnitTest")
+}

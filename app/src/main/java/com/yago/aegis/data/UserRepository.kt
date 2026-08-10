@@ -131,7 +131,7 @@ class UserRepository(
             PhotoRecord(uri = uri, dateLabel = dateLabel)
         )
         // Sube el registro (sin las imágenes) — US-02
-        pushInBackground { firestore.savePhotoHistory(photoHistoryForCloud(settingsStore.photoHistory.first())) }
+        pushInBackground { firestore.savePhotoHistory(SyncMerge.photoHistoryForCloud(settingsStore.photoHistory.first())) }
     }
 
     /** Guarda una snapshot corporal del día. */
@@ -372,13 +372,7 @@ class UserRepository(
         firestore.getRoutines()?.let { settingsStore.saveRoutines(it) }
         firestore.getExercises()?.let { settingsStore.saveExerciseLibrary(it) }
         firestore.getWorkoutHistory()?.let { cloudHistory ->
-            val localHistory = settingsStore.workoutHistory.first()
-            // Merge deduplicado: combinar local + nube, eliminar duplicados por ID
-            // y reemplazar el historial local completo con el resultado limpio
-            val merged = (localHistory + cloudHistory)
-                .distinctBy { it.id }
-                .sortedBy { it.date }
-            // Sobrescribir el historial local completo con la versión limpia
+            val merged = SyncMerge.mergeHistory(settingsStore.workoutHistory.first(), cloudHistory)
             settingsStore.replaceWorkoutHistory(merged)
             // Sincronizar la versión limpia a Firestore también
             pushInBackground { firestore.saveWorkoutHistory(merged) }
@@ -402,18 +396,15 @@ class UserRepository(
         }
         // Historial corporal (US-02): merge por fecha
         firestore.getBodyHistory()?.let { cloud ->
-            val local = settingsStore.bodyHistory.first()
-            val merged = (local + cloud).distinctBy { it.date }.sortedBy { it.date }
+            val merged = SyncMerge.mergeBodyHistory(settingsStore.bodyHistory.first(), cloud)
             settingsStore.saveBodyHistory(merged)
             pushInBackground { firestore.saveBodyHistory(merged) }
         }
         // Registro de fotos (US-02): merge por fecha, conservando la URI LOCAL si la hay
         firestore.getPhotoHistory()?.let { cloud ->
-            val byDate = settingsStore.photoHistory.first().associateBy { it.date }.toMutableMap()
-            for (p in cloud) if (!byDate.containsKey(p.date)) byDate[p.date] = p
-            val merged = byDate.values.sortedBy { it.date }
+            val merged = SyncMerge.mergePhotoHistory(settingsStore.photoHistory.first(), cloud)
             settingsStore.savePhotoHistory(merged)
-            pushInBackground { firestore.savePhotoHistory(photoHistoryForCloud(merged)) }
+            pushInBackground { firestore.savePhotoHistory(SyncMerge.photoHistoryForCloud(merged)) }
         }
     }
 
@@ -447,12 +438,8 @@ class UserRepository(
             timerSound = settingsStore.timerSound.first()
         )
         firestore.saveBodyHistory(settingsStore.bodyHistory.first())
-        firestore.savePhotoHistory(photoHistoryForCloud(settingsStore.photoHistory.first()))
+        firestore.savePhotoHistory(SyncMerge.photoHistoryForCloud(settingsStore.photoHistory.first()))
     }
-
-    // El registro de fotos viaja SIN las imágenes: vaciamos la URI local (no resuelve en otro móvil)
-    private fun photoHistoryForCloud(list: List<PhotoRecord>): List<PhotoRecord> =
-        list.map { it.copy(uri = "") }
 }
 
 // Extensiones para workout settings — añadidas al final del archivo
