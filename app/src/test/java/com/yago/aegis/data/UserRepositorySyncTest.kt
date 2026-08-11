@@ -91,4 +91,18 @@ class UserRepositorySyncTest {
 
         assertEquals(SyncState.Success, repo.syncState.value)
     }
+
+    @Test
+    fun deleteCloudData_propaga_el_fallo_para_no_borrar_auth_con_datos_vivos() = runBlocking {
+        fake.failDelete = true
+
+        var propago = false
+        try {
+            repo.deleteCloudData()
+        } catch (_: Exception) {
+            propago = true
+        }
+
+        assertTrue("deleteCloudData debe propagar el fallo (si no, se borraría Auth con datos vivos)", propago)
+    }
 }

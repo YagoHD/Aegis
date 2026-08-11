@@ -9,6 +9,7 @@ class FakeCloudDataSource : CloudDataSource {
 
     // --- Configuración del escenario ---
     var failReads = false   // los reads (incluido hasCloudData) lanzan, simulando fallo de red
+    var failDelete = false  // deleteAllUserData() lanza, simulando fallo al limpiar la nube
     var fromCache = false   // valor devuelto por isFromCache()
 
     // --- Datos "en la nube" (null = no existen) ---
@@ -80,6 +81,7 @@ class FakeCloudDataSource : CloudDataSource {
     override suspend fun isFromCache(): Boolean = fromCache
 
     override suspend fun deleteAllUserData() {
+        if (failDelete) throw RuntimeException("fallo de borrado simulado")
         profile = null; routines = null; exercises = null; history = null
         tags = null; settings = null; bodyHistory = null; photoHistory = null
     }

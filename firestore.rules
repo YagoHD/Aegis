@@ -17,8 +17,11 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Todo el árbol de un usuario (documento de datos y cualquier subruta futura).
-    match /users/{userId}/{documents=**} {
+    // Esquema PLANO: cada usuario accede SOLO a sus documentos bajo users/{uid}/data/{doc}.
+    // Al restringir a un único segmento {docId} (no `{document=**}`) no se permiten subcolecciones,
+    // así el borrado de cuenta desde el cliente es demostrablemente completo (sin huérfanos) y se
+    // minimiza la superficie de escritura arbitraria (US-09 review P1/P3).
+    match /users/{userId}/data/{docId} {
       allow read, write: if request.auth != null
                          && request.auth.uid == userId;
     }

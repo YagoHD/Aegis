@@ -1,5 +1,7 @@
 package com.yago.aegis.ui.navigation
 
+import android.net.Uri
+
 /**
  * Rutas de navegación CENTRALIZADAS (US-07). Un único punto de verdad para los nombres de ruta:
  * evita strings repetidos y typos entre la definición del `composable` y las llamadas a `navigate`.
@@ -42,7 +44,9 @@ object Routes {
     fun exerciseDetail(exerciseId: Long) = "exercise_detail/$exerciseId"
 
     const val EDIT_EXERCISE = "edit_exercise/{exerciseName}"
-    fun editExercise(exerciseName: String) = "edit_exercise/$exerciseName"
+    // El nombre puede contener '/', '?', '#'… que romperían el matching de un único segmento.
+    // Se codifica al construir la ruta; Navigation lo decodifica al leer el argumento (round-trip).
+    fun editExercise(exerciseName: String) = "edit_exercise/${Uri.encode(exerciseName)}"
 
     const val EDIT_ROUTINE = "edit_routine/{routineId}?isNew={isNew}"
     // isNew=null -> sin query (usa el default del navArgument); si no, lo incluye explícito.

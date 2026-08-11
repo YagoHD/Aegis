@@ -255,25 +255,29 @@ class FirestoreDataSource : CloudDataSource {
 
     /**
      * Borra TODOS los documentos de datos del usuario en Firestore (RGPD / requisito de Play).
-     * Enumera la subcolección `data` y borra lo que haya (así no quedan datos huérfanos si el
-     * esquema crece en el futuro). Como red de seguridad — por si la enumeración falla por red —
-     * borra además la lista de documentos conocidos (borrar uno inexistente es un no-op).
+     * El esquema es PLANO (users/{uid}/data/{doc}), así que borrar los documentos conocidos borra
+     * todo el árbol del usuario (las reglas no permiten subcolecciones — ver firestore.rules).
+     *
+     * IMPORTANTE (US-09 review): el borrado autoritativo (paso 2) PROPAGA el error. Si falla la
+     * limpieza (p.ej. sin red), el llamador NO debe borrar la cuenta de Auth: se dejarían datos
+     * huérfanos. El reintento es idempotente (borrar un doc inexistente es un no-op).
      */
     override suspend fun deleteAllUserData() {
         val uid = userId ?: return
         val dataCol = db.collection("users").document(uid).collection("data")
 
-        // 1) Enumerar y borrar todo lo que exista bajo /data.
+        // 1) Best-effort: barre cualquier documento que hubiera bajo /data (si la enumeración
+        //    falla por red no es crítico; el paso 2 cubre el esquema real y sí propaga).
         runCatching {
             for (doc in dataCol.get().await().documents) {
                 runCatching { doc.reference.delete().await() }
             }
         }
 
-        // 2) Fallback explícito con los documentos conocidos del esquema actual.
+        // 2) Autoritativo: borra los documentos conocidos. Si algo falla, PROPAGA la excepción.
         val known = listOf("profile", "routines", "exercises", "history", "tags", "settings", "bodyHistory", "photoHistory")
         for (c in known) {
-            runCatching { dataCol.document(c).delete().await() }
+            dataCol.document(c).delete().await()
         }
     }
 }

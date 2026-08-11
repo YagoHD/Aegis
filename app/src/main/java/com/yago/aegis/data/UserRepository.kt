@@ -182,9 +182,13 @@ class UserRepository(
         return streak
     }
 
-    /** Borra todos los datos del usuario en Firestore (para borrado de cuenta). */
+    /**
+     * Borra todos los datos del usuario en Firestore (para el borrado de cuenta).
+     * PROPAGA el error (US-09 review): si la limpieza falla, `FirebaseAuthRepository.deleteAccount`
+     * lo trata como fallo y NO borra la cuenta de Auth (evita datos huérfanos); es reintentable.
+     */
     suspend fun deleteCloudData() {
-        runCatching { firestore.deleteAllUserData() }
+        firestore.deleteAllUserData()
     }
 
     suspend fun toggleBMI(enabled: Boolean) {
