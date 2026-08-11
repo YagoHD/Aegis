@@ -2,11 +2,13 @@
 
 **Última actualización / Last updated: junio de 2026 / June 2026**
 
-> Publica este documento en una URL pública (por ejemplo, GitHub Pages) y pega esa URL
-> en la ficha de Google Play Console → Política de privacidad.
+> **URL pública / Public URL:** https://gist.github.com/YagoHD/3f21a5f59335abe7c81b503322a225ef
 >
-> Publish this document at a public URL (e.g. GitHub Pages) and paste that URL into
-> Google Play Console → Privacy Policy.
+> Pega esta URL en Google Play Console → Política de privacidad.
+> Paste this URL into Google Play Console → Privacy Policy.
+>
+> ⚠️ El Gist es una copia manual de este documento: si editas este archivo, actualiza también el Gist.
+> The Gist is a manual copy of this document: if you edit this file, update the Gist too.
 
 ---
 
