@@ -118,7 +118,7 @@
     <string name="dialog_routine_name_label">Nome da rotina</string>
     <string name="dialog_delete_title">Eliminar rotina</string>
     <string name="dialog_delete_confirm">Tens a certeza que queres eliminar a rotina %1$s?</string>
-    <string name="dialog_delete_routine_confirm">Tens a certeza que queres eliminar \'%1$s\'? Todos os exercícios atribuídos serão perdidos.</string>
+    <string name="dialog_delete_routine_confirm">Tens a certeza que queres eliminar \'%1$s\'? Todos os exercícios atribuídos serão perdidos. Não pode ser desfeito.</string>
     <string name="dialog_delete_routine_title">ELIMINAR ROTINA</string>
     <string name="create_routine_dialog_title">NOVA ROTINA</string>
     <string name="routine_name_placeholder">NOME DA ROTINA</string>
@@ -468,4 +468,8 @@
     <string name="sync_error">Falha ao sincronizar</string>
     <string name="sync_retry">Tentar de novo</string>
     <string name="sync_cached">Dados locais (não confirmados)</string>
+
+    <!-- Estado vazio das rotinas (US-10) -->
+    <string name="routines_empty_title">AINDA NÃO TENS ROTINAS</string>
+    <string name="routines_empty_subtitle">Cria a tua primeira rotina com o botão abaixo para começar.</string>
 </resources>

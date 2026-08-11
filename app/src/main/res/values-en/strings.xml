@@ -118,7 +118,7 @@
     <string name="dialog_routine_name_label">Routine name</string>
     <string name="dialog_delete_title">Delete Routine</string>
     <string name="dialog_delete_confirm">Are you sure you want to delete the routine %1$s?</string>
-    <string name="dialog_delete_routine_confirm">Are you sure you want to delete \'%1$s\'? All assigned exercises will be lost.</string>
+    <string name="dialog_delete_routine_confirm">Are you sure you want to delete \'%1$s\'? All assigned exercises will be lost. This can\'t be undone.</string>
     <string name="dialog_delete_routine_title">DELETE ROUTINE</string>
     <string name="create_routine_dialog_title">NEW ROUTINE</string>
     <string name="routine_name_placeholder">ROUTINE NAME</string>
@@ -468,4 +468,8 @@
     <string name="sync_error">Couldn\'t sync with the cloud</string>
     <string name="sync_retry">Retry</string>
     <string name="sync_cached">Local data (unconfirmed)</string>
+
+    <!-- Routines empty state (US-10) -->
+    <string name="routines_empty_title">YOU HAVE NO ROUTINES YET</string>
+    <string name="routines_empty_subtitle">Create your first routine with the button below to start training.</string>
 </resources>

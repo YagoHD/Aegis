@@ -118,7 +118,7 @@
     <string name="dialog_routine_name_label">Nombre de la rutina</string>
     <string name="dialog_delete_title">Eliminar Rutina</string>
     <string name="dialog_delete_confirm">¿Estás seguro de que quieres eliminar la rutina %1$s?</string>
-    <string name="dialog_delete_routine_confirm">¿Estás seguro de que quieres eliminar \'%1$s\'? Se perderán todos los ejercicios asignados.</string>
+    <string name="dialog_delete_routine_confirm">¿Estás seguro de que quieres eliminar \'%1$s\'? Se perderán todos los ejercicios asignados. No se puede deshacer.</string>
     <string name="dialog_delete_routine_title">ELIMINAR RUTINA</string>
     <string name="create_routine_dialog_title">NUEVA RUTINA</string>
     <string name="routine_name_placeholder">NOMBRE DE LA RUTINA</string>
@@ -493,6 +493,10 @@
     <string name="sync_error">Error al sincronizar con la nube</string>
     <string name="sync_retry">Reintentar</string>
     <string name="sync_cached">Datos locales (sin confirmar)</string>
+
+    <!-- Estado vacío de Rutinas (US-10) -->
+    <string name="routines_empty_title">AÚN NO TIENES RUTINAS</string>
+    <string name="routines_empty_subtitle">Crea tu primera rutina con el botón de abajo para empezar a entrenar.</string>
 
     <!-- Firebase -->
     <string name="default_web_client_id">322703265285-qke4qco28fmnp92utb5ob8l9sak16lkp.apps.googleusercontent.com</string>

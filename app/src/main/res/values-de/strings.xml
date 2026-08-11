@@ -118,7 +118,7 @@
     <string name="dialog_routine_name_label">Programmname</string>
     <string name="dialog_delete_title">Programm löschen</string>
     <string name="dialog_delete_confirm">Möchtest du das Programm %1$s wirklich löschen?</string>
-    <string name="dialog_delete_routine_confirm">Möchtest du \'%1$s\' wirklich löschen? Alle zugewiesenen Übungen gehen verloren.</string>
+    <string name="dialog_delete_routine_confirm">Möchtest du \'%1$s\' wirklich löschen? Alle zugewiesenen Übungen gehen verloren. Kann nicht rückgängig gemacht werden.</string>
     <string name="dialog_delete_routine_title">PROGRAMM LÖSCHEN</string>
     <string name="create_routine_dialog_title">NEUES PROGRAMM</string>
     <string name="routine_name_placeholder">PROGRAMMNAME</string>
@@ -468,4 +468,8 @@
     <string name="sync_error">Synchronisierung fehlgeschlagen</string>
     <string name="sync_retry">Erneut versuchen</string>
     <string name="sync_cached">Lokale Daten (unbestätigt)</string>
+
+    <!-- Leerer Zustand der Routinen (US-10) -->
+    <string name="routines_empty_title">NOCH KEINE ROUTINEN</string>
+    <string name="routines_empty_subtitle">Erstelle deine erste Routine mit dem Button unten, um zu starten.</string>
 </resources>

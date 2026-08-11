@@ -118,7 +118,7 @@
     <string name="dialog_routine_name_label">Nome della scheda</string>
     <string name="dialog_delete_title">Elimina scheda</string>
     <string name="dialog_delete_confirm">Sei sicuro di voler eliminare la scheda %1$s?</string>
-    <string name="dialog_delete_routine_confirm">Sei sicuro di voler eliminare \'%1$s\'? Tutti gli esercizi assegnati andranno persi.</string>
+    <string name="dialog_delete_routine_confirm">Sei sicuro di voler eliminare \'%1$s\'? Tutti gli esercizi assegnati andranno persi. Non è reversibile.</string>
     <string name="dialog_delete_routine_title">ELIMINA SCHEDA</string>
     <string name="create_routine_dialog_title">NUOVA SCHEDA</string>
     <string name="routine_name_placeholder">NOME DELLA SCHEDA</string>
@@ -468,4 +468,8 @@
     <string name="sync_error">Sincronizzazione non riuscita</string>
     <string name="sync_retry">Riprova</string>
     <string name="sync_cached">Dati locali (non confermati)</string>
+
+    <!-- Stato vuoto delle routine (US-10) -->
+    <string name="routines_empty_title">NESSUNA ROUTINE ANCORA</string>
+    <string name="routines_empty_subtitle">Crea la tua prima routine con il pulsante qui sotto per iniziare.</string>
 </resources>

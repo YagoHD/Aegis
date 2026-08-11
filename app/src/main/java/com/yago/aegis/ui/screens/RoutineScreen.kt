@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -179,12 +180,16 @@ fun RoutineScreen(
                 verticalArrangement = Arrangement.spacedBy(14.dp), // Espacio entre tarjetas
                 contentPadding = PaddingValues(bottom = 20.dp)
             ) {
-                items(routinesViewModel.routines) { routine ->
-                    RoutineCard(
-                        routine = routine,
-                        onEdit = { onNavigateToEditRoutine(routine.id) },
-                        onDelete = { routineToDelete = routine }
-                    )
+                if (routinesViewModel.routines.isEmpty()) {
+                    item { RoutinesEmptyState() }
+                } else {
+                    items(routinesViewModel.routines) { routine ->
+                        RoutineCard(
+                            routine = routine,
+                            onEdit = { onNavigateToEditRoutine(routine.id) },
+                            onDelete = { routineToDelete = routine }
+                        )
+                    }
                 }
             }
 
@@ -221,6 +226,40 @@ fun RoutineScreen(
         }
     }
 }
+/** Estado vacío guiado de la pestaña Rutinas (US-10): CTA = el botón "Crear rutina" de abajo. */
+@Composable
+private fun RoutinesEmptyState() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 56.dp, bottom = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            imageVector = Icons.Default.FitnessCenter,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+            modifier = Modifier.size(56.dp)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = stringResource(R.string.routines_empty_title),
+            color = MaterialTheme.colorScheme.onBackground,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 1.sp
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = stringResource(R.string.routines_empty_subtitle),
+            color = MaterialTheme.colorScheme.secondary,
+            fontSize = 13.sp,
+            lineHeight = 18.sp,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+    }
+}
+
 @Composable
 fun AegisIconSelector(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
