@@ -467,4 +467,5 @@
     <string name="sync_syncing">Synchronisation…</string>
     <string name="sync_error">Échec de la synchronisation</string>
     <string name="sync_retry">Réessayer</string>
+    <string name="sync_cached">Données locales (non confirmées)</string>
 </resources>

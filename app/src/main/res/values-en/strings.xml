@@ -467,4 +467,5 @@
     <string name="sync_syncing">Syncing…</string>
     <string name="sync_error">Couldn\'t sync with the cloud</string>
     <string name="sync_retry">Retry</string>
+    <string name="sync_cached">Local data (unconfirmed)</string>
 </resources>

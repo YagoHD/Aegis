@@ -348,7 +348,9 @@ class UserRepository(
                 uploadToCloud()
             }
         }.onSuccess {
-            _syncState.value = SyncState.Success
+            // Si los datos vinieron de la caché (sin red), es "Cached", no "Success" confirmado.
+            val cached = runCatching { firestore.isFromCache() }.getOrDefault(false)
+            _syncState.value = if (cached) SyncState.Cached else SyncState.Success
         }.onFailure {
             // Los datos locales quedan intactos; el usuario puede reintentar.
             _syncState.value = SyncState.Error(it.message ?: "No se pudo sincronizar con la nube")

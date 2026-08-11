@@ -9,8 +9,13 @@ sealed interface SyncState {
     object Idle : SyncState
     /** Sincronización en curso. */
     object Syncing : SyncState
-    /** Última sincronización correcta. */
+    /** Última sincronización confirmada CON EL SERVIDOR. */
     object Success : SyncState
+    /**
+     * Datos utilizables desde la CACHÉ local (offline-first), pero SIN confirmación reciente del
+     * servidor. No es un error: la app funciona; al recuperar red y reintentar pasa a Success.
+     */
+    object Cached : SyncState
     /** Falló la sincronización (los datos locales siguen intactos). [message] es recuperable/mostrable. */
     data class Error(val message: String) : SyncState
 }

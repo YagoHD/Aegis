@@ -41,5 +41,7 @@ interface CloudDataSource {
     suspend fun getPhotoHistory(): List<PhotoRecord>?
 
     suspend fun hasCloudData(): Boolean
+    /** true si la última lectura del perfil vino de la CACHÉ local (sin confirmación del servidor). */
+    suspend fun isFromCache(): Boolean
     suspend fun deleteAllUserData()
 }

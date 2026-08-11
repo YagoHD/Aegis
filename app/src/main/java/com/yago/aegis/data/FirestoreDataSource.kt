@@ -244,6 +244,11 @@ class FirestoreDataSource : CloudDataSource {
     override suspend fun hasCloudData(): Boolean =
         userDoc("profile")?.get()?.await()?.exists() == true
 
+    // true si el perfil se sirvió desde la caché local (sin confirmación del servidor). Con red,
+    // Firestore lee del servidor -> isFromCache = false. Si null (sin sesión) tratamos como caché.
+    override suspend fun isFromCache(): Boolean =
+        userDoc("profile")?.get()?.await()?.metadata?.isFromCache ?: true
+
     // ─────────────────────────────────────────────
     // BORRADO DE CUENTA (RGPD / requisito de Google Play)
     // ─────────────────────────────────────────────
