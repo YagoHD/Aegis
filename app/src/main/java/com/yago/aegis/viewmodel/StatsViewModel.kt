@@ -15,11 +15,13 @@ import com.yago.aegis.data.UserRepository
 import com.yago.aegis.data.WorkoutSession
 import com.yago.aegis.data.effectiveSlots
 import com.yago.aegis.data.withSafeDefaults
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -41,11 +43,11 @@ class StatsViewModel(private val repository: UserRepository) : ViewModel() {
 
     // Librería de ejercicios
     val allExercises: StateFlow<List<Exercise>> = repository.exerciseLibrary
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(30_000), emptyList())
 
     // Historial de entrenamientos
     val workoutHistory: StateFlow<List<WorkoutSession>> = repository.workoutHistory
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(30_000), emptyList())
 
     // Disciplina semanal: (sesiones esta semana, objetivo)
     // Usa semana de calendario (lunes 00:00) — misma definición que el volumen semanal.
@@ -67,7 +69,7 @@ class StatsViewModel(private val repository: UserRepository) : ViewModel() {
         val lastWeekVol = history.filter { it.date in startOfLastWeek until startOfThisWeek }.sumOf { calculateVolume(it) }
         val diff = if (lastWeekVol > 0) ((thisWeekVol - lastWeekVol) / lastWeekVol) * 100 else 0.0
         Pair(thisWeekVol, diff)
-    }
+    }.flowOn(Dispatchers.Default)
 
     // Evolución de volumen mensual (últimos 3 meses)
     val monthlyVolumeEvolution: Flow<List<Pair<String, Double>>> = workoutHistory.map { history ->
@@ -82,7 +84,7 @@ class StatsViewModel(private val repository: UserRepository) : ViewModel() {
             }.sumOf { calculateVolume(it) }
             monthName to volume
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     // Búsqueda y filtro de ejercicios (estado UI local al ViewModel)
     var searchQuery by mutableStateOf("")
@@ -143,7 +145,7 @@ class StatsViewModel(private val repository: UserRepository) : ViewModel() {
                 .maxOfOrNull { it.weight } ?: exercise.oneRepMax
             exercise.copy(oneRepMax = maxWeight)
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     // Normaliza nombres para comparar (quita el Zero Width Space de los base y espacios).
     private fun normalizeName(name: String): String = name.replace("​", "").trim().uppercase()

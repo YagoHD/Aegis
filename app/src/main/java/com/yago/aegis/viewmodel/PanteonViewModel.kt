@@ -6,9 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.yago.aegis.data.PanteonResult
 import com.yago.aegis.data.RankEngine
 import com.yago.aegis.data.UserRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 
 /**
@@ -25,7 +27,11 @@ class PanteonViewModel(private val repository: UserRepository) : ViewModel() {
     ) { history, library, mass, sex ->
         val bodyweight = mass.toDoubleOrNull() ?: 0.0
         RankEngine.compute(history, library, bodyweight, sex)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), PanteonResult.EMPTY)
+    }
+        // El cálculo (historial × librería × series) es pesado: fuera del hilo de UI (fluidez de navegación).
+        .flowOn(Dispatchers.Default)
+        // 30s de retención: al volver al Panteón poco después no se recalcula (no se "enfría").
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(30_000), PanteonResult.EMPTY)
 
     class Factory(private val repository: UserRepository) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {

@@ -5,7 +5,9 @@ import androidx.datastore.dataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -79,24 +81,24 @@ class SettingsStore(private val context: Context) {
         if (json.isEmpty()) emptyList()
         else {
             val type = object : TypeToken<List<Routine>>() {}.type
-            gson.fromJson(json, type)
+            gson.fromJson<List<Routine>>(json, type)
         }
-    }
+    }.flowOn(Dispatchers.Default)
     val exerciseLibrary: Flow<List<Exercise>> = context.dataStore.data.map { prefs ->
         val json = prefs[EXERCISES_LIBRARY_KEY] ?: ""
         if (json.isEmpty()) emptyList()
         else {
             val type = object : TypeToken<List<Exercise>>() {}.type
-            gson.fromJson(json, type)
+            gson.fromJson<List<Exercise>>(json, type)
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     // Sesión de entreno en curso (null = ninguna). Se restaura al abrir la app.
     val activeSession: Flow<WorkoutSession?> = context.dataStore.data.map { prefs ->
         prefs[ACTIVE_SESSION_KEY]?.takeIf { it.isNotEmpty() }?.let { json ->
             runCatching { gson.fromJson(json, WorkoutSession::class.java) }.getOrNull()
         }
-    }
+    }.flowOn(Dispatchers.Default)
     val activeRoutineId: Flow<Int?> = context.dataStore.data.map { it[ACTIVE_ROUTINE_ID_KEY]?.toIntOrNull() }
     val activeSessionStart: Flow<Long> = context.dataStore.data.map { it[ACTIVE_SESSION_START_KEY] ?: 0L }
     val globalTags: Flow<List<String>> = context.dataStore.data.map { prefs ->
@@ -104,9 +106,9 @@ class SettingsStore(private val context: Context) {
         if (json.isEmpty()) listOf("PULL", "PUSH", "LEGS")
         else {
             val type = object : TypeToken<List<String>>() {}.type
-            gson.fromJson(json, type)
+            gson.fromJson<List<String>>(json, type)
         }
-    }
+    }.flowOn(Dispatchers.Default)
     val disciplineDay: Flow<Int> = context.dataStore.data.map { it[DISCIPLINE_DAY] ?: 0 }
     val onboardingCompleted: Flow<Boolean> = context.dataStore.data.map { it[ONBOARDING_COMPLETED] ?: false }
     val workoutHistory: Flow<List<WorkoutSession>> = context.dataStore.data.map { prefs ->
@@ -114,9 +116,9 @@ class SettingsStore(private val context: Context) {
         if (json.isEmpty()) emptyList()
         else {
             val type = object : TypeToken<List<WorkoutSession>>() {}.type
-            gson.fromJson(json, type)
+            gson.fromJson<List<WorkoutSession>>(json, type)
         }
-    }
+    }.flowOn(Dispatchers.Default)
     val showVolumeCard: Flow<Boolean> = context.dataStore.data.map { it[SHOW_VOLUME_CARD] ?: true }
     val showDisciplineCard: Flow<Boolean> = context.dataStore.data.map { it[SHOW_DISCIPLINE_CARD] ?: true }
     val showEvolutionGraph: Flow<Boolean> = context.dataStore.data.map { it[SHOW_EVOLUTION_GRAPH] ?: true }
@@ -134,9 +136,9 @@ class SettingsStore(private val context: Context) {
         if (json.isEmpty()) listOf(1.25, 2.5, 5.0, 10.0, 15.0, 20.0, 25.0)
         else {
             val type = object : TypeToken<List<Double>>() {}.type
-            gson.fromJson(json, type)
+            gson.fromJson<List<Double>>(json, type)
         }
-    }
+    }.flowOn(Dispatchers.Default)
     val barWeight: Flow<Float> = context.dataStore.data.map { it[BAR_WEIGHT] ?: 20f }
 
     val bodyHistory: Flow<List<BodySnapshot>> = context.dataStore.data.map { prefs ->
@@ -144,18 +146,18 @@ class SettingsStore(private val context: Context) {
         if (json.isEmpty()) emptyList()
         else {
             val type = object : TypeToken<List<BodySnapshot>>() {}.type
-            gson.fromJson(json, type)
+            gson.fromJson<List<BodySnapshot>>(json, type)
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     val photoHistory: Flow<List<PhotoRecord>> = context.dataStore.data.map { prefs ->
         val json = prefs[PHOTO_HISTORY_KEY] ?: ""
         if (json.isEmpty()) emptyList()
         else {
             val type = object : TypeToken<List<PhotoRecord>>() {}.type
-            gson.fromJson(json, type)
+            gson.fromJson<List<PhotoRecord>>(json, type)
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     // --- ESCRITURA (WRITE) ---
     // Limpia todos los datos locales del usuario — llamar al hacer logout
