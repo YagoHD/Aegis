@@ -205,7 +205,7 @@ fun EditRoutineScreen(
                             slot = slot,
                             onDeleteSlot = { routinesViewModel.removeSlot(slotIndex) },
                             onDeleteVariant = { variantIdx -> routinesViewModel.removeVariantFromSlot(slotIndex, variantIdx) },
-                            onAddVariant = { navController.navigate("add_exercise?slotIndex=$slotIndex") },
+                            onAddVariant = { navController.navigate(com.yago.aegis.ui.navigation.Routes.addExercise(slotIndex)) },
                             showReorderHandle = true,
                             dragHandleModifier = Modifier.draggableHandle()
                         )
@@ -216,7 +216,7 @@ fun EditRoutineScreen(
             // BOTÓN AÑADIR
             item {
                 Surface(
-                    onClick = { navController.navigate("add_exercise?slotIndex=-1") },
+                    onClick = { navController.navigate(com.yago.aegis.ui.navigation.Routes.addExercise(-1)) },
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     shape = RoundedCornerShape(8.dp),
                     color = Color.Transparent,

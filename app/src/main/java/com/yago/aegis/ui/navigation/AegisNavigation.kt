@@ -43,7 +43,7 @@ import com.yago.aegis.viewmodel.RoutinesViewModel
 import com.yago.aegis.viewmodel.StatsViewModel
 import com.yago.aegis.viewmodel.WorkoutViewModel
 
-private val TAB_ROUTES = listOf("stats", "routine", "train", "panteon", "profile")
+private val TAB_ROUTES = listOf(Routes.STATS, Routes.ROUTINE, Routes.TRAIN, Routes.PANTEON, Routes.PROFILE)
 
 private val tabEnter: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
     val from = TAB_ROUTES.indexOf(initialState.destination.route)
@@ -93,21 +93,21 @@ fun AegisNavigation(
     }
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
     val startDest = when {
-        !isLoggedIn -> "welcome"
-        !authRepository.isEmailVerified -> "email_verification"
-        else -> "profile"
+        !isLoggedIn -> Routes.WELCOME
+        !authRepository.isEmailVerified -> Routes.EMAIL_VERIFICATION
+        else -> Routes.PROFILE
     }
 
-    val onboardingRoutes = listOf("welcome", "identity", "metrics", "register", "email_verification")
-    val authRoutes = listOf("login", "welcome", "email_verification")
+    val onboardingRoutes = listOf(Routes.WELCOME, Routes.IDENTITY, Routes.METRICS, Routes.REGISTER, Routes.EMAIL_VERIFICATION)
+    val authRoutes = listOf(Routes.LOGIN, Routes.WELCOME, Routes.EMAIL_VERIFICATION)
     val isSessionActive = currentRoute?.startsWith("active_session") == true ||
-            currentRoute == "custom_session"
+            currentRoute == Routes.CUSTOM_SESSION
 
     // Redirigir a verificación en cualquier momento si needsEmailVerification es true
     val uiStateGlobal by authViewModel.uiState.collectAsState()
     LaunchedEffect(uiStateGlobal.needsEmailVerification) {
         if (uiStateGlobal.needsEmailVerification) {
-            navController.navigate("email_verification") {
+            navController.navigate(Routes.EMAIL_VERIFICATION) {
                 popUpTo(0) { inclusive = false }
             }
         }
@@ -116,15 +116,15 @@ fun AegisNavigation(
     val plateCalculatorViewModel: PlateCalculatorViewModel = viewModel(factory = PlateCalculatorViewModel.Factory(userRepository))
     val panteonViewModel: PanteonViewModel = viewModel(factory = PanteonViewModel.Factory(userRepository))
 
-    val showBottomBar = currentRoute != "settings" &&
+    val showBottomBar = currentRoute != Routes.SETTINGS &&
             !onboardingRoutes.contains(currentRoute) &&
             !authRoutes.contains(currentRoute) &&
             !isSessionActive &&
-            currentRoute != "workout_settings" &&
-            currentRoute != "workout_complete" &&
-            currentRoute != "workout_history" &&
-            currentRoute != "plate_calculator" &&
-            currentRoute != "privacy_policy"
+            currentRoute != Routes.WORKOUT_SETTINGS &&
+            currentRoute != Routes.WORKOUT_COMPLETE &&
+            currentRoute != Routes.WORKOUT_HISTORY &&
+            currentRoute != Routes.PLATE_CALCULATOR &&
+            currentRoute != Routes.PRIVACY_POLICY
 
     Scaffold(
         bottomBar = { if (showBottomBar) AegisBottomBar(navController) }
@@ -135,7 +135,7 @@ fun AegisNavigation(
             modifier = Modifier.padding(paddingValues).imePadding()
         ) {
             composable(
-                route = "login",
+                route = Routes.LOGIN,
                 enterTransition = { slideInHorizontally(initialOffsetX = { -it }) },
                 exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) }
             ) {
@@ -143,57 +143,57 @@ fun AegisNavigation(
                     authViewModel = authViewModel,
                     onNavigateToRegister = {
                         // Volver a welcome para iniciar el flujo de registro completo
-                        navController.navigate("welcome") {
-                            popUpTo("login") { inclusive = true }
+                        navController.navigate(Routes.WELCOME) {
+                            popUpTo(Routes.LOGIN) { inclusive = true }
                         }
                     },
                     onLoginSuccess = {
-                        navController.navigate("profile") {
+                        navController.navigate(Routes.PROFILE) {
                             popUpTo(0) { inclusive = true }
                         }
                     }
                 )
             }
 
-            composable("welcome") {
+            composable(Routes.WELCOME) {
                 WelcomeScreen(
                     onLogin = {
-                        navController.navigate("login") {
-                            popUpTo("welcome") { inclusive = false }
+                        navController.navigate(Routes.LOGIN) {
+                            popUpTo(Routes.WELCOME) { inclusive = false }
                         }
                     },
-                    onRegister = { navController.navigate("identity") }
+                    onRegister = { navController.navigate(Routes.IDENTITY) }
                 )
             }
-            composable("identity") {
+            composable(Routes.IDENTITY) {
                 IdentityScreen(
                     viewModel = profileViewModel,
                     onContinue = { name, _, _ ->
                         profileViewModel.updateName(name)
-                        navController.navigate("metrics")
+                        navController.navigate(Routes.METRICS)
                     },
                     onBack = { navController.popBackStack() }
                 )
             }
-            composable("metrics") {
+            composable(Routes.METRICS) {
                 MetricsScreen(
                     onComplete = { height, mass, sex ->
                         profileViewModel.updateHeight(height)
                         profileViewModel.updateMass(mass)
                         profileViewModel.updateSex(sex)
                         profileViewModel.completeOnboarding()
-                        navController.navigate("register") {
-                            popUpTo("welcome") { inclusive = false }
+                        navController.navigate(Routes.REGISTER) {
+                            popUpTo(Routes.WELCOME) { inclusive = false }
                         }
                     },
                     onBack = { navController.popBackStack() }
                 )
             }
-            composable("register") {
+            composable(Routes.REGISTER) {
                 RegisterScreen(
                     authViewModel = authViewModel,
                     onRegisterSuccess = {
-                        navController.navigate("profile") {
+                        navController.navigate(Routes.PROFILE) {
                             popUpTo(0) { inclusive = true }
                         }
                     },
@@ -201,19 +201,19 @@ fun AegisNavigation(
                 )
             }
 
-            composable("email_verification") {
+            composable(Routes.EMAIL_VERIFICATION) {
                 val email = authViewModel.currentUserEmail
                 EmailVerificationScreen(
                     authViewModel = authViewModel,
                     email = email,
                     onVerified = {
-                        navController.navigate("profile") {
+                        navController.navigate(Routes.PROFILE) {
                             popUpTo(0) { inclusive = true }
                         }
                     },
                     onBack = {
                         authViewModel.logout()
-                        navController.navigate("welcome") {
+                        navController.navigate(Routes.WELCOME) {
                             popUpTo(0) { inclusive = true }
                         }
                     }
@@ -221,7 +221,7 @@ fun AegisNavigation(
             }
 
             composable(
-                route = "routine",
+                route = Routes.ROUTINE,
                 enterTransition = tabEnter,
                 exitTransition = tabExit,
                 popEnterTransition = tabEnter,
@@ -229,10 +229,10 @@ fun AegisNavigation(
             ) {
                 RoutineScreen(
                     routinesViewModel = routinesViewModel,
-                    onNavigateToEditRoutine = { id -> navController.navigate("edit_routine/$id") },
-                    onNavigateToNewRoutine = { id -> navController.navigate("edit_routine/$id?isNew=true") },
+                    onNavigateToEditRoutine = { id -> navController.navigate(Routes.editRoutine(id)) },
+                    onNavigateToNewRoutine = { id -> navController.navigate(Routes.editRoutine(id, true)) },
                     onNavigateToExercises = {
-                        navController.navigate("ejercicios") {
+                        navController.navigate(Routes.EJERCICIOS) {
                             popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
@@ -242,7 +242,7 @@ fun AegisNavigation(
             }
 
             composable(
-                route = "stats",
+                route = Routes.STATS,
                 enterTransition = tabEnter,
                 exitTransition = tabExit,
                 popEnterTransition = tabEnter,
@@ -250,19 +250,19 @@ fun AegisNavigation(
             ) {
                 StatsScreen(
                     viewModel = sharedStatsViewModel,
-                    onNavigateToSettings = { navController.navigate("stats_settings") },
-                    onNavigateToExerciseDetail = { exerciseId -> navController.navigate("exercise_detail/$exerciseId") },
-                    onNavigateToHistory = { navController.navigate("workout_history") }
+                    onNavigateToSettings = { navController.navigate(Routes.STATS_SETTINGS) },
+                    onNavigateToExerciseDetail = { exerciseId -> navController.navigate(Routes.exerciseDetail(exerciseId)) },
+                    onNavigateToHistory = { navController.navigate(Routes.WORKOUT_HISTORY) }
                 )
             }
             composable(
-                route = "stats_settings",
+                route = Routes.STATS_SETTINGS,
                 enterTransition = pushEnter, exitTransition = pushExit,
                 popEnterTransition = pushPopEnter, popExitTransition = pushPopExit
             ) { StatsSettingsScreen(viewModel = sharedStatsViewModel) }
 
             composable(
-                route = "profile",
+                route = Routes.PROFILE,
                 enterTransition = tabEnter,
                 exitTransition = tabExit,
                 popEnterTransition = tabEnter,
@@ -270,9 +270,9 @@ fun AegisNavigation(
             ) {
                 MainProfileScreen(
                     viewModel = profileViewModel,
-                    onNavigateToSettings = { navController.navigate("settings") },
+                    onNavigateToSettings = { navController.navigate(Routes.SETTINGS) },
                     onNavigateToTrain = {
-                        navController.navigate("train") {
+                        navController.navigate(Routes.TRAIN) {
                             popUpTo(navController.graph.startDestinationId) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
@@ -282,7 +282,7 @@ fun AegisNavigation(
             }
 
             composable(
-                route = "ejercicios",
+                route = Routes.EJERCICIOS,
                 enterTransition = tabEnter,
                 exitTransition = tabExit,
                 popEnterTransition = tabEnter,
@@ -290,10 +290,10 @@ fun AegisNavigation(
             ) {
                 ExercisesLibraryScreen(
                     routinesViewModel = routinesViewModel,
-                    onNavigateToCreate = { navController.navigate("create_exercise") },
-                    onNavigateToEdit = { exerciseName -> navController.navigate("edit_exercise/$exerciseName") },
+                    onNavigateToCreate = { navController.navigate(Routes.CREATE_EXERCISE) },
+                    onNavigateToEdit = { exerciseName -> navController.navigate(Routes.editExercise(exerciseName)) },
                     onNavigateToRoutines = {
-                        navController.navigate("routine") {
+                        navController.navigate(Routes.ROUTINE) {
                             popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
@@ -303,7 +303,7 @@ fun AegisNavigation(
             }
 
             composable(
-                route = "panteon",
+                route = Routes.PANTEON,
                 enterTransition = tabEnter,
                 exitTransition = tabExit,
                 popEnterTransition = tabEnter,
@@ -312,7 +312,7 @@ fun AegisNavigation(
                 PanteonScreen(viewModel = panteonViewModel)
             }
             composable(
-                route = "exercise_detail/{exerciseId}",
+                route = Routes.EXERCISE_DETAIL,
                 arguments = listOf(navArgument("exerciseId") { type = NavType.LongType }),
                 enterTransition = pushEnter, exitTransition = pushExit,
                 popEnterTransition = pushPopEnter, popExitTransition = pushPopExit
@@ -322,7 +322,7 @@ fun AegisNavigation(
             }
 
             composable(
-                route = "settings",
+                route = Routes.SETTINGS,
                 enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
                 exitTransition = { slideOutHorizontally(targetOffsetX = { it }) }
             ) {
@@ -331,17 +331,17 @@ fun AegisNavigation(
                     authViewModel = authViewModel,
                     onLogout = {
                         authViewModel.logout()
-                        navController.navigate("welcome") { popUpTo(0) { inclusive = true } }
+                        navController.navigate(Routes.WELCOME) { popUpTo(0) { inclusive = true } }
                     },
                     onAccountDeleted = {
-                        navController.navigate("welcome") { popUpTo(0) { inclusive = true } }
+                        navController.navigate(Routes.WELCOME) { popUpTo(0) { inclusive = true } }
                     },
-                    onNavigateToPrivacy = { navController.navigate("privacy_policy") }
+                    onNavigateToPrivacy = { navController.navigate(Routes.PRIVACY_POLICY) }
                 )
             }
 
             composable(
-                route = "edit_routine/{routineId}?isNew={isNew}",
+                route = Routes.EDIT_ROUTINE,
                 arguments = listOf(
                     navArgument("routineId") { type = NavType.IntType },
                     navArgument("isNew") { type = NavType.BoolType; defaultValue = false }
@@ -361,7 +361,7 @@ fun AegisNavigation(
             }
 
             composable(
-                route = "add_exercise?slotIndex={slotIndex}",
+                route = Routes.ADD_EXERCISE,
                 arguments = listOf(navArgument("slotIndex") { type = NavType.IntType; defaultValue = -1 }),
                 enterTransition = pushEnter, exitTransition = pushExit,
                 popEnterTransition = pushPopEnter, popExitTransition = pushPopExit
@@ -376,7 +376,7 @@ fun AegisNavigation(
             }
 
             composable(
-                route = "edit_exercise/{exerciseName}",
+                route = Routes.EDIT_EXERCISE,
                 enterTransition = pushEnter, exitTransition = pushExit,
                 popEnterTransition = pushPopEnter, popExitTransition = pushPopExit
             ) { backStackEntry ->
@@ -386,7 +386,7 @@ fun AegisNavigation(
             }
 
             composable(
-                route = "create_exercise",
+                route = Routes.CREATE_EXERCISE,
                 enterTransition = pushEnter, exitTransition = pushExit,
                 popEnterTransition = pushPopEnter, popExitTransition = pushPopExit
             ) {
@@ -394,7 +394,7 @@ fun AegisNavigation(
             }
 
             composable(
-                route = "train",
+                route = Routes.TRAIN,
                 enterTransition = tabEnter,
                 exitTransition = tabExit,
                 popEnterTransition = tabEnter,
@@ -404,28 +404,28 @@ fun AegisNavigation(
                     routinesViewModel = routinesViewModel,
                     workoutViewModel = workoutViewModel,
                     onNavigateToCreateRoutine = {
-                        navController.navigate("routine") {
+                        navController.navigate(Routes.ROUTINE) {
                             popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
                         }
                     },
-                    onStartWorkout = { routineId -> navController.navigate("active_session/$routineId") },
-                    onNavigateToPlateCalculator = { navController.navigate("plate_calculator") },
+                    onStartWorkout = { routineId -> navController.navigate(Routes.activeSession(routineId)) },
+                    onNavigateToPlateCalculator = { navController.navigate(Routes.PLATE_CALCULATOR) },
                     onResumeSession = {
                         val id = workoutViewModel.activeRoutineId.value
-                        if (id != null) navController.navigate("active_session/$id")
-                        else navController.navigate("custom_session")
+                        if (id != null) navController.navigate(Routes.activeSession(id))
+                        else navController.navigate(Routes.CUSTOM_SESSION)
                     },
                     onStartCustomWorkout = { name ->
                         workoutViewModel.startCustomWorkout(name)
-                        navController.navigate("custom_session")
+                        navController.navigate(Routes.CUSTOM_SESSION)
                     }
                 )
             }
 
             composable(
-                route = "active_session/{routineId}",
+                route = Routes.ACTIVE_SESSION,
                 arguments = listOf(navArgument("routineId") { type = NavType.IntType })
             ) { backStackEntry ->
                 val routineId = backStackEntry.arguments?.getInt("routineId") ?: -1
@@ -436,34 +436,34 @@ fun AegisNavigation(
                     routinesViewModel = routinesViewModel,
                     profileViewModel = profileViewModel,
                     onFinishWorkout = {
-                        navController.navigate("workout_complete") {
-                            popUpTo("active_session/{routineId}") { inclusive = true }
+                        navController.navigate(Routes.WORKOUT_COMPLETE) {
+                            popUpTo(Routes.ACTIVE_SESSION) { inclusive = true }
                         }
                     },
-                    onNavigateToSettings = { navController.navigate("workout_settings") },
-                    onNavigateToPlateCalculator = { navController.navigate("plate_calculator") },
+                    onNavigateToSettings = { navController.navigate(Routes.WORKOUT_SETTINGS) },
+                    onNavigateToPlateCalculator = { navController.navigate(Routes.PLATE_CALCULATOR) },
                     onBack = { navController.popBackStack() }
                 )
             }
 
             // Entrenamiento libre: la sesión ya se creó con startCustomWorkout antes de navegar
-            composable("custom_session") {
+            composable(Routes.CUSTOM_SESSION) {
                 ActiveSessionScreen(
                     workoutViewModel = workoutViewModel,
                     routinesViewModel = routinesViewModel,
                     profileViewModel = profileViewModel,
                     onFinishWorkout = {
-                        navController.navigate("workout_complete") {
-                            popUpTo("custom_session") { inclusive = true }
+                        navController.navigate(Routes.WORKOUT_COMPLETE) {
+                            popUpTo(Routes.CUSTOM_SESSION) { inclusive = true }
                         }
                     },
-                    onNavigateToSettings = { navController.navigate("workout_settings") },
-                    onNavigateToPlateCalculator = { navController.navigate("plate_calculator") },
+                    onNavigateToSettings = { navController.navigate(Routes.WORKOUT_SETTINGS) },
+                    onNavigateToPlateCalculator = { navController.navigate(Routes.PLATE_CALCULATOR) },
                     onBack = { navController.popBackStack() }
                 )
             }
 
-            composable("workout_complete") {
+            composable(Routes.WORKOUT_COMPLETE) {
                 val summary = workoutViewModel.workoutSummary.collectAsState().value
                 val allHistory by sharedStatsViewModel.workoutHistory.collectAsState()
 
@@ -483,15 +483,15 @@ fun AegisNavigation(
                         onFinish = { notes ->
                             workoutViewModel.saveSessionNotes(notes)
                             workoutViewModel.clearSummary()
-                            navController.navigate("profile") {
+                            navController.navigate(Routes.PROFILE) {
                                 popUpTo(0) { inclusive = true }
                             }
                         },
-                        onNavigateToHistory = { navController.navigate("workout_history") }
+                        onNavigateToHistory = { navController.navigate(Routes.WORKOUT_HISTORY) }
                     )
                 } else {
                     LaunchedEffect(Unit) {
-                        navController.navigate("profile") {
+                        navController.navigate(Routes.PROFILE) {
                             popUpTo(0) { inclusive = true }
                         }
                     }
@@ -499,7 +499,7 @@ fun AegisNavigation(
             }
 
             composable(
-                route = "workout_history",
+                route = Routes.WORKOUT_HISTORY,
                 enterTransition = pushEnter, exitTransition = pushExit,
                 popEnterTransition = pushPopEnter, popExitTransition = pushPopExit
             ) {
@@ -511,7 +511,7 @@ fun AegisNavigation(
             }
 
             composable(
-                route = "workout_settings",
+                route = Routes.WORKOUT_SETTINGS,
                 enterTransition = pushEnter, exitTransition = pushExit,
                 popEnterTransition = pushPopEnter, popExitTransition = pushPopExit
             ) {
@@ -528,7 +528,7 @@ fun AegisNavigation(
             }
 
             composable(
-                route = "plate_calculator",
+                route = Routes.PLATE_CALCULATOR,
                 enterTransition = pushEnter, exitTransition = pushExit,
                 popEnterTransition = pushPopEnter, popExitTransition = pushPopExit
             ) {
@@ -539,7 +539,7 @@ fun AegisNavigation(
             }
 
             composable(
-                route = "privacy_policy",
+                route = Routes.PRIVACY_POLICY,
                 enterTransition = pushEnter, exitTransition = pushExit,
                 popEnterTransition = pushPopEnter, popExitTransition = pushPopExit
             ) {
