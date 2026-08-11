@@ -1,0 +1,28 @@
+rules_version = '2';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Reglas de seguridad de Firestore (US-09)
+//
+// Modelo de datos de Aegis: TODO vive bajo  users/{userId}/data/{documento}
+// (profile, routines, exercises, history, tags, settings, bodyHistory, photoHistory).
+//
+// Principio: cada usuario SOLO puede leer/escribir sus propios datos, y solo si
+// está autenticado. El resto de la base de datos queda denegado por defecto
+// (Firestore niega todo lo que no tenga un `match ... allow` explícito).
+//
+// Sin estas reglas, la seguridad dependía únicamente del SDK cliente: cualquiera
+// con el token de otro proyecto podía leer/escribir datos ajenos. Estas reglas lo
+// imponen en el SERVIDOR.
+// ─────────────────────────────────────────────────────────────────────────────
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Todo el árbol de un usuario (documento de datos y cualquier subruta futura).
+    match /users/{userId}/{documents=**} {
+      allow read, write: if request.auth != null
+                         && request.auth.uid == userId;
+    }
+
+    // No hay más `match`: cualquier otra ruta queda denegada por defecto.
+  }
+}
