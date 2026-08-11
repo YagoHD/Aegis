@@ -100,7 +100,7 @@ fun MetricInput(
                         if (value.isEmpty()) {
                             Text(
                                 text = "00.0",
-                                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+                                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
                                 fontSize = 48.sp,
                                 fontWeight = FontWeight.Black
                             )

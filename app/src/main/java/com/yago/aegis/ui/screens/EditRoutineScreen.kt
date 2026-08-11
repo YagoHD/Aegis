@@ -359,8 +359,8 @@ private fun RoutineSlotCard(
                 }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Añadir variante
-                    IconButton(onClick = onAddVariant, modifier = Modifier.size(36.dp)) {
+                    // Añadir variante — US-11: toque 48dp (icono visible sigue a 18dp)
+                    IconButton(onClick = onAddVariant, modifier = Modifier.size(48.dp)) {
                         Icon(
                             imageVector = Icons.Default.SwapHoriz,
                             contentDescription = stringResource(R.string.add_variant_desc),
@@ -368,8 +368,8 @@ private fun RoutineSlotCard(
                             modifier = Modifier.size(18.dp)
                         )
                     }
-                    // Eliminar slot
-                    IconButton(onClick = onDeleteSlot, modifier = Modifier.size(36.dp)) {
+                    // Eliminar slot — US-11: toque 48dp (icono visible sigue a 18dp)
+                    IconButton(onClick = onDeleteSlot, modifier = Modifier.size(48.dp)) {
                         Icon(
                             imageVector = Icons.Default.Delete,
                             contentDescription = stringResource(R.string.content_desc_delete),

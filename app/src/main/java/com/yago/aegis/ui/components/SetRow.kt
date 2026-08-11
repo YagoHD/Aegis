@@ -66,19 +66,12 @@ fun SetRow(
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         // 1. INDICADOR TÁCTICO DE SERIE
+        // US-11: área de toque de 48dp (accesibilidad) manteniendo el cuadrado VISIBLE a 38dp.
+        // El clickable va en el Box exterior de 48dp; el visual (fondo/borde) en el interior de 38dp.
         val haptic = LocalHapticFeedback.current
         Box(
             modifier = Modifier
-                .size(38.dp)
-                .background(
-                    if (set.isCompleted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-                    RoundedCornerShape(6.dp)
-                )
-                .border(
-                    width = 1.dp,
-                    color = if (set.isCompleted) Color.Transparent else MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
-                    shape = RoundedCornerShape(6.dp)
-                )
+                .size(48.dp)
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null
@@ -88,12 +81,27 @@ fun SetRow(
                 },
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = index.toString().padStart(2, '0'),
-                color = if (set.isCompleted) Color.Black else MaterialTheme.colorScheme.secondary,
-                fontWeight = FontWeight.Black,
-                fontSize = 14.sp
-            )
+            Box(
+                modifier = Modifier
+                    .size(38.dp)
+                    .background(
+                        if (set.isCompleted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                        RoundedCornerShape(6.dp)
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = if (set.isCompleted) Color.Transparent else MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(6.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = index.toString().padStart(2, '0'),
+                    color = if (set.isCompleted) Color.Black else MaterialTheme.colorScheme.secondary,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 14.sp
+                )
+            }
         }
 
         // 2. CAMPO PESO / LASTRE / ASISTENCIA
@@ -130,10 +138,11 @@ fun SetRow(
         )
 
         // 4. BOTÓN BORRAR
+        // US-11: toque de 48dp (icono visible sigue a 20dp). El Spacer gemelo iguala el ancho.
         if (index > 1) {
             IconButton(
                 onClick = onDelete,
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(48.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
@@ -143,7 +152,7 @@ fun SetRow(
                 )
             }
         } else {
-            Spacer(modifier = Modifier.size(32.dp))
+            Spacer(modifier = Modifier.size(48.dp))
         }
     }
 }
@@ -221,7 +230,7 @@ fun SetInputField(
                     if (textValue.isEmpty()) {
                         Text(
                             "0",
-                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
+                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.45f),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
                         )
