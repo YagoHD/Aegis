@@ -220,9 +220,9 @@ class SettingsStore(private val context: Context) {
             )
         } else {
             val type = object : TypeToken<List<BodyMeasure>>() {}.type
-            gson.fromJson(json, type)
+            gson.fromJson<List<BodyMeasure>>(json, type)
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     suspend fun saveExerciseLibrary(list: List<Exercise>) {
         val json = gson.toJson(list)
