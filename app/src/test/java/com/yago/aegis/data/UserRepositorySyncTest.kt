@@ -1,9 +1,13 @@
 package com.yago.aegis.data
 
 import android.content.Context
+import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import com.yago.aegis.data.db.AegisDatabase
+import com.yago.aegis.data.db.RoomMigrator
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -24,6 +28,7 @@ import org.robolectric.annotation.Config
 class UserRepositorySyncTest {
 
     private lateinit var store: SettingsStore
+    private lateinit var db: AegisDatabase
     private lateinit var fake: FakeCloudDataSource
     private lateinit var repo: UserRepository
 
@@ -32,9 +37,13 @@ class UserRepositorySyncTest {
         val ctx = ApplicationProvider.getApplicationContext<Context>()
         store = SettingsStore(ctx)
         store.clearAll()                 // estado determinista entre tests (DataStore persiste en la sandbox)
+        db = Room.inMemoryDatabaseBuilder(ctx, AegisDatabase::class.java).allowMainThreadQueries().build()
         fake = FakeCloudDataSource()
-        repo = UserRepository(store, fake)
+        repo = UserRepository(store, db, RoomMigrator(store, db), fake)
     }
+
+    @After
+    fun teardown() = db.close()
 
     @Test
     fun nube_vacia_sube_local_y_marca_success() = runBlocking {

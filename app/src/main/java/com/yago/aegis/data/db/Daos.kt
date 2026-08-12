@@ -22,6 +22,7 @@ interface ExerciseDao {
     @Upsert suspend fun upsert(item: ExerciseEntity)
     @Upsert suspend fun upsertAll(items: List<ExerciseEntity>)
     @Delete suspend fun delete(item: ExerciseEntity)
+    @Query("DELETE FROM exercises WHERE name = :name COLLATE NOCASE") suspend fun deleteByName(name: String)
     @Query("DELETE FROM exercises") suspend fun clear()
     @Transaction suspend fun replaceAll(items: List<ExerciseEntity>) { clear(); upsertAll(items) }
 }

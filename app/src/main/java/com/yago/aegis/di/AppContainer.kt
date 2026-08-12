@@ -25,8 +25,10 @@ interface AppContainer {
 class DefaultAppContainer(context: Context) : AppContainer {
     private val appContext = context.applicationContext
     override val settingsStore: SettingsStore by lazy { SettingsStore(appContext) }
-    override val userRepository: UserRepository by lazy { UserRepository(settingsStore) }
-    override val authRepository: FirebaseAuthRepository by lazy { FirebaseAuthRepository() }
     override val database: AegisDatabase by lazy { AegisDatabase.get(appContext) }
     override val roomMigrator: RoomMigrator by lazy { RoomMigrator(settingsStore, database) }
+    // US-03 fase 3: UserRepository lee/escribe las 5 colecciones complejas en Room (misma
+    // instancia de migrator que dispara el arranque -> el Mutex se comparte, migra 1 sola vez).
+    override val userRepository: UserRepository by lazy { UserRepository(settingsStore, database, roomMigrator) }
+    override val authRepository: FirebaseAuthRepository by lazy { FirebaseAuthRepository() }
 }

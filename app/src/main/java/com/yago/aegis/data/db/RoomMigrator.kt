@@ -2,6 +2,8 @@ package com.yago.aegis.data.db
 
 import com.yago.aegis.data.SettingsStore
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * US-03 Fase 2: vuelca las colecciones COMPLEJAS de DataStore a Room UNA sola vez.
@@ -20,21 +22,28 @@ class RoomMigrator(
     private val settingsStore: SettingsStore,
     private val db: AegisDatabase
 ) {
+    // Serializa la migración: aunque la disparen a la vez el arranque y la 1ª lectura del repo,
+    // se ejecuta UNA sola vez (doble-check del flag dentro del lock).
+    private val mutex = Mutex()
+
     suspend fun migrateIfNeeded() {
         if (settingsStore.roomMigrated.first()) return
+        mutex.withLock {
+            if (settingsStore.roomMigrated.first()) return
 
-        val exercises = settingsStore.exerciseLibrary.first().distinctBy { it.id }
-        val routines = settingsStore.routines.first().distinctBy { it.id }
-        val history = settingsStore.workoutHistory.first().distinctBy { it.id }.sortedBy { it.date }
-        val body = settingsStore.bodyHistory.first().distinctBy { it.date }
-        val photos = settingsStore.photoHistory.first().distinctBy { it.date }
+            val exercises = settingsStore.exerciseLibrary.first().distinctBy { it.id }
+            val routines = settingsStore.routines.first().distinctBy { it.id }
+            val history = settingsStore.workoutHistory.first().distinctBy { it.id }.sortedBy { it.date }
+            val body = settingsStore.bodyHistory.first().distinctBy { it.date }
+            val photos = settingsStore.photoHistory.first().distinctBy { it.date }
 
-        db.exerciseDao().replaceAll(exercises.map { it.toEntity() })
-        db.routineDao().replaceAll(routines.map { it.toEntity() })
-        db.workoutSessionDao().replaceAll(history.map { it.toEntity() })
-        db.bodySnapshotDao().replaceAll(body.map { it.toEntity() })
-        db.photoRecordDao().replaceAll(photos.map { it.toEntity() })
+            db.exerciseDao().replaceAll(exercises.map { it.toEntity() })
+            db.routineDao().replaceAll(routines.map { it.toEntity() })
+            db.workoutSessionDao().replaceAll(history.map { it.toEntity() })
+            db.bodySnapshotDao().replaceAll(body.map { it.toEntity() })
+            db.photoRecordDao().replaceAll(photos.map { it.toEntity() })
 
-        settingsStore.saveRoomMigrated(true)
+            settingsStore.saveRoomMigrated(true)
+        }
     }
 }

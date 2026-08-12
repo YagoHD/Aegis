@@ -1,5 +1,9 @@
 package com.yago.aegis.data
 
+import com.yago.aegis.data.db.AegisDatabase
+import com.yago.aegis.data.db.RoomMigrator
+import com.yago.aegis.data.db.toDomain
+import com.yago.aegis.data.db.toEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -8,13 +12,22 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 class UserRepository(
     private val settingsStore: SettingsStore,
+    private val database: AegisDatabase,
+    private val roomMigrator: RoomMigrator,
     private val firestore: CloudDataSource = FirestoreDataSource()
 ) {
     private val syncScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    // US-03 fase 3: garantiza que el volcado DataStore->Room terminó antes de leer/escribir Room.
+    // Sin esto, una escritura hecha antes de que corra la migración sería borrada por el replaceAll
+    // del migrador. Idempotente (flag + Mutex en RoomMigrator).
+    private suspend fun ensureMigrated() = roomMigrator.migrateIfNeeded()
 
     // US-01: estado observable de sincronización. La escritura local nunca se bloquea por esto.
     private val _syncState = MutableStateFlow<SyncState>(SyncState.Idle)
@@ -49,10 +62,15 @@ class UserRepository(
     val actualPhotoDate = settingsStore.actualPhotoDate
     val disciplineDay: Flow<Int> = settingsStore.disciplineDay
     val onboardingCompleted: Flow<Boolean> = settingsStore.onboardingCompleted
-    val routines: Flow<List<Routine>> = settingsStore.routines
-    val exerciseLibrary: Flow<List<Exercise>> = settingsStore.exerciseLibrary
+    // US-03 fase 3: estas 5 colecciones se leen de ROOM (off-main por Room; escritura granular).
+    // onStart { ensureMigrated() } asegura el volcado DataStore->Room antes de la 1ª emisión.
+    val routines: Flow<List<Routine>> = database.routineDao().observeAll()
+        .onStart { ensureMigrated() }.map { list -> list.map { it.toDomain() } }
+    val exerciseLibrary: Flow<List<Exercise>> = database.exerciseDao().observeAll()
+        .onStart { ensureMigrated() }.map { list -> list.map { it.toDomain() } }
     val globalTags: Flow<List<String>> = settingsStore.globalTags
-    val workoutHistory: Flow<List<WorkoutSession>> = settingsStore.workoutHistory
+    val workoutHistory: Flow<List<WorkoutSession>> = database.workoutSessionDao().observeAll()
+        .onStart { ensureMigrated() }.map { list -> list.map { it.toDomain() } }
     // Sesión de entreno en curso (persistida para no perderla si muere el proceso)
     val activeSession: Flow<WorkoutSession?> = settingsStore.activeSession
     val activeRoutineId: Flow<Int?> = settingsStore.activeRoutineId
@@ -72,10 +90,12 @@ class UserRepository(
     val timerPosY = settingsStore.timerPosY
     val availablePlates = settingsStore.availablePlates
     val barWeight = settingsStore.barWeight
-    val bodyHistory: Flow<List<BodySnapshot>> = settingsStore.bodyHistory
-    val photoHistory: Flow<List<PhotoRecord>> = settingsStore.photoHistory
+    val bodyHistory: Flow<List<BodySnapshot>> = database.bodySnapshotDao().observeAll()
+        .onStart { ensureMigrated() }.map { list -> list.map { it.toDomain() } }
+    val photoHistory: Flow<List<PhotoRecord>> = database.photoRecordDao().observeAll()
+        .onStart { ensureMigrated() }.map { list -> list.map { it.toDomain() } }
 
-    fun getAllExercises(): Flow<List<Exercise>> = settingsStore.exerciseLibrary
+    fun getAllExercises(): Flow<List<Exercise>> = exerciseLibrary
 
     suspend fun updateName(name: String) {
         settingsStore.saveName(name)
@@ -130,17 +150,19 @@ class UserRepository(
     /** Archiva la foto actual en el historial antes de reemplazarla. */
     suspend fun archiveCurrentActualPhoto(dateLabel: String) {
         val uri = settingsStore.actualPhotoUri.first() ?: return
-        settingsStore.addPhotoToHistory(
-            PhotoRecord(uri = uri, dateLabel = dateLabel)
-        )
+        ensureMigrated()
+        database.photoRecordDao().upsert(PhotoRecord(uri = uri, dateLabel = dateLabel).toEntity())
         // Sube el registro (sin las imágenes) — US-02
-        pushInBackground { firestore.savePhotoHistory(SyncMerge.photoHistoryForCloud(settingsStore.photoHistory.first())) }
+        pushInBackground {
+            firestore.savePhotoHistory(SyncMerge.photoHistoryForCloud(database.photoRecordDao().getAll().map { it.toDomain() }))
+        }
     }
 
     /** Guarda una snapshot corporal del día. */
     suspend fun saveBodySnapshot(snapshot: BodySnapshot) {
-        settingsStore.saveBodySnapshot(snapshot)
-        pushInBackground { firestore.saveBodyHistory(settingsStore.bodyHistory.first()) }
+        ensureMigrated()
+        database.bodySnapshotDao().upsert(snapshot.toEntity())
+        pushInBackground { firestore.saveBodyHistory(database.bodySnapshotDao().getAll().map { it.toDomain() }) }
     }
 
     /**
@@ -152,7 +174,8 @@ class UserRepository(
      * aún no llega al objetivo, no rompe la racha — empezamos a contar desde la anterior.
      */
     suspend fun computeCurrentStreak(): Int {
-        val sessions = settingsStore.workoutHistory.first()
+        ensureMigrated()
+        val sessions = database.workoutSessionDao().getAll().map { it.toDomain() }
         if (sessions.isEmpty()) return 0
         val target = settingsStore.targetDaysPerWeek.first().coerceAtLeast(1)
 
@@ -215,12 +238,14 @@ class UserRepository(
         settingsStore.saveOnboardingCompleted(completed)
 
     suspend fun updateRoutines(list: List<Routine>) {
-        settingsStore.saveRoutines(list)
+        ensureMigrated()
+        database.routineDao().replaceAll(list.map { it.toEntity() })
         pushInBackground { firestore.saveRoutines(list) }
     }
 
     suspend fun updateExerciseLibrary(list: List<Exercise>) {
-        settingsStore.saveExerciseLibrary(list)
+        ensureMigrated()
+        database.exerciseDao().replaceAll(list.map { it.toEntity() })
         pushInBackground { firestore.saveExercises(list) }
     }
 
@@ -230,33 +255,29 @@ class UserRepository(
     }
 
     suspend fun upsertExercise(exercise: Exercise) {
-        val currentList = settingsStore.exerciseLibrary.first().toMutableList()
-        val index = currentList.indexOfFirst { it.id == exercise.id }
-        if (index != -1) currentList[index] = exercise else currentList.add(exercise)
-        settingsStore.saveExerciseLibrary(currentList)
-        pushInBackground { firestore.saveExercises(currentList) }
+        ensureMigrated()
+        database.exerciseDao().upsert(exercise.toEntity())   // granular: 1 fila, no reescribe 201
+        pushInBackground { firestore.saveExercises(database.exerciseDao().getAll().map { it.toDomain() }) }
     }
 
     suspend fun deleteExercise(exercise: Exercise) {
-        val currentList = settingsStore.exerciseLibrary.first().toMutableList()
-        currentList.removeAll { it.name.equals(exercise.name, ignoreCase = true) }
-        settingsStore.saveExerciseLibrary(currentList)
-        pushInBackground { firestore.saveExercises(currentList) }
+        ensureMigrated()
+        database.exerciseDao().deleteByName(exercise.name)   // borra todos los de ese nombre (NOCASE)
+        pushInBackground { firestore.saveExercises(database.exerciseDao().getAll().map { it.toDomain() }) }
     }
 
     suspend fun updateWorkoutSession(session: WorkoutSession) {
-        // Actualiza una sesión existente en el historial (ej: añadir notas)
-        val history = settingsStore.workoutHistory.first().toMutableList()
-        val idx = history.indexOfFirst { it.id == session.id }
-        if (idx >= 0) {
-            history[idx] = session
-            settingsStore.replaceWorkoutHistory(history)
-            pushInBackground { firestore.saveWorkoutHistory(history) }
+        // Actualiza una sesión existente (ej: añadir notas). Mantiene la semántica: no crea fantasmas.
+        ensureMigrated()
+        if (database.workoutSessionDao().getAll().any { it.id == session.id }) {
+            database.workoutSessionDao().upsert(session.toEntity())
+            pushInBackground { firestore.saveWorkoutHistory(database.workoutSessionDao().getAll().map { it.toDomain() }) }
         }
     }
 
     suspend fun saveWorkoutSession(session: WorkoutSession) {
-        settingsStore.saveWorkoutSession(session)
+        ensureMigrated()
+        database.workoutSessionDao().upsert(session.toEntity())   // id nuevo -> inserta (append)
         pushInBackground { firestore.appendWorkoutSession(session) }
     }
 
@@ -334,8 +355,9 @@ class UserRepository(
     suspend fun syncOnLogin() {
         _syncState.value = SyncState.Syncing
         runCatching {
-            // 1. Limpiar duplicados del historial local
-            settingsStore.deduplicateWorkoutHistory()
+            // Asegura el volcado DataStore->Room antes de sincronizar (Room es la fuente local).
+            // Room ya no puede tener ids duplicados (PK), así que la deduplicación local sobra.
+            ensureMigrated()
 
             if (firestore.hasCloudData()) {
                 // 2. Deduplicar también el historial en Firestore
@@ -380,11 +402,12 @@ class UserRepository(
                 settingsStore.saveCustomMeasures(measures)
             }
         }
-        firestore.getRoutines()?.let { settingsStore.saveRoutines(it) }
-        firestore.getExercises()?.let { settingsStore.saveExerciseLibrary(it) }
+        firestore.getRoutines()?.let { cloud -> database.routineDao().replaceAll(cloud.map { it.toEntity() }) }
+        firestore.getExercises()?.let { cloud -> database.exerciseDao().replaceAll(cloud.map { it.toEntity() }) }
         firestore.getWorkoutHistory()?.let { cloudHistory ->
-            val merged = SyncMerge.mergeHistory(settingsStore.workoutHistory.first(), cloudHistory)
-            settingsStore.replaceWorkoutHistory(merged)
+            val local = database.workoutSessionDao().getAll().map { it.toDomain() }
+            val merged = SyncMerge.mergeHistory(local, cloudHistory)
+            database.workoutSessionDao().replaceAll(merged.map { it.toEntity() })
             // Sincronizar la versión limpia a Firestore también
             pushInBackground { firestore.saveWorkoutHistory(merged) }
         }
@@ -407,14 +430,16 @@ class UserRepository(
         }
         // Historial corporal (US-02): merge por fecha
         firestore.getBodyHistory()?.let { cloud ->
-            val merged = SyncMerge.mergeBodyHistory(settingsStore.bodyHistory.first(), cloud)
-            settingsStore.saveBodyHistory(merged)
+            val local = database.bodySnapshotDao().getAll().map { it.toDomain() }
+            val merged = SyncMerge.mergeBodyHistory(local, cloud)
+            database.bodySnapshotDao().replaceAll(merged.map { it.toEntity() })
             pushInBackground { firestore.saveBodyHistory(merged) }
         }
         // Registro de fotos (US-02): merge por fecha, conservando la URI LOCAL si la hay
         firestore.getPhotoHistory()?.let { cloud ->
-            val merged = SyncMerge.mergePhotoHistory(settingsStore.photoHistory.first(), cloud)
-            settingsStore.savePhotoHistory(merged)
+            val local = database.photoRecordDao().getAll().map { it.toDomain() }
+            val merged = SyncMerge.mergePhotoHistory(local, cloud)
+            database.photoRecordDao().replaceAll(merged.map { it.toEntity() })
             pushInBackground { firestore.savePhotoHistory(SyncMerge.photoHistoryForCloud(merged)) }
         }
     }
@@ -431,9 +456,9 @@ class UserRepository(
             basePhotoDate = settingsStore.basePhotoDate.first(),
             actualPhotoDate = settingsStore.actualPhotoDate.first()
         )
-        firestore.saveRoutines(settingsStore.routines.first())
-        firestore.saveExercises(settingsStore.exerciseLibrary.first())
-        firestore.saveWorkoutHistory(settingsStore.workoutHistory.first())
+        firestore.saveRoutines(database.routineDao().getAll().map { it.toDomain() })
+        firestore.saveExercises(database.exerciseDao().getAll().map { it.toDomain() })
+        firestore.saveWorkoutHistory(database.workoutSessionDao().getAll().map { it.toDomain() })
         firestore.saveTags(settingsStore.globalTags.first())
         firestore.saveSettings(
             showBMI = settingsStore.showBMI.first(),
@@ -449,8 +474,8 @@ class UserRepository(
             timerVibrate = settingsStore.timerVibrate.first(),
             timerSound = settingsStore.timerSound.first()
         )
-        firestore.saveBodyHistory(settingsStore.bodyHistory.first())
-        firestore.savePhotoHistory(SyncMerge.photoHistoryForCloud(settingsStore.photoHistory.first()))
+        firestore.saveBodyHistory(database.bodySnapshotDao().getAll().map { it.toDomain() })
+        firestore.savePhotoHistory(SyncMerge.photoHistoryForCloud(database.photoRecordDao().getAll().map { it.toDomain() }))
     }
 }
 

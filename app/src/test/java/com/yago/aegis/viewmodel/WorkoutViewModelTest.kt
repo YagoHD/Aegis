@@ -1,12 +1,16 @@
 package com.yago.aegis.viewmodel
 
 import android.app.Application
+import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.yago.aegis.MainDispatcherRule
 import com.yago.aegis.data.FakeCloudDataSource
 import com.yago.aegis.data.SettingsStore
 import com.yago.aegis.data.UserRepository
+import com.yago.aegis.data.db.AegisDatabase
+import com.yago.aegis.data.db.RoomMigrator
 import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -31,15 +35,20 @@ class WorkoutViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private lateinit var vm: WorkoutViewModel
+    private lateinit var db: AegisDatabase
 
     @Before
     fun setup() = runBlocking {
         val app = ApplicationProvider.getApplicationContext<Application>()
         val store = SettingsStore(app)
         store.clearAll()
-        val repo = UserRepository(store, FakeCloudDataSource())
+        db = Room.inMemoryDatabaseBuilder(app, AegisDatabase::class.java).allowMainThreadQueries().build()
+        val repo = UserRepository(store, db, RoomMigrator(store, db), FakeCloudDataSource())
         vm = WorkoutViewModel(app, repo)
     }
+
+    @After
+    fun teardown() = db.close()
 
     @Test
     fun startCustomWorkout_crea_sesion_vacia_con_nombre_en_mayusculas() {
