@@ -17,6 +17,13 @@ import com.yago.aegis.data.effectiveSlots
 // Entidades Room (US-03). Una por agregado. Las listas se serializan vía [Converters].
 // Los campos de lista son NON-NULL en la entidad (la nulabilidad del dominio se resuelve en el mapper).
 
+// Gson (DataStore) puede inyectar null en campos NO-null de datos antiguos (p.ej. sesiones sin
+// `notes`). Estos helpers lo neutralizan de forma FIABLE: el valor pasa por un parámetro NULLABLE,
+// así el compilador emite el chequeo de verdad (un `?:` directo sobre un tipo no-null se optimizaría
+// y NO protegería del null en runtime).
+private fun gsonStr(v: String?): String = v ?: ""
+private fun <T> gsonList(v: List<T>?): List<T> = v ?: emptyList()
+
 @Entity(tableName = "exercises")
 data class ExerciseEntity(
     @PrimaryKey val id: Long,
@@ -43,10 +50,11 @@ fun ExerciseEntity.toDomain(): Exercise = Exercise(
 )
 
 fun Exercise.toEntity(): ExerciseEntity = ExerciseEntity(
-    id = id, name = name, type = type, muscleGroup = muscleGroup, iconName = iconName,
-    notes = notes, isBodyweight = isBodyweight, lastPerformance = lastPerformance,
-    oneRepMax = oneRepMax, bestSet = bestSet, loadType = loadType, tags = tags,
-    history = history, muscleContributions = muscleContributions ?: emptyList()
+    id = id, name = gsonStr(name), type = gsonStr(type), muscleGroup = gsonStr(muscleGroup),
+    iconName = gsonStr(iconName).ifEmpty { "dumbbell" },
+    notes = gsonStr(notes), isBodyweight = isBodyweight, lastPerformance = gsonStr(lastPerformance),
+    oneRepMax = oneRepMax, bestSet = bestSet, loadType = loadType, tags = gsonList(tags),
+    history = gsonList(history), muscleContributions = gsonList(muscleContributions)
 )
 
 @Entity(tableName = "routines")
@@ -69,8 +77,8 @@ fun RoutineEntity.toDomain(): Routine = Routine(
 
 // Al escribir, normalizamos legacy `exercises` -> slots con effectiveSlots() (no se pierde nada).
 fun Routine.toEntity(): RoutineEntity = RoutineEntity(
-    id = id, name = name, iconName = iconName,
-    exerciseSlots = effectiveSlots(), lastCompletedDates = lastCompletedDates ?: emptyList()
+    id = id, name = gsonStr(name), iconName = iconName,
+    exerciseSlots = effectiveSlots(), lastCompletedDates = gsonList(lastCompletedDates)
 )
 
 @Entity(tableName = "workout_sessions")
@@ -87,7 +95,8 @@ fun WorkoutSessionEntity.toDomain(): WorkoutSession = WorkoutSession(
 )
 
 fun WorkoutSession.toEntity(): WorkoutSessionEntity = WorkoutSessionEntity(
-    id = id, routineName = routineName, date = date, notes = notes, exercisesProgress = exercisesProgress
+    id = gsonStr(id), routineName = gsonStr(routineName), date = date,
+    notes = gsonStr(notes), exercisesProgress = gsonList(exercisesProgress)
 )
 
 @Entity(tableName = "body_snapshots")
@@ -99,7 +108,8 @@ data class BodySnapshotEntity(
 )
 
 fun BodySnapshotEntity.toDomain(): BodySnapshot = BodySnapshot(date, mass, bodyFat, customMeasures)
-fun BodySnapshot.toEntity(): BodySnapshotEntity = BodySnapshotEntity(date, mass, bodyFat, customMeasures)
+fun BodySnapshot.toEntity(): BodySnapshotEntity =
+    BodySnapshotEntity(date, gsonStr(mass).ifEmpty { "0.0" }, gsonStr(bodyFat).ifEmpty { "0.0" }, gsonList(customMeasures))
 
 @Entity(tableName = "photo_records")
 data class PhotoRecordEntity(
@@ -109,4 +119,4 @@ data class PhotoRecordEntity(
 )
 
 fun PhotoRecordEntity.toDomain(): PhotoRecord = PhotoRecord(date, uri, dateLabel)
-fun PhotoRecord.toEntity(): PhotoRecordEntity = PhotoRecordEntity(date, uri, dateLabel)
+fun PhotoRecord.toEntity(): PhotoRecordEntity = PhotoRecordEntity(date, gsonStr(uri), gsonStr(dateLabel))

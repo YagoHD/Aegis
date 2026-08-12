@@ -133,4 +133,20 @@ class AegisDatabaseTest {
         assertEquals(1, all.size)
         assertEquals("C", all.single().name)
     }
+
+    @Test
+    fun toEntity_tolera_nulls_de_gson_en_datos_antiguos() = runBlocking {
+        // Gson inyecta null en `notes` (sesión antigua sin ese campo) pese a ser no-null en Kotlin.
+        // Era el crash real en dispositivo durante la migración.
+        val old = com.google.gson.Gson().fromJson(
+            """{"id":"x","routineName":"A","date":1,"exercisesProgress":[]}""",
+            WorkoutSession::class.java
+        )
+
+        db.workoutSessionDao().upsert(old.toEntity())   // no debe lanzar NPE
+        val back = db.workoutSessionDao().getAll().single().toDomain()
+
+        assertEquals("x", back.id)
+        assertEquals("", back.notes)
+    }
 }
