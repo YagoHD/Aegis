@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
 }
@@ -63,6 +64,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.ui)
     implementation("androidx.compose.material:material-icons-extended")
     implementation("io.coil-kt.coil3:coil-compose:3.0.0-rc01")
