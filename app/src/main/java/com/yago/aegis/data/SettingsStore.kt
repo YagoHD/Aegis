@@ -59,6 +59,8 @@ class SettingsStore(private val context: Context) {
         private val ACTIVE_SESSION_KEY = stringPreferencesKey("active_session")
         private val ACTIVE_ROUTINE_ID_KEY = stringPreferencesKey("active_routine_id")
         private val ACTIVE_SESSION_START_KEY = longPreferencesKey("active_session_start")
+        // US-03: marca que el volcado one-shot DataStore -> Room ya se hizo.
+        private val ROOM_MIGRATED = booleanPreferencesKey("room_migrated")
     }
 
     // --- LECTURA (READ) ---
@@ -111,6 +113,7 @@ class SettingsStore(private val context: Context) {
     }.flowOn(Dispatchers.Default)
     val disciplineDay: Flow<Int> = context.dataStore.data.map { it[DISCIPLINE_DAY] ?: 0 }
     val onboardingCompleted: Flow<Boolean> = context.dataStore.data.map { it[ONBOARDING_COMPLETED] ?: false }
+    val roomMigrated: Flow<Boolean> = context.dataStore.data.map { it[ROOM_MIGRATED] ?: false }
     val workoutHistory: Flow<List<WorkoutSession>> = context.dataStore.data.map { prefs ->
         val json = prefs[WORKOUT_HISTORY_KEY] ?: ""
         if (json.isEmpty()) emptyList()
@@ -206,6 +209,10 @@ class SettingsStore(private val context: Context) {
     }
     suspend fun saveOnboardingCompleted(completed: Boolean) {
         context.dataStore.edit { it[ONBOARDING_COMPLETED] = completed }
+    }
+
+    suspend fun saveRoomMigrated(migrated: Boolean) {
+        context.dataStore.edit { it[ROOM_MIGRATED] = migrated }
     }
 
     val customMeasures: Flow<List<BodyMeasure>> = context.dataStore.data.map { preferences ->

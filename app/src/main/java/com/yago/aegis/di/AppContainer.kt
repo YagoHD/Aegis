@@ -4,6 +4,8 @@ import android.content.Context
 import com.yago.aegis.data.FirebaseAuthRepository
 import com.yago.aegis.data.SettingsStore
 import com.yago.aegis.data.UserRepository
+import com.yago.aegis.data.db.AegisDatabase
+import com.yago.aegis.data.db.RoomMigrator
 
 /**
  * Contenedor de dependencias EXPLÍCITO (US-05). Centraliza la creación de las dependencias de
@@ -15,12 +17,16 @@ interface AppContainer {
     val settingsStore: SettingsStore
     val userRepository: UserRepository
     val authRepository: FirebaseAuthRepository
+    val database: AegisDatabase
+    val roomMigrator: RoomMigrator
 }
 
-/** Implementación real, respaldada por DataStore/Firebase. */
+/** Implementación real, respaldada por DataStore/Room/Firebase. */
 class DefaultAppContainer(context: Context) : AppContainer {
     private val appContext = context.applicationContext
     override val settingsStore: SettingsStore by lazy { SettingsStore(appContext) }
     override val userRepository: UserRepository by lazy { UserRepository(settingsStore) }
     override val authRepository: FirebaseAuthRepository by lazy { FirebaseAuthRepository() }
+    override val database: AegisDatabase by lazy { AegisDatabase.get(appContext) }
+    override val roomMigrator: RoomMigrator by lazy { RoomMigrator(settingsStore, database) }
 }
