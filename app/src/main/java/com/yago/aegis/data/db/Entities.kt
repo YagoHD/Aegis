@@ -58,9 +58,12 @@ data class RoutineEntity(
     val lastCompletedDates: List<Long>
 )
 
-// Al leer, exercises=emptyList() (la app usa effectiveSlots()); los slots ya vienen normalizados.
+// Al leer reconstruimos la lista plana legacy `exercises` (1ª variante por slot), IGUAL que hace
+// el guardado (RoutinesViewModel): la leen RoutineCard (nº), RoutineSelectionCard (preview) y
+// SelectRoutineScreen (tags). Si no, tras migrar mostrarían "0 ejercicios".
 fun RoutineEntity.toDomain(): Routine = Routine(
-    id = id, name = name, exercises = emptyList(),
+    id = id, name = name,
+    exercises = exerciseSlots.mapNotNull { it.variants.firstOrNull() },
     exerciseSlots = exerciseSlots, iconName = iconName, lastCompletedDates = lastCompletedDates
 )
 
