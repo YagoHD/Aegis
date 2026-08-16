@@ -22,6 +22,9 @@ class SocialDataSource {
     private val auth = FirebaseAuth.getInstance()
     private val myUid: String? get() = auth.currentUser?.uid
 
+    /** uid del usuario actual (para que el ViewModel separe amistades desde mi punto de vista). */
+    fun currentUid(): String? = myUid
+
     // MISMO criterio que la función pairId() de las reglas (orden alfabético).
     private fun pairId(a: String, b: String): String = if (a < b) "${a}_${b}" else "${b}_${a}"
 
@@ -48,8 +51,8 @@ class SocialDataSource {
 
     // ---- Amistades ----
 
-    /** Envía solicitud a [toUid] (crea el doc de la pareja en pending). */
-    suspend fun sendFriendRequest(toUid: String): Result<Unit> {
+    /** Envía solicitud a [toUid] (@[toUsername]) firmando también mi @[myUsername] para mostrar. */
+    suspend fun sendFriendRequest(toUid: String, toUsername: String, myUsername: String): Result<Unit> {
         val me = myUid ?: return Result.failure(IllegalStateException("no-session"))
         if (me == toUid) return Result.failure(IllegalArgumentException("self"))
         return runCatching {
@@ -58,6 +61,7 @@ class SocialDataSource {
                     "users" to listOf(me, toUid),
                     "requestedBy" to me,
                     "status" to "pending",
+                    "usernames" to mapOf(me to myUsername, toUid to toUsername),
                     "updatedAt" to System.currentTimeMillis()
                 )
             ).await()
@@ -135,10 +139,13 @@ class SocialDataSource {
     private fun DocumentSnapshot.toFriendship(): Friendship? {
         val users = (get("users") as? List<*>)?.filterIsInstance<String>() ?: return null
         if (users.size != 2) return null
+        @Suppress("UNCHECKED_CAST")
+        val usernames = (get("usernames") as? Map<String, String>) ?: emptyMap()
         return Friendship(
             users = users,
             requestedBy = getString("requestedBy") ?: "",
             status = getString("status") ?: "pending",
+            usernames = usernames,
             updatedAt = getLong("updatedAt") ?: 0L
         )
     }

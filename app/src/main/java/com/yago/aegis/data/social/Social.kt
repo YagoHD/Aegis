@@ -33,6 +33,9 @@ data class Friendship(
     val users: List<String> = emptyList(),
     val requestedBy: String = "",
     val status: String = "pending",
+    // uid -> @usuario, para mostrar amigos/solicitudes SIN leer el perfil ajeno (las reglas lo
+    // bloquean hasta ser amigos). Se rellena al enviar la solicitud.
+    val usernames: Map<String, String> = emptyMap(),
     val updatedAt: Long = 0L
 ) {
     fun otherThan(uid: String): String? = users.firstOrNull { it != uid }
@@ -53,24 +56,28 @@ object UsernameRules {
     fun isValid(username: String): Boolean = REGEX.matches(username)
 }
 
+/** Un amigo/solicitud para la UI: uid + su @usuario (para mostrar). */
+data class FriendRef(val uid: String, val username: String)
+
 /** Mis amistades separadas para la UI. */
 data class FriendBuckets(
-    val friends: List<String> = emptyList(),    // uids con amistad aceptada
-    val incoming: List<String> = emptyList(),   // solicitudes recibidas (yo acepto)
-    val outgoing: List<String> = emptyList()    // solicitudes que envié (pendientes)
+    val friends: List<FriendRef> = emptyList(),    // amistad aceptada
+    val incoming: List<FriendRef> = emptyList(),   // solicitudes recibidas (yo acepto)
+    val outgoing: List<FriendRef> = emptyList()    // solicitudes que envié (pendientes)
 )
 
 /** Separa una lista de amistades en aceptadas / recibidas / enviadas, desde mi punto de vista. */
 fun List<Friendship>.bucketsFor(myUid: String): FriendBuckets {
-    val friends = mutableListOf<String>()
-    val incoming = mutableListOf<String>()
-    val outgoing = mutableListOf<String>()
+    val friends = mutableListOf<FriendRef>()
+    val incoming = mutableListOf<FriendRef>()
+    val outgoing = mutableListOf<FriendRef>()
     for (f in this) {
         val other = f.otherThan(myUid) ?: continue
+        val ref = FriendRef(other, f.usernames[other] ?: "")
         when {
-            f.isAccepted -> friends += other
-            f.requestedBy == myUid -> outgoing += other   // pending que yo pedí
-            else -> incoming += other                     // pending que me pidieron
+            f.isAccepted -> friends += ref
+            f.requestedBy == myUid -> outgoing += ref   // pending que yo pedí
+            else -> incoming += ref                     // pending que me pidieron
         }
     }
     return FriendBuckets(friends, incoming, outgoing)

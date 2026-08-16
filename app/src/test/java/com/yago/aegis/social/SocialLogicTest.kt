@@ -27,18 +27,19 @@ class SocialLogicTest {
     }
 
     @Test
-    fun buckets_separa_aceptadas_recibidas_y_enviadas() {
+    fun buckets_separa_aceptadas_recibidas_y_enviadas_con_username() {
         val me = "ME"
         val list = listOf(
-            Friendship(users = listOf(me, "A"), requestedBy = me, status = "accepted"),
-            Friendship(users = listOf(me, "B"), requestedBy = me, status = "pending"),   // yo pedí -> outgoing
-            Friendship(users = listOf("C", me), requestedBy = "C", status = "pending")   // me pidieron -> incoming
+            Friendship(users = listOf(me, "A"), requestedBy = me, status = "accepted", usernames = mapOf("A" to "ana")),
+            Friendship(users = listOf(me, "B"), requestedBy = me, status = "pending", usernames = mapOf("B" to "bea")),   // yo pedí -> outgoing
+            Friendship(users = listOf("C", me), requestedBy = "C", status = "pending", usernames = mapOf("C" to "carl")) // me pidieron -> incoming
         )
 
         val b = list.bucketsFor(me)
 
-        assertEquals(listOf("A"), b.friends)
-        assertEquals(listOf("B"), b.outgoing)
-        assertEquals(listOf("C"), b.incoming)
+        assertEquals(listOf("A"), b.friends.map { it.uid })
+        assertEquals("ana", b.friends.single().username)   // se muestra sin leer su perfil
+        assertEquals(listOf("B"), b.outgoing.map { it.uid })
+        assertEquals(listOf("C"), b.incoming.map { it.uid })
     }
 }

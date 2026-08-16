@@ -61,6 +61,8 @@ class SettingsStore(private val context: Context) {
         private val ACTIVE_SESSION_START_KEY = longPreferencesKey("active_session_start")
         // US-03: marca que el volcado one-shot DataStore -> Room ya se hizo.
         private val ROOM_MIGRATED = booleanPreferencesKey("room_migrated")
+        // Social: mi @usuario reclamado (fuente de verdad = Firestore; copia local para la UI).
+        private val USERNAME = stringPreferencesKey("username")
     }
 
     // --- LECTURA (READ) ---
@@ -114,6 +116,7 @@ class SettingsStore(private val context: Context) {
     val disciplineDay: Flow<Int> = context.dataStore.data.map { it[DISCIPLINE_DAY] ?: 0 }
     val onboardingCompleted: Flow<Boolean> = context.dataStore.data.map { it[ONBOARDING_COMPLETED] ?: false }
     val roomMigrated: Flow<Boolean> = context.dataStore.data.map { it[ROOM_MIGRATED] ?: false }
+    val username: Flow<String?> = context.dataStore.data.map { it[USERNAME] }
     val workoutHistory: Flow<List<WorkoutSession>> = context.dataStore.data.map { prefs ->
         val json = prefs[WORKOUT_HISTORY_KEY] ?: ""
         if (json.isEmpty()) emptyList()
@@ -213,6 +216,10 @@ class SettingsStore(private val context: Context) {
 
     suspend fun saveRoomMigrated(migrated: Boolean) {
         context.dataStore.edit { it[ROOM_MIGRATED] = migrated }
+    }
+
+    suspend fun saveUsername(value: String) {
+        context.dataStore.edit { it[USERNAME] = value }
     }
 
     val customMeasures: Flow<List<BodyMeasure>> = context.dataStore.data.map { preferences ->

@@ -62,6 +62,8 @@ class UserRepository(
     val actualPhotoDate = settingsStore.actualPhotoDate
     val disciplineDay: Flow<Int> = settingsStore.disciplineDay
     val onboardingCompleted: Flow<Boolean> = settingsStore.onboardingCompleted
+    val username: Flow<String?> = settingsStore.username   // @usuario social (copia local)
+    suspend fun saveUsername(value: String) = settingsStore.saveUsername(value)
     // US-03 fase 3: estas 5 colecciones se leen de ROOM (off-main por Room; escritura granular).
     // onStart { ensureMigrated() } asegura el volcado DataStore->Room antes de la 1ª emisión.
     val routines: Flow<List<Routine>> = database.routineDao().observeAll()
