@@ -472,4 +472,29 @@
     <!-- État vide des routines (US-10) -->
     <string name="routines_empty_title">TU N\'AS PAS ENCORE DE ROUTINES</string>
     <string name="routines_empty_subtitle">Crée ta première routine avec le bouton ci-dessous pour commencer.</string>
+    <!-- Social / Amis -->
+    <string name="social_title">AMIS</string>
+    <string name="content_desc_friends">Amis</string>
+    <string name="social_claim_title">CHOISIS TON NOM D\'UTILISATEUR</string>
+    <string name="social_claim_subtitle">Tes amis te trouveront avec. 3-20 caractères : minuscules, chiffres et _.</string>
+    <string name="social_username_hint">nom d\'utilisateur</string>
+    <string name="social_claim_button">RÉSERVER</string>
+    <string name="social_your_username">Ton nom d\'utilisateur</string>
+    <string name="social_add_title">AJOUTER UN AMI</string>
+    <string name="social_add_hint">nom d\'utilisateur de ton ami</string>
+    <string name="social_add_button">ENVOYER LA DEMANDE</string>
+    <string name="social_requests_title">DEMANDES</string>
+    <string name="social_friends_title">MES AMIS</string>
+    <string name="social_no_friends">Tu n\'as pas encore d\'amis. Ajoute quelqu\'un par son nom d\'utilisateur.</string>
+    <string name="social_accept">Accepter</string>
+    <string name="social_reject">Refuser</string>
+    <string name="social_remove">Retirer</string>
+    <string name="social_fb_claimed">Nom d\'utilisateur réservé !</string>
+    <string name="social_fb_taken">Ce nom d\'utilisateur est déjà pris</string>
+    <string name="social_fb_invalid">Nom d\'utilisateur invalide (3-20, minuscules, lettres/chiffres/_)</string>
+    <string name="social_fb_sent">Demande envoyée</string>
+    <string name="social_fb_not_found">Cet utilisateur n\'existe pas</string>
+    <string name="social_fb_self">Tu ne peux pas t\'ajouter toi-même</string>
+    <string name="social_fb_already">Vous êtes déjà amis ou une demande est en attente</string>
+    <string name="social_fb_error">Une erreur s\'est produite, réessaie</string>
 </resources>

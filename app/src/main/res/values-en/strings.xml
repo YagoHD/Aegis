@@ -472,4 +472,29 @@
     <!-- Routines empty state (US-10) -->
     <string name="routines_empty_title">YOU HAVE NO ROUTINES YET</string>
     <string name="routines_empty_subtitle">Create your first routine with the button below to start training.</string>
+    <!-- Social / Friends -->
+    <string name="social_title">FRIENDS</string>
+    <string name="content_desc_friends">Friends</string>
+    <string name="social_claim_title">CHOOSE YOUR USERNAME</string>
+    <string name="social_claim_subtitle">Your friends will find you with it. 3-20 chars: lowercase, numbers and _.</string>
+    <string name="social_username_hint">username</string>
+    <string name="social_claim_button">RESERVE</string>
+    <string name="social_your_username">Your username</string>
+    <string name="social_add_title">ADD FRIEND</string>
+    <string name="social_add_hint">your friend\'s username</string>
+    <string name="social_add_button">SEND REQUEST</string>
+    <string name="social_requests_title">REQUESTS</string>
+    <string name="social_friends_title">MY FRIENDS</string>
+    <string name="social_no_friends">You have no friends yet. Add someone by their username.</string>
+    <string name="social_accept">Accept</string>
+    <string name="social_reject">Decline</string>
+    <string name="social_remove">Remove</string>
+    <string name="social_fb_claimed">Username reserved!</string>
+    <string name="social_fb_taken">That username is already taken</string>
+    <string name="social_fb_invalid">Invalid username (3-20, lowercase, letters/numbers/_)</string>
+    <string name="social_fb_sent">Request sent</string>
+    <string name="social_fb_not_found">No such user</string>
+    <string name="social_fb_self">You can\'t add yourself</string>
+    <string name="social_fb_already">You\'re already friends or have a pending request</string>
+    <string name="social_fb_error">Something went wrong, try again</string>
 </resources>

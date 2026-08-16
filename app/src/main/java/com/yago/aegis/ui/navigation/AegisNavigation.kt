@@ -78,7 +78,8 @@ fun AegisNavigation(
     workoutViewModel: WorkoutViewModel,
     routinesViewModel: RoutinesViewModel,
     userRepository: UserRepository,
-    authRepository: FirebaseAuthRepository
+    authRepository: FirebaseAuthRepository,
+    socialDataSource: com.yago.aegis.data.social.SocialDataSource
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -115,6 +116,8 @@ fun AegisNavigation(
     val sharedStatsViewModel: StatsViewModel = viewModel(factory = StatsViewModel.Factory(userRepository))
     val plateCalculatorViewModel: PlateCalculatorViewModel = viewModel(factory = PlateCalculatorViewModel.Factory(userRepository))
     val panteonViewModel: PanteonViewModel = viewModel(factory = PanteonViewModel.Factory(userRepository))
+    val socialViewModel: com.yago.aegis.viewmodel.SocialViewModel =
+        viewModel(factory = com.yago.aegis.viewmodel.SocialViewModel.Factory(socialDataSource, userRepository))
 
     val showBottomBar = currentRoute != Routes.SETTINGS &&
             !onboardingRoutes.contains(currentRoute) &&
@@ -124,7 +127,8 @@ fun AegisNavigation(
             currentRoute != Routes.WORKOUT_COMPLETE &&
             currentRoute != Routes.WORKOUT_HISTORY &&
             currentRoute != Routes.PLATE_CALCULATOR &&
-            currentRoute != Routes.PRIVACY_POLICY
+            currentRoute != Routes.PRIVACY_POLICY &&
+            currentRoute != Routes.FRIENDS
 
     Scaffold(
         bottomBar = { if (showBottomBar) AegisBottomBar(navController) }
@@ -309,7 +313,17 @@ fun AegisNavigation(
                 popEnterTransition = tabEnter,
                 popExitTransition = tabExit
             ) {
-                PanteonScreen(viewModel = panteonViewModel)
+                PanteonScreen(
+                    viewModel = panteonViewModel,
+                    onOpenFriends = { navController.navigate(Routes.FRIENDS) }
+                )
+            }
+            composable(
+                route = Routes.FRIENDS,
+                enterTransition = pushEnter, exitTransition = pushExit,
+                popEnterTransition = pushPopEnter, popExitTransition = pushPopExit
+            ) {
+                com.yago.aegis.ui.screens.FriendsScreen(socialViewModel) { navController.popBackStack() }
             }
             composable(
                 route = Routes.EXERCISE_DETAIL,

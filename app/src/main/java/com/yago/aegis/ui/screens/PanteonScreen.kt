@@ -13,9 +13,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MilitaryTech
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -49,7 +51,7 @@ import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.viewmodel.PanteonViewModel
 
 @Composable
-fun PanteonScreen(viewModel: PanteonViewModel) {
+fun PanteonScreen(viewModel: PanteonViewModel, onOpenFriends: () -> Unit = {}) {
     val result by viewModel.result.collectAsState()
     val hasRanks = result.groups.any { it.tier != RankTier.SIN_RANGO }
 
@@ -58,7 +60,16 @@ fun PanteonScreen(viewModel: PanteonViewModel) {
         topBar = {
             AegisTopBar(
                 title = stringResource(R.string.nav_panteon).uppercase(),
-                subtitle = stringResource(R.string.panteon_subtitle)
+                subtitle = stringResource(R.string.panteon_subtitle),
+                actions = {
+                    IconButton(onClick = onOpenFriends) {
+                        Icon(
+                            Icons.Default.Group,
+                            contentDescription = stringResource(R.string.content_desc_friends),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
             )
         }
     ) { padding ->

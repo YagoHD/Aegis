@@ -472,4 +472,29 @@
     <!-- Estado vazio das rotinas (US-10) -->
     <string name="routines_empty_title">AINDA NÃO TENS ROTINAS</string>
     <string name="routines_empty_subtitle">Cria a tua primeira rotina com o botão abaixo para começar.</string>
+    <!-- Social / Amigos -->
+    <string name="social_title">AMIGOS</string>
+    <string name="content_desc_friends">Amigos</string>
+    <string name="social_claim_title">ESCOLHE O TEU NOME DE UTILIZADOR</string>
+    <string name="social_claim_subtitle">Os teus amigos vão encontrar-te com ele. 3-20 caracteres: minúsculas, números e _.</string>
+    <string name="social_username_hint">nome de utilizador</string>
+    <string name="social_claim_button">RESERVAR</string>
+    <string name="social_your_username">O teu nome de utilizador</string>
+    <string name="social_add_title">ADICIONAR AMIGO</string>
+    <string name="social_add_hint">nome de utilizador do teu amigo</string>
+    <string name="social_add_button">ENVIAR PEDIDO</string>
+    <string name="social_requests_title">PEDIDOS</string>
+    <string name="social_friends_title">OS MEUS AMIGOS</string>
+    <string name="social_no_friends">Ainda não tens amigos. Adiciona alguém pelo nome de utilizador.</string>
+    <string name="social_accept">Aceitar</string>
+    <string name="social_reject">Recusar</string>
+    <string name="social_remove">Remover</string>
+    <string name="social_fb_claimed">Nome de utilizador reservado!</string>
+    <string name="social_fb_taken">Esse nome de utilizador já está em uso</string>
+    <string name="social_fb_invalid">Nome de utilizador inválido (3-20, minúsculas, letras/números/_)</string>
+    <string name="social_fb_sent">Pedido enviado</string>
+    <string name="social_fb_not_found">Esse utilizador não existe</string>
+    <string name="social_fb_self">Não podes adicionar-te a ti mesmo</string>
+    <string name="social_fb_already">Já são amigos ou há um pedido pendente</string>
+    <string name="social_fb_error">Algo correu mal, tenta novamente</string>
 </resources>

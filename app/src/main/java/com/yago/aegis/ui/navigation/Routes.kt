@@ -35,6 +35,7 @@ object Routes {
     const val WORKOUT_HISTORY = "workout_history"
     const val CUSTOM_SESSION = "custom_session"
     const val CREATE_EXERCISE = "create_exercise"
+    const val FRIENDS = "friends"
 
     // Rutas con argumentos: plantilla (definición) + builder tipado (navegación)
     const val ACTIVE_SESSION = "active_session/{routineId}"

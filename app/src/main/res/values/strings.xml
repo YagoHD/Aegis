@@ -498,6 +498,32 @@
     <string name="routines_empty_title">AÚN NO TIENES RUTINAS</string>
     <string name="routines_empty_subtitle">Crea tu primera rutina con el botón de abajo para empezar a entrenar.</string>
 
+    <!-- Social / Amigos -->
+    <string name="social_title">AMIGOS</string>
+    <string name="content_desc_friends">Amigos</string>
+    <string name="social_claim_title">ELIGE TU NOMBRE DE USUARIO</string>
+    <string name="social_claim_subtitle">Con él tus amigos podrán encontrarte. 3-20 caracteres: minúsculas, números y _.</string>
+    <string name="social_username_hint">usuario</string>
+    <string name="social_claim_button">RESERVAR</string>
+    <string name="social_your_username">Tu usuario</string>
+    <string name="social_add_title">AÑADIR AMIGO</string>
+    <string name="social_add_hint">usuario de tu amigo</string>
+    <string name="social_add_button">ENVIAR SOLICITUD</string>
+    <string name="social_requests_title">SOLICITUDES</string>
+    <string name="social_friends_title">MIS AMIGOS</string>
+    <string name="social_no_friends">Aún no tienes amigos. Añade a alguien por su usuario.</string>
+    <string name="social_accept">Aceptar</string>
+    <string name="social_reject">Rechazar</string>
+    <string name="social_remove">Eliminar</string>
+    <string name="social_fb_claimed">¡Usuario reservado!</string>
+    <string name="social_fb_taken">Ese usuario ya está cogido</string>
+    <string name="social_fb_invalid">Usuario inválido (3-20, minúsculas, letras/números/_)</string>
+    <string name="social_fb_sent">Solicitud enviada</string>
+    <string name="social_fb_not_found">No existe ese usuario</string>
+    <string name="social_fb_self">No puedes añadirte a ti mismo</string>
+    <string name="social_fb_already">Ya sois amigos o hay una solicitud</string>
+    <string name="social_fb_error">Algo salió mal, reinténtalo</string>
+
     <!-- Firebase -->
     <string name="default_web_client_id">322703265285-qke4qco28fmnp92utb5ob8l9sak16lkp.apps.googleusercontent.com</string>
 </resources>

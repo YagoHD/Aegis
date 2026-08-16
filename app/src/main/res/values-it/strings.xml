@@ -472,4 +472,29 @@
     <!-- Stato vuoto delle routine (US-10) -->
     <string name="routines_empty_title">NESSUNA ROUTINE ANCORA</string>
     <string name="routines_empty_subtitle">Crea la tua prima routine con il pulsante qui sotto per iniziare.</string>
+    <!-- Social / Amici -->
+    <string name="social_title">AMICI</string>
+    <string name="content_desc_friends">Amici</string>
+    <string name="social_claim_title">SCEGLI IL TUO NOME UTENTE</string>
+    <string name="social_claim_subtitle">I tuoi amici ti troveranno con questo. 3-20 caratteri: minuscole, numeri e _.</string>
+    <string name="social_username_hint">nome utente</string>
+    <string name="social_claim_button">RISERVA</string>
+    <string name="social_your_username">Il tuo nome utente</string>
+    <string name="social_add_title">AGGIUNGI AMICO</string>
+    <string name="social_add_hint">nome utente del tuo amico</string>
+    <string name="social_add_button">INVIA RICHIESTA</string>
+    <string name="social_requests_title">RICHIESTE</string>
+    <string name="social_friends_title">I MIEI AMICI</string>
+    <string name="social_no_friends">Non hai ancora amici. Aggiungi qualcuno con il suo nome utente.</string>
+    <string name="social_accept">Accetta</string>
+    <string name="social_reject">Rifiuta</string>
+    <string name="social_remove">Rimuovi</string>
+    <string name="social_fb_claimed">Nome utente riservato!</string>
+    <string name="social_fb_taken">Quel nome utente è già occupato</string>
+    <string name="social_fb_invalid">Nome utente non valido (3-20, minuscole, lettere/numeri/_)</string>
+    <string name="social_fb_sent">Richiesta inviata</string>
+    <string name="social_fb_not_found">Questo utente non esiste</string>
+    <string name="social_fb_self">Non puoi aggiungere te stesso</string>
+    <string name="social_fb_already">Siete già amici o c\'è una richiesta in sospeso</string>
+    <string name="social_fb_error">Qualcosa è andato storto, riprova</string>
 </resources>

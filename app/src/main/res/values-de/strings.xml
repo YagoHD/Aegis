@@ -472,4 +472,29 @@
     <!-- Leerer Zustand der Routinen (US-10) -->
     <string name="routines_empty_title">NOCH KEINE ROUTINEN</string>
     <string name="routines_empty_subtitle">Erstelle deine erste Routine mit dem Button unten, um zu starten.</string>
+    <!-- Social / Freunde -->
+    <string name="social_title">FREUNDE</string>
+    <string name="content_desc_friends">Freunde</string>
+    <string name="social_claim_title">WÄHLE DEINEN BENUTZERNAMEN</string>
+    <string name="social_claim_subtitle">Deine Freunde finden dich damit. 3-20 Zeichen: Kleinbuchstaben, Zahlen und _.</string>
+    <string name="social_username_hint">Benutzername</string>
+    <string name="social_claim_button">RESERVIEREN</string>
+    <string name="social_your_username">Dein Benutzername</string>
+    <string name="social_add_title">FREUND HINZUFÜGEN</string>
+    <string name="social_add_hint">Benutzername deines Freundes</string>
+    <string name="social_add_button">ANFRAGE SENDEN</string>
+    <string name="social_requests_title">ANFRAGEN</string>
+    <string name="social_friends_title">MEINE FREUNDE</string>
+    <string name="social_no_friends">Du hast noch keine Freunde. Füge jemanden über seinen Benutzernamen hinzu.</string>
+    <string name="social_accept">Annehmen</string>
+    <string name="social_reject">Ablehnen</string>
+    <string name="social_remove">Entfernen</string>
+    <string name="social_fb_claimed">Benutzername reserviert!</string>
+    <string name="social_fb_taken">Dieser Benutzername ist bereits vergeben</string>
+    <string name="social_fb_invalid">Ungültiger Benutzername (3-20, Kleinbuchstaben, Buchstaben/Zahlen/_)</string>
+    <string name="social_fb_sent">Anfrage gesendet</string>
+    <string name="social_fb_not_found">Diesen Benutzer gibt es nicht</string>
+    <string name="social_fb_self">Du kannst dich nicht selbst hinzufügen</string>
+    <string name="social_fb_already">Ihr seid bereits Freunde oder es gibt eine offene Anfrage</string>
+    <string name="social_fb_error">Etwas ist schiefgelaufen, versuch es erneut</string>
 </resources>

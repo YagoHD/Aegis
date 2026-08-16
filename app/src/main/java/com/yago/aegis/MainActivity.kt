@@ -40,7 +40,8 @@ class MainActivity : ComponentActivity() {
                     routinesViewModel = routinesViewModel,
                     workoutViewModel = workoutViewModel,
                     userRepository = container.userRepository,
-                    authRepository = container.authRepository
+                    authRepository = container.authRepository,
+                    socialDataSource = container.socialDataSource
                 )
             }
         }
