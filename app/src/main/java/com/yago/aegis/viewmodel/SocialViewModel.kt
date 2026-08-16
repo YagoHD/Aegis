@@ -28,6 +28,12 @@ enum class SocialFeedback {
     REQUEST_SENT, USER_NOT_FOUND, CANNOT_ADD_SELF, ALREADY_LINKED, ERROR
 }
 
+/** Perfiles públicos de mis amigos aceptados, para el ranking/comparación del Panteón. */
+data class FriendRanking(
+    val loading: Boolean = false,
+    val profiles: List<PublicProfile> = emptyList()
+)
+
 /** Estado y acciones de Amigos: reclamar @usuario, añadir por @usuario, aceptar/rechazar. */
 class SocialViewModel(
     private val social: SocialDataSource,
@@ -50,6 +56,9 @@ class SocialViewModel(
 
     private val _busy = MutableStateFlow(false)
     val busy: StateFlow<Boolean> = _busy.asStateFlow()
+
+    private val _friendRanking = MutableStateFlow(FriendRanking())
+    val friendRanking: StateFlow<FriendRanking> = _friendRanking.asStateFlow()
 
     fun claimUsername(input: String) {
         val u = UsernameRules.normalize(input)
@@ -112,6 +121,21 @@ class SocialViewModel(
     /** Sube mi perfil público (rangos calculados). Llamar al cambiar mis marcas o mi @usuario. */
     fun uploadMyProfile() {
         viewModelScope.launch { myUsername.value?.let { uploadMyProfileInternal(it) } }
+    }
+
+    /**
+     * Ranking del Panteón: sube mi perfil (rango fresco) y descarga el de mis amigos aceptados.
+     * Mi lado de la comparación lo pone la pantalla desde el PanteonResult ya calculado; aquí
+     * solo traemos los perfiles ajenos (las reglas solo dejan leerlos si somos amigos aceptados).
+     */
+    fun loadRanking() {
+        viewModelScope.launch {
+            _friendRanking.value = _friendRanking.value.copy(loading = true)
+            myUsername.value?.let { runCatching { uploadMyProfileInternal(it) } }
+            val friends = buckets.value.friends
+            val profiles = friends.mapNotNull { runCatching { social.getPublicProfile(it.uid) }.getOrNull() }
+            _friendRanking.value = FriendRanking(loading = false, profiles = profiles)
+        }
     }
 
     private suspend fun uploadMyProfileInternal(username: String) {

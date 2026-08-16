@@ -315,6 +315,7 @@ fun AegisNavigation(
             ) {
                 PanteonScreen(
                     viewModel = panteonViewModel,
+                    socialViewModel = socialViewModel,
                     onOpenFriends = { navController.navigate(Routes.FRIENDS) }
                 )
             }

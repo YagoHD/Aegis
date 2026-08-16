@@ -526,4 +526,10 @@
 
     <!-- Firebase -->
     <string name="default_web_client_id">322703265285-qke4qco28fmnp92utb5ob8l9sak16lkp.apps.googleusercontent.com</string>
+    <!-- Ranking / comparación entre amigos -->
+    <string name="ranking_you">TÚ</string>
+    <string name="ranking_need_username">Reclama tu @usuario para competir en el ranking y comparar rangos con tus amigos.</string>
+    <string name="ranking_no_friends">Aún no tienes amigos. Añade a alguien para comparar vuestros rangos.</string>
+    <string name="ranking_manage_friends">GESTIONAR AMIGOS</string>
+    <string name="ranking_compare_hint">Toca a un amigo para comparar músculo a músculo.</string>
 </resources>

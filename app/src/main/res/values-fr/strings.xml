@@ -497,4 +497,10 @@
     <string name="social_fb_self">Tu ne peux pas t\'ajouter toi-même</string>
     <string name="social_fb_already">Vous êtes déjà amis ou une demande est en attente</string>
     <string name="social_fb_error">Une erreur s\'est produite, réessaie</string>
+    <!-- Ranking / comparaison entre amis -->
+    <string name="ranking_you">TOI</string>
+    <string name="ranking_need_username">Réserve ton @nom d\'utilisateur pour entrer dans le classement et comparer tes rangs avec tes amis.</string>
+    <string name="ranking_no_friends">Tu n\'as pas encore d\'amis. Ajoute quelqu\'un pour comparer vos rangs.</string>
+    <string name="ranking_manage_friends">GÉRER LES AMIS</string>
+    <string name="ranking_compare_hint">Touche un ami pour comparer muscle par muscle.</string>
 </resources>
