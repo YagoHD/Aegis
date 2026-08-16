@@ -6,6 +6,7 @@ import com.yago.aegis.data.SettingsStore
 import com.yago.aegis.data.UserRepository
 import com.yago.aegis.data.db.AegisDatabase
 import com.yago.aegis.data.db.RoomMigrator
+import com.yago.aegis.data.social.SocialDataSource
 
 /**
  * Contenedor de dependencias EXPLÍCITO (US-05). Centraliza la creación de las dependencias de
@@ -19,6 +20,7 @@ interface AppContainer {
     val authRepository: FirebaseAuthRepository
     val database: AegisDatabase
     val roomMigrator: RoomMigrator
+    val socialDataSource: SocialDataSource
 }
 
 /** Implementación real, respaldada por DataStore/Room/Firebase. */
@@ -31,4 +33,5 @@ class DefaultAppContainer(context: Context) : AppContainer {
     // instancia de migrator que dispara el arranque -> el Mutex se comparte, migra 1 sola vez).
     override val userRepository: UserRepository by lazy { UserRepository(settingsStore, database, roomMigrator) }
     override val authRepository: FirebaseAuthRepository by lazy { FirebaseAuthRepository() }
+    override val socialDataSource: SocialDataSource by lazy { SocialDataSource() }
 }

@@ -45,3 +45,33 @@ fun PanteonResult.toRankSummary(): RankSummary = RankSummary(
     overall = strongest?.tier?.name ?: RankTier.SIN_RANGO.name,
     byGroup = groups.associate { it.group.name to it.tier.name }
 )
+
+/** Validación del @usuario: minúsculas, 3-20, letras/números/_ (sin espacios ni tildes). */
+object UsernameRules {
+    private val REGEX = Regex("^[a-z0-9_]{3,20}$")
+    fun normalize(input: String): String = input.trim().lowercase().removePrefix("@")
+    fun isValid(username: String): Boolean = REGEX.matches(username)
+}
+
+/** Mis amistades separadas para la UI. */
+data class FriendBuckets(
+    val friends: List<String> = emptyList(),    // uids con amistad aceptada
+    val incoming: List<String> = emptyList(),   // solicitudes recibidas (yo acepto)
+    val outgoing: List<String> = emptyList()    // solicitudes que envié (pendientes)
+)
+
+/** Separa una lista de amistades en aceptadas / recibidas / enviadas, desde mi punto de vista. */
+fun List<Friendship>.bucketsFor(myUid: String): FriendBuckets {
+    val friends = mutableListOf<String>()
+    val incoming = mutableListOf<String>()
+    val outgoing = mutableListOf<String>()
+    for (f in this) {
+        val other = f.otherThan(myUid) ?: continue
+        when {
+            f.isAccepted -> friends += other
+            f.requestedBy == myUid -> outgoing += other   // pending que yo pedí
+            else -> incoming += other                     // pending que me pidieron
+        }
+    }
+    return FriendBuckets(friends, incoming, outgoing)
+}
