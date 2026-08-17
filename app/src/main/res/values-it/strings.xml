@@ -509,4 +509,7 @@
     <string name="social_change_username">Cambia nome utente</string>
     <string name="social_change_confirm">CAMBIA</string>
     <string name="social_fb_changed">Nome utente aggiornato</string>
+    <string name="level_breakdown_title">DA DOVE VIENE IL TUO XP</string>
+    <string name="level_breakdown_streak">Serie · %1$d sett</string>
+    <string name="level_xp_gain">+%1$d</string>
 </resources>

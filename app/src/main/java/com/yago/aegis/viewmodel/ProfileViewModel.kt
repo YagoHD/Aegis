@@ -7,6 +7,7 @@ import com.yago.aegis.data.BodyMeasure
 import com.yago.aegis.data.BodySnapshot
 import com.yago.aegis.data.LevelState
 import com.yago.aegis.data.LevelSystem
+import com.yago.aegis.data.XpEntry
 import com.yago.aegis.data.PhotoRecord
 import com.yago.aegis.data.PhotoType
 import com.yago.aegis.data.UserProfile
@@ -43,7 +44,8 @@ data class ProfileUiState(
     val customMeasures: List<BodyMeasure> = emptyList(),
     val bodyHistory: List<BodySnapshot> = emptyList(),
     val photoHistory: List<PhotoRecord> = emptyList(),
-    val level: LevelState = LevelState()
+    val level: LevelState = LevelState(),
+    val levelBreakdown: List<XpEntry> = emptyList()
 )
 
 class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
@@ -67,7 +69,8 @@ class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
 
     private fun recomputeLevel() {
         val level = LevelSystem.compute(latestHistory, latestStreak)
-        _uiState.update { it.copy(level = level) }
+        val breakdown = LevelSystem.breakdown(latestHistory, latestStreak)
+        _uiState.update { it.copy(level = level, levelBreakdown = breakdown) }
     }
 
     private fun collectProfileData() {

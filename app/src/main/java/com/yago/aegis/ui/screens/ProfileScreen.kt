@@ -8,6 +8,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,6 +16,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CloudOff
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.CloudQueue
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Settings
@@ -32,9 +35,13 @@ import androidx.compose.ui.unit.sp
 import com.yago.aegis.R
 import com.yago.aegis.data.LevelState
 import com.yago.aegis.data.PhotoType
+import com.yago.aegis.data.XpEntry
 import com.yago.aegis.data.SyncState
 import com.yago.aegis.ui.components.*
 import com.yago.aegis.viewmodel.ProfileViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -113,7 +120,7 @@ fun ProfileContent(viewModel: ProfileViewModel, onNavigateToTrain: () -> Unit = 
         )
 
         Spacer(modifier = Modifier.height(20.dp))
-        LevelCard(level = state.level)
+        LevelCard(level = state.level, breakdown = state.levelBreakdown)
 
         SyncIndicator(syncState = syncState, onRetry = { viewModel.retrySync() })
 
@@ -313,13 +320,16 @@ private fun NewUserBanner(onNavigateToTrain: () -> Unit) {
 
 /** Nivel y barra de XP del usuario (premia constancia, independiente del Panteón). */
 @Composable
-private fun LevelCard(level: LevelState) {
+private fun LevelCard(level: LevelState, breakdown: List<XpEntry>) {
+    var expanded by remember { mutableStateOf(false) }
+    val canExpand = breakdown.isNotEmpty()
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.surface)
             .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f), RoundedCornerShape(16.dp))
+            .then(if (canExpand) Modifier.clickable { expanded = !expanded } else Modifier)
             .padding(horizontal = 18.dp, vertical = 16.dp)
     ) {
         Row(
@@ -343,12 +353,23 @@ private fun LevelCard(level: LevelState) {
                     letterSpacing = 1.sp
                 )
             }
-            Text(
-                text = stringResource(R.string.xp_format, level.xpIntoLevel, level.xpForLevel),
-                color = MaterialTheme.colorScheme.secondary,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = stringResource(R.string.xp_format, level.xpIntoLevel, level.xpForLevel),
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                if (canExpand) {
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Icon(
+                        imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
         }
         Spacer(modifier = Modifier.height(12.dp))
         Box(
@@ -366,8 +387,58 @@ private fun LevelCard(level: LevelState) {
                     .background(MaterialTheme.colorScheme.primary)
             )
         }
+
+        if (expanded) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = stringResource(R.string.level_breakdown_title),
+                color = MaterialTheme.colorScheme.secondary,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 1.5.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            breakdown.take(20).forEach { entry -> XpRow(entry) }
+        }
     }
 }
+
+@Composable
+private fun XpRow(entry: XpEntry) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = if (entry.isStreak)
+                    stringResource(R.string.level_breakdown_streak, entry.label.toIntOrNull() ?: 0)
+                else entry.label,
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1
+            )
+            if (!entry.isStreak) {
+                Text(
+                    text = formatShortDate(entry.date),
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 10.sp
+                )
+            }
+        }
+        Text(
+            text = stringResource(R.string.level_xp_gain, entry.points),
+            color = MaterialTheme.colorScheme.primary,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Black
+        )
+    }
+}
+
+private fun formatShortDate(millis: Long): String =
+    SimpleDateFormat("d MMM yyyy", Locale.getDefault()).format(Date(millis))
 
 /** Indicador discreto de sincronización (US-01): solo visible al sincronizar o en error. */
 @Composable
