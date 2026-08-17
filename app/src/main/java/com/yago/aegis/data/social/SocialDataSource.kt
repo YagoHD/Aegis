@@ -61,6 +61,20 @@ class SocialDataSource {
         }.getOrNull()
     }
 
+    /**
+     * Cambia mi @usuario: primero RESERVA el nuevo (create; falla si es de otra persona), y solo
+     * si lo consigue LIBERA el viejo. Así nunca me quedo sin nombre ni piso el de otro.
+     */
+    suspend fun changeUsername(old: String, new: String): Result<Unit> {
+        val me = myUid ?: return Result.failure(IllegalStateException("no-session"))
+        return runCatching {
+            db.collection("usernames").document(new).set(mapOf("uid" to me)).await()
+            if (old.isNotBlank() && old != new) {
+                runCatching { db.collection("usernames").document(old).delete().await() }
+            }
+        }
+    }
+
     // ---- Amistades ----
 
     /** Envía solicitud a [toUid] (@[toUsername]) firmando también mi @[myUsername] para mostrar. */

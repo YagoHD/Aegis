@@ -1,6 +1,7 @@
 package com.yago.aegis.ui.screens
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -33,6 +36,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -70,6 +74,7 @@ fun FriendsScreen(viewModel: SocialViewModel, onBack: () -> Unit) {
     val busy by viewModel.busy.collectAsState()
     val snackbar = remember { SnackbarHostState() }
     val ctx = LocalContext.current
+    var showChangeDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(feedback) {
         feedback?.let {
@@ -111,7 +116,7 @@ fun FriendsScreen(viewModel: SocialViewModel, onBack: () -> Unit) {
             if (u == null) {
                 ClaimSection(busy) { viewModel.claimUsername(it) }
             } else {
-                MyProfileCard(u, myRank)
+                MyProfileCard(u, myRank) { showChangeDialog = true }
                 Spacer(Modifier.height(20.dp))
                 AddAllySection(busy) { viewModel.addFriend(it) }
 
@@ -133,20 +138,36 @@ fun FriendsScreen(viewModel: SocialViewModel, onBack: () -> Unit) {
                         color = MaterialTheme.colorScheme.secondary, fontSize = 13.sp, lineHeight = 18.sp
                     )
                 } else {
-                    val tiers = ranking.profiles.associate { it.uid to tierOf(it.overallTier) }
+                    // Prefiere el @usuario/rango del perfil público (refleja cambios de nombre);
+                    // si aún no cargó, cae al que quedó guardado en la amistad.
+                    val profByUid = ranking.profiles.associateBy { it.uid }
                     buckets.friends.forEach { ref ->
-                        FriendListRow(ref, tiers[ref.uid] ?: RankTier.SIN_RANGO) { viewModel.remove(ref.uid) }
+                        val prof = profByUid[ref.uid]
+                        val name = prof?.username?.ifBlank { null } ?: ref.username
+                        val tier = prof?.let { tierOf(it.overallTier) } ?: RankTier.SIN_RANGO
+                        FriendListRow(name, tier) { viewModel.remove(ref.uid) }
                     }
                 }
             }
             Spacer(Modifier.height(40.dp))
         }
     }
+
+    myUsername?.let { current ->
+        if (showChangeDialog) {
+            ChangeUsernameDialog(
+                current = current,
+                busy = busy,
+                onConfirm = { viewModel.changeUsername(it); showChangeDialog = false },
+                onDismiss = { showChangeDialog = false }
+            )
+        }
+    }
 }
 
-/** Tarjeta de mi identidad social: avatar + @usuario + nivel + medalla de rango global. */
+/** Tarjeta de mi identidad social: avatar + @usuario + nivel + medalla + editar @usuario. */
 @Composable
-private fun MyProfileCard(username: String, rank: MyRank) {
+private fun MyProfileCard(username: String, rank: MyRank, onEdit: () -> Unit) {
     Surface(
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
@@ -156,11 +177,20 @@ private fun MyProfileCard(username: String, rank: MyRank) {
             AegisAvatar(username, 60.dp, MaterialTheme.colorScheme.primary, 2.dp)
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {
-                Text(
-                    "@${username.uppercase()}",
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontSize = 17.sp, fontWeight = FontWeight.Black, maxLines = 1
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "@${username.uppercase()}",
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontSize = 17.sp, fontWeight = FontWeight.Black, maxLines = 1
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = stringResource(R.string.social_change_username),
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                        modifier = Modifier.size(15.dp).clickable { onEdit() }
+                    )
+                }
                 Spacer(Modifier.height(2.dp))
                 Text(
                     stringResource(R.string.ranking_level, rank.level),
@@ -263,15 +293,15 @@ private fun RequestCard(ref: FriendRef, onAccept: () -> Unit, onReject: () -> Un
 
 /** Amigo aceptado: avatar + @usuario + medalla de su rango global + eliminar. */
 @Composable
-private fun FriendListRow(ref: FriendRef, tier: RankTier, onRemove: () -> Unit) {
+private fun FriendListRow(username: String, tier: RankTier, onRemove: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        AegisAvatar(ref.username.ifBlank { "?" }, 44.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f))
+        AegisAvatar(username.ifBlank { "?" }, 44.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f))
         Spacer(Modifier.width(12.dp))
         Text(
-            "@${ref.username.ifBlank { "…" }}",
+            "@${username.ifBlank { "…" }}",
             color = MaterialTheme.colorScheme.onBackground, fontSize = 15.sp, fontWeight = FontWeight.Black,
             maxLines = 1, modifier = Modifier.weight(1f)
         )
@@ -327,11 +357,51 @@ private fun PrimaryButton(label: String, busy: Boolean, enabled: Boolean, onClic
     }
 }
 
+@Composable
+private fun ChangeUsernameDialog(current: String, busy: Boolean, onConfirm: (String) -> Unit, onDismiss: () -> Unit) {
+    var text by remember { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+        title = {
+            Text(
+                stringResource(R.string.social_change_username),
+                color = MaterialTheme.colorScheme.onBackground,
+                fontWeight = FontWeight.Black
+            )
+        },
+        text = {
+            Column {
+                Text(
+                    "${stringResource(R.string.social_your_username)}:  @$current",
+                    color = MaterialTheme.colorScheme.secondary, fontSize = 13.sp
+                )
+                Spacer(Modifier.height(12.dp))
+                UsernameField(text, R.string.social_username_hint) { text = it }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(text) }, enabled = text.isNotBlank() && !busy) {
+                Text(
+                    stringResource(R.string.social_change_confirm),
+                    color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.btn_cancel), color = MaterialTheme.colorScheme.secondary)
+            }
+        }
+    )
+}
+
 private fun tierOf(name: String): RankTier =
     runCatching { RankTier.valueOf(name) }.getOrDefault(RankTier.SIN_RANGO)
 
 private fun feedbackRes(f: SocialFeedback): Int = when (f) {
     SocialFeedback.USERNAME_CLAIMED -> R.string.social_fb_claimed
+    SocialFeedback.USERNAME_CHANGED -> R.string.social_fb_changed
     SocialFeedback.USERNAME_TAKEN -> R.string.social_fb_taken
     SocialFeedback.USERNAME_INVALID -> R.string.social_fb_invalid
     SocialFeedback.REQUEST_SENT -> R.string.social_fb_sent

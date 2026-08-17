@@ -506,4 +506,7 @@
     <string name="ranking_filter_global">GLOBAL</string>
     <string name="ranking_level">LEVEL %1$d</string>
     <string name="ranking_level_short">LVL %1$d</string>
+    <string name="social_change_username">Change username</string>
+    <string name="social_change_confirm">CHANGE</string>
+    <string name="social_fb_changed">Username updated</string>
 </resources>

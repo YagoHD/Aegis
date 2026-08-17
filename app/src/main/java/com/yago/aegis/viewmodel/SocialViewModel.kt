@@ -26,7 +26,7 @@ import kotlinx.coroutines.withContext
 
 /** Resultado de una acción social. La pantalla lo mapea a strings (i18n en los 6 idiomas). */
 enum class SocialFeedback {
-    USERNAME_CLAIMED, USERNAME_TAKEN, USERNAME_INVALID,
+    USERNAME_CLAIMED, USERNAME_CHANGED, USERNAME_TAKEN, USERNAME_INVALID,
     REQUEST_SENT, USER_NOT_FOUND, CANNOT_ADD_SELF, ALREADY_LINKED, ERROR
 }
 
@@ -106,6 +106,30 @@ class SocialViewModel(
                 }
                 // De otra persona.
                 else -> SocialFeedback.USERNAME_TAKEN
+            }
+            _busy.value = false
+        }
+    }
+
+    /** Cambia mi @usuario por otro libre. Si es el mío actual, no hace nada. */
+    fun changeUsername(input: String) {
+        val new = UsernameRules.normalize(input)
+        if (!UsernameRules.isValid(new)) { _feedback.value = SocialFeedback.USERNAME_INVALID; return }
+        val old = myUsername.value
+        if (new == old) return
+        viewModelScope.launch {
+            _busy.value = true
+            val owner = runCatching { social.findUidByUsername(new) }.getOrNull()
+            _feedback.value = when (owner) {
+                null -> social.changeUsername(old ?: "", new).fold(
+                    onSuccess = {
+                        repo.saveUsername(new)
+                        uploadMyProfileInternal(new)
+                        SocialFeedback.USERNAME_CHANGED
+                    },
+                    onFailure = { SocialFeedback.USERNAME_TAKEN }
+                )
+                else -> SocialFeedback.USERNAME_TAKEN   // de otra persona (o carrera)
             }
             _busy.value = false
         }
