@@ -51,6 +51,8 @@ class UserRepository(
     val showVisualLog = settingsStore.showVisualLog
     val showGirths = settingsStore.showGirths
     val showEvolution = settingsStore.showEvolution
+    val defaultsSeeded = settingsStore.defaultsSeeded
+    suspend fun saveDefaultsSeeded(v: Boolean) = settingsStore.saveDefaultsSeeded(v)
     val avatarUri = settingsStore.avatarUri
     val currentMass = settingsStore.currentMass
     val height = settingsStore.height

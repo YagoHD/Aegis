@@ -42,9 +42,9 @@ fun ExercisesLibraryScreen(
     onNavigateToRoutines: () -> Unit = {}
 ) {
     var exerciseToDelete by remember { mutableStateOf<Exercise?>(null) }
-    var showLoadDefaultsDialog by remember { mutableStateOf(false) }
     var showFilters by remember { mutableStateOf(false) }
     var baseSectionExpanded by remember { mutableStateOf(true) }
+    var userSectionExpanded by remember { mutableStateOf(true) }
 
     val userExercises by routinesViewModel.filteredUserExercises.collectAsState()
     val baseExercises by routinesViewModel.filteredBaseExercises.collectAsState()
@@ -53,33 +53,6 @@ fun ExercisesLibraryScreen(
 
     val isFiltering = routinesViewModel.librarySearchQuery.isNotEmpty()
             || routinesViewModel.selectedLibraryTag != "ALL"
-
-    // ─── DIÁLOGO cargar / eliminar base ───
-    if (showLoadDefaultsDialog) {
-        AegisAlertDialog(
-            title = if (hasDefaultExercises) stringResource(R.string.delete_base_exercises_title) else stringResource(R.string.load_base_exercises_title),
-            confirmText = if (hasDefaultExercises) stringResource(R.string.btn_delete) else stringResource(R.string.btn_load),
-            dismissText = stringResource(R.string.btn_cancel),
-            confirmButtonColor = if (hasDefaultExercises) MaterialTheme.colorScheme.error
-                                 else MaterialTheme.colorScheme.primary,
-            onDismiss = { showLoadDefaultsDialog = false },
-            onConfirm = {
-                if (hasDefaultExercises) routinesViewModel.deleteDefaultExercises()
-                else routinesViewModel.loadDefaultExercises()
-                showLoadDefaultsDialog = false
-            }
-        ) {
-            Text(
-                text = if (hasDefaultExercises)
-                    stringResource(R.string.delete_base_exercises_message)
-                else
-                    stringResource(R.string.load_base_exercises_message),
-                color = MaterialTheme.colorScheme.secondary,
-                fontSize = 14.sp,
-                lineHeight = 20.sp
-            )
-        }
-    }
 
     // ─── DIÁLOGO eliminar ejercicio individual ───
     if (exerciseToDelete != null) {
@@ -145,33 +118,6 @@ fun ExercisesLibraryScreen(
                     }
                 }
 
-                val baseColor = if (hasDefaultExercises) MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
-                                else MaterialTheme.colorScheme.secondary
-                Surface(
-                    onClick = { showLoadDefaultsDialog = true },
-                    modifier = Modifier.weight(1f).height(44.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    color = Color.Transparent,
-                    border = BorderStroke(1.dp,
-                        if (hasDefaultExercises) MaterialTheme.colorScheme.error.copy(alpha = 0.4f)
-                        else MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f))
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        Icon(
-                            if (hasDefaultExercises) Icons.Default.DeleteSweep else Icons.Default.Download,
-                            null, tint = baseColor, modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            if (hasDefaultExercises) stringResource(R.string.btn_delete_base) else stringResource(R.string.btn_load_base),
-                            color = baseColor, fontWeight = FontWeight.Black, fontSize = 11.sp, letterSpacing = 1.sp
-                        )
-                    }
-                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -286,33 +232,37 @@ fun ExercisesLibraryScreen(
                             SectionHeader(
                                 title = stringResource(R.string.my_exercises_title),
                                 count = userExercises.size,
-                                isExpandable = false
+                                isExpandable = true,
+                                expanded = userSectionExpanded,
+                                onToggle = { userSectionExpanded = !userSectionExpanded }
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }
                     }
 
-                    if (userExercises.isEmpty() && !isFiltering) {
-                        item {
-                            Text(
-                                text = stringResource(R.string.empty_exercises_message),
-                                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
-                                fontSize = 12.sp,
-                                fontStyle = FontStyle.Italic,
-                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
-                                lineHeight = 18.sp
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-                    } else {
-                        items(userExercises, key = { it.id }) { exercise ->
-                            ExerciseCard(
-                                exercise = exercise,
-                                onEdit = { onNavigateToEdit(exercise.name) },
-                                onDelete = { exerciseToDelete = exercise },
-                                showReorderHandle = false,
-                                isAddMode = false
-                            )
+                    if (userSectionExpanded) {
+                        if (userExercises.isEmpty() && !isFiltering) {
+                            item {
+                                Text(
+                                    text = stringResource(R.string.empty_exercises_message),
+                                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+                                    fontSize = 12.sp,
+                                    fontStyle = FontStyle.Italic,
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
+                                    lineHeight = 18.sp
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+                        } else {
+                            items(userExercises, key = { it.id }) { exercise ->
+                                ExerciseCard(
+                                    exercise = exercise,
+                                    onEdit = { onNavigateToEdit(exercise.name) },
+                                    onDelete = { exerciseToDelete = exercise },
+                                    showReorderHandle = false,
+                                    isAddMode = false
+                                )
+                            }
                         }
                     }
 

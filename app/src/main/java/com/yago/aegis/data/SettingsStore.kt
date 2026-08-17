@@ -25,6 +25,7 @@ class SettingsStore(private val context: Context) {
         val SHOW_VISUAL_LOG = booleanPreferencesKey("show_visual_log")
         val SHOW_GIRTHS = booleanPreferencesKey("show_girths")
         val SHOW_EVOLUTION = booleanPreferencesKey("show_evolution")
+        val DEFAULTS_SEEDED = booleanPreferencesKey("defaults_seeded")
         val AVATAR_URI = stringPreferencesKey("avatar_uri")
         val CURRENT_MASS = stringPreferencesKey("current_mass")
         val HEIGHT = doublePreferencesKey("height")
@@ -73,6 +74,8 @@ class SettingsStore(private val context: Context) {
     val showVisualLog: Flow<Boolean> = context.dataStore.data.map { it[SHOW_VISUAL_LOG] ?: true }
     val showGirths: Flow<Boolean> = context.dataStore.data.map { it[SHOW_GIRTHS] ?: true }
     val showEvolution: Flow<Boolean> = context.dataStore.data.map { it[SHOW_EVOLUTION] ?: true }
+    // Ejercicios base sembrados ya en este dispositivo (para no re-sembrar en cada arranque).
+    val defaultsSeeded: Flow<Boolean> = context.dataStore.data.map { it[DEFAULTS_SEEDED] ?: false }
     val avatarUri: Flow<String?> = context.dataStore.data.map { it[AVATAR_URI] }
     val currentMass: Flow<String> = context.dataStore.data.map { it[CURRENT_MASS] ?: "0.0" }
     val height: Flow<Double> = context.dataStore.data.map { it[HEIGHT] ?: 0.0 }
@@ -195,6 +198,10 @@ class SettingsStore(private val context: Context) {
 
     suspend fun saveShowEvolution(show: Boolean) {
         context.dataStore.edit { it[SHOW_EVOLUTION] = show }
+    }
+
+    suspend fun saveDefaultsSeeded(v: Boolean) {
+        context.dataStore.edit { it[DEFAULTS_SEEDED] = v }
     }
 
     suspend fun saveAvatarUri(uri: String) {

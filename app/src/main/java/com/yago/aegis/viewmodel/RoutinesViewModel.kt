@@ -95,6 +95,18 @@ class RoutinesViewModel(private val repository: UserRepository) : ViewModel() {
                 routines.addAll(savedRoutines.map { r -> r.withSafeDefaults() })
             }
         }
+        // Ejercicios base: se siembran AUTOMÁTICAMENTE la primera vez en este dispositivo
+        // (el nuevo usuario no necesita botón de cargar). Dedup por id y upsert idempotente →
+        // seguro ante el sync; solo añade los que falten, sin sobrescribir los existentes.
+        viewModelScope.launch {
+            if (!repository.defaultsSeeded.first()) {
+                val existingIds = repository.getAllExercises().first().map { it.id }.toSet()
+                DefaultExercises.getAll()
+                    .filter { it.id !in existingIds }
+                    .forEach { repository.upsertExercise(it) }
+                repository.saveDefaultsSeeded(true)
+            }
+        }
     }
 
     private fun persistChanges() {
