@@ -498,6 +498,8 @@ fun AegisNavigation(
                         onFinish = { notes ->
                             workoutViewModel.saveSessionNotes(notes)
                             workoutViewModel.clearSummary()
+                            // Rango fresco tras entrenar: que los amigos vean mis nuevas marcas.
+                            socialViewModel.uploadMyProfile()
                             navController.navigate(Routes.PROFILE) {
                                 popUpTo(0) { inclusive = true }
                             }

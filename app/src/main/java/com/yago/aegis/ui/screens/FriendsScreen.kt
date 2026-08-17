@@ -54,6 +54,7 @@ import com.yago.aegis.R
 import com.yago.aegis.data.RankTier
 import com.yago.aegis.data.social.FriendRef
 import com.yago.aegis.ui.components.AegisAvatar
+import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.RankMedal
 import com.yago.aegis.viewmodel.MyRank
 import com.yago.aegis.viewmodel.SocialFeedback
@@ -81,6 +82,20 @@ fun FriendsScreen(viewModel: SocialViewModel, onBack: () -> Unit) {
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            AegisTopBar(
+                title = stringResource(R.string.social_title),
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.content_desc_back),
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                }
+            )
+        },
         snackbarHost = { SnackbarHost(snackbar) }
     ) { pad ->
         Column(
@@ -90,22 +105,6 @@ fun FriendsScreen(viewModel: SocialViewModel, onBack: () -> Unit) {
                 .padding(horizontal = 24.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            Spacer(Modifier.height(8.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.content_desc_back),
-                        tint = MaterialTheme.colorScheme.onBackground
-                    )
-                }
-                Spacer(Modifier.width(6.dp))
-                Text(
-                    stringResource(R.string.social_title),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontSize = 20.sp, fontWeight = FontWeight.Black, letterSpacing = 2.sp
-                )
-            }
             Spacer(Modifier.height(16.dp))
 
             val u = myUsername
