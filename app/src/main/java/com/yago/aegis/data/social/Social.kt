@@ -28,6 +28,7 @@ data class PublicProfile(
     val overallTier: String = RankTier.SIN_RANGO.name,
     val groupTiers: Map<String, String> = emptyMap(),
     val groupDivisions: Map<String, Int> = emptyMap(),
+    val avatar: String = "",   // thumbnail JPEG en base64 (<=128px); vacío = sin foto
     val updatedAt: Long = 0L
 )
 

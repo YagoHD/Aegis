@@ -60,6 +60,7 @@ import com.yago.aegis.data.social.FriendRef
 import com.yago.aegis.ui.components.AegisAvatar
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.RankMedal
+import com.yago.aegis.util.AvatarImage
 import com.yago.aegis.viewmodel.MyRank
 import com.yago.aegis.viewmodel.SocialFeedback
 import com.yago.aegis.viewmodel.SocialViewModel
@@ -70,6 +71,7 @@ fun FriendsScreen(viewModel: SocialViewModel, onBack: () -> Unit) {
     val buckets by viewModel.buckets.collectAsState()
     val ranking by viewModel.friendRanking.collectAsState()
     val myRank by viewModel.myRank.collectAsState()
+    val myAvatar by viewModel.myAvatarUri.collectAsState()
     val feedback by viewModel.feedback.collectAsState()
     val busy by viewModel.busy.collectAsState()
     val snackbar = remember { SnackbarHostState() }
@@ -116,7 +118,7 @@ fun FriendsScreen(viewModel: SocialViewModel, onBack: () -> Unit) {
             if (u == null) {
                 ClaimSection(busy) { viewModel.claimUsername(it) }
             } else {
-                MyProfileCard(u, myRank) { showChangeDialog = true }
+                MyProfileCard(u, myRank, myAvatar) { showChangeDialog = true }
                 Spacer(Modifier.height(20.dp))
                 AddAllySection(busy) { viewModel.addFriend(it) }
 
@@ -138,14 +140,17 @@ fun FriendsScreen(viewModel: SocialViewModel, onBack: () -> Unit) {
                         color = MaterialTheme.colorScheme.secondary, fontSize = 13.sp, lineHeight = 18.sp
                     )
                 } else {
-                    // Prefiere el @usuario/rango del perfil público (refleja cambios de nombre);
+                    // Prefiere el @usuario/rango/avatar del perfil público (refleja cambios);
                     // si aún no cargó, cae al que quedó guardado en la amistad.
                     val profByUid = ranking.profiles.associateBy { it.uid }
+                    val avatars = remember(ranking.profiles) {
+                        ranking.profiles.associate { it.uid to AvatarImage.decode(it.avatar) }
+                    }
                     buckets.friends.forEach { ref ->
                         val prof = profByUid[ref.uid]
                         val name = prof?.username?.ifBlank { null } ?: ref.username
                         val tier = prof?.let { tierOf(it.overallTier) } ?: RankTier.SIN_RANGO
-                        FriendListRow(name, tier) { viewModel.remove(ref.uid) }
+                        FriendListRow(name, tier, avatars[ref.uid]) { viewModel.remove(ref.uid) }
                     }
                 }
             }
@@ -167,14 +172,14 @@ fun FriendsScreen(viewModel: SocialViewModel, onBack: () -> Unit) {
 
 /** Tarjeta de mi identidad social: avatar + @usuario + nivel + medalla + editar @usuario. */
 @Composable
-private fun MyProfileCard(username: String, rank: MyRank, onEdit: () -> Unit) {
+private fun MyProfileCard(username: String, rank: MyRank, photo: Any?, onEdit: () -> Unit) {
     Surface(
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            AegisAvatar(username, 60.dp, MaterialTheme.colorScheme.primary, 2.dp)
+            AegisAvatar(username, 60.dp, MaterialTheme.colorScheme.primary, 2.dp, photo = photo)
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -293,12 +298,12 @@ private fun RequestCard(ref: FriendRef, onAccept: () -> Unit, onReject: () -> Un
 
 /** Amigo aceptado: avatar + @usuario + medalla de su rango global + eliminar. */
 @Composable
-private fun FriendListRow(username: String, tier: RankTier, onRemove: () -> Unit) {
+private fun FriendListRow(username: String, tier: RankTier, photo: Any?, onRemove: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        AegisAvatar(username.ifBlank { "?" }, 44.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f))
+        AegisAvatar(username.ifBlank { "?" }, 44.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f), photo = photo)
         Spacer(Modifier.width(12.dp))
         Text(
             "@${username.ifBlank { "…" }}",

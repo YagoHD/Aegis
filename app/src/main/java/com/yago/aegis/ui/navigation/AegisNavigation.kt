@@ -116,8 +116,9 @@ fun AegisNavigation(
     val sharedStatsViewModel: StatsViewModel = viewModel(factory = StatsViewModel.Factory(userRepository))
     val plateCalculatorViewModel: PlateCalculatorViewModel = viewModel(factory = PlateCalculatorViewModel.Factory(userRepository))
     val panteonViewModel: PanteonViewModel = viewModel(factory = PanteonViewModel.Factory(userRepository))
+    val socialAppContext = androidx.compose.ui.platform.LocalContext.current.applicationContext
     val socialViewModel: com.yago.aegis.viewmodel.SocialViewModel =
-        viewModel(factory = com.yago.aegis.viewmodel.SocialViewModel.Factory(socialDataSource, userRepository))
+        viewModel(factory = com.yago.aegis.viewmodel.SocialViewModel.Factory(socialDataSource, userRepository, socialAppContext))
 
     val showBottomBar = currentRoute != Routes.SETTINGS &&
             !onboardingRoutes.contains(currentRoute) &&

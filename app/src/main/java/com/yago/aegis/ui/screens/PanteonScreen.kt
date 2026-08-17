@@ -54,6 +54,7 @@ import com.yago.aegis.data.RankTier
 import com.yago.aegis.data.SubgroupRank
 import com.yago.aegis.data.divisionFromProgress
 import com.yago.aegis.data.social.PublicProfile
+import com.yago.aegis.util.AvatarImage
 import com.yago.aegis.ui.components.AegisAvatar
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.RankMedal
@@ -430,7 +431,8 @@ private data class RankRow(
     val overall: RankTier,
     val groups: Map<MuscleGroup, RankTier>,
     val divisions: Map<MuscleGroup, Int>,
-    val isMe: Boolean = false
+    val isMe: Boolean = false,
+    val photo: Any? = null   // content:// Uri (mío) o ImageBitmap decodificado (amigo)
 )
 
 private fun RankRow.rankFor(group: MuscleGroup): Rank =
@@ -453,6 +455,7 @@ private fun FriendsRankingSection(
     val username = socialViewModel.myUsername.collectAsState().value
     val buckets = socialViewModel.buckets.collectAsState().value   // mantiene vivo el listener de amistades
     val ranking = socialViewModel.friendRanking.collectAsState().value
+    val myAvatar = socialViewModel.myAvatarUri.collectAsState().value
     var filter by remember { mutableStateOf<MuscleGroup?>(null) }
 
     // Carga/recarga al abrir la pestaña y cuando cambie mi lista de amigos.
@@ -467,15 +470,21 @@ private fun FriendsRankingSection(
         return
     }
 
+    // Decodifica una sola vez los avatares (base64) de los amigos.
+    val friendAvatars = remember(ranking.profiles) {
+        ranking.profiles.associate { it.uid to AvatarImage.decode(it.avatar) }
+    }
+
     val me = RankRow(
         username = username,
         level = ranking.myLevel,
         overall = myResult.strongest?.tier ?: RankTier.SIN_RANGO,
         groups = myResult.groups.associate { it.group to it.tier },
         divisions = myResult.groups.associate { it.group to divisionFromProgress(it.progressToNext) },
-        isMe = true
+        isMe = true,
+        photo = myAvatar
     )
-    val friends = ranking.profiles.map { it.toRankRow() }
+    val friends = ranking.profiles.map { it.toRankRow().copy(photo = friendAvatars[it.uid]) }
     val board = (listOf(me) + friends).sortedWith(
         compareByDescending<RankRow> { val (t, d) = rankOf(it, filter); rankScore(t, d) }
             .thenBy { it.username.lowercase() }
@@ -589,7 +598,7 @@ private fun PodiumPlace(row: RankRow, place: Int, filter: MuscleGroup?) {
             )
             Spacer(Modifier.height(4.dp))
         }
-        AegisAvatar(row.username, avatarSize, ringColor, borderWidth = if (place == 1) 3.dp else 2.dp)
+        AegisAvatar(row.username, avatarSize, ringColor, borderWidth = if (place == 1) 3.dp else 2.dp, photo = row.photo)
         Spacer(Modifier.height(6.dp))
         Text(
             text = if (row.isMe) stringResource(R.string.ranking_you) else "@${row.username}",
@@ -639,7 +648,8 @@ private fun RankingListRow(position: Int, row: RankRow, me: RankRow, filter: Mus
                     row.username, 44.dp,
                     borderColor = if (row.isMe) MaterialTheme.colorScheme.primary
                                   else MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
-                    borderWidth = if (row.isMe) 2.dp else 1.dp
+                    borderWidth = if (row.isMe) 2.dp else 1.dp,
+                    photo = row.photo
                 )
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
@@ -699,7 +709,7 @@ private fun ComparisonPanel(me: RankRow, friend: RankRow) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                AegisAvatar(me.username, 44.dp, MaterialTheme.colorScheme.primary, 2.dp)
+                AegisAvatar(me.username, 44.dp, MaterialTheme.colorScheme.primary, 2.dp, photo = me.photo)
                 Spacer(Modifier.height(4.dp))
                 Text(stringResource(R.string.ranking_you), color = MaterialTheme.colorScheme.primary, fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
             }
@@ -711,7 +721,7 @@ private fun ComparisonPanel(me: RankRow, friend: RankRow) {
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                AegisAvatar(friend.username, 44.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f), 2.dp)
+                AegisAvatar(friend.username, 44.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f), 2.dp, photo = friend.photo)
                 Spacer(Modifier.height(4.dp))
                 Text("@${friend.username}", color = MaterialTheme.colorScheme.onBackground, fontSize = 10.sp, fontWeight = FontWeight.Black, maxLines = 1)
             }

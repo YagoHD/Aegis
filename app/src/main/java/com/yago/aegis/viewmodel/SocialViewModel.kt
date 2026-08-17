@@ -1,5 +1,7 @@
 package com.yago.aegis.viewmodel
 
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -13,6 +15,7 @@ import com.yago.aegis.data.social.SocialDataSource
 import com.yago.aegis.data.social.UsernameRules
 import com.yago.aegis.data.social.bucketsFor
 import com.yago.aegis.data.social.toRankSummary
+import com.yago.aegis.util.AvatarImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -46,13 +49,18 @@ data class MyRank(
 /** Estado y acciones de Amigos: reclamar @usuario, añadir por @usuario, aceptar/rechazar. */
 class SocialViewModel(
     private val social: SocialDataSource,
-    private val repo: UserRepository
+    private val repo: UserRepository,
+    private val appContext: Context
 ) : ViewModel() {
 
     private val myUid: String = social.currentUid() ?: ""
 
     val myUsername: StateFlow<String?> =
         repo.username.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    /** Mi avatar local (content://) para pintarlo a calidad plena en las pantallas sociales. */
+    val myAvatarUri: StateFlow<String?> =
+        repo.avatarUri.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     val buckets: StateFlow<FriendBuckets> =
         social.observeFriendships()
@@ -196,7 +204,7 @@ class SocialViewModel(
     }
 
     private suspend fun uploadMyProfileInternal(username: String) {
-        val (summary, level) = withContext(Dispatchers.Default) {
+        val (summary, level, avatar) = withContext(Dispatchers.Default) {
             val history = repo.workoutHistory.first()
             val library = repo.exerciseLibrary.first()
             val bodyweight = repo.currentMass.first().toDoubleOrNull() ?: 0.0
@@ -204,7 +212,8 @@ class SocialViewModel(
             val streak = repo.computeCurrentStreak()
             val rankSummary = RankEngine.compute(history, library, bodyweight, sex).toRankSummary()
             val userLevel = LevelSystem.compute(history, streak).level
-            rankSummary to userLevel
+            val avatarB64 = repo.avatarUri.first()?.let { AvatarImage.encode(appContext, Uri.parse(it)) } ?: ""
+            Triple(rankSummary, userLevel, avatarB64)
         }
         _myRank.value = MyRank(
             level = level,
@@ -218,19 +227,21 @@ class SocialViewModel(
                 level = level,
                 overallTier = summary.overall,
                 groupTiers = summary.byGroup,
-                groupDivisions = summary.byGroupDivision
+                groupDivisions = summary.byGroupDivision,
+                avatar = avatar
             )
         )
     }
 
     class Factory(
         private val social: SocialDataSource,
-        private val repo: UserRepository
+        private val repo: UserRepository,
+        private val appContext: Context
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(SocialViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
-                return SocialViewModel(social, repo) as T
+                return SocialViewModel(social, repo, appContext) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")
         }
