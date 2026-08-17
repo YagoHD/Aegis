@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
@@ -42,6 +43,7 @@ import com.yago.aegis.viewmodel.ProfileViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -191,8 +193,16 @@ fun ProfileContent(viewModel: ProfileViewModel, onNavigateToTrain: () -> Unit = 
             }
         }
 
-        // ── BOTÓN GUARDAR SNAPSHOT + HISTORIAL ──────────────────────────────
+        // ── BOTÓN GUARDAR MEDIDAS + CHECK ✓ 3s ──────────────────────────────
         var snapshotSaved by remember { mutableStateOf(false) }
+        // Cada vez que se guarda, el check aparece 3 s y luego vuelve a "Guardar".
+        LaunchedEffect(snapshotSaved) {
+            if (snapshotSaved) {
+                delay(3000)
+                snapshotSaved = false
+            }
+        }
+        val savedGreen = Color(0xFF7FB069)
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -205,16 +215,15 @@ fun ProfileContent(viewModel: ProfileViewModel, onNavigateToTrain: () -> Unit = 
                 }
             ) {
                 Icon(
-                    imageVector = Icons.Default.Save,
+                    imageVector = if (snapshotSaved) Icons.Default.CheckCircle else Icons.Default.Save,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = if (snapshotSaved) savedGreen else MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(14.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = if (snapshotSaved) stringResource(R.string.saved_today_label) else stringResource(R.string.save_today_btn),
-                    color = if (snapshotSaved) MaterialTheme.colorScheme.secondary
-                            else MaterialTheme.colorScheme.primary,
+                    text = if (snapshotSaved) stringResource(R.string.saved_today_label) else stringResource(R.string.btn_save),
+                    color = if (snapshotSaved) savedGreen else MaterialTheme.colorScheme.primary,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Black,
                     letterSpacing = 1.sp
