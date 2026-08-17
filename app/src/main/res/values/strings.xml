@@ -543,4 +543,7 @@
     <string name="level_breakdown_title">DE DÓNDE VIENE TU XP</string>
     <string name="level_breakdown_streak">Racha · %1$d sem</string>
     <string name="level_xp_gain">+%1$d</string>
+    <string name="avatar_crop_title">ENCUADRA TU FOTO</string>
+    <string name="avatar_crop_hint">Pellizca para hacer zoom y arrastra para colocar</string>
+    <string name="avatar_crop_confirm">USAR</string>
 </resources>

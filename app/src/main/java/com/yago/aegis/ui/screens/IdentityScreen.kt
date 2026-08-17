@@ -43,21 +43,23 @@ fun IdentityScreen(
     var selectedPhotoUri by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
 
+    var avatarCropUri by remember { mutableStateOf<Uri?>(null) }
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        uri?.let { selectedUri ->
-            try {
-                context.contentResolver.takePersistableUriPermission(
-                    selectedUri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                )
-                viewModel.updateAvatar(selectedUri.toString())
-                selectedPhotoUri = selectedUri.toString()
-            } catch (e: Exception) {
-                e.printStackTrace()
+        uri?.let { avatarCropUri = it }
+    }
+    avatarCropUri?.let { cropUri ->
+        com.yago.aegis.ui.components.AvatarCropDialog(
+            uri = cropUri,
+            onDismiss = { avatarCropUri = null },
+            onConfirm = { bmp ->
+                val saved = com.yago.aegis.util.AvatarImage.saveAvatar(context, bmp)
+                viewModel.updateAvatar(saved.toString())
+                selectedPhotoUri = saved.toString()
+                avatarCropUri = null
             }
-        }
+        )
     }
 
     // ELIMINADO: .verticalScroll(rememberScrollState())

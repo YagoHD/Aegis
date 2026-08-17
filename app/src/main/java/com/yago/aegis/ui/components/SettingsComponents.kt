@@ -67,15 +67,23 @@ fun SettingsMenu(
     var showDeleteAccountDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+    var avatarCropUri by remember { mutableStateOf<android.net.Uri?>(null) }
     val avatarLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
-        uri?.let {
-            try {
-                context.contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            } catch (e: Exception) { e.printStackTrace() }
-            viewModel.updateAvatar(it.toString())
-        }
+        // En vez de guardar directo, abrimos el recorte para encuadrar la foto.
+        uri?.let { avatarCropUri = it }
+    }
+    avatarCropUri?.let { cropUri ->
+        AvatarCropDialog(
+            uri = cropUri,
+            onDismiss = { avatarCropUri = null },
+            onConfirm = { bmp ->
+                val saved = com.yago.aegis.util.AvatarImage.saveAvatar(context, bmp)
+                viewModel.updateAvatar(saved.toString())
+                avatarCropUri = null
+            }
+        )
     }
 
     // Diálogo de cambio de contraseña

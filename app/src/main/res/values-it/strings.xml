@@ -514,4 +514,7 @@
     <string name="level_breakdown_title">DA DOVE VIENE IL TUO XP</string>
     <string name="level_breakdown_streak">Serie · %1$d sett</string>
     <string name="level_xp_gain">+%1$d</string>
+    <string name="avatar_crop_title">INQUADRA LA FOTO</string>
+    <string name="avatar_crop_hint">Pizzica per lo zoom, trascina per posizionare</string>
+    <string name="avatar_crop_confirm">USA</string>
 </resources>

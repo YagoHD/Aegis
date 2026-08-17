@@ -514,4 +514,7 @@
     <string name="level_breakdown_title">WHERE YOUR XP COMES FROM</string>
     <string name="level_breakdown_streak">Streak · %1$d wks</string>
     <string name="level_xp_gain">+%1$d</string>
+    <string name="avatar_crop_title">FRAME YOUR PHOTO</string>
+    <string name="avatar_crop_hint">Pinch to zoom, drag to position</string>
+    <string name="avatar_crop_confirm">USE</string>
 </resources>

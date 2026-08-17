@@ -8,6 +8,7 @@ import android.util.Base64
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import java.io.ByteArrayOutputStream
+import java.io.File
 
 /**
  * Avatar como thumbnail pequeño en base64, para SINCRONIZARLO vía Firestore sin montar Storage.
@@ -17,7 +18,7 @@ import java.io.ByteArrayOutputStream
  */
 object AvatarImage {
 
-    private const val MAX_PX = 128
+    private const val MAX_PX = 256
     private const val JPEG_QUALITY = 70
 
     /** Lee el content:// Uri, lo reduce y lo devuelve como JPEG base64 (null si falla). */
@@ -46,5 +47,24 @@ object AvatarImage {
         if (max <= MAX_PX) return src
         val scale = MAX_PX.toFloat() / max
         return Bitmap.createScaledBitmap(src, (src.width * scale).toInt(), (src.height * scale).toInt(), true)
+    }
+
+    private const val AVATAR_MAX_PX = 512
+
+    /**
+     * Guarda el bitmap YA recortado como avatar en un fichero PROPIO de la app (filesDir) y
+     * devuelve su Uri. Un fichero propio persiste y se lee siempre (a diferencia del content://
+     * prestado por el selector, que puede caducar). Borra el avatar anterior.
+     */
+    fun saveAvatar(context: Context, bitmap: Bitmap): Uri {
+        context.filesDir.listFiles { f -> f.name.startsWith("avatar_") }?.forEach { it.delete() }
+        val max = maxOf(bitmap.width, bitmap.height)
+        val scaled = if (max > AVATAR_MAX_PX) {
+            val s = AVATAR_MAX_PX.toFloat() / max
+            Bitmap.createScaledBitmap(bitmap, (bitmap.width * s).toInt(), (bitmap.height * s).toInt(), true)
+        } else bitmap
+        val file = File(context.filesDir, "avatar_${System.currentTimeMillis()}.jpg")
+        file.outputStream().use { scaled.compress(Bitmap.CompressFormat.JPEG, 90, it) }
+        return Uri.fromFile(file)
     }
 }

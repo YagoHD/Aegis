@@ -514,4 +514,7 @@
     <string name="level_breakdown_title">D\'OÙ VIENT TON XP</string>
     <string name="level_breakdown_streak">Série · %1$d sem</string>
     <string name="level_xp_gain">+%1$d</string>
+    <string name="avatar_crop_title">CADRE TA PHOTO</string>
+    <string name="avatar_crop_hint">Pince pour zoomer, glisse pour placer</string>
+    <string name="avatar_crop_confirm">UTILISER</string>
 </resources>

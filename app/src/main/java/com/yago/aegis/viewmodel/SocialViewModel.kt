@@ -2,6 +2,7 @@ package com.yago.aegis.viewmodel
 
 import android.content.Context
 import android.net.Uri
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -86,6 +87,17 @@ class SocialViewModel(
         viewModelScope.launch {
             if (repo.username.first() == null) {
                 runCatching { social.findMyUsername() }.getOrNull()?.let { repo.saveUsername(it) }
+            }
+        }
+        // Restaura mi FOTO de avatar tras logout / cambio de dispositivo: si no hay avatar local
+        // pero sí en mi perfil público de la nube, lo bajo, lo guardo como fichero y lo apunto.
+        viewModelScope.launch {
+            if (repo.avatarUri.first() == null) {
+                val b64 = runCatching { social.getPublicProfile(myUid) }.getOrNull()?.avatar
+                if (!b64.isNullOrBlank()) {
+                    val bmp = withContext(Dispatchers.Default) { AvatarImage.decode(b64)?.asAndroidBitmap() }
+                    if (bmp != null) repo.updateAvatar(AvatarImage.saveAvatar(appContext, bmp).toString())
+                }
             }
         }
     }
