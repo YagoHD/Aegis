@@ -8,7 +8,7 @@ package com.yago.aegis.data
 enum class RankTier(val display: String, val colorHex: Long) {
     SIN_RANGO("Sin Rango", 0xFF3A3A3A),
     BRONCE("Bronce", 0xFFCD7F32),
-    PLATA("Plata", 0xFFC0C0C0),
+    PLATA("Plata", 0xFF9E9E9E),
     ORO("Oro", 0xFFD4AF37),
     PLATINO("Platino", 0xFFE5E4E2),
     DIAMANTE("Diamante", 0xFF4FC3F7),

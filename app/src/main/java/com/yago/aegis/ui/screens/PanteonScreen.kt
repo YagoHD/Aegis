@@ -85,7 +85,7 @@ fun PanteonScreen(
                         Icon(
                             Icons.Default.Group,
                             contentDescription = stringResource(R.string.content_desc_friends),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 }
@@ -247,7 +247,7 @@ private fun SummaryCard(label: String, group: GroupRank?, modifier: Modifier = M
                     maxLines = 1
                 )
                 Text(
-                    text = tier.display.uppercase(),
+                    text = Rank(tier, divisionFromProgress(group?.progressToNext ?: 0f)).label,
                     color = if (tier == RankTier.SIN_RANGO) MaterialTheme.colorScheme.secondary else Color(tier.colorHex),
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
@@ -281,7 +281,7 @@ private fun GroupRow(g: GroupRank) {
                         letterSpacing = 0.5.sp
                     )
                     Text(
-                        text = g.tier.display.uppercase(),
+                        text = Rank(g.tier, divisionFromProgress(g.progressToNext)).label,
                         color = if (g.tier == RankTier.SIN_RANGO) MaterialTheme.colorScheme.secondary else tierColor,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
@@ -735,13 +735,11 @@ private fun ComparisonPanel(me: RankRow, friend: RankRow) {
 
 @Composable
 private fun CompareGroupRow(group: MuscleGroup, mine: Rank, theirs: Rank) {
-    val mineScore = rankScore(mine.tier, mine.division)
-    val theirsScore = rankScore(theirs.tier, theirs.division)
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        RankDivisionBadge(mine, winner = mineScore > theirsScore)
+        RankDivisionBadge(mine)
         Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
             Text(
                 text = group.display.uppercase(),
@@ -753,18 +751,16 @@ private fun CompareGroupRow(group: MuscleGroup, mine: Rank, theirs: Rank) {
                 maxLines = 1
             )
         }
-        RankDivisionBadge(theirs, winner = theirsScore > mineScore)
+        RankDivisionBadge(theirs)
     }
 }
 
-/** Insignia de rango con división (ej. "ORO I"). Borde dorado si es el ganador del grupo. */
+/** Insignia de rango con división (ej. "ORO I"). */
 @Composable
-private fun RankDivisionBadge(rank: Rank, winner: Boolean) {
+private fun RankDivisionBadge(rank: Rank) {
     val isRanked = rank.tier != RankTier.SIN_RANGO
     Surface(
-        modifier = Modifier
-            .width(78.dp)
-            .then(if (winner) Modifier.border(1.5.dp, AegisGoldAccent, RoundedCornerShape(4.dp)) else Modifier),
+        modifier = Modifier.width(78.dp),
         shape = RoundedCornerShape(4.dp),
         color = if (isRanked) Color(rank.tier.colorHex) else MaterialTheme.colorScheme.surface
     ) {
