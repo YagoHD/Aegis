@@ -84,6 +84,7 @@
     <string name="settings_label_bmi">Mostrar IMC (BMI)</string>
     <string name="settings_label_visual_log">Mostrar Log Visual</string>
     <string name="settings_label_girths">Mostrar medidas corporales</string>
+    <string name="settings_label_evolution">Mostrar evolución</string>
     <string name="settings_hint_new_measure">Nombre (ej: Cuádriceps)</string>
     <string name="settings_desc_delete">Borrar medida</string>
     <string name="settings_desc_add">Añadir medida</string>

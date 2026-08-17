@@ -296,6 +296,7 @@ fun SettingsMenu(
                 SettingsRow(stringResource(R.string.settings_label_bmi), state.showBMI) { viewModel.toggleBMI(it) }
                 SettingsRow(stringResource(R.string.settings_label_visual_log), state.showVisualLog) { viewModel.toggleVisualLog(it) }
                 SettingsRow(stringResource(R.string.settings_label_girths), state.showGirths) { viewModel.toggleGirths(it) }
+                SettingsRow(stringResource(R.string.settings_label_evolution), state.showEvolution) { viewModel.toggleEvolution(it) }
             }
         }
 

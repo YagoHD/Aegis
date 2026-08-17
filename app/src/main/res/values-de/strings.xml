@@ -84,6 +84,7 @@
     <string name="settings_label_bmi">BMI anzeigen</string>
     <string name="settings_label_visual_log">Foto-Tagebuch anzeigen</string>
     <string name="settings_label_girths">Körpermaße anzeigen</string>
+    <string name="settings_label_evolution">Entwicklung anzeigen</string>
     <string name="settings_hint_new_measure">Name (z. B.: Quadrizeps)</string>
     <string name="settings_desc_delete">Maß löschen</string>
     <string name="settings_desc_add">Maß hinzufügen</string>

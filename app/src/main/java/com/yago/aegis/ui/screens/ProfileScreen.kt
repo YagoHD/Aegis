@@ -222,7 +222,7 @@ fun ProfileContent(viewModel: ProfileViewModel, onNavigateToTrain: () -> Unit = 
             }
         }
 
-        if (state.bodyHistory.isNotEmpty() || state.photoHistory.isNotEmpty()) {
+        if (state.showEvolution && (state.bodyHistory.isNotEmpty() || state.photoHistory.isNotEmpty())) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = stringResource(R.string.evolution_section_title),

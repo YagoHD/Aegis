@@ -50,6 +50,7 @@ class UserRepository(
     val showBodyFat = settingsStore.showBodyFat
     val showVisualLog = settingsStore.showVisualLog
     val showGirths = settingsStore.showGirths
+    val showEvolution = settingsStore.showEvolution
     val avatarUri = settingsStore.avatarUri
     val currentMass = settingsStore.currentMass
     val height = settingsStore.height
@@ -234,6 +235,11 @@ class UserRepository(
     suspend fun toggleGirths(enabled: Boolean) {
         settingsStore.saveShowGirths(enabled)
         syncSettingsToCloud()
+    }
+
+    // Preferencia LOCAL (no se sincroniza a la nube): mostrar/ocultar el bloque de Evolución.
+    suspend fun toggleEvolution(enabled: Boolean) {
+        settingsStore.saveShowEvolution(enabled)
     }
 
     suspend fun updateOnboardingCompleted(completed: Boolean) =

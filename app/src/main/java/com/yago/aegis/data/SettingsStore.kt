@@ -24,6 +24,7 @@ class SettingsStore(private val context: Context) {
         val SHOW_BODY_FAT = booleanPreferencesKey("show_body_fat")
         val SHOW_VISUAL_LOG = booleanPreferencesKey("show_visual_log")
         val SHOW_GIRTHS = booleanPreferencesKey("show_girths")
+        val SHOW_EVOLUTION = booleanPreferencesKey("show_evolution")
         val AVATAR_URI = stringPreferencesKey("avatar_uri")
         val CURRENT_MASS = stringPreferencesKey("current_mass")
         val HEIGHT = doublePreferencesKey("height")
@@ -71,6 +72,7 @@ class SettingsStore(private val context: Context) {
     val showBodyFat: Flow<Boolean> = context.dataStore.data.map { it[SHOW_BODY_FAT] ?: true }
     val showVisualLog: Flow<Boolean> = context.dataStore.data.map { it[SHOW_VISUAL_LOG] ?: true }
     val showGirths: Flow<Boolean> = context.dataStore.data.map { it[SHOW_GIRTHS] ?: true }
+    val showEvolution: Flow<Boolean> = context.dataStore.data.map { it[SHOW_EVOLUTION] ?: true }
     val avatarUri: Flow<String?> = context.dataStore.data.map { it[AVATAR_URI] }
     val currentMass: Flow<String> = context.dataStore.data.map { it[CURRENT_MASS] ?: "0.0" }
     val height: Flow<Double> = context.dataStore.data.map { it[HEIGHT] ?: 0.0 }
@@ -189,6 +191,10 @@ class SettingsStore(private val context: Context) {
 
     suspend fun saveShowGirths(show: Boolean) {
         context.dataStore.edit { it[SHOW_GIRTHS] = show }
+    }
+
+    suspend fun saveShowEvolution(show: Boolean) {
+        context.dataStore.edit { it[SHOW_EVOLUTION] = show }
     }
 
     suspend fun saveAvatarUri(uri: String) {

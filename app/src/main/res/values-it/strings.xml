@@ -84,6 +84,7 @@
     <string name="settings_label_bmi">Mostra IMC (BMI)</string>
     <string name="settings_label_visual_log">Mostra diario visivo</string>
     <string name="settings_label_girths">Mostra misure corporee</string>
+    <string name="settings_label_evolution">Mostra evoluzione</string>
     <string name="settings_hint_new_measure">Nome (es.: Quadricipiti)</string>
     <string name="settings_desc_delete">Elimina misura</string>
     <string name="settings_desc_add">Aggiungi misura</string>

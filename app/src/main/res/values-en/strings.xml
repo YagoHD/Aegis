@@ -84,6 +84,7 @@
     <string name="settings_label_bmi">Show BMI</string>
     <string name="settings_label_visual_log">Show Visual Log</string>
     <string name="settings_label_girths">Show body measurements</string>
+    <string name="settings_label_evolution">Show evolution</string>
     <string name="settings_hint_new_measure">Name (e.g.: Quadriceps)</string>
     <string name="settings_desc_delete">Delete measurement</string>
     <string name="settings_desc_add">Add measurement</string>

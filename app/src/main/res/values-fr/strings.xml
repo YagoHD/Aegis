@@ -84,6 +84,7 @@
     <string name="settings_label_bmi">Afficher l\'IMC (BMI)</string>
     <string name="settings_label_visual_log">Afficher le journal visuel</string>
     <string name="settings_label_girths">Afficher les mensurations corporelles</string>
+    <string name="settings_label_evolution">Afficher l\'évolution</string>
     <string name="settings_hint_new_measure">Nom (ex. : Quadriceps)</string>
     <string name="settings_desc_delete">Supprimer la mensuration</string>
     <string name="settings_desc_add">Ajouter une mensuration</string>

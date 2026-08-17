@@ -41,6 +41,7 @@ data class ProfileUiState(
     val showBodyFat: Boolean = true,
     val showVisualLog: Boolean = true,
     val showGirths: Boolean = true,
+    val showEvolution: Boolean = true,
     val customMeasures: List<BodyMeasure> = emptyList(),
     val bodyHistory: List<BodySnapshot> = emptyList(),
     val photoHistory: List<PhotoRecord> = emptyList(),
@@ -110,9 +111,10 @@ class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
                 repository.showBMI,
                 repository.showBodyFat,
                 repository.showVisualLog,
-                repository.showGirths
-            ) { bmi, fat, visual, girths ->
-                { state: ProfileUiState -> state.copy(showBMI = bmi, showBodyFat = fat, showVisualLog = visual, showGirths = girths) }
+                repository.showGirths,
+                repository.showEvolution
+            ) { bmi, fat, visual, girths, evolution ->
+                { state: ProfileUiState -> state.copy(showBMI = bmi, showBodyFat = fat, showVisualLog = visual, showGirths = girths, showEvolution = evolution) }
             }.collect { update ->
                 _uiState.update { update(it) }
             }
@@ -196,6 +198,7 @@ class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
     fun toggleBodyFat(enabled: Boolean) = viewModelScope.launch { repository.toggleBodyFat(enabled) }
     fun toggleVisualLog(enabled: Boolean) = viewModelScope.launch { repository.toggleVisualLog(enabled) }
     fun toggleGirths(enabled: Boolean) = viewModelScope.launch { repository.toggleGirths(enabled) }
+    fun toggleEvolution(enabled: Boolean) = viewModelScope.launch { repository.toggleEvolution(enabled) }
 
     fun updateMeasureValue(id: String, newValue: String) {
         val updatedList = _uiState.value.customMeasures.map {
