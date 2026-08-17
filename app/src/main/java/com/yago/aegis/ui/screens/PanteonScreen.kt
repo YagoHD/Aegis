@@ -1,8 +1,6 @@
 package com.yago.aegis.ui.screens
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -36,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -57,7 +54,9 @@ import com.yago.aegis.data.RankTier
 import com.yago.aegis.data.SubgroupRank
 import com.yago.aegis.data.divisionFromProgress
 import com.yago.aegis.data.social.PublicProfile
+import com.yago.aegis.ui.components.AegisAvatar
 import com.yago.aegis.ui.components.AegisTopBar
+import com.yago.aegis.ui.components.RankMedal
 import com.yago.aegis.ui.theme.AegisGoldAccent
 import com.yago.aegis.viewmodel.PanteonViewModel
 import com.yago.aegis.viewmodel.SocialViewModel
@@ -336,27 +335,6 @@ private fun SubgroupRow(s: SubgroupRank) {
     }
 }
 
-/** Medalla (imagen) del tier. Se usa en las tarjetas resumen y en las filas de grupo. */
-@Composable
-private fun RankMedal(tier: RankTier, size: Dp) {
-    Image(
-        painter = painterResource(medalRes(tier)),
-        contentDescription = tier.display,
-        modifier = Modifier.size(size)
-    )
-}
-
-@DrawableRes
-private fun medalRes(tier: RankTier): Int = when (tier) {
-    RankTier.BRONCE -> R.drawable.rank_bronce
-    RankTier.PLATA -> R.drawable.rank_plata
-    RankTier.ORO -> R.drawable.rank_oro
-    RankTier.PLATINO -> R.drawable.rank_platino
-    RankTier.DIAMANTE -> R.drawable.rank_diamante
-    RankTier.TITAN -> R.drawable.rank_titan
-    RankTier.SIN_RANGO -> R.drawable.rank_sin_rango
-}
-
 @Composable
 private fun RankBadge(tier: RankTier, small: Boolean = false, winner: Boolean = false) {
     val isRanked = tier != RankTier.SIN_RANGO
@@ -537,26 +515,6 @@ private fun FriendsRankingSection(
     }
 }
 
-/** Avatar temporal: círculo con la inicial del @usuario (la foto sincronizada llega después). */
-@Composable
-private fun AvatarCircle(username: String, size: Dp, borderColor: Color, borderWidth: Dp = 1.dp) {
-    Box(
-        modifier = Modifier
-            .size(size)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .border(borderWidth, borderColor, CircleShape),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = username.firstOrNull()?.uppercase() ?: "?",
-            color = MaterialTheme.colorScheme.onBackground,
-            fontSize = (size.value * 0.4f).sp,
-            fontWeight = FontWeight.Black
-        )
-    }
-}
-
 @Composable
 private fun RankingFilterChips(selected: MuscleGroup?, onSelect: (MuscleGroup?) -> Unit) {
     Row(
@@ -631,7 +589,7 @@ private fun PodiumPlace(row: RankRow, place: Int, filter: MuscleGroup?) {
             )
             Spacer(Modifier.height(4.dp))
         }
-        AvatarCircle(row.username, avatarSize, ringColor, borderWidth = if (place == 1) 3.dp else 2.dp)
+        AegisAvatar(row.username, avatarSize, ringColor, borderWidth = if (place == 1) 3.dp else 2.dp)
         Spacer(Modifier.height(6.dp))
         Text(
             text = if (row.isMe) stringResource(R.string.ranking_you) else "@${row.username}",
@@ -641,7 +599,7 @@ private fun PodiumPlace(row: RankRow, place: Int, filter: MuscleGroup?) {
             maxLines = 1
         )
         Text(
-            text = "LVL ${row.level}",
+            text = stringResource(R.string.ranking_level_short, row.level),
             color = MaterialTheme.colorScheme.secondary,
             fontSize = 10.sp,
             fontWeight = FontWeight.Bold,
@@ -677,7 +635,7 @@ private fun RankingListRow(position: Int, row: RankRow, me: RankRow, filter: Mus
                     modifier = Modifier.width(24.dp)
                 )
                 Spacer(Modifier.width(8.dp))
-                AvatarCircle(
+                AegisAvatar(
                     row.username, 44.dp,
                     borderColor = if (row.isMe) MaterialTheme.colorScheme.primary
                                   else MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
@@ -700,7 +658,7 @@ private fun RankingListRow(position: Int, row: RankRow, me: RankRow, filter: Mus
                         }
                     }
                     Text(
-                        text = "NIVEL ${row.level}",
+                        text = stringResource(R.string.ranking_level, row.level),
                         color = MaterialTheme.colorScheme.secondary,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
@@ -741,7 +699,7 @@ private fun ComparisonPanel(me: RankRow, friend: RankRow) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                AvatarCircle(me.username, 44.dp, MaterialTheme.colorScheme.primary, 2.dp)
+                AegisAvatar(me.username, 44.dp, MaterialTheme.colorScheme.primary, 2.dp)
                 Spacer(Modifier.height(4.dp))
                 Text(stringResource(R.string.ranking_you), color = MaterialTheme.colorScheme.primary, fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
             }
@@ -753,7 +711,7 @@ private fun ComparisonPanel(me: RankRow, friend: RankRow) {
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                AvatarCircle(friend.username, 44.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f), 2.dp)
+                AegisAvatar(friend.username, 44.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f), 2.dp)
                 Spacer(Modifier.height(4.dp))
                 Text("@${friend.username}", color = MaterialTheme.colorScheme.onBackground, fontSize = 10.sp, fontWeight = FontWeight.Black, maxLines = 1)
             }

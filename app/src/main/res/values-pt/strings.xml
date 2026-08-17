@@ -480,7 +480,7 @@
     <string name="social_username_hint">nome de utilizador</string>
     <string name="social_claim_button">RESERVAR</string>
     <string name="social_your_username">O teu nome de utilizador</string>
-    <string name="social_add_title">ADICIONAR AMIGO</string>
+    <string name="social_add_title">ADICIONAR ALIADO</string>
     <string name="social_add_hint">nome de utilizador do teu amigo</string>
     <string name="social_add_button">ENVIAR PEDIDO</string>
     <string name="social_requests_title">PEDIDOS</string>
@@ -504,4 +504,6 @@
     <string name="ranking_manage_friends">GERIR AMIGOS</string>
     <string name="ranking_compare_hint">Toca num amigo para comparar músculo a músculo.</string>
     <string name="ranking_filter_global">GLOBAL</string>
+    <string name="ranking_level">NÍVEL %1$d</string>
+    <string name="ranking_level_short">LVL %1$d</string>
 </resources>

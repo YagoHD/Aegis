@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.yago.aegis.data.LevelSystem
 import com.yago.aegis.data.RankEngine
+import com.yago.aegis.data.RankTier
 import com.yago.aegis.data.UserRepository
 import com.yago.aegis.data.social.FriendBuckets
 import com.yago.aegis.data.social.PublicProfile
@@ -36,6 +37,12 @@ data class FriendRanking(
     val profiles: List<PublicProfile> = emptyList()
 )
 
+/** Mi nivel + rango global, para la tarjeta de perfil de la pantalla de Amigos. */
+data class MyRank(
+    val level: Int = 1,
+    val overall: RankTier = RankTier.SIN_RANGO
+)
+
 /** Estado y acciones de Amigos: reclamar @usuario, añadir por @usuario, aceptar/rechazar. */
 class SocialViewModel(
     private val social: SocialDataSource,
@@ -61,6 +68,9 @@ class SocialViewModel(
 
     private val _friendRanking = MutableStateFlow(FriendRanking())
     val friendRanking: StateFlow<FriendRanking> = _friendRanking.asStateFlow()
+
+    private val _myRank = MutableStateFlow(MyRank())
+    val myRank: StateFlow<MyRank> = _myRank.asStateFlow()
 
     fun claimUsername(input: String) {
         val u = UsernameRules.normalize(input)
@@ -154,6 +164,10 @@ class SocialViewModel(
             val userLevel = LevelSystem.compute(history, streak).level
             rankSummary to userLevel
         }
+        _myRank.value = MyRank(
+            level = level,
+            overall = runCatching { RankTier.valueOf(summary.overall) }.getOrDefault(RankTier.SIN_RANGO)
+        )
         social.uploadPublicProfile(
             PublicProfile(
                 uid = myUid,
