@@ -33,6 +33,7 @@ fun StatsScreen(
     val filteredList by viewModel.filteredExercises.collectAsState(initial = emptyList())
     val availableTags by viewModel.availableStatsTags.collectAsState(initial = emptyList())
     val monthlyData by viewModel.monthlyVolumeEvolution.collectAsState(initial = emptyList())
+    val evolutionMonths by viewModel.evolutionMonths.collectAsState(initial = 3)
     val routines by viewModel.routines.collectAsState()
 
     // Usamos Scaffold para que la TopBar esté fija y el contenido haga scroll debajo
@@ -109,7 +110,11 @@ fun StatsScreen(
             // --- BLOQUE DE EVOLUCIÓN (GRÁFICA DE BARRAS) ---
             if (showEvolution) {
                 item {
-                    WeightEvolutionSection(monthlyData = monthlyData)
+                    WeightEvolutionSection(
+                        monthlyData = monthlyData,
+                        rangeMonths = evolutionMonths,
+                        onToggleRange = { viewModel.toggleEvolutionRange() }
+                    )
                 }
             }
 

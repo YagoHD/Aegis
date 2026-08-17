@@ -302,6 +302,24 @@ private fun GroupRow(g: GroupRank) {
             TierBar(g.progressToNext, if (g.tier == RankTier.SIN_RANGO) MaterialTheme.colorScheme.secondary else tierColor)
 
             if (expanded) {
+                // La medalla en GRANDE para disfrutar el icono del rango del grupo.
+                if (g.tier != RankTier.SIN_RANGO) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        RankMedal(g.tier, 104.dp)
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = Rank(g.tier, divisionFromProgress(g.progressToNext)).label,
+                            color = tierColor,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 1.sp
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.height(12.dp))
                 g.subgroups.forEach { s -> SubgroupRow(s) }
             }

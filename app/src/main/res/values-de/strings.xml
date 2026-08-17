@@ -441,6 +441,7 @@
     <string name="session_progress_label">FORTSCHRITT</string>
     <string name="percent_completed_format">%1$d%% ABGESCHLOSSEN</string>
     <string name="last_3_months">LETZTE 3 MONATE</string>
+    <string name="last_year">LETZTES JAHR</string>
     <string name="temporal_progress_title">ZEITLICHER FORTSCHRITT</string>
     <string name="history_col_weight">GEWICHT</string>
     <string name="history_col_reps">WDH.</string>

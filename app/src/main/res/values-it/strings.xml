@@ -441,6 +441,7 @@
     <string name="session_progress_label">PROGRESSO</string>
     <string name="percent_completed_format">%1$d%% COMPLETATO</string>
     <string name="last_3_months">ULTIMI 3 MESI</string>
+    <string name="last_year">ULTIMO ANNO</string>
     <string name="temporal_progress_title">PROGRESSO NEL TEMPO</string>
     <string name="history_col_weight">PESO</string>
     <string name="history_col_reps">RIPETIZIONI</string>

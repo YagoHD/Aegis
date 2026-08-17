@@ -71,20 +71,26 @@ class StatsViewModel(private val repository: UserRepository) : ViewModel() {
         Pair(thisWeekVol, diff)
     }.flowOn(Dispatchers.Default)
 
-    // Evolución de volumen mensual (últimos 3 meses)
-    val monthlyVolumeEvolution: Flow<List<Pair<String, Double>>> = workoutHistory.map { history ->
-        (2 downTo 0).map { i ->
-            val tempCal = Calendar.getInstance().apply { add(Calendar.MONTH, -i) }
-            val monthName = SimpleDateFormat("MMM", Locale.getDefault()).format(tempCal.time).uppercase()
-            val month = tempCal.get(Calendar.MONTH)
-            val year = tempCal.get(Calendar.YEAR)
-            val volume = history.filter {
-                val c = Calendar.getInstance().apply { timeInMillis = it.date }
-                c.get(Calendar.MONTH) == month && c.get(Calendar.YEAR) == year
-            }.sumOf { calculateVolume(it) }
-            monthName to volume
-        }
-    }.flowOn(Dispatchers.Default)
+    // Rango de la evolución de volumen: 3 meses o 12 (último año). Se alterna tocando la etiqueta.
+    private val _evolutionMonths = MutableStateFlow(3)
+    val evolutionMonths: StateFlow<Int> = _evolutionMonths
+    fun toggleEvolutionRange() { _evolutionMonths.value = if (_evolutionMonths.value == 3) 12 else 3 }
+
+    // Evolución de volumen mensual (últimos 3 meses o último año, según evolutionMonths).
+    val monthlyVolumeEvolution: Flow<List<Pair<String, Double>>> =
+        combine(workoutHistory, _evolutionMonths) { history, months ->
+            ((months - 1) downTo 0).map { i ->
+                val tempCal = Calendar.getInstance().apply { add(Calendar.MONTH, -i) }
+                val monthName = SimpleDateFormat("MMM", Locale.getDefault()).format(tempCal.time).uppercase()
+                val month = tempCal.get(Calendar.MONTH)
+                val year = tempCal.get(Calendar.YEAR)
+                val volume = history.filter {
+                    val c = Calendar.getInstance().apply { timeInMillis = it.date }
+                    c.get(Calendar.MONTH) == month && c.get(Calendar.YEAR) == year
+                }.sumOf { calculateVolume(it) }
+                monthName to volume
+            }
+        }.flowOn(Dispatchers.Default)
 
     // Búsqueda y filtro de ejercicios (estado UI local al ViewModel)
     var searchQuery by mutableStateOf("")
