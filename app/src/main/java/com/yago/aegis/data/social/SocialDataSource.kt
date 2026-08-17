@@ -49,6 +49,18 @@ class SocialDataSource {
     suspend fun findUidByUsername(username: String): String? =
         db.collection("usernames").document(username).get().await().getString("uid")
 
+    /**
+     * Mi @usuario a partir de mi uid (búsqueda inversa). Sirve para RESTAURARLO tras un
+     * logout+login (el nombre local se borra al salir, pero el doc en la nube sigue siendo mío).
+     */
+    suspend fun findMyUsername(): String? {
+        val me = myUid ?: return null
+        return runCatching {
+            db.collection("usernames").whereEqualTo("uid", me).limit(1).get().await()
+                .documents.firstOrNull()?.id
+        }.getOrNull()
+    }
+
     // ---- Amistades ----
 
     /** Envía solicitud a [toUid] (@[toUsername]) firmando también mi @[myUsername] para mostrar. */

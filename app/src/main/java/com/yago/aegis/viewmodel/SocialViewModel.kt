@@ -72,22 +72,40 @@ class SocialViewModel(
     private val _myRank = MutableStateFlow(MyRank())
     val myRank: StateFlow<MyRank> = _myRank.asStateFlow()
 
+    init {
+        // Tras un logout+login el @usuario local se borra; si sigue siendo mío en la nube, restáuralo
+        // (evita que la app vuelva a pedir elegir nombre y que choques con tu propio @usuario).
+        viewModelScope.launch {
+            if (repo.username.first() == null) {
+                runCatching { social.findMyUsername() }.getOrNull()?.let { repo.saveUsername(it) }
+            }
+        }
+    }
+
     fun claimUsername(input: String) {
         val u = UsernameRules.normalize(input)
         if (!UsernameRules.isValid(u)) { _feedback.value = SocialFeedback.USERNAME_INVALID; return }
         viewModelScope.launch {
             _busy.value = true
-            _feedback.value = if (!social.isUsernameAvailable(u)) {
-                SocialFeedback.USERNAME_TAKEN
-            } else {
-                social.claimUsername(u).fold(
+            val owner = runCatching { social.findUidByUsername(u) }.getOrNull()
+            _feedback.value = when (owner) {
+                // Libre: lo reclamo.
+                null -> social.claimUsername(u).fold(
                     onSuccess = {
                         repo.saveUsername(u)
                         uploadMyProfileInternal(u)
                         SocialFeedback.USERNAME_CLAIMED
                     },
-                    onFailure = { SocialFeedback.USERNAME_TAKEN }   // set() falló = ya cogido / error
+                    onFailure = { SocialFeedback.USERNAME_TAKEN }   // carrera: otro lo creó primero
                 )
+                // Ya es MÍO (p.ej. tras logout+login): lo readopto localmente, no es un error.
+                myUid -> {
+                    repo.saveUsername(u)
+                    uploadMyProfileInternal(u)
+                    SocialFeedback.USERNAME_CLAIMED
+                }
+                // De otra persona.
+                else -> SocialFeedback.USERNAME_TAKEN
             }
             _busy.value = false
         }
