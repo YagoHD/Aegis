@@ -21,6 +21,16 @@ enum class RankTier(val display: String, val colorHex: Long) {
 }
 
 /**
+ * División dentro de un tier a partir del progreso hacia el siguiente (0..1):
+ * recién entrado = III (3), a mitad = II (2), a punto de ascender = I (1).
+ */
+fun divisionFromProgress(progress: Float): Int = when {
+    progress < 1f / 3f -> 3
+    progress < 2f / 3f -> 2
+    else -> 1
+}
+
+/**
  * Un rango concreto con su división interna.
  * [division] 3 = III (más baja), 2 = II, 1 = I (más alta dentro del tier).
  */

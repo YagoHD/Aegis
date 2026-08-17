@@ -2,6 +2,7 @@ package com.yago.aegis.data.social
 
 import com.yago.aegis.data.PanteonResult
 import com.yago.aegis.data.RankTier
+import com.yago.aegis.data.divisionFromProgress
 
 /**
  * Capa social (amigos + ranking competitivo).
@@ -14,7 +15,8 @@ import com.yago.aegis.data.RankTier
 /** Trozo compartible: rango por grupo + tier global (nombre del enum RankTier, p.ej. "ORO"). */
 data class RankSummary(
     val overall: String = RankTier.SIN_RANGO.name,
-    val byGroup: Map<String, String> = emptyMap()   // "PECHO" -> "PLATINO", ...
+    val byGroup: Map<String, String> = emptyMap(),       // "PECHO" -> "PLATINO", ...
+    val byGroupDivision: Map<String, Int> = emptyMap()   // "PECHO" -> 1 (I) .. 3 (III)
 )
 
 /** Perfil que ven los amigos. Defaults para deserialización de Firestore. */
@@ -25,6 +27,7 @@ data class PublicProfile(
     val level: Int = 0,
     val overallTier: String = RankTier.SIN_RANGO.name,
     val groupTiers: Map<String, String> = emptyMap(),
+    val groupDivisions: Map<String, Int> = emptyMap(),
     val updatedAt: Long = 0L
 )
 
@@ -46,7 +49,8 @@ data class Friendship(
 /** Extrae el resumen compartible del resultado del Panteón (lógica pura, testeable). */
 fun PanteonResult.toRankSummary(): RankSummary = RankSummary(
     overall = strongest?.tier?.name ?: RankTier.SIN_RANGO.name,
-    byGroup = groups.associate { it.group.name to it.tier.name }
+    byGroup = groups.associate { it.group.name to it.tier.name },
+    byGroupDivision = groups.associate { it.group.name to divisionFromProgress(it.progressToNext) }
 )
 
 /** Validación del @usuario: minúsculas, 3-20, letras/números/_ (sin espacios ni tildes). */

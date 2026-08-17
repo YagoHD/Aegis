@@ -503,4 +503,5 @@
     <string name="ranking_no_friends">You have no friends yet. Add someone to compare your ranks.</string>
     <string name="ranking_manage_friends">MANAGE FRIENDS</string>
     <string name="ranking_compare_hint">Tap a friend to compare muscle by muscle.</string>
+    <string name="ranking_filter_global">GLOBAL</string>
 </resources>

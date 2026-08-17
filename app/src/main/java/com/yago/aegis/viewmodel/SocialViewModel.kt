@@ -3,6 +3,7 @@ package com.yago.aegis.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.yago.aegis.data.LevelSystem
 import com.yago.aegis.data.RankEngine
 import com.yago.aegis.data.UserRepository
 import com.yago.aegis.data.social.FriendBuckets
@@ -31,6 +32,7 @@ enum class SocialFeedback {
 /** Perfiles públicos de mis amigos aceptados, para el ranking/comparación del Panteón. */
 data class FriendRanking(
     val loading: Boolean = false,
+    val myLevel: Int = 1,
     val profiles: List<PublicProfile> = emptyList()
 )
 
@@ -131,28 +133,36 @@ class SocialViewModel(
     fun loadRanking() {
         viewModelScope.launch {
             _friendRanking.value = _friendRanking.value.copy(loading = true)
+            val myLevel = withContext(Dispatchers.Default) {
+                LevelSystem.compute(repo.workoutHistory.first(), repo.computeCurrentStreak()).level
+            }
             myUsername.value?.let { runCatching { uploadMyProfileInternal(it) } }
             val friends = buckets.value.friends
             val profiles = friends.mapNotNull { runCatching { social.getPublicProfile(it.uid) }.getOrNull() }
-            _friendRanking.value = FriendRanking(loading = false, profiles = profiles)
+            _friendRanking.value = FriendRanking(loading = false, myLevel = myLevel, profiles = profiles)
         }
     }
 
     private suspend fun uploadMyProfileInternal(username: String) {
-        val summary = withContext(Dispatchers.Default) {
+        val (summary, level) = withContext(Dispatchers.Default) {
             val history = repo.workoutHistory.first()
             val library = repo.exerciseLibrary.first()
             val bodyweight = repo.currentMass.first().toDoubleOrNull() ?: 0.0
             val sex = repo.sex.first()
-            RankEngine.compute(history, library, bodyweight, sex).toRankSummary()
+            val streak = repo.computeCurrentStreak()
+            val rankSummary = RankEngine.compute(history, library, bodyweight, sex).toRankSummary()
+            val userLevel = LevelSystem.compute(history, streak).level
+            rankSummary to userLevel
         }
         social.uploadPublicProfile(
             PublicProfile(
                 uid = myUid,
                 username = username,
                 displayName = repo.userName.first(),
+                level = level,
                 overallTier = summary.overall,
-                groupTiers = summary.byGroup
+                groupTiers = summary.byGroup,
+                groupDivisions = summary.byGroupDivision
             )
         )
     }

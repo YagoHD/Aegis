@@ -503,4 +503,5 @@
     <string name="ranking_no_friends">Non hai ancora amici. Aggiungi qualcuno per confrontare i vostri ranghi.</string>
     <string name="ranking_manage_friends">GESTISCI AMICI</string>
     <string name="ranking_compare_hint">Tocca un amico per confrontare muscolo per muscolo.</string>
+    <string name="ranking_filter_global">GLOBALE</string>
 </resources>

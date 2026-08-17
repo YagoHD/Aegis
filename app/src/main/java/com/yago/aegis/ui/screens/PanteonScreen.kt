@@ -6,11 +6,14 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Group
@@ -49,10 +52,13 @@ import com.yago.aegis.data.Fatigue
 import com.yago.aegis.data.GroupRank
 import com.yago.aegis.data.MuscleGroup
 import com.yago.aegis.data.PanteonResult
+import com.yago.aegis.data.Rank
 import com.yago.aegis.data.RankTier
 import com.yago.aegis.data.SubgroupRank
+import com.yago.aegis.data.divisionFromProgress
 import com.yago.aegis.data.social.PublicProfile
 import com.yago.aegis.ui.components.AegisTopBar
+import com.yago.aegis.ui.theme.AegisGoldAccent
 import com.yago.aegis.viewmodel.PanteonViewModel
 import com.yago.aegis.viewmodel.SocialViewModel
 
@@ -436,16 +442,29 @@ private fun TierBar(progress: Float, color: Color) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Pestaña AMIGOS: ranking + comparación de rangos (Fase 5)
+// Pestaña AMIGOS: ranking (podio + filtro por músculo) + comparación (Fases 5 y B/D)
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Fila del ranking. Mi lado sale del PanteonResult; el de un amigo, de su PublicProfile. */
 private data class RankRow(
     val username: String,
+    val level: Int,
     val overall: RankTier,
     val groups: Map<MuscleGroup, RankTier>,
+    val divisions: Map<MuscleGroup, Int>,
     val isMe: Boolean = false
 )
+
+private fun RankRow.rankFor(group: MuscleGroup): Rank =
+    Rank(groups[group] ?: RankTier.SIN_RANGO, divisions[group] ?: 3)
+
+/** Tier + división que se muestran según el filtro (null = global). */
+private fun rankOf(row: RankRow, filter: MuscleGroup?): Pair<RankTier, Int> =
+    if (filter == null) row.overall to 3
+    else (row.groups[filter] ?: RankTier.SIN_RANGO) to (row.divisions[filter] ?: 3)
+
+/** Puntuación comparable: pesa el tier y, a igualdad, la división (I mejor que III). */
+private fun rankScore(tier: RankTier, division: Int): Int = tierIndex(tier) * 3 + (3 - division)
 
 @Composable
 private fun FriendsRankingSection(
@@ -456,158 +475,305 @@ private fun FriendsRankingSection(
     val username = socialViewModel.myUsername.collectAsState().value
     val buckets = socialViewModel.buckets.collectAsState().value   // mantiene vivo el listener de amistades
     val ranking = socialViewModel.friendRanking.collectAsState().value
+    var filter by remember { mutableStateOf<MuscleGroup?>(null) }
 
     // Carga/recarga al abrir la pestaña y cuando cambie mi lista de amigos.
     LaunchedEffect(buckets.friends) { socialViewModel.loadRanking() }
 
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        if (username == null) {
-            RankingCta(
-                text = stringResource(R.string.ranking_need_username),
-                button = stringResource(R.string.ranking_manage_friends),
-                onClick = onManageFriends
-            )
+    if (username == null) {
+        RankingCta(
+            text = stringResource(R.string.ranking_need_username),
+            button = stringResource(R.string.ranking_manage_friends),
+            onClick = onManageFriends
+        )
+        return
+    }
+
+    val me = RankRow(
+        username = username,
+        level = ranking.myLevel,
+        overall = myResult.strongest?.tier ?: RankTier.SIN_RANGO,
+        groups = myResult.groups.associate { it.group to it.tier },
+        divisions = myResult.groups.associate { it.group to divisionFromProgress(it.progressToNext) },
+        isMe = true
+    )
+    val friends = ranking.profiles.map { it.toRankRow() }
+    val board = (listOf(me) + friends).sortedWith(
+        compareByDescending<RankRow> { val (t, d) = rankOf(it, filter); rankScore(t, d) }
+            .thenBy { it.username.lowercase() }
+    )
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        RankingFilterChips(filter) { filter = it }
+
+        if (board.size >= 3) {
+            Podium(board.take(3), filter)
+            board.drop(3).forEachIndexed { i, row ->
+                RankingListRow(position = i + 4, row = row, me = me, filter = filter)
+            }
         } else {
-            val me = RankRow(
-                username = username,
-                overall = myResult.strongest?.tier ?: RankTier.SIN_RANGO,
-                groups = myResult.groups.associate { it.group to it.tier },
-                isMe = true
-            )
-            val friends = ranking.profiles.map { it.toRankRow() }
-            val board = (listOf(me) + friends).sortedWith(
-                compareByDescending<RankRow> { tierIndex(it.overall) }.thenBy { it.username.lowercase() }
-            )
-
-            Text(
-                text = stringResource(R.string.ranking_compare_hint),
-                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.7f),
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Medium,
-                lineHeight = 15.sp
-            )
-
-            board.forEachIndexed { i, row -> RankingRow(position = i + 1, row = row, me = me) }
-
-            if (friends.isEmpty()) {
-                if (ranking.loading) {
-                    Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(
-                            color = MaterialTheme.colorScheme.primary,
-                            strokeWidth = 2.dp,
-                            modifier = Modifier.size(26.dp)
-                        )
-                    }
-                } else {
-                    RankingCta(
-                        text = stringResource(R.string.ranking_no_friends),
-                        button = stringResource(R.string.ranking_manage_friends),
-                        onClick = onManageFriends
-                    )
-                }
+            board.forEachIndexed { i, row ->
+                RankingListRow(position = i + 1, row = row, me = me, filter = filter)
             }
         }
-    }
-}
 
-@Composable
-private fun RankingRow(position: Int, row: RankRow, me: RankRow) {
-    var expanded by remember { mutableStateOf(false) }
-    val canCompare = !row.isMe
-    val tierColor = if (row.overall == RankTier.SIN_RANGO) MaterialTheme.colorScheme.secondary
-                    else Color(row.overall.colorHex)
-
-    Surface(
-        shape = RoundedCornerShape(12.dp),
-        color = if (row.isMe) MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
-                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-    ) {
-        Column(modifier = Modifier.padding(14.dp)) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .then(if (canCompare) Modifier.clickable { expanded = !expanded } else Modifier),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "#$position",
-                    color = MaterialTheme.colorScheme.secondary,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Black,
-                    modifier = Modifier.width(30.dp)
+        if (friends.isEmpty()) {
+            if (ranking.loading) {
+                Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.primary,
+                        strokeWidth = 2.dp,
+                        modifier = Modifier.size(26.dp)
+                    )
+                }
+            } else {
+                RankingCta(
+                    text = stringResource(R.string.ranking_no_friends),
+                    button = stringResource(R.string.ranking_manage_friends),
+                    onClick = onManageFriends
                 )
-                RankMedal(row.overall, 40.dp)
-                Spacer(modifier = Modifier.width(10.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = if (row.isMe) stringResource(R.string.ranking_you) else "@${row.username}",
-                        color = if (row.isMe) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.onBackground,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Black,
-                        maxLines = 1
-                    )
-                    Text(
-                        text = row.overall.display.uppercase(),
-                        color = tierColor,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 0.5.sp
-                    )
-                }
-                if (canCompare) {
-                    Icon(
-                        if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        null,
-                        tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-
-            if (expanded && canCompare) {
-                Spacer(modifier = Modifier.height(12.dp))
-                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    CompareHeaderLabel(stringResource(R.string.ranking_you))
-                    Spacer(modifier = Modifier.weight(1f))
-                    CompareHeaderLabel("@${row.username}")
-                }
-                Spacer(modifier = Modifier.height(6.dp))
-                MuscleGroup.entries.forEach { grp ->
-                    CompareGroupRow(
-                        group = grp,
-                        mine = me.groups[grp] ?: RankTier.SIN_RANGO,
-                        theirs = row.groups[grp] ?: RankTier.SIN_RANGO
-                    )
-                }
             }
         }
     }
 }
 
+/** Avatar temporal: círculo con la inicial del @usuario (la foto sincronizada llega después). */
 @Composable
-private fun CompareHeaderLabel(text: String) {
-    Box(modifier = Modifier.width(78.dp), contentAlignment = Alignment.Center) {
+private fun AvatarCircle(username: String, size: Dp, borderColor: Color, borderWidth: Dp = 1.dp) {
+    Box(
+        modifier = Modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .border(borderWidth, borderColor, CircleShape),
+        contentAlignment = Alignment.Center
+    ) {
         Text(
-            text = text,
-            color = MaterialTheme.colorScheme.secondary,
-            fontSize = 9.sp,
-            fontWeight = FontWeight.Black,
-            letterSpacing = 1.sp,
-            maxLines = 1
+            text = username.firstOrNull()?.uppercase() ?: "?",
+            color = MaterialTheme.colorScheme.onBackground,
+            fontSize = (size.value * 0.4f).sp,
+            fontWeight = FontWeight.Black
         )
     }
 }
 
 @Composable
-private fun CompareGroupRow(group: MuscleGroup, mine: RankTier, theirs: RankTier) {
-    val mineIdx = tierIndex(mine)
-    val theirsIdx = tierIndex(theirs)
+private fun RankingFilterChips(selected: MuscleGroup?, onSelect: (MuscleGroup?) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        FilterChip(stringResource(R.string.ranking_filter_global), selected == null) { onSelect(null) }
+        MuscleGroup.entries.forEach { g ->
+            FilterChip(g.display.uppercase(), selected == g) { onSelect(g) }
+        }
+    }
+}
+
+@Composable
+private fun FilterChip(text: String, active: Boolean, onClick: () -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = if (active) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.Transparent,
+        border = BorderStroke(
+            1.dp,
+            if (active) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)
+        ),
+        modifier = Modifier.clickable { onClick() }
+    ) {
+        Text(
+            text = text,
+            color = if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 0.5.sp,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+    }
+}
+
+@Composable
+private fun Podium(top3: List<RankRow>, filter: MuscleGroup?) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.Bottom
+    ) {
+        Box(Modifier.weight(1f), contentAlignment = Alignment.BottomCenter) {
+            top3.getOrNull(1)?.let { PodiumPlace(it, 2, filter) }
+        }
+        Box(Modifier.weight(1.25f), contentAlignment = Alignment.BottomCenter) {
+            top3.getOrNull(0)?.let { PodiumPlace(it, 1, filter) }
+        }
+        Box(Modifier.weight(1f), contentAlignment = Alignment.BottomCenter) {
+            top3.getOrNull(2)?.let { PodiumPlace(it, 3, filter) }
+        }
+    }
+}
+
+@Composable
+private fun PodiumPlace(row: RankRow, place: Int, filter: MuscleGroup?) {
+    val avatarSize = if (place == 1) 84.dp else 60.dp
+    val ringColor = when (place) {
+        1 -> Color(RankTier.ORO.colorHex)
+        2 -> Color(RankTier.PLATA.colorHex)
+        else -> Color(RankTier.BRONCE.colorHex)
+    }
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        if (place == 1) {
+            Icon(
+                Icons.Default.EmojiEvents, null,
+                tint = AegisGoldAccent,
+                modifier = Modifier.size(26.dp)
+            )
+            Spacer(Modifier.height(4.dp))
+        }
+        AvatarCircle(row.username, avatarSize, ringColor, borderWidth = if (place == 1) 3.dp else 2.dp)
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = if (row.isMe) stringResource(R.string.ranking_you) else "@${row.username}",
+            color = if (row.isMe) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
+            fontSize = if (place == 1) 14.sp else 12.sp,
+            fontWeight = FontWeight.Black,
+            maxLines = 1
+        )
+        Text(
+            text = "LVL ${row.level}",
+            color = MaterialTheme.colorScheme.secondary,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 0.5.sp
+        )
+    }
+}
+
+@Composable
+private fun RankingListRow(position: Int, row: RankRow, me: RankRow, filter: MuscleGroup?) {
+    var expanded by remember { mutableStateOf(false) }
+    val canCompare = !row.isMe
+    val (tier, _) = rankOf(row, filter)
+
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = if (row.isMe) MaterialTheme.colorScheme.primary.copy(alpha = 0.10f) else Color.Transparent
+    ) {
+        Column {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .then(if (canCompare) Modifier.clickable { expanded = !expanded } else Modifier)
+                    .padding(vertical = 10.dp, horizontal = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "$position",
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Black,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.width(24.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                AvatarCircle(
+                    row.username, 44.dp,
+                    borderColor = if (row.isMe) MaterialTheme.colorScheme.primary
+                                  else MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
+                    borderWidth = if (row.isMe) 2.dp else 1.dp
+                )
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "@${row.username}",
+                            color = if (row.isMe) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.onBackground,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Black,
+                            maxLines = 1
+                        )
+                        if (row.isMe) {
+                            Spacer(Modifier.width(6.dp))
+                            TuPill()
+                        }
+                    }
+                    Text(
+                        text = "NIVEL ${row.level}",
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp
+                    )
+                }
+                RankMedal(tier, 34.dp)
+            }
+
+            if (expanded && canCompare) {
+                ComparisonPanel(me = me, friend = row)
+            }
+        }
+    }
+}
+
+@Composable
+private fun TuPill() {
+    Surface(shape = RoundedCornerShape(4.dp), color = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)) {
+        Text(
+            text = stringResource(R.string.ranking_you),
+            color = MaterialTheme.colorScheme.primary,
+            fontSize = 9.sp,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 1.sp,
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+        )
+    }
+}
+
+/** Cara a cara: cabecera (TÚ vs @amigo) + una fila por grupo con divisiones y ganador. */
+@Composable
+private fun ComparisonPanel(me: RankRow, friend: RankRow) {
+    Column(modifier = Modifier.padding(horizontal = 6.dp).padding(top = 4.dp, bottom = 12.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                AvatarCircle(me.username, 44.dp, MaterialTheme.colorScheme.primary, 2.dp)
+                Spacer(Modifier.height(4.dp))
+                Text(stringResource(R.string.ranking_you), color = MaterialTheme.colorScheme.primary, fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+            }
+            Text(
+                text = "VS",
+                color = AegisGoldAccent,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Black,
+                modifier = Modifier.padding(horizontal = 20.dp)
+            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                AvatarCircle(friend.username, 44.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f), 2.dp)
+                Spacer(Modifier.height(4.dp))
+                Text("@${friend.username}", color = MaterialTheme.colorScheme.onBackground, fontSize = 10.sp, fontWeight = FontWeight.Black, maxLines = 1)
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+        MuscleGroup.entries.forEach { grp ->
+            CompareGroupRow(group = grp, mine = me.rankFor(grp), theirs = friend.rankFor(grp))
+        }
+    }
+}
+
+@Composable
+private fun CompareGroupRow(group: MuscleGroup, mine: Rank, theirs: Rank) {
+    val mineScore = rankScore(mine.tier, mine.division)
+    val theirsScore = rankScore(theirs.tier, theirs.division)
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        RankBadge(mine, small = true, winner = mineIdx > theirsIdx)
+        RankDivisionBadge(mine, winner = mineScore > theirsScore)
         Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
             Text(
                 text = group.display.uppercase(),
@@ -619,7 +785,31 @@ private fun CompareGroupRow(group: MuscleGroup, mine: RankTier, theirs: RankTier
                 maxLines = 1
             )
         }
-        RankBadge(theirs, small = true, winner = theirsIdx > mineIdx)
+        RankDivisionBadge(theirs, winner = theirsScore > mineScore)
+    }
+}
+
+/** Insignia de rango con división (ej. "ORO I"). Borde dorado si es el ganador del grupo. */
+@Composable
+private fun RankDivisionBadge(rank: Rank, winner: Boolean) {
+    val isRanked = rank.tier != RankTier.SIN_RANGO
+    Surface(
+        modifier = Modifier
+            .width(78.dp)
+            .then(if (winner) Modifier.border(1.5.dp, AegisGoldAccent, RoundedCornerShape(4.dp)) else Modifier),
+        shape = RoundedCornerShape(4.dp),
+        color = if (isRanked) Color(rank.tier.colorHex) else MaterialTheme.colorScheme.surface
+    ) {
+        Text(
+            text = rank.label,
+            color = if (isRanked) Color.Black else MaterialTheme.colorScheme.secondary,
+            fontSize = 8.sp,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 0.5.sp,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp)
+        )
     }
 }
 
@@ -663,8 +853,10 @@ private fun RankingCta(text: String, button: String, onClick: () -> Unit) {
 
 private fun PublicProfile.toRankRow(): RankRow = RankRow(
     username = username,
+    level = level,
     overall = tierOf(overallTier),
-    groups = groupTiers.mapNotNull { (k, v) -> groupOf(k)?.let { it to tierOf(v) } }.toMap()
+    groups = groupTiers.mapNotNull { (k, v) -> groupOf(k)?.let { it to tierOf(v) } }.toMap(),
+    divisions = groupDivisions.mapNotNull { (k, v) -> groupOf(k)?.let { it to v } }.toMap()
 )
 
 private fun tierOf(name: String): RankTier =
