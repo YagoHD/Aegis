@@ -140,6 +140,8 @@ class SocialDataSource {
                     "level" to profile.level,
                     "overallTier" to profile.overallTier,
                     "groupTiers" to profile.groupTiers,
+                    "groupDivisions" to profile.groupDivisions,
+                    "avatar" to profile.avatar,
                     "updatedAt" to System.currentTimeMillis()
                 )
             ).await()
@@ -158,6 +160,10 @@ class SocialDataSource {
             level = (doc.getLong("level") ?: 0L).toInt(),
             overallTier = doc.getString("overallTier") ?: "SIN_RANGO",
             groupTiers = (doc.get("groupTiers") as? Map<String, String>) ?: emptyMap(),
+            groupDivisions = (doc.get("groupDivisions") as? Map<*, *>)
+                ?.entries?.associate { (k, v) -> k.toString() to ((v as? Number)?.toInt() ?: 3) }
+                ?: emptyMap(),
+            avatar = doc.getString("avatar") ?: "",
             updatedAt = doc.getLong("updatedAt") ?: 0L
         )
     }
