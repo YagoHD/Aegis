@@ -39,11 +39,15 @@ import com.yago.aegis.data.PhotoType
 import com.yago.aegis.data.XpEntry
 import com.yago.aegis.data.SyncState
 import com.yago.aegis.ui.components.*
+import com.yago.aegis.util.PhotoStore
 import com.yago.aegis.viewmodel.ProfileViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,19 +93,17 @@ fun ProfileContent(viewModel: ProfileViewModel, onNavigateToTrain: () -> Unit = 
     var showDialog by remember { mutableStateOf(false) }
     var photoTypeTarget by remember { mutableStateOf(PhotoType.BASE) }
 
+    val photoScope = rememberCoroutineScope()
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri: Uri? ->
-        uri?.let {
-            try {
-                context.contentResolver.takePersistableUriPermission(
-                    it,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                )
-            } catch (e: Exception) {
-                e.printStackTrace()
+        uri?.let { picked ->
+            // Copiamos la foto a un fichero propio (robustez local): así no se pierde si Android
+            // caduca el permiso del content://. Si la copia falla, usamos el original.
+            photoScope.launch {
+                val appUri = withContext(Dispatchers.IO) { PhotoStore.copyToAppFile(context, picked) }
+                viewModel.updatePhoto(uri = (appUri ?: picked).toString(), type = photoTypeTarget)
             }
-            viewModel.updatePhoto(uri = it.toString(), type = photoTypeTarget)
         }
     }
 
