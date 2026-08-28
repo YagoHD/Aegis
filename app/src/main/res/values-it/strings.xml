@@ -517,4 +517,5 @@
     <string name="avatar_crop_title">INQUADRA LA FOTO</string>
     <string name="avatar_crop_hint">Pizzica per lo zoom, trascina per posizionare</string>
     <string name="avatar_crop_confirm">USA</string>
+    <string name="remove_exercise_desc">Rimuovi esercizio</string>
 </resources>

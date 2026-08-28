@@ -83,7 +83,9 @@ data class ExerciseProgress(
     val exercise: Exercise,
     val sets: List<ExerciseSet> = listOf(ExerciseSet()),
     // Todas las variantes del slot (incluida la actual). Vacío = ejercicio sin variantes.
-    val slotVariants: List<Exercise> = emptyList()
+    val slotVariants: List<Exercise> = emptyList(),
+    // Añadido "en caliente" durante la sesión (no venía en la rutina) → se puede quitar con la X.
+    val addedInSession: Boolean = false
 )
 
 /**

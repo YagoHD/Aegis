@@ -257,7 +257,8 @@ class WorkoutViewModel(
                 s?.copy(
                     exercisesProgress = s.exercisesProgress + ExerciseProgress(
                         exercise = exercise.copy(lastPerformance = last ?: exercise.lastPerformance),
-                        sets = listOf(ExerciseSet())
+                        sets = listOf(ExerciseSet()),
+                        addedInSession = true
                     )
                 )
             }

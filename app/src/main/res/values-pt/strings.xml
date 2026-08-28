@@ -517,4 +517,5 @@
     <string name="avatar_crop_title">ENQUADRA A TUA FOTO</string>
     <string name="avatar_crop_hint">Belisca para zoom, arrasta para posicionar</string>
     <string name="avatar_crop_confirm">USAR</string>
+    <string name="remove_exercise_desc">Remover exercício</string>
 </resources>

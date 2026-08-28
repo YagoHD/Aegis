@@ -409,6 +409,9 @@ fun ActiveSessionScreen(
                                 },
                                 onSwitchVariant = if (progress.slotVariants.size > 1) { variantIndex ->
                                     workoutViewModel.switchVariant(index, variantIndex)
+                                } else null,
+                                onRemoveExercise = if (progress.addedInSession) {
+                                    { workoutViewModel.removeExerciseFromSession(progress.exercise.id) }
                                 } else null
                             )
                             if (index < currentSession.exercisesProgress.lastIndex) {

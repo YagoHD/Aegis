@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material3.Icon
@@ -43,6 +44,7 @@ fun ExerciseSessionCard(
     onDeleteSet: (String) -> Unit,
     onToggleExercise: () -> Unit,
     onSwitchVariant: ((Int) -> Unit)? = null,  // newVariantIndex
+    onRemoveExercise: (() -> Unit)? = null,     // solo para ejercicios añadidos en caliente
     bodyweight: Double = 0.0
 ) {
     val loadType = progress.exercise.resolveLoadType()
@@ -119,6 +121,17 @@ fun ExerciseSessionCard(
                 }
             }
 
+            // Solo los ejercicios añadidos en caliente muestran la X para quitarlos.
+            if (onRemoveExercise != null) {
+                IconButton(onClick = onRemoveExercise, modifier = Modifier.size(32.dp)) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = stringResource(R.string.remove_exercise_desc),
+                        tint = MaterialTheme.colorScheme.error.copy(alpha = 0.6f),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
             IconButton(onClick = onToggleExercise) {
                 Icon(
                     imageVector = if (isExerciseDone) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
@@ -229,8 +242,9 @@ private fun computeProgressionSuggestion(lastPerformance: String, isBodyweight: 
         "Prueba ${maxReps + 2} reps hoy"
     } else {
         val weights = sets.mapNotNull { s ->
-            Regex("([\\d.]+)kg x \\d+", RegexOption.IGNORE_CASE).find(s)
-                ?.groupValues?.get(1)?.toDoubleOrNull()
+            // Acepta coma o punto decimal ("30,5kg" en locale ES) y espacios flexibles.
+            Regex("([\\d.,]+)\\s*kg\\s*x\\s*\\d+", RegexOption.IGNORE_CASE).find(s)
+                ?.groupValues?.get(1)?.replace(",", ".")?.toDoubleOrNull()
         }
         if (weights.isEmpty()) return null
         val maxWeight = weights.max()
