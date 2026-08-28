@@ -518,4 +518,5 @@
     <string name="avatar_crop_hint">Zum Zoomen ziehen, zum Platzieren schieben</string>
     <string name="avatar_crop_confirm">VERWENDEN</string>
     <string name="remove_exercise_desc">Übung entfernen</string>
+    <string name="history_edit">BEARBEITEN</string>
 </resources>

@@ -169,6 +169,11 @@ class StatsViewModel(private val repository: UserRepository) : ViewModel() {
     fun updateTargetDays(days: Int) {
         viewModelScope.launch { repository.updateTargetDays(days) }
     }
+
+    /** Guarda una sesión corregida en el historial. El Panteón observa el historial → recomputa el rango. */
+    fun updateSession(session: com.yago.aegis.data.WorkoutSession) {
+        viewModelScope.launch { repository.updateWorkoutSession(session) }
+    }
     fun updateRestTimerSeconds(seconds: Int) {
         viewModelScope.launch { repository.updateRestTimerSeconds(seconds) }
     }

@@ -524,7 +524,8 @@ fun AegisNavigation(
                 val history by sharedStatsViewModel.workoutHistory.collectAsState()
                 WorkoutHistoryScreen(
                     sessions = history,
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    onSaveSession = { sharedStatsViewModel.updateSession(it) }
                 )
             }
 

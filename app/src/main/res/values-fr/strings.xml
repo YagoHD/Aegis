@@ -518,4 +518,5 @@
     <string name="avatar_crop_hint">Pince pour zoomer, glisse pour placer</string>
     <string name="avatar_crop_confirm">UTILISER</string>
     <string name="remove_exercise_desc">Retirer l\'exercice</string>
+    <string name="history_edit">MODIFIER</string>
 </resources>

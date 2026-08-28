@@ -518,4 +518,5 @@
     <string name="avatar_crop_hint">Pinch to zoom, drag to position</string>
     <string name="avatar_crop_confirm">USE</string>
     <string name="remove_exercise_desc">Remove exercise</string>
+    <string name="history_edit">EDIT</string>
 </resources>

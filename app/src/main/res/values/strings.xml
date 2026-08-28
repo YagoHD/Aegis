@@ -547,4 +547,5 @@
     <string name="avatar_crop_hint">Pellizca para hacer zoom y arrastra para colocar</string>
     <string name="avatar_crop_confirm">USAR</string>
     <string name="remove_exercise_desc">Quitar ejercicio</string>
+    <string name="history_edit">EDITAR</string>
 </resources>

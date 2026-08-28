@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -22,10 +24,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.R
+import com.yago.aegis.data.ExerciseSet
 import com.yago.aegis.data.WorkoutSession
 import com.yago.aegis.ui.components.AegisTopBar
 import java.text.SimpleDateFormat
@@ -34,7 +38,8 @@ import java.util.*
 @Composable
 fun WorkoutHistoryScreen(
     sessions: List<WorkoutSession>,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onSaveSession: (WorkoutSession) -> Unit = {}
 ) {
     // Ordenamos de más reciente a más antiguo
     val sorted = remember(sessions) { sessions.sortedByDescending { it.date } }
@@ -89,7 +94,7 @@ fun WorkoutHistoryScreen(
                         items = monthSessions,
                         key = { index, session -> "${month}_${session.id}_${index}" }
                     ) { _, session ->
-                        HistorySessionRow(session = session)
+                        HistorySessionRow(session = session, onSaveSession = onSaveSession)
                     }
                 }
             }
@@ -98,8 +103,10 @@ fun WorkoutHistoryScreen(
 }
 
 @Composable
-private fun HistorySessionRow(session: WorkoutSession) {
+private fun HistorySessionRow(session: WorkoutSession, onSaveSession: (WorkoutSession) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
+    var editing by remember(session.id) { mutableStateOf(false) }
+    var edited by remember(session.id) { mutableStateOf(session) }
 
     val dateStr = remember(session.date) {
         SimpleDateFormat("EEE dd MMM · HH:mm", Locale("es"))
@@ -184,6 +191,28 @@ private fun HistorySessionRow(session: WorkoutSession) {
                         modifier = Modifier.padding(bottom = 4.dp)
                     )
 
+                    // ─── Editar / guardar (corrige datos mal metidos; recalcula el competitivo) ───
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (!editing) {
+                            TextButton(onClick = { edited = session; editing = true }) {
+                                Icon(Icons.Default.Edit, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(13.dp))
+                                Spacer(Modifier.width(4.dp))
+                                Text(stringResource(R.string.history_edit), color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.Black, letterSpacing = 0.5.sp)
+                            }
+                        } else {
+                            TextButton(onClick = { editing = false }) {
+                                Text(stringResource(R.string.btn_cancel), color = MaterialTheme.colorScheme.secondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            }
+                            TextButton(onClick = { onSaveSession(edited); editing = false }) {
+                                Text(stringResource(R.string.btn_save), color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.Black)
+                            }
+                        }
+                    }
+
                     if (completedExercises.isEmpty()) {
                         Text(
                             stringResource(R.string.no_completed_exercises),
@@ -191,6 +220,30 @@ private fun HistorySessionRow(session: WorkoutSession) {
                             fontSize = 12.sp,
                             fontStyle = FontStyle.Italic
                         )
+                    } else if (editing) {
+                        edited.exercisesProgress.forEachIndexed { exIdx, prog ->
+                            if (prog.sets.none { it.isCompleted }) return@forEachIndexed
+                            Text(
+                                text = prog.exercise.name.uppercase(),
+                                color = MaterialTheme.colorScheme.onBackground,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 0.3.sp
+                            )
+                            prog.sets.forEachIndexed { setIdx, set ->
+                                if (!set.isCompleted) return@forEachIndexed
+                                EditableSetRow(set) { newWeight, newReps ->
+                                    edited = edited.copy(
+                                        exercisesProgress = edited.exercisesProgress.mapIndexed { i, p ->
+                                            if (i != exIdx) p
+                                            else p.copy(sets = p.sets.mapIndexed { j, s ->
+                                                if (j != setIdx) s else s.copy(weight = newWeight, reps = newReps)
+                                            })
+                                        }
+                                    )
+                                }
+                            }
+                        }
                     } else {
                         completedExercises.forEach { progress ->
                             val completedSets = progress.sets.filter { it.isCompleted }
@@ -255,6 +308,61 @@ private fun HistorySessionRow(session: WorkoutSession) {
             }
         }
     }
+}
+
+/** Fila editable de una serie: peso (con decimales) × reps (enteros). */
+@Composable
+private fun EditableSetRow(set: ExerciseSet, onChange: (Double, Int) -> Unit) {
+    var weightStr by remember(set.id) {
+        mutableStateOf(
+            when {
+                set.weight == 0.0 -> ""
+                set.weight % 1 == 0.0 -> set.weight.toInt().toString()
+                else -> set.weight.toString()
+            }
+        )
+    }
+    var repsStr by remember(set.id) { mutableStateOf(set.reps.toString()) }
+    fun emit() = onChange(weightStr.replace(",", ".").toDoubleOrNull() ?: 0.0, repsStr.toIntOrNull() ?: 0)
+
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        HistoryNumberField(weightStr, "kg", true, Modifier.width(96.dp)) { weightStr = it; emit() }
+        Text("×", color = MaterialTheme.colorScheme.secondary, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+        HistoryNumberField(repsStr, null, false, Modifier.width(76.dp)) { repsStr = it; emit() }
+    }
+}
+
+@Composable
+private fun HistoryNumberField(
+    value: String,
+    suffix: String?,
+    decimal: Boolean,
+    modifier: Modifier,
+    onChange: (String) -> Unit
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = { s ->
+            if (s.all { it.isDigit() || (decimal && (it == '.' || it == ',')) }) onChange(s)
+        },
+        singleLine = true,
+        suffix = { if (!suffix.isNullOrEmpty()) Text(suffix, fontSize = 10.sp, color = MaterialTheme.colorScheme.secondary) },
+        keyboardOptions = KeyboardOptions(keyboardType = if (decimal) KeyboardType.Decimal else KeyboardType.Number),
+        textStyle = LocalTextStyle.current.copy(fontSize = 14.sp, fontWeight = FontWeight.Bold),
+        modifier = modifier,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedContainerColor = MaterialTheme.colorScheme.background,
+            unfocusedContainerColor = MaterialTheme.colorScheme.background,
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
+            focusedTextColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedTextColor = MaterialTheme.colorScheme.onBackground
+        )
+    )
 }
 
 @Composable
