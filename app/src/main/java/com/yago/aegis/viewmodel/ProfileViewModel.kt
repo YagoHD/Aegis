@@ -3,16 +3,24 @@ package com.yago.aegis.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.google.gson.GsonBuilder
 import com.yago.aegis.data.BodyMeasure
 import com.yago.aegis.data.BodySnapshot
+import com.yago.aegis.data.Exercise
 import com.yago.aegis.data.LevelState
 import com.yago.aegis.data.LevelSystem
+import com.yago.aegis.data.Rank
+import com.yago.aegis.data.RankEngine
+import com.yago.aegis.data.divisionFromProgress
 import com.yago.aegis.data.XpEntry
 import com.yago.aegis.data.PhotoRecord
 import com.yago.aegis.data.PhotoType
 import com.yago.aegis.data.UserProfile
 import com.yago.aegis.data.UserRepository
 import com.yago.aegis.data.WorkoutSession
+import com.yago.aegis.data.effectiveSlots
+import com.yago.aegis.data.resolveLoadType
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -23,6 +31,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -160,6 +169,145 @@ class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
             _uiState.update { it.copy(user = it.user.copy(currentStreak = latestStreak)) }
             recomputeLevel()
         }
+    }
+
+    // --- EXPORTACIÓN ---
+
+    /**
+     * Serializa TODOS los datos "analizables" del usuario a un JSON legible por una IA:
+     * perfil + nivel, historial de métricas corporales, medidas actuales, rutinas,
+     * biblioteca de ejercicios (con contribuciones musculares) e historial completo de
+     * entrenos (series con peso/reps/completado). Estructura anidada intacta a propósito:
+     * el JSON conserva la relación sesión→ejercicio→serie que un CSV perdería.
+     * Se dispara desde Ajustes → "Exportar datos". Corre en Default (Gson + recorridos).
+     */
+    suspend fun buildExportJson(): String = withContext(Dispatchers.Default) {
+        val name = repository.userName.first()
+        val sex = repository.sex.first()
+        val height = repository.height.first()
+        val mass = repository.currentMass.first()
+        val bodyFat = repository.bodyFat.first()
+        val disciplineDay = repository.disciplineDay.first()
+        val streak = repository.computeCurrentStreak()
+        val history = repository.workoutHistory.first()
+        val library = repository.exerciseLibrary.first()
+        val routines = repository.routines.first()
+        val bodyHistory = repository.bodyHistory.first()
+        val measures = repository.customMeasures.first()
+        val level = LevelSystem.compute(history, streak)
+        // Rangos del Panteón (competitivo): tier + división por músculo, igual que en la pantalla.
+        // La masa se guarda como texto; toleramos coma decimal (locale ES) para el bodyweight.
+        val bw = mass.replace(",", ".").toDoubleOrNull() ?: 0.0
+        val panteon = RankEngine.compute(history, library, bw, sex)
+
+        // Serializa un ejercicio con todo su detalle analizable. Se reutiliza en la biblioteca
+        // y en las variantes de cada hueco de rutina (las que se alternan con la flecha), para
+        // que el JSON sea autoexplicativo sin tener que cruzar por nombre.
+        fun exerciseToMap(e: Exercise): Map<String, Any?> = linkedMapOf(
+            "name" to e.name,
+            "muscleGroup" to e.muscleGroup,
+            "type" to e.type,
+            "loadType" to e.resolveLoadType().name,
+            "oneRepMaxKg" to e.oneRepMax,
+            "bestSet" to e.bestSet,
+            "tags" to e.tags,
+            "muscleContributions" to (e.muscleContributions ?: emptyList()).map { c ->
+                linkedMapOf("muscle" to c.muscle, "percent" to c.percent)
+            }
+        )
+
+        val root = linkedMapOf<String, Any?>(
+            "app" to "Aegis",
+            "schemaVersion" to 1,
+            "exportedAt" to System.currentTimeMillis(),
+            "profile" to linkedMapOf(
+                "name" to name,
+                "sex" to sex,
+                "heightCm" to height,
+                "bodyweightKg" to mass,
+                "bodyFatPct" to bodyFat,
+                "trainingDaysPerWeek" to disciplineDay,
+                "streakWeeks" to streak,
+                "level" to level.level,
+                "totalXp" to level.totalXp
+            ),
+            "bodyHistory" to bodyHistory.map { snap ->
+                linkedMapOf(
+                    "date" to snap.date,
+                    "massKg" to snap.mass,
+                    "bodyFatPct" to snap.bodyFat,
+                    "measures" to snap.customMeasures.map { m ->
+                        linkedMapOf("id" to m.id, "name" to m.name, "value" to m.value)
+                    }
+                )
+            },
+            "currentMeasures" to measures.map { m ->
+                linkedMapOf("id" to m.id, "name" to m.name, "value" to m.value)
+            },
+            "routines" to routines.map { r ->
+                linkedMapOf(
+                    "name" to r.name,
+                    // Cada hueco (slot) es un ejercicio con sus variantes alternativas (las que se
+                    // cambian con la flecha durante el entreno). Cada variante va con detalle completo.
+                    "slots" to r.effectiveSlots().map { slot ->
+                        linkedMapOf("variants" to slot.variants.map { exerciseToMap(it) })
+                    }
+                )
+            },
+            "exerciseLibrary" to library.map { exerciseToMap(it) },
+            "workoutHistory" to history.sortedByDescending { it.date }.map { s ->
+                linkedMapOf(
+                    "date" to s.date,
+                    "routineName" to s.routineName,
+                    "notes" to s.notes,
+                    "exercises" to s.exercisesProgress.map { p ->
+                        linkedMapOf(
+                            "name" to p.exercise.name,
+                            "muscleGroup" to p.exercise.muscleGroup,
+                            "loadType" to p.exercise.resolveLoadType().name,
+                            "sets" to p.sets.map { st ->
+                                linkedMapOf(
+                                    "weightKg" to st.weight,
+                                    "reps" to st.reps,
+                                    "completed" to st.isCompleted
+                                )
+                            }
+                        )
+                    }
+                )
+            },
+            // Rangos del Panteón calculados por la app (lo que ves en la pestaña MIS RANGOS).
+            // Ventana de 84 días con decaimiento; solo cuentan ejercicios BASE con peso.
+            "panteon" to linkedMapOf(
+                "windowDays" to RankEngine.DECAY_WINDOW_DAYS,
+                "strongestGroup" to panteon.strongest?.group?.name,
+                "weakestGroup" to panteon.weakest?.group?.name,
+                "groups" to panteon.groups.map { g ->
+                    linkedMapOf(
+                        "group" to g.group.name,
+                        "groupDisplay" to g.group.display,
+                        "tier" to g.tier.name,
+                        "rank" to Rank(g.tier, divisionFromProgress(g.progressToNext)).label,
+                        "progressToNext" to g.progressToNext,
+                        "daysSinceTrained" to g.daysSinceTrained,
+                        "fatigue" to g.fatigue.name,
+                        "subgroups" to g.subgroups.map { sr ->
+                            linkedMapOf(
+                                "subgroup" to sr.subgroup.name,
+                                "subgroupDisplay" to sr.subgroup.display,
+                                "tier" to sr.tier.name,
+                                "rank" to Rank(sr.tier, divisionFromProgress(sr.progressToNext)).label,
+                                "ratio" to sr.ratio,
+                                "progressToNext" to sr.progressToNext,
+                                "approx" to sr.approx,
+                                "windowVolume" to sr.windowVolume
+                            )
+                        }
+                    )
+                }
+            )
+        )
+        GsonBuilder().setPrettyPrinting().create().toJson(root)
     }
 
     // --- ESCRITURA ---

@@ -519,4 +519,9 @@
     <string name="avatar_crop_confirm">USA</string>
     <string name="remove_exercise_desc">Rimuovi esercizio</string>
     <string name="history_edit">MODIFICA</string>
+
+    <!-- Esporta dati (per analisi con IA) -->
+    <string name="export_data_label">ESPORTA DATI</string>
+    <string name="export_data_subtitle">Scarica le tue routine, la cronologia e le misure in JSON per analizzarle con un\'IA</string>
+    <string name="export_data_error">Impossibile esportare i dati</string>
 </resources>

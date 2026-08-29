@@ -519,4 +519,9 @@
     <string name="avatar_crop_confirm">USAR</string>
     <string name="remove_exercise_desc">Remover exercício</string>
     <string name="history_edit">EDITAR</string>
+
+    <!-- Exportar dados (para análise por IA) -->
+    <string name="export_data_label">EXPORTAR DADOS</string>
+    <string name="export_data_subtitle">Descarrega as tuas rotinas, histórico e métricas em JSON para analisares com uma IA</string>
+    <string name="export_data_error">Não foi possível exportar os dados</string>
 </resources>

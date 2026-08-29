@@ -519,4 +519,9 @@
     <string name="avatar_crop_confirm">VERWENDEN</string>
     <string name="remove_exercise_desc">Übung entfernen</string>
     <string name="history_edit">BEARBEITEN</string>
+
+    <!-- Daten exportieren (für KI-Analyse) -->
+    <string name="export_data_label">DATEN EXPORTIEREN</string>
+    <string name="export_data_subtitle">Lade deine Routinen, deinen Verlauf und deine Messwerte als JSON herunter, um sie mit einer KI zu analysieren</string>
+    <string name="export_data_error">Daten konnten nicht exportiert werden</string>
 </resources>

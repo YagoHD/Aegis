@@ -1,6 +1,8 @@
 package com.yago.aegis.ui.components
 
+import android.content.Context
 import android.content.Intent
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -15,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Person
@@ -41,8 +44,37 @@ import com.yago.aegis.BuildConfig
 import com.yago.aegis.R
 import com.yago.aegis.viewmodel.AuthViewModel
 import com.yago.aegis.viewmodel.ProfileViewModel
+import androidx.core.content.FileProvider
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+/**
+ * Escribe el JSON exportado a un fichero temporal en cache y abre el selector de compartir
+ * (Drive, Gmail, WhatsApp, "Guardar en Archivos"…) para que el usuario lo lleve donde quiera.
+ * Reutiliza el FileProvider ya declarado (packageName.fileprovider → cache-path).
+ */
+private suspend fun shareExportedData(context: Context, json: String, chooserTitle: String) {
+    val file = withContext(Dispatchers.IO) {
+        val stamp = SimpleDateFormat("yyyyMMdd_HHmm", Locale.US).format(Date())
+        val f = File(context.cacheDir, "aegis_export_$stamp.json")
+        f.writeText(json)
+        f
+    }
+    val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "application/json"
+        putExtra(Intent.EXTRA_STREAM, uri)
+        putExtra(Intent.EXTRA_SUBJECT, file.name)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    context.startActivity(Intent.createChooser(intent, chooserTitle))
+}
 
 @Composable
 fun SettingsMenu(
@@ -291,6 +323,40 @@ fun SettingsMenu(
 
             VerticalDividerSection()
         }
+
+        // --- EXPORTAR DATOS (para análisis por IA) ---
+        val exportLabel = stringResource(R.string.export_data_label)
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        coroutineScope.launch {
+                            try {
+                                val json = viewModel.buildExportJson()
+                                shareExportedData(context, json, exportLabel)
+                            } catch (e: Exception) {
+                                Toast.makeText(context, R.string.export_data_error, Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                    .padding(vertical = 14.dp, horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Default.FileDownload, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(exportLabel, color = MaterialTheme.colorScheme.onBackground, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.export_data_subtitle), color = MaterialTheme.colorScheme.secondary, fontSize = 11.sp)
+                }
+                Text("›", color = MaterialTheme.colorScheme.secondary, fontSize = 18.sp)
+            }
+        }
+
+        VerticalDividerSection()
 
         SectionHeader(text = stringResource(R.string.settings_title_interface))
         Spacer(modifier = Modifier.height(12.dp))
