@@ -475,6 +475,7 @@ private fun FriendsRankingSection(
     val ranking = socialViewModel.friendRanking.collectAsState().value
     val myAvatar = socialViewModel.myAvatarUri.collectAsState().value
     var filter by remember { mutableStateOf<MuscleGroup?>(null) }
+    var comparing by remember { mutableStateOf<String?>(null) }   // @usuario del amigo en comparación
 
     // Carga/recarga al abrir la pestaña y cuando cambie mi lista de amigos.
     LaunchedEffect(buckets.friends) { socialViewModel.loadRanking() }
@@ -511,15 +512,27 @@ private fun FriendsRankingSection(
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         RankingFilterChips(filter) { filter = it }
 
-        if (board.size >= 3) {
-            Podium(board.take(3), filter)
+        // Tocar a un amigo (en el podio o en la lista) lo pone en comparación; volver a tocarlo la cierra.
+        val onSelect: (RankRow) -> Unit = { r ->
+            if (!r.isMe) comparing = if (comparing == r.username) null else r.username
+        }
+
+        if (board.size >= 2) {
+            Podium(board.take(3), filter, comparing, onSelect)
             board.drop(3).forEachIndexed { i, row ->
-                RankingListRow(position = i + 4, row = row, me = me, filter = filter)
+                RankingListRow(position = i + 4, row = row, filter = filter,
+                    selected = row.username == comparing, onClick = { onSelect(row) })
             }
         } else {
             board.forEachIndexed { i, row ->
-                RankingListRow(position = i + 1, row = row, me = me, filter = filter)
+                RankingListRow(position = i + 1, row = row, filter = filter,
+                    selected = row.username == comparing, onClick = { onSelect(row) })
             }
+        }
+
+        // Cara a cara del amigo seleccionado, debajo de todo (podio o lista).
+        friends.firstOrNull { it.username == comparing }?.let { friend ->
+            ComparisonPanel(me = me, friend = friend)
         }
 
         if (friends.isEmpty()) {
@@ -581,33 +594,40 @@ private fun FilterChip(text: String, active: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-private fun Podium(top3: List<RankRow>, filter: MuscleGroup?) {
+private fun Podium(top3: List<RankRow>, filter: MuscleGroup?, comparing: String?, onSelect: (RankRow) -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.Bottom
     ) {
         Box(Modifier.weight(1f), contentAlignment = Alignment.BottomCenter) {
-            top3.getOrNull(1)?.let { PodiumPlace(it, 2, filter) }
+            top3.getOrNull(1)?.let { PodiumPlace(it, 2, filter, it.username == comparing) { onSelect(it) } }
         }
         Box(Modifier.weight(1.25f), contentAlignment = Alignment.BottomCenter) {
-            top3.getOrNull(0)?.let { PodiumPlace(it, 1, filter) }
+            top3.getOrNull(0)?.let { PodiumPlace(it, 1, filter, it.username == comparing) { onSelect(it) } }
         }
         Box(Modifier.weight(1f), contentAlignment = Alignment.BottomCenter) {
-            top3.getOrNull(2)?.let { PodiumPlace(it, 3, filter) }
+            top3.getOrNull(2)?.let { PodiumPlace(it, 3, filter, it.username == comparing) { onSelect(it) } }
         }
     }
 }
 
 @Composable
-private fun PodiumPlace(row: RankRow, place: Int, filter: MuscleGroup?) {
+private fun PodiumPlace(row: RankRow, place: Int, filter: MuscleGroup?, selected: Boolean, onClick: () -> Unit) {
     val avatarSize = if (place == 1) 84.dp else 60.dp
     val ringColor = when (place) {
         1 -> Color(RankTier.ORO.colorHex)
         2 -> Color(RankTier.PLATA.colorHex)
         else -> Color(RankTier.BRONCE.colorHex)
     }
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
+            .then(if (!row.isMe) Modifier.clickable { onClick() } else Modifier)
+            .then(if (selected) Modifier.background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)) else Modifier)
+            .padding(horizontal = 6.dp, vertical = 4.dp)
+    ) {
         if (place == 1) {
             Icon(
                 Icons.Default.EmojiEvents, null,
@@ -636,69 +656,62 @@ private fun PodiumPlace(row: RankRow, place: Int, filter: MuscleGroup?) {
 }
 
 @Composable
-private fun RankingListRow(position: Int, row: RankRow, me: RankRow, filter: MuscleGroup?) {
-    var expanded by remember { mutableStateOf(false) }
+private fun RankingListRow(position: Int, row: RankRow, filter: MuscleGroup?, selected: Boolean, onClick: () -> Unit) {
     val canCompare = !row.isMe
     val (tier, _) = rankOf(row, filter)
 
     Surface(
         shape = RoundedCornerShape(12.dp),
-        color = if (row.isMe) MaterialTheme.colorScheme.primary.copy(alpha = 0.10f) else Color.Transparent
+        color = if (row.isMe || selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.10f) else Color.Transparent
     ) {
-        Column {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .then(if (canCompare) Modifier.clickable { expanded = !expanded } else Modifier)
-                    .padding(vertical = 10.dp, horizontal = 6.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "$position",
-                    color = MaterialTheme.colorScheme.secondary,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Black,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.width(24.dp)
-                )
-                Spacer(Modifier.width(8.dp))
-                AegisAvatar(
-                    row.username, 44.dp,
-                    borderColor = if (row.isMe) MaterialTheme.colorScheme.primary
-                                  else MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
-                    borderWidth = if (row.isMe) 2.dp else 1.dp,
-                    photo = row.photo
-                )
-                Spacer(Modifier.width(12.dp))
-                Column(Modifier.weight(1f)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "@${row.username}",
-                            color = if (row.isMe) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.onBackground,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Black,
-                            maxLines = 1
-                        )
-                        if (row.isMe) {
-                            Spacer(Modifier.width(6.dp))
-                            TuPill()
-                        }
-                    }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(if (canCompare) Modifier.clickable { onClick() } else Modifier)
+                .padding(vertical = 10.dp, horizontal = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "$position",
+                color = MaterialTheme.colorScheme.secondary,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Black,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.width(24.dp)
+            )
+            Spacer(Modifier.width(8.dp))
+            AegisAvatar(
+                row.username, 44.dp,
+                borderColor = if (row.isMe) MaterialTheme.colorScheme.primary
+                              else MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
+                borderWidth = if (row.isMe) 2.dp else 1.dp,
+                photo = row.photo
+            )
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = stringResource(R.string.ranking_level, row.level),
-                        color = MaterialTheme.colorScheme.secondary,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 0.5.sp
+                        text = "@${row.username}",
+                        color = if (row.isMe) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.onBackground,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Black,
+                        maxLines = 1
                     )
+                    if (row.isMe) {
+                        Spacer(Modifier.width(6.dp))
+                        TuPill()
+                    }
                 }
-                RankMedal(tier, 34.dp)
+                Text(
+                    text = stringResource(R.string.ranking_level, row.level),
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp
+                )
             }
-
-            if (expanded && canCompare) {
-                ComparisonPanel(me = me, friend = row)
-            }
+            RankMedal(tier, 34.dp)
         }
     }
 }
