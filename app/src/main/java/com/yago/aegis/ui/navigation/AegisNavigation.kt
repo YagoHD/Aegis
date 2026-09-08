@@ -7,9 +7,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.navigation.NavBackStackEntry
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -20,7 +17,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -89,7 +85,7 @@ fun AegisNavigation(
     val authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory(application, authRepository, userRepository))
 
     if (onboardingCompleted == null) {
-        Box(modifier = Modifier.fillMaxSize().background(Color.Black))
+        AegisSplashPlaceholder()
         return
     }
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()

@@ -92,6 +92,8 @@ fun ActiveSessionScreen(
 
     var showCancelDialog by remember { mutableStateOf(false) }
     var showExercisePicker by remember { mutableStateOf(false) }
+    // C2: evita guardar la sesión dos veces por un doble toque rápido en "Finalizar".
+    var isFinishing by remember { mutableStateOf(false) }
     val libraryExercises by routinesViewModel.allExercises.collectAsState()
     val context = LocalContext.current
     val density = LocalDensity.current
@@ -269,7 +271,10 @@ fun ActiveSessionScreen(
             title = stringResource(R.string.uncompleted_exercises_title),
             confirmText = stringResource(R.string.mark_complete_btn),
             dismissText = stringResource(R.string.review_btn),
-            onDismiss = { workoutViewModel.dismissUncompletedDialog() },
+            onDismiss = {
+                workoutViewModel.dismissUncompletedDialog()
+                isFinishing = false
+            },
             onConfirm = {
                 workoutViewModel.forceFinishWorkout(routinesViewModel) {
                     profileViewModel.incrementDisciplineDay()
@@ -478,15 +483,18 @@ fun ActiveSessionScreen(
 
                         Button(
                             onClick = {
-                                workoutViewModel.requestFinishWorkout()
-                                if (workoutViewModel.uncompletedWithData.value.isEmpty()) {
-                                    workoutViewModel.finishWorkout(routinesViewModel) {
-                                        profileViewModel.incrementDisciplineDay()
-                                        onFinishWorkout()
+                                if (!isFinishing) {
+                                    isFinishing = true
+                                    workoutViewModel.requestFinishWorkout()
+                                    if (workoutViewModel.uncompletedWithData.value.isEmpty()) {
+                                        workoutViewModel.finishWorkout(routinesViewModel) {
+                                            profileViewModel.incrementDisciplineDay()
+                                            onFinishWorkout()
+                                        }
                                     }
                                 }
                             },
-                            enabled = hasAnyData,
+                            enabled = hasAnyData && !isFinishing,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 16.dp, bottom = 100.dp)

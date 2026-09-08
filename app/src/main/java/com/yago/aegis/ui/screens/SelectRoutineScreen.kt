@@ -51,6 +51,7 @@ fun SelectRoutineScreen(
     val activeName = activeSession?.routineName
     val hasActiveSession = activeSession != null
     var showLockedDialog by remember { mutableStateOf(false) }
+    var showAbandonDialog by remember { mutableStateOf(false) }
     var showCustomDialog by remember { mutableStateOf(false) }
     var customName by remember { mutableStateOf("") }
 
@@ -113,6 +114,28 @@ fun SelectRoutineScreen(
         }
     }
 
+    // C1: abandonar la sesión en curso desde el banner NUNCA en un solo toque.
+    if (showAbandonDialog) {
+        AegisAlertDialog(
+            title = stringResource(R.string.exit_session_dialog_title),
+            confirmText = stringResource(R.string.btn_abandon_session),
+            dismissText = stringResource(R.string.btn_continue_training),
+            onDismiss = { showAbandonDialog = false },
+            onConfirm = {
+                showAbandonDialog = false
+                workoutViewModel.cancelWorkout { }
+            },
+            confirmButtonColor = MaterialTheme.colorScheme.error
+        ) {
+            Text(
+                text = stringResource(R.string.exit_session_question),
+                color = MaterialTheme.colorScheme.secondary,
+                fontSize = 14.sp,
+                lineHeight = 20.sp
+            )
+        }
+    }
+
     Scaffold(
         // Cambiamos BackgroundBlackGrey por el background puro del Theme (050505)
         containerColor = MaterialTheme.colorScheme.background,
@@ -144,7 +167,7 @@ fun SelectRoutineScreen(
                     ActiveSessionBanner(
                         name = activeName,
                         onResume = onResumeSession,
-                        onCancel = { workoutViewModel.cancelWorkout { } }
+                        onCancel = { showAbandonDialog = true }
                     )
                 }
             }
