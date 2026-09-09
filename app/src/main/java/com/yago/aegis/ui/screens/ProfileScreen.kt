@@ -111,7 +111,6 @@ fun ProfileContent(viewModel: ProfileViewModel, onNavigateToTrain: () -> Unit = 
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 24.dp)
-            .imePadding()
             .verticalScroll(scrollState)
     ) {
         Spacer(modifier = Modifier.height(16.dp))

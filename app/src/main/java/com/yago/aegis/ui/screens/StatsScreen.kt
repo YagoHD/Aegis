@@ -55,6 +55,8 @@ fun StatsScreen(
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = stringResource(R.string.settings_desc),
+                            tint = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.size(22.dp)
                         )
                     }
                 }
