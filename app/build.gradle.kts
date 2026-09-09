@@ -67,6 +67,8 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.ui)
     implementation("androidx.compose.material:material-icons-extended")
+    // Fuente de marca (Cinzel) vía Google Fonts descargable — gestionada por el Compose BOM
+    implementation("androidx.compose.ui:ui-text-google-fonts")
     implementation("io.coil-kt.coil3:coil-compose:3.0.0-rc01")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.0-rc01")
     implementation("androidx.navigation:navigation-compose:2.9.7")

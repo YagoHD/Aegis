@@ -38,9 +38,10 @@ fun AegisTopBar(
                     Text(
                         text = title.uppercase(),
                         color = MaterialTheme.colorScheme.onBackground, // AegisWhite
-                        fontSize = 15.sp, // Ajuste sutil de tamaño para elegancia
+                        fontFamily = com.yago.aegis.ui.theme.AegisBrandFamily, // marca (Cinzel)
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.5.sp
+                        letterSpacing = 1.sp
                     )
                 }
             },

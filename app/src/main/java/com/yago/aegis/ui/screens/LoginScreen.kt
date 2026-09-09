@@ -174,7 +174,7 @@ fun LoginScreen(
 
         Icon(imageVector = Icons.Default.Shield, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(64.dp))
         Spacer(modifier = Modifier.height(12.dp))
-        Text("AEGIS", fontSize = 36.sp, fontWeight = FontWeight.Black, letterSpacing = 6.sp, color = MaterialTheme.colorScheme.onBackground)
+        Text("AEGIS", fontFamily = com.yago.aegis.ui.theme.AegisBrandFamily, fontSize = 36.sp, fontWeight = FontWeight.Black, letterSpacing = 6.sp, color = MaterialTheme.colorScheme.onBackground)
         Text(stringResource(R.string.login_subtitle), fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 3.sp, color = MaterialTheme.colorScheme.secondary)
 
         Spacer(modifier = Modifier.weight(1f))

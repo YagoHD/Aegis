@@ -22,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.R
+import com.yago.aegis.ui.theme.AegisBrandFamily
 import com.yago.aegis.ui.theme.AegisCream
 
 /**
@@ -68,6 +69,7 @@ fun WelcomeScreen(
             Text(
                 text = "AEGIS",
                 style = TextStyle(
+                    fontFamily = AegisBrandFamily,
                     color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 48.sp,
                     fontWeight = FontWeight.ExtraBold,
@@ -161,6 +163,7 @@ fun AegisSplashPlaceholder() {
             Text(
                 text = "AEGIS",
                 style = TextStyle(
+                    fontFamily = AegisBrandFamily,
                     color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.ExtraBold,
