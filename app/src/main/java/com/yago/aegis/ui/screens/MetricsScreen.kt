@@ -46,7 +46,7 @@ fun MetricsScreen(
                 IconButton(onClick = onBack) {
                     Icon(
                         Icons.Default.ArrowBack,
-                        contentDescription = null,
+                        contentDescription = stringResource(R.string.content_desc_back),
                         tint = MaterialTheme.colorScheme.onBackground
                     )
                 }
@@ -79,8 +79,8 @@ fun MetricsScreen(
         // --- 3. INPUTS DE PRECISIÓN ---
         // Usamos SurfaceDark (30%) dentro de MetricInput para las tarjetas
         MetricInput(
-            label = "ALTURA CONFIGURACIÓN",
-            unit = "CM",
+            label = stringResource(R.string.label_height),
+            unit = stringResource(R.string.unit_centimeters),
             value = height,
             onValueChange = { height = it },
             icon = Icons.Default.Straighten
@@ -90,7 +90,7 @@ fun MetricsScreen(
 
         MetricInput(
             label = stringResource(R.string.current_mass_label),
-            unit = "KG",
+            unit = stringResource(R.string.unit_kg),
             value = mass,
             onValueChange = { mass = it },
             icon = Icons.Default.MonitorWeight

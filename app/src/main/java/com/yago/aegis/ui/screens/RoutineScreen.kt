@@ -74,6 +74,7 @@ fun RoutineScreen(
             title = stringResource(R.string.create_routine_dialog_title),
             confirmText = stringResource(R.string.btn_save),
             dismissText = stringResource(R.string.btn_cancel),
+            confirmEnabled = textState.isNotBlank(),
             onDismiss = { showDialog = false },
             onConfirm = {
                 if (textState.isNotBlank()) {
@@ -139,6 +140,8 @@ fun RoutineScreen(
     if (routineToDelete != null) {
         AegisAlertDialog(
             title = stringResource(R.string.dialog_delete_routine_title),
+            confirmText = stringResource(R.string.btn_delete),
+            dismissText = stringResource(R.string.btn_cancel),
             onConfirm = {
                 routineToDelete?.let { routinesViewModel.removeRoutine(it) }
                 routineToDelete = null

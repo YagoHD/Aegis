@@ -35,11 +35,10 @@ import com.yago.aegis.ui.components.AegisStepProgress
 @Composable
 fun IdentityScreen(
     viewModel: ProfileViewModel,
-    onContinue: (String, String, String?) -> Unit,
+    onContinue: (String) -> Unit,
     onBack: () -> Unit
 ) {
     var name by remember { mutableStateOf("") }
-    var bio by remember { mutableStateOf("") }
     var selectedPhotoUri by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
 
@@ -75,7 +74,7 @@ fun IdentityScreen(
             subtitle = stringResource(R.string.step_02_subtitle),
             navigationIcon = {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = null, tint = MaterialTheme.colorScheme.onBackground)
+                    Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.content_desc_back), tint = MaterialTheme.colorScheme.onBackground)
                 }
             }
         )
@@ -134,22 +133,11 @@ fun IdentityScreen(
             placeholder = stringResource(R.string.username_placeholder)
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        AegisTextField(
-            label = stringResource(R.string.biography_label),
-            value = bio,
-            onValueChange = { bio = it },
-            placeholder = stringResource(R.string.biography_placeholder),
-            isSingleLine = false,
-            modifier = Modifier.height(120.dp) // Ajustado para que quepa en pantallas pequeñas
-        )
-
         // Este Spacer "empuja" todo lo de arriba hacia arriba y lo de abajo hacia abajo
         Spacer(modifier = Modifier.weight(1f))
 
         Button(
-            onClick = { if (name.isNotBlank()) onContinue(name, bio, selectedPhotoUri) },
+            onClick = { if (name.isNotBlank()) onContinue(name) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),

@@ -60,6 +60,7 @@ fun SelectRoutineScreen(
             title = stringResource(R.string.custom_workout_dialog_title),
             confirmText = stringResource(R.string.custom_workout_start_btn),
             dismissText = stringResource(R.string.btn_cancel),
+            confirmEnabled = customName.isNotBlank(),
             onDismiss = { showCustomDialog = false },
             onConfirm = {
                 if (customName.isNotBlank()) {

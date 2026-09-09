@@ -99,7 +99,20 @@ fun ActiveSessionScreen(
     val density = LocalDensity.current
     val view = LocalView.current
 
-    val currentSession = session ?: return
+    // O15: sin sesión (arranque o rutina inexistente) mostramos un loader, no una pantalla
+    // en blanco sin salida. Si la rutina ya no existe, el gesto de atrás del sistema sale.
+    val currentSession = session
+    if (currentSession == null) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+        }
+        return
+    }
 
     // El gesto de "atrás" abre el mismo diálogo que la flecha: así nunca se sale de
     // la sesión sin pausarla/cancelarla, y no se pierden datos por accidente.

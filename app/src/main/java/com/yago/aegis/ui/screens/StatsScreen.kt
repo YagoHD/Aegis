@@ -35,6 +35,7 @@ fun StatsScreen(
     val monthlyData by viewModel.monthlyVolumeEvolution.collectAsState(initial = emptyList())
     val evolutionMonths by viewModel.evolutionMonths.collectAsState(initial = 3)
     val routines by viewModel.routines.collectAsState()
+    val history by viewModel.workoutHistory.collectAsState()
 
     // Usamos Scaffold para que la TopBar esté fija y el contenido haga scroll debajo
     Scaffold(
@@ -61,6 +62,12 @@ fun StatsScreen(
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
+        // O12: estado de primer uso real. Sin historial no mostramos tarjetas a cero
+        // ni el mensaje de "ningún ejercicio coincide con el filtro" (que confundía).
+        if (history.isEmpty()) {
+            EmptyStatsState(Modifier.padding(paddingValues))
+            return@Scaffold
+        }
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -161,5 +168,40 @@ fun StatsScreen(
 
             item { Spacer(Modifier.height(32.dp)) }
         }
+    }
+}
+
+/** O12: primer uso de Stats — invita a entrenar en vez de mostrar tarjetas a cero. */
+@Composable
+private fun EmptyStatsState(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = 32.dp),
+        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Insights,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+            modifier = Modifier.size(56.dp)
+        )
+        Spacer(Modifier.height(16.dp))
+        Text(
+            text = stringResource(R.string.empty_history_title),
+            color = MaterialTheme.colorScheme.onBackground,
+            fontSize = 15.sp,
+            fontWeight = androidx.compose.ui.text.font.FontWeight.Black,
+            letterSpacing = 1.sp
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = stringResource(R.string.empty_history_subtitle),
+            color = MaterialTheme.colorScheme.secondary,
+            fontSize = 13.sp,
+            lineHeight = 18.sp,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
     }
 }

@@ -68,7 +68,7 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
         PolicySection(
             "1. Datos que recogemos",
             "Para usar Aegis necesitas una cuenta (email y contraseña, o inicio de sesión con " +
-                "Google). Además guardamos los datos que tú introduces: nombre y biografía, " +
+                "Google). Además guardamos los datos que tú introduces: nombre, " +
                 "métricas corporales (peso, altura, grasa, medidas personalizadas), fotos de " +
                 "progreso, tus rutinas, ejercicios e historial de entrenamientos, y tus " +
                 "preferencias de la app."

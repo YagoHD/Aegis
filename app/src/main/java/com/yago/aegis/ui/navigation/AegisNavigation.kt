@@ -169,7 +169,7 @@ fun AegisNavigation(
             composable(Routes.IDENTITY) {
                 IdentityScreen(
                     viewModel = profileViewModel,
-                    onContinue = { name, _, _ ->
+                    onContinue = { name ->
                         profileViewModel.updateName(name)
                         navController.navigate(Routes.METRICS)
                     },

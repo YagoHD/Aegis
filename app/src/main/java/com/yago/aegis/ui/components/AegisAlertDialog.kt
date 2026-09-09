@@ -18,6 +18,7 @@ fun AegisAlertDialog(
     confirmText: String = "SÍ",
     dismissText: String = "NO",
     confirmButtonColor: Color = MaterialTheme.colorScheme.primary,
+    confirmEnabled: Boolean = true,
     content: @Composable () -> Unit
 ) {
     AlertDialog(
@@ -45,10 +46,10 @@ fun AegisAlertDialog(
         },
 
         confirmButton = {
-            TextButton(onClick = onConfirm) {
+            TextButton(onClick = onConfirm, enabled = confirmEnabled) {
                 Text(
                     text = confirmText.uppercase(),
-                    color = confirmButtonColor,
+                    color = if (confirmEnabled) confirmButtonColor else confirmButtonColor.copy(alpha = 0.35f),
                     fontWeight = FontWeight.Black,
                     letterSpacing = 1.sp
                 )
