@@ -21,6 +21,8 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yago.aegis.ui.theme.AegisSuccess
+import com.yago.aegis.ui.theme.Radius
 
 @Composable
 fun StatCard(
@@ -36,7 +38,7 @@ fun StatCard(
     Surface(
         modifier = modifier.height(130.dp), // Un poco más compacta y agresiva
         color = MaterialTheme.colorScheme.surfaceVariant, // 30%: SurfaceDark
-        shape = RoundedCornerShape(8.dp), // Esquinas unificadas (8.dp)
+        shape = RoundedCornerShape(Radius.md), // Esquinas unificadas (8.dp)
         border = BorderStroke(
             width = 1.dp,
             color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f) // Borde acero sutil
@@ -72,7 +74,7 @@ fun StatCard(
                 Text(
                     text = subValue.uppercase(),
                     color = if (isPositive && subValue.contains("+"))
-                        Color(0xFF81C784) // Un verde más técnico/pastel que no rompa el estilo
+                        AegisSuccess // token de éxito unificado (O3)
                     else
                         MaterialTheme.colorScheme.secondary.copy(alpha = 0.7f),
                     fontSize = 10.sp,

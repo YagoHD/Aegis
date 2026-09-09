@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import com.yago.aegis.R
 import com.yago.aegis.data.Routine
 import com.yago.aegis.ui.getExerciseIcon
+import com.yago.aegis.ui.theme.Radius
 
 @Composable
 fun RoutineSelectionCard(
@@ -35,7 +36,7 @@ fun RoutineSelectionCard(
             .fillMaxWidth()
             .padding(vertical = 10.dp)
             .alpha(if (isLocked) 0.45f else 1f),
-        shape = RoundedCornerShape(12.dp), // Esquinas más agresivas
+        shape = RoundedCornerShape(Radius.lg), // Esquinas más agresivas
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         ),
@@ -64,7 +65,7 @@ fun RoutineSelectionCard(
                 // 2. Título (Negrita Itálica para dinamismo)
                 Text(
                     text = routine.name.uppercase(),
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Black,
                     fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
@@ -108,7 +109,7 @@ fun RoutineSelectionCard(
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (isLocked) MaterialTheme.colorScheme.surface
                                              else MaterialTheme.colorScheme.primary,
-                            contentColor = if (isLocked) MaterialTheme.colorScheme.secondary else Color.Black
+                            contentColor = if (isLocked) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onPrimary
                         ),
                         shape = RoundedCornerShape(6.dp), // Botón más cuadrado = más serio
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
@@ -139,7 +140,7 @@ fun RoutineSelectionCard(
                 modifier = Modifier
                     .size(44.dp)
                     .align(Alignment.TopEnd),
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(Radius.md),
                 color = MaterialTheme.colorScheme.background.copy(alpha = 0.4f),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
             ) {
@@ -158,9 +159,9 @@ fun RoutineSelectionCard(
 fun ExerciseNameCapsule(name: String) {
     Surface(
         modifier = Modifier.widthIn(max = 85.dp),
-        shape = RoundedCornerShape(4.dp), // Cápsulas más rectangulares
-        color = Color.White.copy(alpha = 0.05f),
-        border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.1f))
+        shape = RoundedCornerShape(Radius.sm), // Cápsulas más rectangulares
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.05f),
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
     ) {
         Text(
             text = name.uppercase(),

@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yago.aegis.ui.theme.Radius
 
 @Composable
 fun MetricInput(
@@ -66,13 +67,14 @@ fun MetricInput(
         Spacer(modifier = Modifier.height(12.dp))
 
         // --- ÁREA DE ENTRADA NUMÉRICA ---
+        val hairline = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .drawBehind {
                     // Línea inferior de alta precisión
                     drawLine(
-                        color = Color.White.copy(alpha = 0.1f),
+                        color = hairline,
                         start = Offset(0f, size.height),
                         end = Offset(size.width, size.height),
                         strokeWidth = 1.dp.toPx()
@@ -88,7 +90,7 @@ fun MetricInput(
                 textStyle = TextStyle(
                     color = if (value == "000" || value == "00.0" || value.isEmpty())
                         MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)
-                    else Color.White,
+                    else MaterialTheme.colorScheme.onBackground,
                     fontSize = 48.sp,
                     fontWeight = FontWeight.Black, // Más peso visual
                     letterSpacing = 2.sp
@@ -113,7 +115,7 @@ fun MetricInput(
             // Indicador de Icono Táctico
             Surface(
                 color = MaterialTheme.colorScheme.background, // Negro profundo 050505
-                shape = RoundedCornerShape(4.dp),
+                shape = RoundedCornerShape(Radius.sm),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f)),
                 modifier = Modifier.size(44.dp)
             ) {
@@ -155,7 +157,7 @@ fun AegisTextField(
             onValueChange = onValueChange,
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(4.dp)), // Esquinas más cuadradas = más técnico
+                .clip(RoundedCornerShape(Radius.sm)), // Esquinas más cuadradas = más técnico
             placeholder = {
                 Text(
                     text = placeholder,
@@ -167,8 +169,8 @@ fun AegisTextField(
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant, // 161616
                 unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
+                focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
                 cursorColor = MaterialTheme.colorScheme.primary,
                 focusedIndicatorColor = MaterialTheme.colorScheme.primary, // Línea muy fina de acento
                 unfocusedIndicatorColor = Color.Transparent

@@ -32,6 +32,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.draw.scale
+import com.yago.aegis.ui.theme.Radius
 import com.yago.aegis.R
 import com.yago.aegis.data.ExerciseSet
 import com.yago.aegis.data.LoadType
@@ -69,6 +75,14 @@ fun SetRow(
         // US-11: área de toque de 48dp (accesibilidad) manteniendo el cuadrado VISIBLE a 38dp.
         // El clickable va en el Box exterior de 48dp; el visual (fondo/borde) en el interior de 38dp.
         val haptic = LocalHapticFeedback.current
+        // G2: "pop" con rebote al marcar la serie como completada.
+        val setScale = remember { Animatable(1f) }
+        LaunchedEffect(set.isCompleted) {
+            if (set.isCompleted) {
+                setScale.animateTo(1.18f, spring(dampingRatio = Spring.DampingRatioHighBouncy, stiffness = Spring.StiffnessMedium))
+                setScale.animateTo(1f, spring())
+            }
+        }
         Box(
             modifier = Modifier
                 .size(48.dp)
@@ -84,6 +98,7 @@ fun SetRow(
             Box(
                 modifier = Modifier
                     .size(38.dp)
+                    .scale(setScale.value)
                     .background(
                         if (set.isCompleted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
                         RoundedCornerShape(6.dp)
@@ -97,7 +112,7 @@ fun SetRow(
             ) {
                 Text(
                     text = index.toString().padStart(2, '0'),
-                    color = if (set.isCompleted) Color.Black else MaterialTheme.colorScheme.secondary,
+                    color = if (set.isCompleted) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.secondary,
                     fontWeight = FontWeight.Black,
                     fontSize = 14.sp
                 )
@@ -202,7 +217,7 @@ fun SetInputField(
                 }
             },
             textStyle = TextStyle(
-                color = if (isCompleted) MaterialTheme.colorScheme.primary else Color.White,
+                color = if (isCompleted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold,
@@ -217,12 +232,12 @@ fun SetInputField(
                         .padding(top = 4.dp)
                         .background(
                             color = if (isCompleted) MaterialTheme.colorScheme.primary.copy(alpha = 0.05f) else MaterialTheme.colorScheme.surfaceVariant,
-                            shape = RoundedCornerShape(4.dp)
+                            shape = RoundedCornerShape(Radius.sm)
                         )
                         .border(
                             width = 1.dp,
                             color = if (isCompleted) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.Transparent,
-                            shape = RoundedCornerShape(4.dp)
+                            shape = RoundedCornerShape(Radius.sm)
                         )
                         .padding(vertical = 10.dp),
                     contentAlignment = Alignment.Center

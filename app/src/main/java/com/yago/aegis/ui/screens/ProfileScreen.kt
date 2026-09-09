@@ -6,6 +6,8 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -382,6 +384,12 @@ private fun LevelCard(level: LevelState, breakdown: List<XpEntry>) {
             }
         }
         Spacer(modifier = Modifier.height(12.dp))
+        // G2: la barra de XP se rellena con animación al cambiar el nivel/progreso.
+        val animatedXp by animateFloatAsState(
+            targetValue = level.progress,
+            animationSpec = tween(600),
+            label = "xpProgress"
+        )
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -391,7 +399,7 @@ private fun LevelCard(level: LevelState, breakdown: List<XpEntry>) {
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(level.progress)
+                    .fillMaxWidth(animatedXp)
                     .height(8.dp)
                     .clip(RoundedCornerShape(4.dp))
                     .background(MaterialTheme.colorScheme.primary)
