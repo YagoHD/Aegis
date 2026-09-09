@@ -93,7 +93,7 @@ fun RegisterScreen(
     ) {
         AegisTopBar(
             title = stringResource(R.string.create_account_title),
-            subtitle = stringResource(R.string.step_04_subtitle),
+            subtitle = stringResource(R.string.step_03_subtitle),
             navigationIcon = {
                 IconButton(onClick = onBack) {
                     Icon(
@@ -105,7 +105,7 @@ fun RegisterScreen(
             }
         )
 
-        AegisStepProgress(currentStep = 4, totalSteps = 4)
+        AegisStepProgress(currentStep = 3, totalSteps = 3)
 
         Spacer(modifier = Modifier.height(24.dp))
 

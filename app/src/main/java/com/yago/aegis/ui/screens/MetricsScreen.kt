@@ -43,7 +43,7 @@ fun MetricsScreen(
         // --- 1. NAVEGACIÓN Y PROGRESO ---
         AegisTopBar(
             title = stringResource(R.string.metrics_title),
-            subtitle = stringResource(R.string.step_03_subtitle),
+            subtitle = stringResource(R.string.step_02_subtitle),
             navigationIcon = {
                 IconButton(onClick = onBack) {
                     Icon(
@@ -55,7 +55,7 @@ fun MetricsScreen(
             }
         )
 
-        AegisStepProgress(currentStep = 3)
+        AegisStepProgress(currentStep = 2)
 
         // Y8: contenido scrollable; el botón queda fijo abajo.
         Column(

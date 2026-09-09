@@ -73,7 +73,7 @@ fun IdentityScreen(
     ) {
         AegisTopBar(
             title = stringResource(R.string.identity_title),
-            subtitle = stringResource(R.string.step_02_subtitle),
+            subtitle = stringResource(R.string.step_01_subtitle),
             navigationIcon = {
                 IconButton(onClick = onBack) {
                     Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.content_desc_back), tint = MaterialTheme.colorScheme.onBackground)
@@ -81,7 +81,7 @@ fun IdentityScreen(
             }
         )
 
-        AegisStepProgress(currentStep = 2)
+        AegisStepProgress(currentStep = 1)
 
         // Y8: contenido scrollable (evita recortes con teclado en pantallas pequeñas);
         // el botón queda fijo abajo.

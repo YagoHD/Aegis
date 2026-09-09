@@ -308,6 +308,7 @@
 
     <!-- Identity screen -->
     <string name="identity_title">IDENTITY</string>
+    <string name="step_01_subtitle">STEP 01</string>
     <string name="step_02_subtitle">STEP 02</string>
     <string name="configure_avatar_title">SET UP YOUR AVATAR</string>
     <string name="username_label">USERNAME</string>
