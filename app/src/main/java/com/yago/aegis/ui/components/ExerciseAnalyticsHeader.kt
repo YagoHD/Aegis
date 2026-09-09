@@ -79,8 +79,8 @@ fun ExerciseAnalyticsHeader(
                 focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
                 unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f),
                 cursorColor = MaterialTheme.colorScheme.primary,
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White
+                focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                unfocusedTextColor = MaterialTheme.colorScheme.onBackground
             )
         )
 

@@ -85,7 +85,7 @@ fun LastSessionCard(lastSetsText: String, suggestion: String? = null) {
             text = if (!hasData) stringResource(R.string.label_no_data) else lastSetsText,
             color = if (!hasData)
                 MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
-            else Color.White,
+            else MaterialTheme.colorScheme.onBackground,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             letterSpacing = 0.5.sp,

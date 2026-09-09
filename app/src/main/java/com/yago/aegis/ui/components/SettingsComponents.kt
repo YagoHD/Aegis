@@ -388,7 +388,7 @@ fun SettingsMenu(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = measure.name.uppercase(), color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                Text(text = measure.name.uppercase(), color = MaterialTheme.colorScheme.onBackground, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                 IconButton(onClick = { viewModel.removeMeasure(measure.id) }) {
                     Icon(imageVector = Icons.Default.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error.copy(alpha = 0.6f), modifier = Modifier.size(20.dp))
                 }
@@ -705,7 +705,7 @@ fun SectionHeader(text: String) {
 @Composable
 fun VerticalDividerSection() {
     Spacer(modifier = Modifier.height(24.dp))
-    HorizontalDivider(color = Color.White.copy(alpha = 0.05f), thickness = 1.dp)
+    HorizontalDivider(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.05f), thickness = 1.dp)
     Spacer(modifier = Modifier.height(24.dp))
 }
 
@@ -717,7 +717,7 @@ fun SettingsRow(label: String, checked: Boolean, onCheckedChange: (Boolean) -> U
     ) {
         Text(
             text = label.uppercase(),
-            color = if (checked) Color.White else MaterialTheme.colorScheme.secondary,
+            color = if (checked) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.secondary,
             style = TextStyle(fontWeight = if (checked) FontWeight.Bold else FontWeight.Medium, fontSize = 13.sp, letterSpacing = 0.5.sp),
             modifier = Modifier.weight(1f)
         )

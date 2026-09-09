@@ -104,7 +104,7 @@ fun WeightEvolutionSection(
                         // VALOR: Estilo numérico pesado
                         Text(
                             text = formatVolume(volume),
-                            color = if (isLastMonth) Color.White else MaterialTheme.colorScheme.secondary.copy(alpha = 0.7f),
+                            color = if (isLastMonth) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.secondary.copy(alpha = 0.7f),
                             fontSize = 10.sp,
                             fontWeight = if (isLastMonth) FontWeight.ExtraBold else FontWeight.Bold,
                             letterSpacing = (-0.2).sp
@@ -129,7 +129,7 @@ fun WeightEvolutionSection(
                         // NOMBRE DEL MES (AegisSteel)
                         Text(
                             text = month.uppercase(),
-                            color = if (isLastMonth) Color.White else MaterialTheme.colorScheme.secondary,
+                            color = if (isLastMonth) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.secondary,
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Black,
                             letterSpacing = 1.sp

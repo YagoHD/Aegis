@@ -98,7 +98,7 @@ fun ExerciseSessionCard(
                         fontWeight = FontWeight.Black,
                         fontSize = 18.sp,
                         letterSpacing = 1.sp,
-                        color = if (isExerciseDone) MaterialTheme.colorScheme.primary else Color.White
+                        color = if (isExerciseDone) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                     ),
                     modifier = Modifier.weight(1f)
                 )
