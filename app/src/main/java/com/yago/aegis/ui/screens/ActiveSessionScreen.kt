@@ -264,7 +264,7 @@ fun ActiveSessionScreen(
                     ) {
                         Text(
                             stringResource(R.string.btn_continue_training),
-                            color = androidx.compose.ui.graphics.Color.Black,
+                            color = MaterialTheme.colorScheme.onPrimary,
                             fontWeight = androidx.compose.ui.text.font.FontWeight.Black,
                             fontSize = 12.sp,
                             letterSpacing = 1.sp
@@ -549,7 +549,7 @@ fun ActiveSessionScreen(
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = if (hasAnyData) MaterialTheme.colorScheme.primary
                                                  else MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
-                                contentColor = if (hasAnyData) Color.Black
+                                contentColor = if (hasAnyData) MaterialTheme.colorScheme.onPrimary
                                                else MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
                                 disabledContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
                                 disabledContentColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)

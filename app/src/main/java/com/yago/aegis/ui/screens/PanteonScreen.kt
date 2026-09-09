@@ -367,7 +367,7 @@ private fun RankBadge(tier: RankTier, small: Boolean = false, winner: Boolean = 
     ) {
         Text(
             text = tier.display.uppercase(),
-            color = if (isRanked) Color.Black else MaterialTheme.colorScheme.secondary,
+            color = if (isRanked) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.secondary,
             fontSize = if (small) 8.sp else 10.sp,
             fontWeight = FontWeight.Black,
             letterSpacing = 1.sp,
@@ -797,7 +797,7 @@ private fun RankDivisionBadge(rank: Rank) {
     ) {
         Text(
             text = rank.label,
-            color = if (isRanked) Color.Black else MaterialTheme.colorScheme.secondary,
+            color = if (isRanked) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.secondary,
             fontSize = 8.sp,
             fontWeight = FontWeight.Black,
             letterSpacing = 0.5.sp,
@@ -835,7 +835,7 @@ private fun RankingCta(text: String, button: String, onClick: () -> Unit) {
             ) {
                 Text(
                     text = button,
-                    color = Color.Black,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Black,
                     letterSpacing = 1.sp,

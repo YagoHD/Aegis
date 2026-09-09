@@ -416,7 +416,7 @@ fun WorkoutCompleteScreen(
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = Color.Black
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             ) {
                 Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(18.dp))

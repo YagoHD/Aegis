@@ -103,7 +103,7 @@ fun EditExerciseScreen(
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary, // AegisBronze
-                    contentColor = Color.Black
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             ) {
                 Text(

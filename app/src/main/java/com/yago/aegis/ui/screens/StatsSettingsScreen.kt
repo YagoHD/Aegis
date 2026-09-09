@@ -83,7 +83,7 @@ fun StatsSettingsScreen(
                         ) {
                             Text(
                                 text = day.toString(),
-                                color = if (isSelected) Color.Black else Color.White,
+                                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground,
                                 fontWeight = FontWeight.Black
                             )
                         }

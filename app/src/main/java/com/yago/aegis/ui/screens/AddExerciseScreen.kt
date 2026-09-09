@@ -212,7 +212,7 @@ fun AddExerciseScreen(
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = Color.Black
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ) {
@@ -376,7 +376,7 @@ fun TagChip(text: String, isSelected: Boolean, onClick: () -> Unit) {
         Text(
             text = text.uppercase(),
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            color = if (isSelected) Color.Black else MaterialTheme.colorScheme.secondary,
+            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.secondary,
             fontSize = 10.sp,
             fontWeight = FontWeight.Black,
             letterSpacing = 0.5.sp

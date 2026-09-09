@@ -193,11 +193,11 @@ fun SelectRoutineScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center
                         ) {
-                            Icon(Icons.Default.Bolt, contentDescription = null, tint = Color.Black)
+                            Icon(Icons.Default.Bolt, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary)
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
                                 text = stringResource(R.string.custom_workout_btn),
-                                color = Color.Black,
+                                color = MaterialTheme.colorScheme.onPrimary,
                                 fontWeight = FontWeight.Black,
                                 fontSize = 13.sp,
                                 letterSpacing = 1.5.sp
@@ -347,7 +347,7 @@ private fun ActiveSessionBanner(
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = Color.Black
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     ),
                     shape = RoundedCornerShape(6.dp)
                 ) {

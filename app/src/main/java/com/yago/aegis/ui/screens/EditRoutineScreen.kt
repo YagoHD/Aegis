@@ -259,7 +259,7 @@ fun EditRoutineScreen(
                     modifier = Modifier.fillMaxWidth().height(60.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = Color.Black,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
                         disabledContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f),
                         disabledContentColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)
                     ),

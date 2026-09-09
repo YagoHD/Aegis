@@ -162,12 +162,12 @@ fun IdentityScreen(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     stringResource(R.string.btn_continue),
-                    color = Color.Black,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     fontWeight = FontWeight.Black,
                     letterSpacing = 1.sp
                 )
                 Spacer(modifier = Modifier.width(12.dp))
-                Icon(Icons.Default.ArrowForward, contentDescription = null, tint = Color.Black, modifier = Modifier.size(20.dp))
+                Icon(Icons.Default.ArrowForward, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(20.dp))
             }
         }
     }

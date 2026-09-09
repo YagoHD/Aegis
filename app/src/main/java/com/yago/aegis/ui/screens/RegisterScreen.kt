@@ -202,12 +202,12 @@ fun RegisterScreen(
             shape = RoundedCornerShape(8.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = Color.Black,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
                 disabledContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)
             )
         ) {
             if (uiState.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.Black, strokeWidth = 2.dp)
+                CircularProgressIndicator(modifier = Modifier.size(20.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
             } else {
                 Text(stringResource(R.string.btn_create_account), fontWeight = FontWeight.Black, letterSpacing = 1.sp)
             }

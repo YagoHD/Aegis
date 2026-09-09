@@ -320,7 +320,7 @@ private fun NewUserBanner(onNavigateToTrain: () -> Unit) {
         ) {
             Text(
                 text = stringResource(R.string.btn_go),
-                color = Color.Black,
+                color = MaterialTheme.colorScheme.onPrimary,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Black,
                 letterSpacing = 1.sp,

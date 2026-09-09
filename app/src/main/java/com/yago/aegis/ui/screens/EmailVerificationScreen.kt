@@ -130,9 +130,9 @@ fun EmailVerificationScreen(
             shape = RoundedCornerShape(8.dp)
         ) {
             if (uiState.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.Black, strokeWidth = 2.dp)
+                CircularProgressIndicator(modifier = Modifier.size(20.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
             } else {
-                Text(stringResource(R.string.btn_verified), color = Color.Black, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
+                Text(stringResource(R.string.btn_verified), color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
             }
         }
 

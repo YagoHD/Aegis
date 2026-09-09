@@ -247,7 +247,7 @@ private fun SectionTitle(title: String, count: Int = 0) {
             Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primary) {
                 Text(
                     "$count",
-                    color = Color.Black, fontSize = 10.sp, fontWeight = FontWeight.Black,
+                    color = MaterialTheme.colorScheme.onPrimary, fontSize = 10.sp, fontWeight = FontWeight.Black,
                     modifier = Modifier.padding(horizontal = 7.dp, vertical = 1.dp)
                 )
             }
@@ -279,7 +279,7 @@ private fun RequestCard(ref: FriendRef, onAccept: () -> Unit, onReject: () -> Un
                     onClick = onAccept,
                     modifier = Modifier.weight(1f).height(42.dp),
                     shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = Color.Black)
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)
                 ) {
                     Text(stringResource(R.string.social_accept), fontWeight = FontWeight.Black, fontSize = 12.sp, letterSpacing = 0.5.sp)
                 }
@@ -353,11 +353,11 @@ private fun PrimaryButton(label: String, busy: Boolean, enabled: Boolean, onClic
         shape = RoundedCornerShape(8.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = Color.Black,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
             disabledContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)
         )
     ) {
-        if (busy) CircularProgressIndicator(modifier = Modifier.height(20.dp).width(20.dp), strokeWidth = 2.dp, color = Color.Black)
+        if (busy) CircularProgressIndicator(modifier = Modifier.height(20.dp).width(20.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onPrimary)
         else Text(label, fontWeight = FontWeight.Black, letterSpacing = 1.sp, fontSize = 13.sp)
     }
 }

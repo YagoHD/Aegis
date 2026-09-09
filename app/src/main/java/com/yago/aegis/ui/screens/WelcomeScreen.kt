@@ -105,7 +105,7 @@ fun WelcomeScreen(
             ) {
                 Text(
                     text = stringResource(R.string.btn_create_account),
-                    color = Color.Black,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     fontWeight = FontWeight.Black,
                     fontSize = 14.sp,
                     letterSpacing = 2.sp
