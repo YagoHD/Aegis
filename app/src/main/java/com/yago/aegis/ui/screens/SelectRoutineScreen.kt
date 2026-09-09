@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.R
+import com.yago.aegis.ui.theme.Radius
 import com.yago.aegis.ui.components.AegisAlertDialog
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.RoutineSelectionCard
@@ -89,7 +90,7 @@ fun SelectRoutineScreen(
                     focusedTextColor = MaterialTheme.colorScheme.onBackground,
                     unfocusedTextColor = MaterialTheme.colorScheme.onBackground
                 ),
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(Radius.md)
             )
         }
     }
@@ -186,7 +187,7 @@ fun SelectRoutineScreen(
                             .padding(top = 20.dp)
                             .height(52.dp),
                         color = MaterialTheme.colorScheme.primary,
-                        shape = RoundedCornerShape(8.dp)
+                        shape = RoundedCornerShape(Radius.md)
                     ) {
                         Row(
                             modifier = Modifier.fillMaxSize(),
@@ -237,7 +238,7 @@ fun SelectRoutineScreen(
                     Surface(
                         onClick = onNavigateToCreateRoutine,
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                        shape = RoundedCornerShape(4.dp),
+                        shape = RoundedCornerShape(Radius.sm),
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
                     ) {
                         Row(
@@ -316,7 +317,7 @@ private fun ActiveSessionBanner(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 20.dp),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(Radius.lg),
         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
     ) {

@@ -36,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.R
+import com.yago.aegis.ui.theme.Radius
 import com.yago.aegis.data.LevelState
 import com.yago.aegis.data.PhotoType
 import com.yago.aegis.data.XpEntry
@@ -183,9 +184,9 @@ fun ProfileContent(viewModel: ProfileViewModel, onNavigateToTrain: () -> Unit = 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(RoundedCornerShape(Radius.md))
                     .background(MaterialTheme.colorScheme.surface)
-                    .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f), RoundedCornerShape(Radius.md))
                     .padding(vertical = 8.dp)
             ) {
                 state.customMeasures.forEach { measure ->
@@ -283,9 +284,9 @@ private fun NewUserBanner(onNavigateToTrain: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(Radius.lg))
             .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
-            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), RoundedCornerShape(Radius.lg))
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -314,7 +315,7 @@ private fun NewUserBanner(onNavigateToTrain: () -> Unit) {
         }
         Surface(
             onClick = onNavigateToTrain,
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(Radius.md),
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.wrapContentSize()
         ) {
@@ -338,9 +339,9 @@ private fun LevelCard(level: LevelState, breakdown: List<XpEntry>) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(Radius.xl))
             .background(MaterialTheme.colorScheme.surface)
-            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f), RoundedCornerShape(16.dp))
+            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f), RoundedCornerShape(Radius.xl))
             .then(if (canExpand) Modifier.clickable { expanded = !expanded } else Modifier)
             .padding(horizontal = 18.dp, vertical = 16.dp)
     ) {
@@ -394,14 +395,14 @@ private fun LevelCard(level: LevelState, breakdown: List<XpEntry>) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(8.dp)
-                .clip(RoundedCornerShape(4.dp))
+                .clip(RoundedCornerShape(Radius.sm))
                 .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.08f))
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth(animatedXp)
                     .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp))
+                    .clip(RoundedCornerShape(Radius.sm))
                     .background(MaterialTheme.colorScheme.primary)
             )
         }

@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.data.Routine
 import com.yago.aegis.R
+import com.yago.aegis.ui.theme.Radius
 import com.yago.aegis.ui.globalExerciseIcons
 import com.yago.aegis.ui.components.AegisAlertDialog
 import com.yago.aegis.ui.components.AegisTopBar
@@ -103,7 +104,7 @@ fun RoutineScreen(
                         focusedTextColor = MaterialTheme.colorScheme.onBackground,
                         unfocusedTextColor = MaterialTheme.colorScheme.onBackground
                     ),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(Radius.md)
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -208,7 +209,7 @@ fun RoutineScreen(
                     .padding(vertical = 16.dp)
                     .height(56.dp),
                 color = Color.Transparent,
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(Radius.md),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
             ) {
                 Row(
@@ -272,12 +273,12 @@ fun AegisIconSelector(
     Box(
         modifier = Modifier
             .size(45.dp)
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(Radius.md))
             .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else Color.Transparent)
             .border(
                 width = 1.dp,
                 color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(Radius.md)
             )
             .clickable { onClick() },
         contentAlignment = Alignment.Center
