@@ -524,4 +524,18 @@
     <string name="export_data_label">EXPORTER LES DONNÉES</string>
     <string name="export_data_subtitle">Télécharge tes routines, ton historique et tes mesures en JSON pour les analyser avec une IA</string>
     <string name="export_data_error">Impossible d\'exporter les données</string>
+    <!-- Panteón / competitivo (Y13) -->
+    <string name="panteon_my_ranks">MES RANGS</string>
+    <string name="panteon_friends">AMIS</string>
+    <string name="panteon_league">LIGUE</string>
+    <string name="panteon_subtitle">30 DERNIERS JOURS</string>
+    <string name="panteon_empty">Termine des entraînements pour forger tes rangs</string>
+    <string name="highest_rank_label">TOP</string>
+    <string name="to_improve_label">À AMÉLIORER</string>
+    <string name="next_tier_short">SUIV.</string>
+    <string name="body_map_soon">CARTE CORPORELLE BIENTÔT</string>
+    <string name="competitive_muscles_title">MUSCLES (COMPÉTITIF)</string>
+    <string name="competitive_muscles_hint">Coche les muscles travaillés et leur %. Compte pour le Panthéon ; total ~100.</string>
+    <string name="add_muscle_btn">AJOUTER UN MUSCLE</string>
+    <string name="total_percent_label">TOTAL %1$d%%</string>
 </resources>

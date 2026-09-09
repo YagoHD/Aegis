@@ -42,8 +42,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
@@ -98,6 +100,7 @@ fun ActiveSessionScreen(
     val context = LocalContext.current
     val density = LocalDensity.current
     val view = LocalView.current
+    val haptic = LocalHapticFeedback.current
 
     // O15: sin sesión (arranque o rutina inexistente) mostramos un loader, no una pantalla
     // en blanco sin salida. Si la rutina ya no existe, el gesto de atrás del sistema sale.
@@ -498,6 +501,7 @@ fun ActiveSessionScreen(
                             onClick = {
                                 if (!isFinishing) {
                                     isFinishing = true
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress) // G1
                                     workoutViewModel.requestFinishWorkout()
                                     if (workoutViewModel.uncompletedWithData.value.isEmpty()) {
                                         workoutViewModel.finishWorkout(routinesViewModel) {
