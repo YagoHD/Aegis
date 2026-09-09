@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -60,6 +61,11 @@ fun LoginScreen(
                 authViewModel.clearState()
             },
             containerColor = MaterialTheme.colorScheme.surface,
+            modifier = Modifier.border( // O6: mismo borde/forma que AegisAlertDialog
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+                shape = RoundedCornerShape(28.dp)
+            ),
             title = {
                 Text(
                     stringResource(R.string.forgot_password_title),

@@ -5,6 +5,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -81,7 +83,15 @@ fun IdentityScreen(
 
         AegisStepProgress(currentStep = 2)
 
-        Spacer(modifier = Modifier.height(32.dp)) // Reducido un poco para ganar aire
+        // Y8: contenido scrollable (evita recortes con teclado en pantallas pequeñas);
+        // el botón queda fijo abajo.
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+        ) {
+
+        Spacer(modifier = Modifier.height(32.dp))
 
         // Avatar Section
         Box(
@@ -133,8 +143,9 @@ fun IdentityScreen(
             placeholder = stringResource(R.string.username_placeholder)
         )
 
-        // Este Spacer "empuja" todo lo de arriba hacia arriba y lo de abajo hacia abajo
-        Spacer(modifier = Modifier.weight(1f))
+        } // fin del contenido scrollable
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         Button(
             onClick = { if (name.isNotBlank()) onContinue(name) },

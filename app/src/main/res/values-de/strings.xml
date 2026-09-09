@@ -538,4 +538,7 @@
     <string name="competitive_muscles_hint">Markiere die trainierten Muskeln und ihren %. Zählt für das Pantheon; Summe ~100.</string>
     <string name="add_muscle_btn">MUSKEL HINZUFÜGEN</string>
     <string name="total_percent_label">GESAMT %1$d%%</string>
+    <!-- Notification permission rationale (O14) -->
+    <string name="notif_rationale_title">HINWEISE AKTIVIEREN</string>
+    <string name="notif_rationale_body">Erlaube Benachrichtigungen, damit wir dich am Ende der Pause informieren, auch wenn du die App verlässt.</string>
 </resources>

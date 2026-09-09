@@ -36,6 +36,7 @@ fun StatsScreen(
     val evolutionMonths by viewModel.evolutionMonths.collectAsState(initial = 3)
     val routines by viewModel.routines.collectAsState()
     val history by viewModel.workoutHistory.collectAsState()
+    val syncState by viewModel.syncState.collectAsState()
 
     // Usamos Scaffold para que la TopBar esté fija y el contenido haga scroll debajo
     Scaffold(
@@ -80,6 +81,9 @@ fun StatsScreen(
         ) {
 
             item { Spacer(Modifier.height(8.dp)) } // Margen superior tras la TopBar
+
+            // O13: indicador de sincronización (solo visible al sincronizar/error/offline)
+            item { SyncIndicator(syncState = syncState, onRetry = { viewModel.retrySync() }) }
 
             // --- BLOQUE DE MÉTRICAS (DISCIPLINA Y VOLUMEN) ---
             if (showDiscipline || showVolume) {

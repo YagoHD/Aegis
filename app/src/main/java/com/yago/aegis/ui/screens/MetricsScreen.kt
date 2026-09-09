@@ -1,6 +1,8 @@
 package com.yago.aegis.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -54,6 +56,13 @@ fun MetricsScreen(
         )
 
         AegisStepProgress(currentStep = 3)
+
+        // Y8: contenido scrollable; el botón queda fijo abajo.
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+        ) {
 
         Spacer(modifier = Modifier.height(32.dp))
 
@@ -109,8 +118,9 @@ fun MetricsScreen(
         Spacer(modifier = Modifier.height(10.dp))
         SexSelector(selected = sex, onSelect = { sex = it })
 
-        // El Spacer con weight empuja el botón al final sin necesidad de scroll
-        Spacer(modifier = Modifier.weight(1f))
+        } // fin del contenido scrollable
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         // --- 4. BOTÓN DE FINALIZACIÓN (10% Bronce) ---
         val isEnabled = height.isNotEmpty() && mass.isNotEmpty() && sex.isNotEmpty()

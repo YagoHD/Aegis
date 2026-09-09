@@ -41,6 +41,10 @@ class StatsViewModel(private val repository: UserRepository) : ViewModel() {
     val targetDaysPerWeek = repository.targetDaysPerWeek
     val restTimerSeconds = repository.restTimerSeconds
 
+    // O13: estado de sincronización, para mostrar el indicador también en Stats.
+    val syncState = repository.syncState
+    fun retrySync() = viewModelScope.launch { repository.retrySync() }
+
     // Librería de ejercicios
     val allExercises: StateFlow<List<Exercise>> = repository.exerciseLibrary
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(30_000), emptyList())

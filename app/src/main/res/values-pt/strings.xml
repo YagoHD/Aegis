@@ -538,4 +538,7 @@
     <string name="competitive_muscles_hint">Marca os músculos que trabalha e a sua %. Conta para o Panteão; soma ~100.</string>
     <string name="add_muscle_btn">ADICIONAR MÚSCULO</string>
     <string name="total_percent_label">TOTAL %1$d%%</string>
+    <!-- Notification permission rationale (O14) -->
+    <string name="notif_rationale_title">ATIVAR AVISOS</string>
+    <string name="notif_rationale_body">Permite as notificações para te avisar quando acabar o descanso, mesmo que saias da app.</string>
 </resources>

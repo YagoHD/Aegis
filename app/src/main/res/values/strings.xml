@@ -553,4 +553,7 @@
     <string name="export_data_label">EXPORTAR DATOS</string>
     <string name="export_data_subtitle">Descarga tus rutinas, historial y métricas en JSON para analizarlos con una IA</string>
     <string name="export_data_error">No se pudieron exportar los datos</string>
+    <!-- Aviso de permiso de notificaciones (O14) -->
+    <string name="notif_rationale_title">ACTIVAR AVISOS</string>
+    <string name="notif_rationale_body">Permite las notificaciones para avisarte cuando acabe el descanso, aunque salgas de la app.</string>
 </resources>

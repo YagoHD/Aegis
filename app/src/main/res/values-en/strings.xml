@@ -538,4 +538,7 @@
     <string name="competitive_muscles_hint">Mark the muscles it works and their %. Counts for the Pantheon; sums to ~100.</string>
     <string name="add_muscle_btn">ADD MUSCLE</string>
     <string name="total_percent_label">TOTAL %1$d%%</string>
+    <!-- Notification permission rationale (O14) -->
+    <string name="notif_rationale_title">ENABLE ALERTS</string>
+    <string name="notif_rationale_body">Allow notifications so we can alert you when your rest ends, even if you leave the app.</string>
 </resources>

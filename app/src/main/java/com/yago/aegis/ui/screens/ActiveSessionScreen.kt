@@ -19,6 +19,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.*
@@ -136,6 +137,9 @@ fun ActiveSessionScreen(
     ) { granted ->
         if (granted) showWorkoutNotification(context, currentSession.routineName)
     }
+    // O14: explicamos ANTES de pedir el permiso (nada de prompt del sistema a bocajarro).
+    var showNotifRationale by remember { mutableStateOf(false) }
+    var notifAsked by remember { mutableStateOf(false) }
 
     DisposableEffect(currentSession.routineName) {
         val hasPermission = ContextCompat.checkSelfPermission(
@@ -144,12 +148,33 @@ fun ActiveSessionScreen(
 
         if (hasPermission) {
             showWorkoutNotification(context, currentSession.routineName)
-        } else {
-            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else if (!notifAsked) {
+            notifAsked = true
+            showNotifRationale = true
         }
 
         onDispose {
             cancelWorkoutNotification(context)
+        }
+    }
+
+    if (showNotifRationale) {
+        AegisAlertDialog(
+            title = stringResource(R.string.notif_rationale_title),
+            confirmText = stringResource(R.string.btn_continue),
+            dismissText = stringResource(R.string.btn_cancel),
+            onDismiss = { showNotifRationale = false },
+            onConfirm = {
+                showNotifRationale = false
+                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        ) {
+            Text(
+                text = stringResource(R.string.notif_rationale_body),
+                color = MaterialTheme.colorScheme.secondary,
+                fontSize = 14.sp,
+                lineHeight = 20.sp
+            )
         }
     }
 
@@ -201,6 +226,11 @@ fun ActiveSessionScreen(
         AlertDialog(
             onDismissRequest = { showCancelDialog = false },
             containerColor = MaterialTheme.colorScheme.surface,
+            modifier = Modifier.border( // O6: mismo borde/forma que AegisAlertDialog
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+                shape = RoundedCornerShape(28.dp)
+            ),
             title = {
                 Text(
                     stringResource(R.string.exit_session_dialog_title),
