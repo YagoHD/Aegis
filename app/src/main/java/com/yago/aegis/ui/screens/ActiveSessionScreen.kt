@@ -600,7 +600,7 @@ fun RestTimerFab(
     val primaryColor = MaterialTheme.colorScheme.primary
     val surfaceColor = MaterialTheme.colorScheme.surface
     val secondaryColor = MaterialTheme.colorScheme.secondary
-    val dangerColor = Color(0xFFE57373)
+    val dangerColor = MaterialTheme.colorScheme.error
 
     val isLow = seconds <= 10 && isRunning
     val arcColor = if (isLow) dangerColor else primaryColor

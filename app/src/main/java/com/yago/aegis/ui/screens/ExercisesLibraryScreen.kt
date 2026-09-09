@@ -64,7 +64,7 @@ fun ExercisesLibraryScreen(
             },
             onDismiss = { exerciseToDelete = null },
             confirmText = stringResource(R.string.btn_delete),
-            confirmButtonColor = Color(0xFFB3261E)
+            confirmButtonColor = MaterialTheme.colorScheme.error
         ) {
             Text(
                 text = stringResource(R.string.delete_exercise_confirm, exerciseToDelete?.name ?: ""),

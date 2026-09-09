@@ -204,7 +204,7 @@ fun ProfileContent(viewModel: ProfileViewModel, onNavigateToTrain: () -> Unit = 
                 snapshotSaved = false
             }
         }
-        val savedGreen = Color(0xFF7FB069)
+        val savedGreen = com.yago.aegis.ui.theme.AegisSuccess
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -224,7 +224,7 @@ fun ProfileContent(viewModel: ProfileViewModel, onNavigateToTrain: () -> Unit = 
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = if (snapshotSaved) stringResource(R.string.saved_today_label) else stringResource(R.string.btn_save),
+                    text = if (snapshotSaved) stringResource(R.string.saved_today_label) else stringResource(R.string.save_today_btn),
                     color = if (snapshotSaved) savedGreen else MaterialTheme.colorScheme.primary,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Black,

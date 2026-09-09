@@ -124,9 +124,9 @@ fun RowScope.AegisNavItem(
             Text(
                 text = labelText.uppercase(),
                 style = TextStyle(
-                    fontSize = 8.sp,
+                    fontSize = 10.sp, // O8: subido de 8sp (ilegible) al mínimo cómodo de nav
                     fontWeight = FontWeight.Black,
-                    letterSpacing = 1.2.sp // Ajustado para que quepa bien en el nuevo ancho
+                    letterSpacing = 1.sp
                 )
             )
         },

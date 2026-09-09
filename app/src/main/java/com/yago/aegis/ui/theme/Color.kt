@@ -31,3 +31,4 @@ val AegisSteel = Color(0xFF70706B)     // Gris metálico para textos desactivado
 val AegisCard = SurfaceDark
 // --- ESTADOS ---
 val AegisError = Color(0xFFCF6679)     // Rojo suave para no romper la estética
+val AegisSuccess = Color(0xFF7FB069)   // Verde para confirmaciones (guardado, éxito)
