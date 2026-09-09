@@ -16,3 +16,6 @@ local.properties
 
 # Mockups de diseño (Stitch) — referencias, no versionar (bloat)
 /images/
+
+# Kotlin daemon build cache
+.kotlin/
