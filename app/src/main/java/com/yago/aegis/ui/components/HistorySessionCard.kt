@@ -1,3 +1,4 @@
+import com.yago.aegis.ui.theme.Spacing
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -50,7 +51,7 @@ fun HistorySessionCard(
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         // --- TABLA DE SETS (Cabeceras Técnicas) ---
         Row(

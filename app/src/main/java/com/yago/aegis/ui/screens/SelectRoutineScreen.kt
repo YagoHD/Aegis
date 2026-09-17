@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Spacing
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
@@ -161,7 +162,7 @@ fun SelectRoutineScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 24.dp) // Mantenemos el padding de lujo
+                .padding(horizontal = Spacing.xl) // Mantenemos el padding de lujo
         ) {
             // --- BANNER DE SESIÓN EN CURSO ---
             if (hasActiveSession && activeName != null) {
@@ -195,7 +196,7 @@ fun SelectRoutineScreen(
                             horizontalArrangement = Arrangement.Center
                         ) {
                             Icon(Icons.Default.Bolt, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary)
-                            Spacer(modifier = Modifier.width(12.dp))
+                            Spacer(modifier = Modifier.width(Spacing.md))
                             Text(
                                 text = stringResource(R.string.custom_workout_btn),
                                 color = MaterialTheme.colorScheme.onPrimary,
@@ -213,7 +214,7 @@ fun SelectRoutineScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 24.dp, bottom = 16.dp),
+                        .padding(top = Spacing.xl, bottom = Spacing.lg),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.Bottom
                 ) {
@@ -242,11 +243,11 @@ fun SelectRoutineScreen(
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
                     ) {
                         Row(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            modifier = Modifier.padding(horizontal = Spacing.md, vertical = 6.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(Icons.Default.Add, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(14.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
+                            Spacer(modifier = Modifier.width(Spacing.xs))
                             Text(
                                 stringResource(R.string.new_routine_btn),
                                 color = MaterialTheme.colorScheme.primary,
@@ -298,7 +299,7 @@ fun SelectRoutineScreen(
                             }
                         }
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(Spacing.md))
                 }
             }
 
@@ -321,7 +322,7 @@ private fun ActiveSessionBanner(
         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(Spacing.lg)) {
             Text(
                 text = stringResource(R.string.active_session_lock_title),
                 color = MaterialTheme.colorScheme.primary,
@@ -329,7 +330,7 @@ private fun ActiveSessionBanner(
                 fontWeight = FontWeight.Black,
                 letterSpacing = 2.sp
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(Spacing.xs))
             Text(
                 text = name.uppercase(),
                 color = MaterialTheme.colorScheme.onBackground,
@@ -341,7 +342,7 @@ private fun ActiveSessionBanner(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(Spacing.md)
             ) {
                 Button(
                     onClick = onResume,
@@ -388,7 +389,7 @@ fun EmptyRoutinesPlaceholder() {
             tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
             modifier = Modifier.size(48.dp)
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
         Text(
             stringResource(R.string.no_routines_message),
             color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),

@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.background
@@ -99,7 +100,7 @@ fun EditExerciseScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(24.dp)
+                    .padding(Spacing.xl)
                     .height(56.dp),
                 shape = RoundedCornerShape(Radius.md),
                 colors = ButtonDefaults.buttonColors(
@@ -119,10 +120,10 @@ fun EditExerciseScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+                .padding(horizontal = Spacing.xl),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xl)
         ) {
-            item { Spacer(modifier = Modifier.height(8.dp)) }
+            item { Spacer(modifier = Modifier.height(Spacing.sm)) }
 
             // 1. NOMBRE DEL EJERCICIO
             item {
@@ -139,7 +140,7 @@ fun EditExerciseScreen(
                 LoadTypeSelector(
                     selected = loadType,
                     onSelect = { loadType = it },
-                    modifier = Modifier.padding(vertical = 4.dp)
+                    modifier = Modifier.padding(vertical = Spacing.xs)
                 )
             }
 
@@ -151,7 +152,7 @@ fun EditExerciseScreen(
                     onValueChange = { notes = it },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp),
+                        .padding(top = Spacing.sm),
                     placeholder = {
                         Text(
                             text = stringResource(R.string.form_notes_placeholder),
@@ -195,10 +196,10 @@ fun EditExerciseScreen(
             item {
                 SectionLabel(stringResource(R.string.select_icon))
                 FlowRow(
-                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = Spacing.md),
                     maxItemsInEachRow = 4,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.md)
                 ) {
                     globalExerciseIcons.forEach { (name, icon) ->
                         // ✅ Reutilizamos el selector modular
@@ -224,7 +225,7 @@ fun EditInput(value: String, onValueChange: (String) -> Unit, placeholder: Strin
         onValueChange = onValueChange,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 8.dp),
+            .padding(top = Spacing.sm),
         placeholder = {
             Text(
                 text = placeholder.uppercase(),

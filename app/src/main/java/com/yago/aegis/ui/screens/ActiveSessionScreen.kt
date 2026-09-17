@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import android.Manifest
@@ -251,8 +252,8 @@ fun ActiveSessionScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                        .padding(horizontal = Spacing.sm, vertical = Spacing.xs),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.sm)
                 ) {
                     // Opción 1: Continuar entrenando
                     Button(
@@ -334,7 +335,7 @@ fun ActiveSessionScreen(
                     text = stringResource(R.string.uncompleted_exercises_message),
                     color = MaterialTheme.colorScheme.secondary,
                     fontSize = 14.sp,
-                    modifier = Modifier.padding(bottom = 12.dp)
+                    modifier = Modifier.padding(bottom = Spacing.md)
                 )
                 uncompletedWithData.forEach { progress ->
                     Text(
@@ -434,10 +435,10 @@ fun ActiveSessionScreen(
                         .fillMaxSize()
                         .padding(horizontal = 20.dp)
                         .imePadding(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.lg),
                     contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 120.dp)
                 ) {
-                    item { Spacer(modifier = Modifier.height(8.dp)) }
+                    item { Spacer(modifier = Modifier.height(Spacing.sm)) }
 
                     itemsIndexed(
                         items = currentSession.exercisesProgress,
@@ -468,7 +469,7 @@ fun ActiveSessionScreen(
                             )
                             if (index < currentSession.exercisesProgress.lastIndex) {
                                 HorizontalDivider(
-                                    modifier = Modifier.padding(top = 16.dp, start = 8.dp, end = 8.dp),
+                                    modifier = Modifier.padding(top = Spacing.lg, start = Spacing.sm, end = Spacing.sm),
                                     thickness = 0.5.dp,
                                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
                                 )
@@ -498,7 +499,7 @@ fun ActiveSessionScreen(
                             onClick = { showExercisePicker = true },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = 8.dp)
+                                .padding(top = Spacing.sm)
                                 .height(52.dp),
                             color = Color.Transparent,
                             shape = RoundedCornerShape(Radius.md),
@@ -510,7 +511,7 @@ fun ActiveSessionScreen(
                                 horizontalArrangement = Arrangement.Center
                             ) {
                                 Icon(Icons.Default.Add, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                                Spacer(modifier = Modifier.width(8.dp))
+                                Spacer(modifier = Modifier.width(Spacing.sm))
                                 Text(
                                     text = stringResource(R.string.btn_add_exercise),
                                     color = MaterialTheme.colorScheme.primary,
@@ -545,7 +546,7 @@ fun ActiveSessionScreen(
                             enabled = hasAnyData && !isFinishing,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = 16.dp, bottom = 100.dp)
+                                .padding(top = Spacing.lg, bottom = 100.dp)
                                 .height(60.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = if (hasAnyData) MaterialTheme.colorScheme.primary

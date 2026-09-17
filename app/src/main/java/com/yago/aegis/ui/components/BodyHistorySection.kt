@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import android.net.Uri
@@ -65,7 +66,7 @@ fun BodyHistorySection(
                     snapshots = recent,
                     valueSelector = { it.mass.toFloatOrNull() ?: 0f }
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Spacing.lg))
             }
 
             // Grasa corporal
@@ -77,7 +78,7 @@ fun BodyHistorySection(
                     snapshots = recent,
                     valueSelector = { it.bodyFat.toFloatOrNull() ?: 0f }
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Spacing.lg))
             }
 
             // Medidas personalizadas con al menos 2 puntos no cero
@@ -96,7 +97,7 @@ fun BodyHistorySection(
                                 ?.value?.toFloatOrNull() ?: 0f
                         }
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(Spacing.lg))
                 }
             }
         }
@@ -110,10 +111,10 @@ fun BodyHistorySection(
                 fontWeight = FontWeight.Black,
                 letterSpacing = 2.sp
             )
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
-                contentPadding = PaddingValues(end = 4.dp)
+                contentPadding = PaddingValues(end = Spacing.xs)
             ) {
                 items(photoHistory.reversed()) { record ->
                     PhotoHistoryThumb(record)
@@ -152,7 +153,7 @@ private fun MetricLineChart(
             1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f)
         )
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(Spacing.lg)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -171,7 +172,7 @@ private fun MetricLineChart(
                 ) {
                     Text(
                         text = deltaTxt,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                        modifier = Modifier.padding(horizontal = Spacing.sm, vertical = 3.dp),
                         color = bronzeColor,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Black
@@ -187,17 +188,17 @@ private fun MetricLineChart(
                     fontWeight = FontWeight.Black,
                     letterSpacing = (-0.5).sp
                 )
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(Spacing.xs))
                 Text(
                     text = unit,
                     color = secondaryColor,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 4.dp)
+                    modifier = Modifier.padding(bottom = Spacing.xs)
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             // Gráfica
             Box(
@@ -298,7 +299,7 @@ private fun PhotoHistoryThumb(record: PhotoRecord) {
                         listOf(Color.Transparent, Color.Black.copy(alpha = 0.75f))
                     )
                 )
-                .padding(bottom = 8.dp, top = 20.dp),
+                .padding(bottom = Spacing.sm, top = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(

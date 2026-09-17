@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import android.app.Activity
@@ -90,7 +91,7 @@ fun RegisterScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(24.dp)
+            .padding(Spacing.xl)
     ) {
         AegisTopBar(
             title = stringResource(R.string.create_account_title),
@@ -108,7 +109,7 @@ fun RegisterScreen(
 
         AegisStepProgress(currentStep = 3, totalSteps = 3)
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Spacing.xl))
 
         Text(
             text = stringResource(R.string.save_progress_title),
@@ -122,7 +123,7 @@ fun RegisterScreen(
             color = MaterialTheme.colorScheme.secondary,
             fontSize = 14.sp,
             lineHeight = 20.sp,
-            modifier = Modifier.padding(top = 8.dp)
+            modifier = Modifier.padding(top = Spacing.sm)
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -140,7 +141,7 @@ fun RegisterScreen(
             colors = authTextFieldColors()
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         // Contraseña
         OutlinedTextField(
@@ -165,7 +166,7 @@ fun RegisterScreen(
             colors = authTextFieldColors()
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         // Confirmar contraseña
         OutlinedTextField(
@@ -184,7 +185,7 @@ fun RegisterScreen(
         // Errores
         val error = localError ?: uiState.errorMessage
         if (error != null) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Spacing.sm))
             Text(
                 text = error,
                 color = MaterialTheme.colorScheme.error,
@@ -214,7 +215,7 @@ fun RegisterScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         // Separador
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -223,7 +224,7 @@ fun RegisterScreen(
             HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f))
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         // Botón Google
         OutlinedButton(
@@ -242,6 +243,6 @@ fun RegisterScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
     }
 }

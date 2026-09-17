@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import android.content.Context
@@ -169,14 +170,14 @@ fun SettingsMenu(
             .padding(horizontal = 20.dp)
             .verticalScroll(scrollState)
     ) {
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Spacing.xl))
 
         SectionHeader(text = stringResource(R.string.user_data_section_title))
 
         Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+            modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.lg),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(Spacing.lg)
         ) {
             Box(
                 modifier = Modifier
@@ -215,7 +216,7 @@ fun SettingsMenu(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         Text(
             text = stringResource(R.string.sex_label),
@@ -224,7 +225,7 @@ fun SettingsMenu(
             fontWeight = FontWeight.Black,
             letterSpacing = 1.5.sp
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
         SexSelector(selected = user.sex, onSelect = { viewModel.updateSex(it) })
 
         VerticalDividerSection()
@@ -232,21 +233,21 @@ fun SettingsMenu(
         // --- SECCIÓN CUENTA (solo si hay authViewModel) ---
         if (authViewModel != null) {
             SectionHeader(text = stringResource(R.string.account_section_title))
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             Surface(
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                 shape = RoundedCornerShape(Radius.lg)
             ) {
-                Column(modifier = Modifier.padding(8.dp)) {
+                Column(modifier = Modifier.padding(Spacing.sm)) {
                     // Email del usuario
                     authViewModel.currentUserEmail?.let { email ->
                         Row(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp, horizontal = 8.dp),
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp, horizontal = Spacing.sm),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(Icons.Default.Person, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(12.dp))
+                            Spacer(modifier = Modifier.width(Spacing.md))
                             Text(email, color = MaterialTheme.colorScheme.secondary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                         }
                         HorizontalDivider(color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f))
@@ -258,11 +259,11 @@ fun SettingsMenu(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { showChangePasswordDialog = true }
-                                .padding(vertical = 14.dp, horizontal = 8.dp),
+                                .padding(vertical = 14.dp, horizontal = Spacing.sm),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(Icons.Default.Lock, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(12.dp))
+                            Spacer(modifier = Modifier.width(Spacing.md))
                             Text(stringResource(R.string.change_password_label), color = MaterialTheme.colorScheme.onBackground, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                             Text("›", color = MaterialTheme.colorScheme.secondary, fontSize = 18.sp)
                         }
@@ -274,11 +275,11 @@ fun SettingsMenu(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { showLogoutDialog = true }
-                            .padding(vertical = 14.dp, horizontal = 8.dp),
+                            .padding(vertical = 14.dp, horizontal = Spacing.sm),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(Icons.Default.Logout, null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(Spacing.md))
                         Text(stringResource(R.string.logout_label), color = MaterialTheme.colorScheme.error, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     }
                     HorizontalDivider(color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f))
@@ -288,11 +289,11 @@ fun SettingsMenu(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { showDeleteAccountDialog = true }
-                            .padding(vertical = 14.dp, horizontal = 8.dp),
+                            .padding(vertical = 14.dp, horizontal = Spacing.sm),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(Icons.Default.DeleteForever, null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(Spacing.md))
                         Text(stringResource(R.string.delete_account_label), color = MaterialTheme.colorScheme.error, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                         Text("›", color = MaterialTheme.colorScheme.secondary, fontSize = 18.sp)
                     }
@@ -312,11 +313,11 @@ fun SettingsMenu(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { onNavigateToPrivacy() }
-                        .padding(vertical = 14.dp, horizontal = 16.dp),
+                        .padding(vertical = 14.dp, horizontal = Spacing.lg),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(Icons.Default.PrivacyTip, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(Spacing.md))
                     Text(stringResource(R.string.privacy_policy_label), color = MaterialTheme.colorScheme.onBackground, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                     Text("›", color = MaterialTheme.colorScheme.secondary, fontSize = 18.sp)
                 }
@@ -344,11 +345,11 @@ fun SettingsMenu(
                             }
                         }
                     }
-                    .padding(vertical = 14.dp, horizontal = 16.dp),
+                    .padding(vertical = 14.dp, horizontal = Spacing.lg),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(Icons.Default.FileDownload, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(Spacing.md))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(exportLabel, color = MaterialTheme.colorScheme.onBackground, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     Text(stringResource(R.string.export_data_subtitle), color = MaterialTheme.colorScheme.secondary, fontSize = 11.sp)
@@ -360,13 +361,13 @@ fun SettingsMenu(
         VerticalDividerSection()
 
         SectionHeader(text = stringResource(R.string.settings_title_interface))
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         Surface(
             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
             shape = RoundedCornerShape(Radius.lg)
         ) {
-            Column(modifier = Modifier.padding(8.dp)) {
+            Column(modifier = Modifier.padding(Spacing.sm)) {
                 SettingsRow(stringResource(R.string.settings_label_body_fat), state.showBodyFat) { viewModel.toggleBodyFat(it) }
                 SettingsRow(stringResource(R.string.settings_label_bmi), state.showBMI) { viewModel.toggleBMI(it) }
                 SettingsRow(stringResource(R.string.settings_label_visual_log), state.showVisualLog) { viewModel.toggleVisualLog(it) }
@@ -383,9 +384,9 @@ fun SettingsMenu(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp)
+                    .padding(vertical = Spacing.xs)
                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), RoundedCornerShape(Radius.md))
-                    .padding(start = 16.dp),
+                    .padding(start = Spacing.lg),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -396,12 +397,12 @@ fun SettingsMenu(
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
             Box(modifier = Modifier.weight(1f)) {
                 AegisTextField(
@@ -622,7 +623,7 @@ fun DeleteAccountDialog(
             )
         },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
                 Text(
                     stringResource(R.string.delete_account_warning),
                     color = MaterialTheme.colorScheme.secondary,
@@ -705,15 +706,15 @@ fun SectionHeader(text: String) {
 
 @Composable
 fun VerticalDividerSection() {
-    Spacer(modifier = Modifier.height(24.dp))
+    Spacer(modifier = Modifier.height(Spacing.xl))
     HorizontalDivider(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.05f), thickness = 1.dp)
-    Spacer(modifier = Modifier.height(24.dp))
+    Spacer(modifier = Modifier.height(Spacing.xl))
 }
 
 @Composable
 fun SettingsRow(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 4.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.sm, horizontal = Spacing.xs),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(

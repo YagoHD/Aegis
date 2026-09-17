@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.BorderStroke
@@ -37,7 +38,7 @@ fun LoadTypeSelector(
             letterSpacing = 1.5.sp
         )
         Spacer(modifier = Modifier.height(10.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
             LoadChip(
                 label = stringResource(R.string.load_type_normal),
                 isSelected = selected == LoadType.NORMAL,
@@ -57,7 +58,7 @@ fun LoadTypeSelector(
                 onClick = { onSelect(LoadType.ASSISTED) }
             )
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
         Text(
             text = when (selected) {
                 LoadType.NORMAL -> stringResource(R.string.load_type_normal_desc)
@@ -97,7 +98,7 @@ private fun LoadChip(
             fontSize = 10.sp,
             fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
             letterSpacing = 0.5.sp,
-            modifier = Modifier.padding(vertical = 10.dp, horizontal = 4.dp)
+            modifier = Modifier.padding(vertical = 10.dp, horizontal = Spacing.xs)
         )
     }
 }

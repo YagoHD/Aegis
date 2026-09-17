@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.background
@@ -30,7 +31,7 @@ fun GirthRow(label: String, value: String, onValueChange: (String) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 12.dp, horizontal = 4.dp), // Un poco más de aire vertical
+            .padding(vertical = Spacing.md, horizontal = Spacing.xs), // Un poco más de aire vertical
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -56,7 +57,7 @@ fun GirthRow(label: String, value: String, onValueChange: (String) -> Unit) {
                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
                     shape = RoundedCornerShape(Radius.sm)
                 )
-                .padding(vertical = 8.dp, horizontal = 12.dp),
+                .padding(vertical = Spacing.sm, horizontal = Spacing.md),
             contentAlignment = Alignment.Center
         ) {
             BasicTextField(

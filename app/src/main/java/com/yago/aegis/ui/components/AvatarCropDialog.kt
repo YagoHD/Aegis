@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import android.graphics.Bitmap
@@ -100,7 +101,7 @@ fun AvatarCropDialog(
                     fontWeight = FontWeight.Black,
                     letterSpacing = 1.sp
                 )
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(Spacing.lg))
 
                 // Cuadro capturable + anillo circular de guía (el anillo NO se captura).
                 Box(modifier = Modifier.size(280.dp), contentAlignment = Alignment.Center) {
@@ -143,7 +144,7 @@ fun AvatarCropDialog(
                     color = MaterialTheme.colorScheme.secondary,
                     fontSize = 11.sp
                 )
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(Spacing.md))
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                     TextButton(onClick = onDismiss) {

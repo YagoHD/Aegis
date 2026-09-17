@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.BorderStroke
@@ -110,10 +111,10 @@ fun FriendsScreen(viewModel: SocialViewModel, onBack: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(pad)
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = Spacing.xl)
                 .verticalScroll(rememberScrollState())
         ) {
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(Spacing.lg))
 
             val u = myUsername
             if (u == null) {
@@ -155,7 +156,7 @@ fun FriendsScreen(viewModel: SocialViewModel, onBack: () -> Unit) {
                     }
                 }
             }
-            Spacer(Modifier.height(40.dp))
+            Spacer(Modifier.height(Spacing.xxl))
         }
     }
 
@@ -179,7 +180,7 @@ private fun MyProfileCard(username: String, rank: MyRank, photo: Any?, onEdit: (
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.padding(Spacing.lg), verticalAlignment = Alignment.CenterVertically) {
             AegisAvatar(username, 60.dp, MaterialTheme.colorScheme.primary, 2.dp, photo = photo)
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {
@@ -189,7 +190,7 @@ private fun MyProfileCard(username: String, rank: MyRank, photo: Any?, onEdit: (
                         color = MaterialTheme.colorScheme.onBackground,
                         fontSize = 17.sp, fontWeight = FontWeight.Black, maxLines = 1
                     )
-                    Spacer(Modifier.width(8.dp))
+                    Spacer(Modifier.width(Spacing.sm))
                     Icon(
                         Icons.Default.Edit,
                         contentDescription = stringResource(R.string.social_change_username),
@@ -240,11 +241,11 @@ private fun AddAllySection(busy: Boolean, onAdd: (String) -> Unit) {
 
 @Composable
 private fun SectionTitle(title: String, count: Int = 0) {
-    Spacer(Modifier.height(24.dp))
+    Spacer(Modifier.height(Spacing.xl))
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(title, color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.Black, letterSpacing = 1.5.sp)
         if (count > 0) {
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(Spacing.sm))
             Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primary) {
                 Text(
                     "$count",
@@ -254,7 +255,7 @@ private fun SectionTitle(title: String, count: Int = 0) {
             }
         }
     }
-    Spacer(Modifier.height(8.dp))
+    Spacer(Modifier.height(Spacing.sm))
 }
 
 /** Solicitud recibida: avatar + @usuario + Aceptar (bronce) / Rechazar (contorno). */
@@ -263,18 +264,18 @@ private fun RequestCard(ref: FriendRef, onAccept: () -> Unit, onReject: () -> Un
     Surface(
         shape = RoundedCornerShape(Radius.lg),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+        modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xs)
     ) {
         Column(Modifier.padding(14.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 AegisAvatar(ref.username.ifBlank { "?" }, 40.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f))
-                Spacer(Modifier.width(12.dp))
+                Spacer(Modifier.width(Spacing.md))
                 Text(
                     "@${ref.username.ifBlank { "…" }}",
                     color = MaterialTheme.colorScheme.onBackground, fontSize = 15.sp, fontWeight = FontWeight.Black, maxLines = 1
                 )
             }
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(Spacing.md))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Button(
                     onClick = onAccept,
@@ -301,11 +302,11 @@ private fun RequestCard(ref: FriendRef, onAccept: () -> Unit, onReject: () -> Un
 @Composable
 private fun FriendListRow(username: String, tier: RankTier, photo: Any?, onRemove: () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.sm),
         verticalAlignment = Alignment.CenterVertically
     ) {
         AegisAvatar(username.ifBlank { "?" }, 44.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f), photo = photo)
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(Spacing.md))
         Text(
             "@${username.ifBlank { "…" }}",
             color = MaterialTheme.colorScheme.onBackground, fontSize = 15.sp, fontWeight = FontWeight.Black,
@@ -382,7 +383,7 @@ private fun ChangeUsernameDialog(current: String, busy: Boolean, onConfirm: (Str
                     "${stringResource(R.string.social_your_username)}:  @$current",
                     color = MaterialTheme.colorScheme.secondary, fontSize = 13.sp
                 )
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(Spacing.md))
                 UsernameField(text, R.string.social_username_hint) { text = it }
             }
         },

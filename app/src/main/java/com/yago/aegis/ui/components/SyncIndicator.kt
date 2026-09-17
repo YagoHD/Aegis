@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Spacing
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -41,7 +42,7 @@ fun SyncIndicator(syncState: SyncState, onRetry: () -> Unit) {
                     strokeWidth = 2.dp,
                     color = MaterialTheme.colorScheme.primary
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(Spacing.sm))
                 Text(
                     text = stringResource(R.string.sync_syncing),
                     color = MaterialTheme.colorScheme.secondary,
@@ -61,7 +62,7 @@ fun SyncIndicator(syncState: SyncState, onRetry: () -> Unit) {
                     tint = MaterialTheme.colorScheme.error.copy(alpha = 0.85f),
                     modifier = Modifier.size(14.dp)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(Spacing.sm))
                 Text(
                     text = stringResource(R.string.sync_error),
                     color = MaterialTheme.colorScheme.error.copy(alpha = 0.9f),
@@ -70,7 +71,7 @@ fun SyncIndicator(syncState: SyncState, onRetry: () -> Unit) {
                 )
                 TextButton(
                     onClick = onRetry,
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                    contentPadding = PaddingValues(horizontal = Spacing.sm, vertical = 0.dp)
                 ) {
                     Text(
                         text = stringResource(R.string.sync_retry),
@@ -94,7 +95,7 @@ fun SyncIndicator(syncState: SyncState, onRetry: () -> Unit) {
                     tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.7f),
                     modifier = Modifier.size(14.dp)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(Spacing.sm))
                 Text(
                     text = stringResource(R.string.sync_cached),
                     color = MaterialTheme.colorScheme.secondary,
@@ -103,7 +104,7 @@ fun SyncIndicator(syncState: SyncState, onRetry: () -> Unit) {
                 )
                 TextButton(
                     onClick = onRetry,
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                    contentPadding = PaddingValues(horizontal = Spacing.sm, vertical = 0.dp)
                 ) {
                     Text(
                         text = stringResource(R.string.sync_retry),

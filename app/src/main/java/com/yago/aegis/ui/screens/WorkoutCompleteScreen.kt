@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import android.content.Context
@@ -165,7 +166,7 @@ fun WorkoutCompleteScreen(
                 lineHeight = 46.sp
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Spacing.sm))
 
             Text(
                 text = summary.routineName.uppercase(),
@@ -220,13 +221,13 @@ fun WorkoutCompleteScreen(
                                     else Color(0xFFCF6679),
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Black,
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = Spacing.xs)
                                 )
                             }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(Spacing.sm))
 
                     Row(verticalAlignment = Alignment.Bottom) {
                         Text(
@@ -242,11 +243,11 @@ fun WorkoutCompleteScreen(
                             color = MaterialTheme.colorScheme.secondary,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            modifier = Modifier.padding(bottom = Spacing.sm)
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(Spacing.md))
 
                     Box(
                         modifier = Modifier
@@ -266,7 +267,7 @@ fun WorkoutCompleteScreen(
                     }
 
                     if (previousVolume > 0) {
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(Spacing.sm))
                         Text(
                             text = stringResource(R.string.volume_comparison_label, formatVolume(previousVolume)),
                             color = MaterialTheme.colorScheme.secondary,
@@ -277,12 +278,12 @@ fun WorkoutCompleteScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             // ─── DURACIÓN Y EJERCICIOS ───
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(Spacing.md)
             ) {
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant,
@@ -290,7 +291,7 @@ fun WorkoutCompleteScreen(
                     modifier = Modifier.weight(1f)
                 ) {
                     Column(
-                        modifier = Modifier.padding(16.dp),
+                        modifier = Modifier.padding(Spacing.lg),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Icon(
@@ -299,7 +300,7 @@ fun WorkoutCompleteScreen(
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(20.dp)
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(Spacing.sm))
                         Text(
                             text = stringResource(R.string.duration_label),
                             color = MaterialTheme.colorScheme.secondary,
@@ -307,7 +308,7 @@ fun WorkoutCompleteScreen(
                             fontWeight = FontWeight.Black,
                             letterSpacing = 1.5.sp
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(Spacing.xs))
                         Text(
                             text = formatDuration(animatedDuration.value.toLong()),
                             color = MaterialTheme.colorScheme.onBackground,
@@ -323,7 +324,7 @@ fun WorkoutCompleteScreen(
                     modifier = Modifier.weight(1f)
                 ) {
                     Column(
-                        modifier = Modifier.padding(16.dp),
+                        modifier = Modifier.padding(Spacing.lg),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Icon(
@@ -332,7 +333,7 @@ fun WorkoutCompleteScreen(
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(20.dp)
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(Spacing.sm))
                         Text(
                             text = stringResource(R.string.exercises_label),
                             color = MaterialTheme.colorScheme.secondary,
@@ -340,7 +341,7 @@ fun WorkoutCompleteScreen(
                             fontWeight = FontWeight.Black,
                             letterSpacing = 1.5.sp
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(Spacing.xs))
                         Text(
                             text = "${summary.exerciseCount}",
                             color = MaterialTheme.colorScheme.onBackground,
@@ -351,7 +352,7 @@ fun WorkoutCompleteScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(Spacing.xl))
 
             // ─── EJERCICIOS COMPLETADOS ───
             Row(
@@ -367,14 +368,14 @@ fun WorkoutCompleteScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             summary.exercises.forEach { exercise ->
                 ExerciseSummaryRow(exercise)
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(Spacing.sm))
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(Spacing.xl))
 
             // ─── SHARE CARD ───
             Text(
@@ -386,7 +387,7 @@ fun WorkoutCompleteScreen(
                 letterSpacing = 2.sp
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             // La card se captura con graphicsLayer al dibujarse
             Box(
@@ -402,7 +403,7 @@ fun WorkoutCompleteScreen(
                 WorkoutShareCard(summary = summary, previousVolume = previousVolume)
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             Button(
                 onClick = {
@@ -430,7 +431,7 @@ fun WorkoutCompleteScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(Spacing.xl))
 
             // ─── NOTAS DE SESIÓN ───
             OutlinedTextField(
@@ -472,10 +473,10 @@ fun WorkoutCompleteScreen(
                 fontStyle = FontStyle.Italic,
                 textAlign = TextAlign.Center,
                 lineHeight = 22.sp,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = Spacing.lg)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.lg))
 
             // ─── ENLACE AL HISTORIAL ───
             TextButton(
@@ -498,7 +499,7 @@ fun WorkoutCompleteScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.lg))
 
             // ─── BOTÓN FINISH SESSION ───
             Button(
@@ -518,7 +519,7 @@ fun WorkoutCompleteScreen(
                     fontSize = 15.sp,
                     letterSpacing = 2.sp
                 )
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(Spacing.md))
                 Text(
                     text = "»",
                     fontWeight = FontWeight.Black,
@@ -527,7 +528,7 @@ fun WorkoutCompleteScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxl))
         }
     }
 }
@@ -547,7 +548,7 @@ private fun PRCelebrationBanner(prExercises: List<ExerciseSummary>, borderAlpha:
         shape = RoundedCornerShape(Radius.lg)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+            modifier = Modifier.padding(horizontal = Spacing.lg, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -640,9 +641,9 @@ private fun WorkoutShareCard(summary: WorkoutSummary, previousVolume: Double = 0
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
         HorizontalDivider(color = ShareBronze.copy(alpha = 0.18f))
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         // Nombre de la rutina + badge % mejora
         Row(
@@ -660,7 +661,7 @@ private fun WorkoutShareCard(summary: WorkoutSummary, previousVolume: Double = 0
                 modifier = Modifier.weight(1f)
             )
             if (volumeDiff != null) {
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(Spacing.sm))
                 Surface(
                     color = if (volumeDiff >= 0) ShareBronze.copy(alpha = 0.15f)
                             else Color(0xFF8B3A3A).copy(alpha = 0.2f),
@@ -676,7 +677,7 @@ private fun WorkoutShareCard(summary: WorkoutSummary, previousVolume: Double = 0
                         color = if (volumeDiff >= 0) ShareAccent else Color(0xFFBF7070),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Black,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xs)
                     )
                 }
             }
@@ -692,7 +693,7 @@ private fun WorkoutShareCard(summary: WorkoutSummary, previousVolume: Double = 0
         Spacer(modifier = Modifier.height(18.dp))
 
         // Stats chips (ahora 4: volumen, duración, ejercicios, sets)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
             ShareStatChip(
                 value = formatVolumeShare(summary.totalVolume),
                 unit = "kg",
@@ -727,7 +728,7 @@ private fun WorkoutShareCard(summary: WorkoutSummary, previousVolume: Double = 0
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp),
+                        .padding(vertical = Spacing.xs),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
@@ -778,14 +779,14 @@ private fun WorkoutShareCard(summary: WorkoutSummary, previousVolume: Double = 0
                     text = stringResource(R.string.more_count_format, summary.exercises.size - 5),
                     color = ShareBronze.copy(alpha = 0.45f),
                     fontSize = 11.sp,
-                    modifier = Modifier.padding(top = 4.dp, start = 15.dp)
+                    modifier = Modifier.padding(top = Spacing.xs, start = 15.dp)
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(18.dp))
         HorizontalDivider(color = ShareBronze.copy(alpha = 0.13f))
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -806,7 +807,7 @@ private fun WorkoutShareCard(summary: WorkoutSummary, previousVolume: Double = 0
                         tint = ShareAccent,
                         modifier = Modifier.size(14.dp)
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(modifier = Modifier.width(Spacing.xs))
                     Text(
                         text = stringResource(R.string.new_pr_badge),
                         color = ShareAccent,
@@ -866,7 +867,7 @@ fun ExerciseSummaryRow(exercise: ExerciseSummary) {
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+            modifier = Modifier.padding(horizontal = Spacing.lg, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
@@ -917,7 +918,7 @@ fun ExerciseSummaryRow(exercise: ExerciseSummary) {
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Black,
                         letterSpacing = 1.sp,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xs)
                     )
                 }
             }

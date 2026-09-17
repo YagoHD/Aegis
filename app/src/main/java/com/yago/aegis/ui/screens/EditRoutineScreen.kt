@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.animation.core.animateDpAsState
@@ -100,11 +101,11 @@ fun EditRoutineScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = Spacing.xl),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             // ITEM 0
-            item { Spacer(modifier = Modifier.height(8.dp)) }
+            item { Spacer(modifier = Modifier.height(Spacing.sm)) }
 
             // ITEM 1: NOMBRE
             item {
@@ -116,7 +117,7 @@ fun EditRoutineScreen(
                         fontWeight = FontWeight.Black,
                         letterSpacing = 1.5.sp
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(Spacing.sm))
                     OutlinedTextField(
                         value = tempName,
                         onValueChange = { tempName = it },
@@ -148,7 +149,7 @@ fun EditRoutineScreen(
                         fontWeight = FontWeight.Black,
                         letterSpacing = 1.5.sp
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(Spacing.md))
                     FlowRow(
                         modifier = Modifier.fillMaxWidth(),
                         maxItemsInEachRow = 5,
@@ -232,7 +233,7 @@ fun EditRoutineScreen(
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary
                         )
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(Spacing.md))
                         Text(
                             text = stringResource(R.string.btn_add_exercise).uppercase(),
                             color = MaterialTheme.colorScheme.primary,
@@ -267,7 +268,7 @@ fun EditRoutineScreen(
                     shape = RoundedCornerShape(Radius.md)
                 ) {
                     Icon(Icons.Default.Save, contentDescription = null)
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(Spacing.md))
                     Text(
                         if (isNewRoutine) stringResource(R.string.btn_create_routine_label)
                         else stringResource(R.string.btn_save_routine),
@@ -309,7 +310,7 @@ private fun RoutineSlotCard(
         Column {
             // Fila principal
             Row(
-                modifier = Modifier.padding(12.dp),
+                modifier = Modifier.padding(Spacing.md),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Icono del ejercicio principal
@@ -328,7 +329,7 @@ private fun RoutineSlotCard(
                     )
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(Spacing.md))
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
@@ -384,7 +385,7 @@ private fun RoutineSlotCard(
                             contentDescription = stringResource(R.string.content_desc_reorder),
                             tint = MaterialTheme.colorScheme.secondary,
                             modifier = dragHandleModifier
-                                .padding(start = 4.dp)
+                                .padding(start = Spacing.xs)
                                 .size(22.dp)
                         )
                     }
@@ -394,14 +395,14 @@ private fun RoutineSlotCard(
             // Variantes adicionales (2.ª en adelante)
             if (hasVariants) {
                 HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 12.dp),
+                    modifier = Modifier.padding(horizontal = Spacing.md),
                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f)
                 )
                 slot.variants.drop(1).forEachIndexed { idx, variant ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 56.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
+                            .padding(start = 56.dp, end = Spacing.xs, top = Spacing.xs, bottom = Spacing.xs),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
@@ -410,7 +411,7 @@ private fun RoutineSlotCard(
                             tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f),
                             modifier = Modifier.size(12.dp)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(Spacing.sm))
                         Text(
                             text = variant.name.uppercase(),
                             color = MaterialTheme.colorScheme.secondary,
@@ -431,7 +432,7 @@ private fun RoutineSlotCard(
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(Spacing.xs))
             }
         }
     }

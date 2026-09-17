@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.BorderStroke
@@ -72,7 +73,7 @@ fun WeightEvolutionSection(
             }
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(Spacing.md))
 
         // --- CONTENEDOR TÉCNICO AEGIS ---
         Surface(
@@ -111,7 +112,7 @@ fun WeightEvolutionSection(
                             letterSpacing = (-0.2).sp
                         )
 
-                        Spacer(Modifier.height(8.dp))
+                        Spacer(Modifier.height(Spacing.sm))
 
                         // LA BARRA TÉCNICA
                         Box(
@@ -125,7 +126,7 @@ fun WeightEvolutionSection(
                                 )
                         )
 
-                        Spacer(Modifier.height(12.dp))
+                        Spacer(Modifier.height(Spacing.md))
 
                         // NOMBRE DEL MES (AegisSteel)
                         Text(

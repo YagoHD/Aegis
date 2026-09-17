@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.BorderStroke
@@ -48,7 +49,7 @@ fun ExerciseCard(
         )
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(Spacing.md),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // 1. ICONO DINÁMICO
@@ -70,7 +71,7 @@ fun ExerciseCard(
                 )
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(Spacing.lg))
 
             // 2. TEXTO E INFORMACIÓN
             Column(modifier = Modifier.weight(1f)) {
@@ -125,7 +126,7 @@ fun ExerciseCard(
                         contentDescription = stringResource(R.string.content_desc_reorder),
                         tint = MaterialTheme.colorScheme.secondary,
                         modifier = dragHandleModifier // ✅ Aquí aplicamos el arrastre
-                            .padding(start = 8.dp)
+                            .padding(start = Spacing.sm)
                             .size(24.dp)
                     )
                 }

@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Spacing
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -38,7 +39,7 @@ fun MetricInput(
     onValueChange: (String) -> Unit,
     icon: ImageVector
 ) {
-    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.md)) {
         // --- ETIQUETAS DE CABECERA ---
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -64,7 +65,7 @@ fun MetricInput(
             )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         // --- ÁREA DE ENTRADA NUMÉRICA ---
         val hairline = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
@@ -80,7 +81,7 @@ fun MetricInput(
                         strokeWidth = 1.dp.toPx()
                     )
                 }
-                .padding(bottom = 8.dp),
+                .padding(bottom = Spacing.sm),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -150,7 +151,7 @@ fun AegisTextField(
             )
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         TextField(
             value = value,

@@ -1,3 +1,4 @@
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -42,7 +43,7 @@ fun BiometricCard(
                 color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
                 shape = RoundedCornerShape(Radius.md)
             ) // Borde técnico casi invisible
-            .padding(12.dp)
+            .padding(Spacing.md)
     ) {
         // ETIQUETA: AegisSteel (Gris técnico)
         Text(
@@ -53,7 +54,7 @@ fun BiometricCard(
             letterSpacing = 1.5.sp
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         Row(
             verticalAlignment = Alignment.Bottom,
@@ -90,7 +91,7 @@ fun BiometricCard(
                 )
             }
 
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(Spacing.xs))
 
             // UNIDAD: AegisSteel más pequeño
             Text(

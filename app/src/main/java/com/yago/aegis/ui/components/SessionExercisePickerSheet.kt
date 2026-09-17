@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.background
@@ -78,7 +79,7 @@ fun SessionExercisePickerSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp)
-                .padding(bottom = 24.dp)
+                .padding(bottom = Spacing.xl)
         ) {
             Text(
                 text = stringResource(R.string.btn_add_exercise),
@@ -88,7 +89,7 @@ fun SessionExercisePickerSheet(
                 letterSpacing = 1.sp
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             OutlinedTextField(
                 value = query,
@@ -109,7 +110,7 @@ fun SessionExercisePickerSheet(
                 )
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             // Crear un ejercicio nuevo con el texto escrito (para improvisar en el gym)
             if (canCreate) {
@@ -119,11 +120,11 @@ fun SessionExercisePickerSheet(
                         .clip(RoundedCornerShape(Radius.md))
                         .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
                         .clickable { onCreateExercise(trimmedQuery) }
-                        .padding(horizontal = 12.dp, vertical = 12.dp),
+                        .padding(horizontal = Spacing.md, vertical = Spacing.md),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(Icons.Default.Add, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(Spacing.md))
                     Text(
                         text = stringResource(R.string.create_exercise_named, trimmedQuery.uppercase()),
                         color = MaterialTheme.colorScheme.primary,
@@ -134,14 +135,14 @@ fun SessionExercisePickerSheet(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(Spacing.sm))
             }
 
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(max = 420.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(Spacing.sm)
             ) {
                 items(filtered, key = { it.id }) { ex ->
                     val added = ex.id in alreadyAddedIds
@@ -151,7 +152,7 @@ fun SessionExercisePickerSheet(
                             .clip(RoundedCornerShape(Radius.md))
                             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
                             .then(if (added) Modifier else Modifier.clickable { onPick(ex) })
-                            .padding(horizontal = 12.dp, vertical = 12.dp),
+                            .padding(horizontal = Spacing.md, vertical = Spacing.md),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
@@ -161,7 +162,7 @@ fun SessionExercisePickerSheet(
                                    else MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(20.dp)
                         )
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(Spacing.md))
                         Text(
                             text = ex.name.uppercase(),
                             color = if (added) MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)

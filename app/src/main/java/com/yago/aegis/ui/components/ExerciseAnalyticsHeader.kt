@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.BorderStroke
@@ -45,7 +46,7 @@ fun ExerciseAnalyticsHeader(
             letterSpacing = 1.5.sp
         )
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(Spacing.md))
 
         OutlinedTextField(
             value = searchQuery,
@@ -101,7 +102,7 @@ fun ExerciseAnalyticsHeader(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             verticalAlignment = Alignment.CenterVertically
         ) {
             HeaderChip(
@@ -161,7 +162,7 @@ private fun HeaderChip(label: String, isSelected: Boolean, onClick: () -> Unit) 
             fontSize = 11.sp,
             fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
             letterSpacing = 0.8.sp,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+            modifier = Modifier.padding(horizontal = Spacing.md, vertical = 6.dp)
         )
     }
 }

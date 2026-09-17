@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.layout.*
@@ -48,7 +49,7 @@ fun EmailVerificationScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(Spacing.xl),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -69,7 +70,7 @@ fun EmailVerificationScreen(
             letterSpacing = 2.sp
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         Text(
             text = stringResource(R.string.verification_email_sent),
@@ -78,7 +79,7 @@ fun EmailVerificationScreen(
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         Surface(
             color = MaterialTheme.colorScheme.surface,
@@ -91,11 +92,11 @@ fun EmailVerificationScreen(
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.md)
             )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         Text(
             text = stringResource(R.string.verification_instructions),
@@ -106,7 +107,7 @@ fun EmailVerificationScreen(
         )
 
         if (uiState.errorMessage != null && uiState.needsEmailVerification) {
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
             Surface(
                 color = MaterialTheme.colorScheme.error.copy(alpha = 0.1f),
                 shape = RoundedCornerShape(Radius.md)
@@ -115,7 +116,7 @@ fun EmailVerificationScreen(
                     text = uiState.errorMessage!!,
                     color = MaterialTheme.colorScheme.error,
                     fontSize = 12.sp,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                    modifier = Modifier.padding(horizontal = Spacing.lg, vertical = 10.dp),
                     textAlign = TextAlign.Center
                 )
             }
@@ -137,7 +138,7 @@ fun EmailVerificationScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         OutlinedButton(
             onClick = {
@@ -163,7 +164,7 @@ fun EmailVerificationScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Spacing.xl))
 
         TextButton(onClick = onBack) {
             Text(stringResource(R.string.use_another_account), color = MaterialTheme.colorScheme.secondary, fontSize = 13.sp)

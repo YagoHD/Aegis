@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -70,7 +71,7 @@ fun IdentityScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(24.dp)
+            .padding(Spacing.xl)
     ) {
         AegisTopBar(
             title = stringResource(R.string.identity_title),
@@ -121,7 +122,7 @@ fun IdentityScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Spacing.xl))
 
         Text(
             text = stringResource(R.string.configure_avatar_title),
@@ -134,7 +135,7 @@ fun IdentityScreen(
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxl))
 
         // Form Section
         AegisTextField(
@@ -146,7 +147,7 @@ fun IdentityScreen(
 
         } // fin del contenido scrollable
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         Button(
             onClick = { if (name.isNotBlank()) onContinue(name) },
@@ -167,7 +168,7 @@ fun IdentityScreen(
                     fontWeight = FontWeight.Black,
                     letterSpacing = 1.sp
                 )
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(Spacing.md))
                 Icon(Icons.Default.ArrowForward, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(20.dp))
             }
         }

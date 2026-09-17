@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import android.graphics.Paint
@@ -64,7 +65,7 @@ fun ProgressionChartSection(
                         fontWeight = FontWeight.Black,
                         letterSpacing = 1.5.sp
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(Spacing.sm))
                     Row(verticalAlignment = Alignment.Bottom) {
                         Text(
                             text = currentMax.split(" ")[0],
@@ -73,7 +74,7 @@ fun ProgressionChartSection(
                             fontWeight = FontWeight.Black,
                             letterSpacing = (-1).sp
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(Spacing.xs))
                         Text(
                             text = "KG",
                             color = MaterialTheme.colorScheme.secondary,
@@ -90,7 +91,7 @@ fun ProgressionChartSection(
                 ) {
                     Text(
                         text = "↗ $percentageGain",
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xs),
                         color = bronzeColor,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Black
@@ -224,7 +225,7 @@ fun ProgressionChartSection(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             // ── ETIQUETAS EJE X ──
             val labels = if (dateLabels.isNotEmpty()) dateLabels else recentMonths

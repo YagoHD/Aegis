@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Spacing
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -61,7 +62,7 @@ fun ExerciseSessionCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 12.dp)
+            .padding(vertical = Spacing.md)
     ) {
         // --- CABECERA TÉCNICA ---
         Row(
@@ -152,7 +153,7 @@ fun ExerciseSessionCard(
                 fontSize = 9.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 0.5.sp,
-                modifier = Modifier.padding(start = 4.dp, top = 2.dp, bottom = 2.dp)
+                modifier = Modifier.padding(start = Spacing.xs, top = 2.dp, bottom = 2.dp)
             )
         }
 
@@ -164,7 +165,7 @@ fun ExerciseSessionCard(
                 fontSize = 11.sp,
                 fontStyle = FontStyle.Italic,
                 lineHeight = 15.sp,
-                modifier = Modifier.padding(start = 4.dp, top = 2.dp, bottom = 2.dp)
+                modifier = Modifier.padding(start = Spacing.xs, top = 2.dp, bottom = 2.dp)
             )
         }
 
@@ -174,7 +175,7 @@ fun ExerciseSessionCard(
             suggestion = progressionSuggestion
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         // --- LISTA DE SERIES (SETS) ---
         progress.sets.forEachIndexed { index, set ->
@@ -194,7 +195,7 @@ fun ExerciseSessionCard(
             onClick = onAddSet,
             modifier = Modifier
                 .align(Alignment.Start)
-                .padding(top = 8.dp)
+                .padding(top = Spacing.sm)
         ) {
             Icon(
                 imageVector = Icons.Default.Add,

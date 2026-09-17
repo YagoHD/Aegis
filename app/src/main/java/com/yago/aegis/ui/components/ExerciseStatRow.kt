@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.BorderStroke
@@ -40,7 +41,7 @@ fun ExerciseStatRow(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp) // Espaciado entre tarjetas igual que en tus listas
+            .padding(vertical = Spacing.xs) // Espaciado entre tarjetas igual que en tus listas
             .clickable { onClick() },
         shape = RoundedCornerShape(Radius.md),
         color = MaterialTheme.colorScheme.surfaceVariant, // 30%: SurfaceDark/Variant
@@ -50,7 +51,7 @@ fun ExerciseStatRow(
         )
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(Spacing.md),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // 1. ICONO DINÁMICO (Con el mismo recuadro que tu ExerciseCard)
@@ -76,7 +77,7 @@ fun ExerciseStatRow(
                 )
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(Spacing.lg))
 
             // 2. TEXTO E INFORMACIÓN (Mismo estilo de jerarquía)
             Column(modifier = Modifier.weight(1f)) {
@@ -115,7 +116,7 @@ fun ExerciseStatRow(
                 )
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(Spacing.sm))
 
             // INDICADOR DE ENTRADA
             Icon(

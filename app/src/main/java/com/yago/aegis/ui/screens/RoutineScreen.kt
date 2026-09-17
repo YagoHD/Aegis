@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Spacing
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -117,7 +118,7 @@ fun RoutineScreen(
                     letterSpacing = 1.sp
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(Spacing.md))
 
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
@@ -167,9 +168,9 @@ fun RoutineScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 24.dp) // Padding lateral de lujo
+                .padding(horizontal = Spacing.xl) // Padding lateral de lujo
         ) {
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             RoutinesExercisesToggle(
                 isRoutines = true,
@@ -177,7 +178,7 @@ fun RoutineScreen(
                 onSelectExercises = onNavigateToExercises
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.lg))
 
             LazyColumn(
                 modifier = Modifier.weight(1f),
@@ -206,7 +207,7 @@ fun RoutineScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 16.dp)
+                    .padding(vertical = Spacing.lg)
                     .height(56.dp),
                 color = Color.Transparent,
                 shape = RoundedCornerShape(Radius.md),
@@ -217,7 +218,7 @@ fun RoutineScreen(
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Icon(Icons.Default.Add, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(Spacing.md))
                     Text(
                         text = stringResource(R.string.btn_create_routine),
                         color = MaterialTheme.colorScheme.primary,
@@ -236,7 +237,7 @@ private fun RoutinesEmptyState() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 56.dp, bottom = 24.dp),
+            .padding(top = 56.dp, bottom = Spacing.xl),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
@@ -245,7 +246,7 @@ private fun RoutinesEmptyState() {
             tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
             modifier = Modifier.size(56.dp)
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
         Text(
             text = stringResource(R.string.routines_empty_title),
             color = MaterialTheme.colorScheme.onBackground,
@@ -253,7 +254,7 @@ private fun RoutinesEmptyState() {
             fontWeight = FontWeight.Black,
             letterSpacing = 1.sp
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
         Text(
             text = stringResource(R.string.routines_empty_subtitle),
             color = MaterialTheme.colorScheme.secondary,

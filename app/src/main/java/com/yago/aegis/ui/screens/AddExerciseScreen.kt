@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.BorderStroke
@@ -89,10 +90,10 @@ fun AddExerciseScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+                .padding(horizontal = Spacing.xl),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xl)
         ) {
-            item { Spacer(modifier = Modifier.height(8.dp)) }
+            item { Spacer(modifier = Modifier.height(Spacing.sm)) }
 
             // 1. SECCIÓN: CREACIÓN DE EJERCICIO
             item {
@@ -121,7 +122,7 @@ fun AddExerciseScreen(
                     OutlinedTextField(
                         value = notes,
                         onValueChange = { notes = it },
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                        modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
                         placeholder = {
                             Text(
                                 text = stringResource(R.string.form_notes_placeholder),
@@ -164,7 +165,7 @@ fun AddExerciseScreen(
                 Column {
                     SectionLabel(stringResource(R.string.select_icon))
                     FlowRow(
-                        modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                        modifier = Modifier.fillMaxWidth().padding(top = Spacing.md),
                         maxItemsInEachRow = 5,
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -229,7 +230,7 @@ fun AddExerciseScreen(
             item {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(vertical = 12.dp)
+                    modifier = Modifier.padding(vertical = Spacing.md)
                 ) {
                     HorizontalDivider(
                         modifier = Modifier.weight(1f),
@@ -275,13 +276,13 @@ fun AddExerciseScreen(
             // FILTRO POR TAG
             if (availableTags.isNotEmpty()) {
                 item {
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(Spacing.sm))
                     TagFilterRow(
                         tags = availableTags,
                         selectedTag = selectedTag,
                         onTagSelected = { selectedTag = it }
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(Spacing.xs))
                 }
             }
 
@@ -321,7 +322,7 @@ fun SectionLabel(text: String) {
         fontSize = 10.sp,
         fontWeight = FontWeight.Black,
         letterSpacing = 1.5.sp,
-        modifier = Modifier.padding(bottom = 8.dp, start = 2.dp)
+        modifier = Modifier.padding(bottom = Spacing.sm, start = 2.dp)
     )
 }
 
@@ -376,7 +377,7 @@ fun TagChip(text: String, isSelected: Boolean, onClick: () -> Unit) {
     ) {
         Text(
             text = text.uppercase(),
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            modifier = Modifier.padding(horizontal = Spacing.md, vertical = 6.dp),
             color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.secondary,
             fontSize = 10.sp,
             fontWeight = FontWeight.Black,

@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.background
@@ -61,7 +62,7 @@ fun AegisTagManager(
                     )
                 }
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(Spacing.sm))
 
                 IconButton(
                     onClick = onAddClick,
@@ -77,7 +78,7 @@ fun AegisTagManager(
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         // --- CONTENEDOR DE ETIQUETAS (FLOW) ---
         // Aplicamos un ligero fondo oscuro para agrupar las etiquetas visualmente
@@ -88,11 +89,11 @@ fun AegisTagManager(
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
                     shape = RoundedCornerShape(Radius.md)
                 )
-                .padding(8.dp)
+                .padding(Spacing.sm)
         ) {
             FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                verticalArrangement = Arrangement.spacedBy(Spacing.sm),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 allTags.filter { it != DefaultExercises.BASE_TAG }.forEach { tag ->

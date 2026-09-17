@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import android.app.Activity
@@ -92,7 +93,7 @@ fun LoginScreen(
                             fontSize = 13.sp,
                             lineHeight = 18.sp
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(Spacing.lg))
                         OutlinedTextField(
                             value = forgotEmail,
                             onValueChange = { forgotEmail = it },
@@ -105,7 +106,7 @@ fun LoginScreen(
                             colors = authTextFieldColors()
                         )
                         if (uiState.errorMessage != null) {
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(Spacing.sm))
                             Text(uiState.errorMessage!!, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
                         }
                     }
@@ -174,13 +175,13 @@ fun LoginScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(24.dp),
+            .padding(Spacing.xl),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.weight(1f))
 
         Icon(imageVector = Icons.Default.Shield, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(64.dp))
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
         Text("AEGIS", fontFamily = com.yago.aegis.ui.theme.AegisBrandFamily, fontSize = 36.sp, fontWeight = FontWeight.Black, letterSpacing = 6.sp, color = MaterialTheme.colorScheme.onBackground)
         Text(stringResource(R.string.login_subtitle), fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 3.sp, color = MaterialTheme.colorScheme.secondary)
 
@@ -198,7 +199,7 @@ fun LoginScreen(
             colors = authTextFieldColors()
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         OutlinedTextField(
             value = password,
@@ -237,10 +238,10 @@ fun LoginScreen(
 
         if (uiState.errorMessage != null) {
             Text(uiState.errorMessage!!, color = MaterialTheme.colorScheme.error, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(Spacing.xs))
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         Button(
             onClick = { authViewModel.login(email, password) },
@@ -260,7 +261,7 @@ fun LoginScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f))
@@ -268,7 +269,7 @@ fun LoginScreen(
             HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f))
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         OutlinedButton(
             onClick = { launchGoogleSignIn() },
@@ -280,7 +281,7 @@ fun LoginScreen(
             Text(stringResource(R.string.btn_google_login), color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Black, letterSpacing = 1.sp, fontSize = 13.sp)
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Spacing.xl))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.no_account_question), color = MaterialTheme.colorScheme.secondary, fontSize = 13.sp)
@@ -289,7 +290,7 @@ fun LoginScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
     }
 }
 

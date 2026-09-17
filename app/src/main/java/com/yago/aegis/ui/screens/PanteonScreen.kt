@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.BorderStroke
@@ -98,9 +99,9 @@ fun PanteonScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
-            item { Spacer(modifier = Modifier.height(4.dp)) }
+            item { Spacer(modifier = Modifier.height(Spacing.xs)) }
             item { PanteonTabs(tab) { tab = it } }
 
             when (tab) {
@@ -110,7 +111,7 @@ fun PanteonScreen(
                         item { EmptyRanks() }
                     } else {
                         item {
-                            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
                                 SummaryCard(
                                     label = stringResource(R.string.highest_rank_label),
                                     group = result.strongest,
@@ -170,7 +171,7 @@ private fun TabItem(text: String, active: Boolean, locked: Boolean, onClick: () 
                 letterSpacing = 1.sp
             )
             if (locked) {
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(Spacing.xs))
                 Icon(Icons.Default.Lock, null, tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f), modifier = Modifier.size(11.dp))
             }
         }
@@ -197,7 +198,7 @@ private fun BodyMapPlaceholder() {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(Icons.Default.MilitaryTech, null, tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f), modifier = Modifier.size(48.dp))
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
             Text(
                 text = stringResource(R.string.body_map_soon),
                 color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f),
@@ -212,7 +213,7 @@ private fun BodyMapPlaceholder() {
 @Composable
 private fun EmptyRanks() {
     Column(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xl),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -236,10 +237,10 @@ private fun SummaryCard(label: String, group: GroupRank?, modifier: Modifier = M
         val tier = group?.tier ?: RankTier.SIN_RANGO
         Row(modifier = Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
             RankMedal(tier, 52.dp)
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(Spacing.md))
             Column {
                 Text(label, color = MaterialTheme.colorScheme.secondary, fontSize = 9.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(Spacing.xs))
                 Text(
                     text = group?.group?.display?.uppercase() ?: "—",
                     color = MaterialTheme.colorScheme.onBackground,
@@ -268,7 +269,7 @@ private fun GroupRow(g: GroupRank) {
         shape = RoundedCornerShape(Radius.lg),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(Spacing.lg)) {
             Row(
                 modifier = Modifier.fillMaxWidth().clickable { expanded = !expanded },
                 verticalAlignment = Alignment.CenterVertically
@@ -290,9 +291,9 @@ private fun GroupRow(g: GroupRank) {
                     )
                 }
                 FatigueChip(g.fatigue, g.daysSinceTrained)
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(Spacing.sm))
                 RankMedal(g.tier, 44.dp)
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(Spacing.sm))
                 Icon(
                     if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                     null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp)
@@ -305,7 +306,7 @@ private fun GroupRow(g: GroupRank) {
             if (expanded) {
                 // La medalla en GRANDE para disfrutar el icono del rango del grupo.
                 if (g.tier != RankTier.SIN_RANGO) {
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(Spacing.lg))
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -321,7 +322,7 @@ private fun GroupRow(g: GroupRank) {
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(Spacing.md))
                 g.subgroups.forEach { s -> SubgroupRow(s) }
             }
         }
@@ -348,7 +349,7 @@ private fun SubgroupRow(s: SubgroupRank) {
                 fontSize = 8.sp,
                 fontWeight = FontWeight.Black,
                 letterSpacing = 1.sp,
-                modifier = Modifier.padding(end = 8.dp)
+                modifier = Modifier.padding(end = Spacing.sm)
             )
         }
         RankBadge(s.tier, small = true)
@@ -510,7 +511,7 @@ private fun FriendsRankingSection(
             .thenBy { it.username.lowercase() }
     )
 
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
         RankingFilterChips(filter) { filter = it }
 
         // Tocar a un amigo (en el podio o en la lista) lo pone en comparación; volver a tocarlo la cierra.
@@ -538,7 +539,7 @@ private fun FriendsRankingSection(
 
         if (friends.isEmpty()) {
             if (ranking.loading) {
-                Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                Box(Modifier.fillMaxWidth().padding(Spacing.lg), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(
                         color = MaterialTheme.colorScheme.primary,
                         strokeWidth = 2.dp,
@@ -562,7 +563,7 @@ private fun RankingFilterChips(selected: MuscleGroup?, onSelect: (MuscleGroup?) 
         modifier = Modifier
             .fillMaxWidth()
             .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
     ) {
         FilterChip(stringResource(R.string.ranking_filter_global), selected == null) { onSelect(null) }
         MuscleGroup.entries.forEach { g ->
@@ -589,7 +590,7 @@ private fun FilterChip(text: String, active: Boolean, onClick: () -> Unit) {
             fontSize = 12.sp,
             fontWeight = FontWeight.Black,
             letterSpacing = 0.5.sp,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.sm)
         )
     }
 }
@@ -597,8 +598,8 @@ private fun FilterChip(text: String, active: Boolean, onClick: () -> Unit) {
 @Composable
 private fun Podium(top3: List<RankRow>, filter: MuscleGroup?, comparing: String?, onSelect: (RankRow) -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.md),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         verticalAlignment = Alignment.Bottom
     ) {
         Box(Modifier.weight(1f), contentAlignment = Alignment.BottomCenter) {
@@ -627,7 +628,7 @@ private fun PodiumPlace(row: RankRow, place: Int, filter: MuscleGroup?, selected
             .clip(RoundedCornerShape(Radius.lg))
             .then(if (!row.isMe) Modifier.clickable { onClick() } else Modifier)
             .then(if (selected) Modifier.background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)) else Modifier)
-            .padding(horizontal = 6.dp, vertical = 4.dp)
+            .padding(horizontal = 6.dp, vertical = Spacing.xs)
     ) {
         if (place == 1) {
             Icon(
@@ -635,7 +636,7 @@ private fun PodiumPlace(row: RankRow, place: Int, filter: MuscleGroup?, selected
                 tint = AegisGoldAccent,
                 modifier = Modifier.size(26.dp)
             )
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(Spacing.xs))
         }
         AegisAvatar(row.username, avatarSize, ringColor, borderWidth = if (place == 1) 3.dp else 2.dp, photo = row.photo)
         Spacer(Modifier.height(6.dp))
@@ -680,7 +681,7 @@ private fun RankingListRow(position: Int, row: RankRow, filter: MuscleGroup?, se
                 textAlign = TextAlign.Center,
                 modifier = Modifier.width(24.dp)
             )
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(Spacing.sm))
             AegisAvatar(
                 row.username, 44.dp,
                 borderColor = if (row.isMe) MaterialTheme.colorScheme.primary
@@ -688,7 +689,7 @@ private fun RankingListRow(position: Int, row: RankRow, filter: MuscleGroup?, se
                 borderWidth = if (row.isMe) 2.dp else 1.dp,
                 photo = row.photo
             )
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(Spacing.md))
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
@@ -734,15 +735,15 @@ private fun TuPill() {
 /** Cara a cara: cabecera (TÚ vs @amigo) + una fila por grupo con divisiones y ganador. */
 @Composable
 private fun ComparisonPanel(me: RankRow, friend: RankRow) {
-    Column(modifier = Modifier.padding(horizontal = 6.dp).padding(top = 4.dp, bottom = 12.dp)) {
+    Column(modifier = Modifier.padding(horizontal = 6.dp).padding(top = Spacing.xs, bottom = Spacing.md)) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.sm),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 AegisAvatar(me.username, 44.dp, MaterialTheme.colorScheme.primary, 2.dp, photo = me.photo)
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(Spacing.xs))
                 Text(stringResource(R.string.ranking_you), color = MaterialTheme.colorScheme.primary, fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
             }
             Text(
@@ -754,11 +755,11 @@ private fun ComparisonPanel(me: RankRow, friend: RankRow) {
             )
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 AegisAvatar(friend.username, 44.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f), 2.dp, photo = friend.photo)
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(Spacing.xs))
                 Text("@${friend.username}", color = MaterialTheme.colorScheme.onBackground, fontSize = 10.sp, fontWeight = FontWeight.Black, maxLines = 1)
             }
         }
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Spacing.sm))
         MuscleGroup.entries.forEach { grp ->
             CompareGroupRow(group = grp, mine = me.rankFor(grp), theirs = friend.rankFor(grp))
         }

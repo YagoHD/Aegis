@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Spacing
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -33,9 +34,9 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .verticalScroll(scroll)
-            .padding(horizontal = 24.dp)
+            .padding(horizontal = Spacing.xl)
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack) {
@@ -45,7 +46,7 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
                     tint = MaterialTheme.colorScheme.onBackground
                 )
             }
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(Spacing.sm))
             Text(
                 text = stringResource(R.string.privacy_policy_title),
                 color = MaterialTheme.colorScheme.onBackground,
@@ -55,7 +56,7 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         Text(
             text = "Última actualización: junio de 2026",

@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Spacing
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -75,12 +76,12 @@ fun StatsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp), // Padding global para todos los items
+                .padding(horizontal = Spacing.lg), // Padding global para todos los items
             // Aumentamos el espacio entre secciones para el look "modular"
             verticalArrangement = Arrangement.spacedBy(28.dp)
         ) {
 
-            item { Spacer(Modifier.height(8.dp)) } // Margen superior tras la TopBar
+            item { Spacer(Modifier.height(Spacing.sm)) } // Margen superior tras la TopBar
 
             // O13: indicador de sincronización (solo visible al sincronizar/error/offline)
             item { SyncIndicator(syncState = syncState, onRetry = { viewModel.retrySync() }) }
@@ -90,7 +91,7 @@ fun StatsScreen(
                 item {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.md)
                     ) {
                         if (showDiscipline) {
                             StatCard(
@@ -156,7 +157,7 @@ fun StatsScreen(
                             color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 24.dp),
+                                .padding(vertical = Spacing.xl),
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                             fontSize = 13.sp
                         )
@@ -193,7 +194,7 @@ private fun EmptyStatsState(modifier: Modifier = Modifier) {
             tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
             modifier = Modifier.size(56.dp)
         )
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(Spacing.lg))
         Text(
             text = stringResource(R.string.empty_history_title),
             color = MaterialTheme.colorScheme.onBackground,
@@ -201,7 +202,7 @@ private fun EmptyStatsState(modifier: Modifier = Modifier) {
             fontWeight = androidx.compose.ui.text.font.FontWeight.Black,
             letterSpacing = 1.sp
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Spacing.sm))
         Text(
             text = stringResource(R.string.empty_history_subtitle),
             color = MaterialTheme.colorScheme.secondary,

@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.background
@@ -27,7 +28,7 @@ fun LastSessionCard(lastSetsText: String, suggestion: String? = null) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .padding(vertical = Spacing.sm)
             .background(
                 color = MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
                 shape = RoundedCornerShape(Radius.sm)
@@ -37,7 +38,7 @@ fun LastSessionCard(lastSetsText: String, suggestion: String? = null) {
                 color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
                 shape = RoundedCornerShape(Radius.sm)
             )
-            .padding(12.dp)
+            .padding(Spacing.md)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -48,7 +49,7 @@ fun LastSessionCard(lastSetsText: String, suggestion: String? = null) {
                     .size(6.dp)
                     .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(50))
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(Spacing.sm))
             Text(
                 text = stringResource(R.string.previous_workout_label),
                 color = MaterialTheme.colorScheme.primary,
@@ -67,7 +68,7 @@ fun LastSessionCard(lastSetsText: String, suggestion: String? = null) {
                             MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
                             RoundedCornerShape(Radius.sm)
                         )
-                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                        .padding(horizontal = Spacing.sm, vertical = 3.dp)
                 ) {
                     Text(
                         text = stringResource(R.string.ghost_target),
@@ -95,7 +96,7 @@ fun LastSessionCard(lastSetsText: String, suggestion: String? = null) {
 
         // Sugerencia de progresión (objetivo concreto de hoy)
         if (suggestion != null) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Spacing.sm))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "→",

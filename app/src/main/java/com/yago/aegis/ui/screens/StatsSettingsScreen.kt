@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.background
@@ -45,23 +46,23 @@ fun StatsSettingsScreen(
             .padding(horizontal = 20.dp)
             .verticalScroll(scrollState)
     ) {
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Spacing.xl))
 
         // --- SECCIÓN 1: OBJETIVOS SEMANALES ---
         SectionHeader(text = stringResource(R.string.stats_settings_title))
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         Surface(
             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
             shape = RoundedCornerShape(Radius.lg)
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(modifier = Modifier.padding(Spacing.lg)) {
                 Text(
                     text = stringResource(R.string.weekly_training_days_title),
                     color = MaterialTheme.colorScheme.secondary,
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
                 )
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(Spacing.md))
 
                 // Un selector simple de días (puedes usar un Slider o botones)
                 Row(
@@ -97,13 +98,13 @@ fun StatsSettingsScreen(
 
         // --- SECCIÓN 2: VISIBILIDAD DE MÓDULOS ---
         SectionHeader(text = stringResource(R.string.modules_visibility_title))
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         Surface(
             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
             shape = RoundedCornerShape(Radius.lg)
         ) {
-            Column(modifier = Modifier.padding(8.dp)) {
+            Column(modifier = Modifier.padding(Spacing.sm)) {
                 SettingsRow(stringResource(R.string.volume_module_label), showVolume) { viewModel.toggleVolumeCard(it) }
                 SettingsRow(stringResource(R.string.discipline_module_label), showDiscipline) { viewModel.toggleDisciplineCard(it) }
                 SettingsRow(stringResource(R.string.evolution_graph_module_label), showEvolution) { viewModel.toggleEvolutionGraph(it) }

@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Spacing
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -69,7 +70,7 @@ fun SetRow(
             .fillMaxWidth()
             .padding(vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(Spacing.md)
     ) {
         // 1. INDICADOR TÁCTICO DE SERIE
         // US-11: área de toque de 48dp (accesibilidad) manteniendo el cuadrado VISIBLE a 38dp.
@@ -229,7 +230,7 @@ fun SetInputField(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 4.dp)
+                        .padding(top = Spacing.xs)
                         .background(
                             color = if (isCompleted) MaterialTheme.colorScheme.primary.copy(alpha = 0.05f) else MaterialTheme.colorScheme.surfaceVariant,
                             shape = RoundedCornerShape(Radius.sm)

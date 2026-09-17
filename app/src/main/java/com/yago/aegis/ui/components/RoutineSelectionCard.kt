@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Spacing
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
@@ -46,7 +47,7 @@ fun RoutineSelectionCard(
                     else MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
         )
     ) {
-        Box(modifier = Modifier.padding(16.dp)) {
+        Box(modifier = Modifier.padding(Spacing.lg)) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 // 1. Tags (Estilo Metadato)
                 if (displayTags.isNotEmpty()) {
@@ -101,7 +102,7 @@ fun RoutineSelectionCard(
                         }
                     }
 
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(Spacing.md))
 
                     // Botón de acción: BLOQUEADO / CONTINUAR / START según el estado
                     Button(
@@ -112,7 +113,7 @@ fun RoutineSelectionCard(
                             contentColor = if (isLocked) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onPrimary
                         ),
                         shape = RoundedCornerShape(6.dp), // Botón más cuadrado = más serio
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.sm),
                         elevation = ButtonDefaults.buttonElevation(defaultElevation = if (isLocked) 0.dp else 4.dp)
                     ) {
                         Text(
@@ -170,7 +171,7 @@ fun ExerciseNameCapsule(name: String) {
             fontWeight = FontWeight.Bold,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+            modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xs)
         )
     }
 }

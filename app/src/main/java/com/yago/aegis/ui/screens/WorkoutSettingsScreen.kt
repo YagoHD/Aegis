@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.background
@@ -70,18 +71,18 @@ fun WorkoutSettingsScreen(
 
             Column(modifier = Modifier.padding(horizontal = 20.dp)) {
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(Spacing.xl))
 
                 // ─── SECCIÓN TEMPORIZADOR ───
                 SectionHeader(text = stringResource(R.string.rest_timer_section_title))
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Spacing.lg))
 
                 // Mostrar/ocultar temporizador
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                     shape = RoundedCornerShape(Radius.lg)
                 ) {
-                    Column(modifier = Modifier.padding(8.dp)) {
+                    Column(modifier = Modifier.padding(Spacing.sm)) {
                         SettingsRow(stringResource(R.string.show_timer_label), showTimer) {
                             showTimer = it
                             scope.launch { onSave(timerSeconds, vibrate, sound, it) }
@@ -99,7 +100,7 @@ fun WorkoutSettingsScreen(
                     fontWeight = FontWeight.Black,
                     letterSpacing = 1.5.sp
                 )
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(Spacing.md))
 
                 // Grid de opciones de tiempo
                 val rows = timeOptions.chunked(3)
@@ -165,13 +166,13 @@ fun WorkoutSettingsScreen(
 
                 // ─── SECCIÓN ALERTAS ───
                 SectionHeader(text = stringResource(R.string.alert_section_title))
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(Spacing.md))
 
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                     shape = RoundedCornerShape(Radius.lg)
                 ) {
-                    Column(modifier = Modifier.padding(8.dp)) {
+                    Column(modifier = Modifier.padding(Spacing.sm)) {
                         SettingsRow(stringResource(R.string.vibration_label), vibrate) {
                             vibrate = it
                             scope.launch { onSave(timerSeconds, it, sound, showTimer) }
@@ -193,9 +194,9 @@ fun WorkoutSettingsScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
-                        modifier = Modifier.padding(16.dp),
+                        modifier = Modifier.padding(Spacing.lg),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.md)
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
@@ -205,7 +206,7 @@ fun WorkoutSettingsScreen(
                                 fontWeight = FontWeight.Black,
                                 letterSpacing = 1.5.sp
                             )
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(Spacing.xs))
                             Text(
                                 formatTimerOption(timerSeconds),
                                 color = MaterialTheme.colorScheme.primary,

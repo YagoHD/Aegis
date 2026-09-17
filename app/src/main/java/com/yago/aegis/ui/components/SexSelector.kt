@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.BorderStroke
@@ -34,7 +35,7 @@ fun SexSelector(
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(Spacing.md)
     ) {
         SexOption(stringResource(R.string.sex_male), selected == "MALE", Modifier.weight(1f)) { onSelect("MALE") }
         SexOption(stringResource(R.string.sex_female), selected == "FEMALE", Modifier.weight(1f)) { onSelect("FEMALE") }

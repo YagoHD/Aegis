@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.animation.AnimatedVisibility
@@ -86,7 +87,7 @@ fun ExercisesLibraryScreen(
                 .padding(padding)
                 .padding(horizontal = 20.dp)
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.lg))
 
             RoutinesExercisesToggle(
                 isRoutines = false,
@@ -94,7 +95,7 @@ fun ExercisesLibraryScreen(
                 onSelectExercises = { }
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             // ─── FILA DE BOTONES ───
             Row(
@@ -121,13 +122,13 @@ fun ExercisesLibraryScreen(
 
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             // ─── BUSCADOR + BOTÓN FILTRO ───
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
             ) {
                 OutlinedTextField(
                     value = routinesViewModel.librarySearchQuery,
@@ -205,7 +206,7 @@ fun ExercisesLibraryScreen(
                         if (routinesViewModel.selectedLibraryTag != "ALL") {
                             TextButton(
                                 onClick = { routinesViewModel.selectedLibraryTag = "ALL" },
-                                contentPadding = PaddingValues(horizontal = 8.dp)
+                                contentPadding = PaddingValues(horizontal = Spacing.sm)
                             ) {
                                 Text(stringResource(R.string.clear_filter_label).uppercase(), color = MaterialTheme.colorScheme.secondary, fontSize = 10.sp, fontWeight = FontWeight.Black)
                             }
@@ -214,7 +215,7 @@ fun ExercisesLibraryScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             // ─── LISTA CON SECCIONES ───
             val totalCount = userExercises.size + baseExercises.size
@@ -223,7 +224,7 @@ fun ExercisesLibraryScreen(
                 EmptyLibraryState()
             } else {
                 LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.sm),
                     contentPadding = PaddingValues(bottom = 100.dp)
                 ) {
 
@@ -237,7 +238,7 @@ fun ExercisesLibraryScreen(
                                 expanded = userSectionExpanded,
                                 onToggle = { userSectionExpanded = !userSectionExpanded }
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(Spacing.sm))
                         }
                     }
 
@@ -249,10 +250,10 @@ fun ExercisesLibraryScreen(
                                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
                                     fontSize = 12.sp,
                                     fontStyle = FontStyle.Italic,
-                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
+                                    modifier = Modifier.padding(horizontal = Spacing.xs, vertical = Spacing.sm),
                                     lineHeight = 18.sp
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(Spacing.sm))
                             }
                         } else {
                             items(userExercises, key = { it.id }) { exercise ->
@@ -270,9 +271,9 @@ fun ExercisesLibraryScreen(
                     // ── SEPARADOR ──
                     if (hasDefaultExercises) {
                         item {
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(Spacing.sm))
                             HorizontalDivider(color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f))
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(Spacing.sm))
                         }
 
                         // ── SECCIÓN: EJERCICIOS BASE (plegable) ──
@@ -284,7 +285,7 @@ fun ExercisesLibraryScreen(
                                 expanded = baseSectionExpanded,
                                 onToggle = { baseSectionExpanded = !baseSectionExpanded }
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(Spacing.sm))
                         }
 
                         if (baseSectionExpanded) {
@@ -304,7 +305,7 @@ fun ExercisesLibraryScreen(
                     if (totalCount == 0 && isFiltering) {
                         item {
                             Column(
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 40.dp),
+                                modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xxl),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Icon(Icons.Default.SearchOff, null,
@@ -336,7 +337,7 @@ private fun SectionHeader(
         modifier = Modifier
             .fillMaxWidth()
             .then(if (isExpandable) Modifier.clickable { onToggle() } else Modifier)
-            .padding(vertical = 4.dp),
+            .padding(vertical = Spacing.xs),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
@@ -354,7 +355,7 @@ private fun SectionHeader(
             fontWeight = FontWeight.Bold
         )
         if (isExpandable) {
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(Spacing.xs))
             Icon(
                 if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                 null,
@@ -380,7 +381,7 @@ private fun EmptyLibraryState() {
         Spacer(modifier = Modifier.height(20.dp))
         Text(stringResource(R.string.empty_library_title), color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f),
             fontSize = 13.sp, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
         Text(stringResource(R.string.empty_library_instruction),
             color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f),
             fontSize = 13.sp, fontStyle = FontStyle.Italic,

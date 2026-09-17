@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.background
@@ -57,11 +58,11 @@ fun PlateCalculatorScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = Spacing.xl)
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(28.dp)
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Spacing.sm))
 
             // --- PESO OBJETIVO ---
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -134,7 +135,7 @@ fun PlateCalculatorScreen(
 
             // --- RESULTADO ---
             if (uiState.targetWeight.isNotEmpty()) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
                     PlateLabel(stringResource(R.string.plates_per_side_label))
                     ResultCard(
                         platesPerSide = uiState.platesPerSide,
@@ -145,7 +146,7 @@ fun PlateCalculatorScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxl))
         }
     }
 }
@@ -157,9 +158,9 @@ private fun PlateGrid(
     onToggle: (Double) -> Unit
 ) {
     val rows = allPlates.chunked(4)
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
         rows.forEach { row ->
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                 row.forEach { plate ->
                     val isSelected = selectedPlates.contains(plate)
                     val label = if (plate % 1 == 0.0) "${plate.toInt()} kg" else "$plate kg"
@@ -177,7 +178,7 @@ private fun PlateGrid(
                                 RoundedCornerShape(Radius.md)
                             )
                             .clickable { onToggle(plate) }
-                            .padding(vertical = 12.dp),
+                            .padding(vertical = Spacing.md),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -218,7 +219,7 @@ private fun ResultCard(
                 RoundedCornerShape(Radius.lg)
             )
             .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(Spacing.lg)
     ) {
         if (targetWeight < barWeight && targetWeight > 0) {
             Text(

@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Spacing
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
@@ -35,7 +36,7 @@ fun TagFilterRow(
         modifier = modifier
             .fillMaxWidth()
             .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Chip "TODO" siempre primero
@@ -80,7 +81,7 @@ private fun TagChipFilter(
             fontSize = 11.sp,
             fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
             letterSpacing = 0.8.sp,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+            modifier = Modifier.padding(horizontal = Spacing.md, vertical = 6.dp)
         )
     }
 }

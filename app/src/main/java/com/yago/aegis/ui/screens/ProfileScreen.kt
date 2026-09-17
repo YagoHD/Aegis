@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Spacing
 
 import BiometricCard
 import android.content.Intent
@@ -113,10 +114,10 @@ fun ProfileContent(viewModel: ProfileViewModel, onNavigateToTrain: () -> Unit = 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp)
+            .padding(horizontal = Spacing.xl)
             .verticalScroll(scrollState)
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         ProfileHeader(
             name = user.name,
@@ -131,11 +132,11 @@ fun ProfileContent(viewModel: ProfileViewModel, onNavigateToTrain: () -> Unit = 
         SyncIndicator(syncState = syncState, onRetry = { viewModel.retrySync() })
 
         if (user.disciplineDay == 0) {
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(Spacing.xl))
             NewUserBanner(onNavigateToTrain)
         }
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxl))
 
         Text(
             text = stringResource(R.string.label_biometrics).uppercase(),
@@ -145,11 +146,11 @@ fun ProfileContent(viewModel: ProfileViewModel, onNavigateToTrain: () -> Unit = 
             letterSpacing = 2.sp
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
             Box(modifier = Modifier.weight(1f)) {
                 BiometricCard(stringResource(R.string.label_mass), user.currentMass, "KG") {
@@ -170,7 +171,7 @@ fun ProfileContent(viewModel: ProfileViewModel, onNavigateToTrain: () -> Unit = 
             }
         }
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxl))
 
         if (state.showGirths) {
             Text(
@@ -180,14 +181,14 @@ fun ProfileContent(viewModel: ProfileViewModel, onNavigateToTrain: () -> Unit = 
                 fontWeight = FontWeight.Black,
                 letterSpacing = 2.sp
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.lg))
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(Radius.md))
                     .background(MaterialTheme.colorScheme.surface)
                     .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f), RoundedCornerShape(Radius.md))
-                    .padding(vertical = 8.dp)
+                    .padding(vertical = Spacing.sm)
             ) {
                 state.customMeasures.forEach { measure ->
                     GirthRow(measure.name, measure.value) { newValue ->
@@ -236,7 +237,7 @@ fun ProfileContent(viewModel: ProfileViewModel, onNavigateToTrain: () -> Unit = 
         }
 
         if (state.showEvolution && (state.bodyHistory.isNotEmpty() || state.photoHistory.isNotEmpty())) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Spacing.sm))
             Text(
                 text = stringResource(R.string.evolution_section_title),
                 color = MaterialTheme.colorScheme.secondary,
@@ -244,7 +245,7 @@ fun ProfileContent(viewModel: ProfileViewModel, onNavigateToTrain: () -> Unit = 
                 fontWeight = FontWeight.Black,
                 letterSpacing = 2.sp
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.lg))
             BodyHistorySection(
                 bodyHistory = state.bodyHistory,
                 photoHistory = state.photoHistory,
@@ -252,7 +253,7 @@ fun ProfileContent(viewModel: ProfileViewModel, onNavigateToTrain: () -> Unit = 
             )
         }
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxl))
 
         if (state.showVisualLog) {
             VisualLogSection(
@@ -287,9 +288,9 @@ private fun NewUserBanner(onNavigateToTrain: () -> Unit) {
             .clip(RoundedCornerShape(Radius.lg))
             .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
             .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), RoundedCornerShape(Radius.lg))
-            .padding(16.dp),
+            .padding(Spacing.lg),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        horizontalArrangement = Arrangement.spacedBy(Spacing.lg)
     ) {
         Icon(
             imageVector = Icons.Default.Bolt,
@@ -305,7 +306,7 @@ private fun NewUserBanner(onNavigateToTrain: () -> Unit) {
                 fontWeight = FontWeight.Black,
                 letterSpacing = 1.5.sp
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(Spacing.xs))
             Text(
                 text = stringResource(R.string.welcome_first_workout_message),
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
@@ -325,7 +326,7 @@ private fun NewUserBanner(onNavigateToTrain: () -> Unit) {
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Black,
                 letterSpacing = 1.sp,
-                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = Spacing.sm)
             )
         }
     }
@@ -343,7 +344,7 @@ private fun LevelCard(level: LevelState, breakdown: List<XpEntry>) {
             .background(MaterialTheme.colorScheme.surface)
             .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f), RoundedCornerShape(Radius.xl))
             .then(if (canExpand) Modifier.clickable { expanded = !expanded } else Modifier)
-            .padding(horizontal = 18.dp, vertical = 16.dp)
+            .padding(horizontal = 18.dp, vertical = Spacing.lg)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -384,7 +385,7 @@ private fun LevelCard(level: LevelState, breakdown: List<XpEntry>) {
                 }
             }
         }
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
         // G2: la barra de XP se rellena con animación al cambiar el nivel/progreso.
         val animatedXp by animateFloatAsState(
             targetValue = level.progress,
@@ -408,7 +409,7 @@ private fun LevelCard(level: LevelState, breakdown: List<XpEntry>) {
         }
 
         if (expanded) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.lg))
             Text(
                 text = stringResource(R.string.level_breakdown_title),
                 color = MaterialTheme.colorScheme.secondary,
@@ -416,7 +417,7 @@ private fun LevelCard(level: LevelState, breakdown: List<XpEntry>) {
                 fontWeight = FontWeight.Black,
                 letterSpacing = 1.5.sp
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Spacing.sm))
             breakdown.take(20).forEach { entry -> XpRow(entry) }
         }
     }

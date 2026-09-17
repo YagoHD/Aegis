@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import android.net.Uri
@@ -59,15 +60,15 @@ fun VisualLogSection(
                 letterSpacing = 1.sp,
                 modifier = Modifier
                     .clickable { onAddClick() }
-                    .padding(vertical = 4.dp, horizontal = 8.dp)
+                    .padding(vertical = Spacing.xs, horizontal = Spacing.sm)
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp), // Espacio uniforme entre tarjetas
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md), // Espacio uniforme entre tarjetas
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Foto BASE
@@ -145,7 +146,7 @@ fun ProgressPhotoCard(label: String, date: String, photoUri: Uri?) {
                         colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f))
                     )
                 )
-                .padding(bottom = 12.dp, top = 24.dp),
+                .padding(bottom = Spacing.md, top = Spacing.xl),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(

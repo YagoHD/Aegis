@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Spacing
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -70,8 +71,8 @@ fun WorkoutHistoryScreen(
                     .fillMaxSize()
                     .padding(padding)
                     .padding(horizontal = 20.dp),
-                contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                contentPadding = PaddingValues(top = Spacing.lg, bottom = 100.dp),
+                verticalArrangement = Arrangement.spacedBy(Spacing.sm)
             ) {
                 // Agrupar por mes para separadores
                 val grouped = sorted.groupBy { session ->
@@ -87,7 +88,7 @@ fun WorkoutHistoryScreen(
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Black,
                             letterSpacing = 2.sp,
-                            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                            modifier = Modifier.padding(top = Spacing.sm, bottom = Spacing.xs)
                         )
                     }
                     itemsIndexed(
@@ -133,7 +134,7 @@ private fun HistorySessionRow(session: WorkoutSession, onSaveSession: (WorkoutSe
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { expanded = !expanded }
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                    .padding(horizontal = Spacing.lg, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Indicador lateral bronce
@@ -147,7 +148,7 @@ private fun HistorySessionRow(session: WorkoutSession, onSaveSession: (WorkoutSe
                         )
                 )
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(Spacing.md))
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
@@ -183,12 +184,12 @@ private fun HistorySessionRow(session: WorkoutSession, onSaveSession: (WorkoutSe
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 31.dp, end = 16.dp, bottom = 14.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                        .padding(start = 31.dp, end = Spacing.lg, bottom = 14.dp),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.sm)
                 ) {
                     HorizontalDivider(
                         color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
-                        modifier = Modifier.padding(bottom = 4.dp)
+                        modifier = Modifier.padding(bottom = Spacing.xs)
                     )
 
                     // ─── Editar / guardar (corrige datos mal metidos; recalcula el competitivo) ───
@@ -200,7 +201,7 @@ private fun HistorySessionRow(session: WorkoutSession, onSaveSession: (WorkoutSe
                         if (!editing) {
                             TextButton(onClick = { edited = session; editing = true }) {
                                 Icon(Icons.Default.Edit, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(13.dp))
-                                Spacer(Modifier.width(4.dp))
+                                Spacer(Modifier.width(Spacing.xs))
                                 Text(stringResource(R.string.history_edit), color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.Black, letterSpacing = 0.5.sp)
                             }
                         } else {
@@ -266,7 +267,7 @@ private fun HistorySessionRow(session: WorkoutSession, onSaveSession: (WorkoutSe
                                     letterSpacing = 0.3.sp,
                                     modifier = Modifier.width(120.dp)
                                 )
-                                Spacer(modifier = Modifier.width(8.dp))
+                                Spacer(modifier = Modifier.width(Spacing.sm))
                                 Text(
                                     text = setsText,
                                     color = MaterialTheme.colorScheme.secondary,
@@ -283,7 +284,7 @@ private fun HistorySessionRow(session: WorkoutSession, onSaveSession: (WorkoutSe
                     if (notes.isNotBlank()) {
                         HorizontalDivider(
                             color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f),
-                            modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)
+                            modifier = Modifier.padding(top = Spacing.xs, bottom = Spacing.sm)
                         )
                         Row(
                             verticalAlignment = Alignment.Top,
@@ -370,7 +371,7 @@ private fun EmptyHistoryState() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(40.dp),
+            .padding(Spacing.xxl),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -388,7 +389,7 @@ private fun EmptyHistoryState() {
             fontWeight = FontWeight.Black,
             letterSpacing = 2.sp
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
         Text(
             text = stringResource(R.string.empty_history_subtitle),
             color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f),

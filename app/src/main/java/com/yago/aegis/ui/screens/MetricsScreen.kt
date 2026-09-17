@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.background
@@ -39,7 +40,7 @@ fun MetricsScreen(
             .fillMaxSize()
             // 60%: BackgroundBlack (Fondo profundo)
             .background(MaterialTheme.colorScheme.background)
-            .padding(24.dp)
+            .padding(Spacing.xl)
     ) {
         // --- 1. NAVEGACIÓN Y PROGRESO ---
         AegisTopBar(
@@ -81,7 +82,7 @@ fun MetricsScreen(
             color = MaterialTheme.colorScheme.secondary, // AegisSteel
             fontSize = 14.sp,
             lineHeight = 20.sp,
-            modifier = Modifier.padding(top = 8.dp)
+            modifier = Modifier.padding(top = Spacing.sm)
         )
 
         Spacer(modifier = Modifier.height(48.dp))
@@ -121,7 +122,7 @@ fun MetricsScreen(
 
         } // fin del contenido scrollable
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         // --- 4. BOTÓN DE FINALIZACIÓN (10% Bronce) ---
         val isEnabled = height.isNotEmpty() && mass.isNotEmpty() && sex.isNotEmpty()

@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Spacing
 import com.yago.aegis.ui.theme.Radius
 
 import HistorySessionCard
@@ -135,10 +136,10 @@ fun ExerciseDetailScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = Spacing.lg),
             verticalArrangement = Arrangement.spacedBy(28.dp)
         ) {
-            item { Spacer(Modifier.height(8.dp)) }
+            item { Spacer(Modifier.height(Spacing.sm)) }
 
             item {
                 ProgressionChartSection(
@@ -152,7 +153,7 @@ fun ExerciseDetailScreen(
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.md)
                 ) {
                     StatCard(
                         title = stringResource(R.string.pr_record_title),
@@ -171,7 +172,7 @@ fun ExerciseDetailScreen(
 
             item {
                 SectionHeader(text = stringResource(R.string.sets_history_title))
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(Spacing.lg))
             }
 
             itemsIndexed(history.takeLast(5).reversed()) { index, session ->
@@ -181,11 +182,11 @@ fun ExerciseDetailScreen(
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Box(modifier = Modifier.padding(12.dp)) {
+                    Box(modifier = Modifier.padding(Spacing.md)) {
                         HistorySessionCard(session, exerciseId)
                     }
                 }
-                if (index < 4) Spacer(Modifier.height(8.dp))
+                if (index < 4) Spacer(Modifier.height(Spacing.sm))
             }
 
             item { Spacer(Modifier.height(32.dp)) }
