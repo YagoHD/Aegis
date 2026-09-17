@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -41,7 +42,7 @@ fun ExerciseStatRow(
             .fillMaxWidth()
             .padding(vertical = 4.dp) // Espaciado entre tarjetas igual que en tus listas
             .clickable { onClick() },
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(Radius.md),
         color = MaterialTheme.colorScheme.surfaceVariant, // 30%: SurfaceDark/Variant
         border = BorderStroke(
             width = 1.dp,
@@ -58,12 +59,12 @@ fun ExerciseStatRow(
                     .size(44.dp)
                     .background(
                         color = MaterialTheme.colorScheme.background,
-                        shape = RoundedCornerShape(4.dp)
+                        shape = RoundedCornerShape(Radius.sm)
                     )
                     .border(
                         width = 1.dp,
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                        shape = RoundedCornerShape(4.dp)
+                        shape = RoundedCornerShape(Radius.sm)
                     ),
                 contentAlignment = Alignment.Center
             ) {

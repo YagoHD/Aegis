@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -134,7 +135,7 @@ fun AddExerciseScreen(
                             color = MaterialTheme.colorScheme.onBackground,
                             fontSize = 13.sp
                         ),
-                        shape = RoundedCornerShape(8.dp),
+                        shape = RoundedCornerShape(Radius.md),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -214,7 +215,7 @@ fun AddExerciseScreen(
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     ),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(Radius.md)
                 ) {
                     Text(
                         if (isVariantMode) stringResource(R.string.btn_create_and_add_variant) else stringResource(R.string.btn_create_and_add_routine),
@@ -267,7 +268,7 @@ fun AddExerciseScreen(
                         unfocusedBorderColor = Color.Transparent,
                         focusedTextColor = MaterialTheme.colorScheme.onBackground
                     ),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(Radius.md)
                 )
             }
 
@@ -358,7 +359,7 @@ fun AegisInput(
             unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
             cursorColor = MaterialTheme.colorScheme.primary
         ),
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(Radius.md)
     )
 }
 
@@ -366,7 +367,7 @@ fun AegisInput(
 fun TagChip(text: String, isSelected: Boolean, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(4.dp),
+        shape = RoundedCornerShape(Radius.sm),
         color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
         border = BorderStroke(
             width = 1.dp,
@@ -389,7 +390,7 @@ fun IconBox(icon: ImageVector, isSelected: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .size(60.dp)
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(Radius.md))
             .background(
                 if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
                 else MaterialTheme.colorScheme.surfaceVariant
@@ -398,7 +399,7 @@ fun IconBox(icon: ImageVector, isSelected: Boolean, onClick: () -> Unit) {
                 width = if (isSelected) 1.5.dp else 1.dp,
                 color = if (isSelected) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f),
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(Radius.md)
             )
             .clickable { onClick() },
         contentAlignment = Alignment.Center

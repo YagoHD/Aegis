@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -97,7 +98,7 @@ fun ProfileHeader(
         ) {
             Surface(
                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                shape = RoundedCornerShape(4.dp)
+                shape = RoundedCornerShape(Radius.sm)
             ) {
                 Text(
                     text = stringResource(R.string.label_discipline_day, disciplineDay).uppercase(),
@@ -112,7 +113,7 @@ fun ProfileHeader(
             if (currentStreak >= 1) {
                 Surface(
                     color = MaterialTheme.colorScheme.error.copy(alpha = 0.12f),
-                    shape = RoundedCornerShape(4.dp)
+                    shape = RoundedCornerShape(Radius.sm)
                 ) {
                     Text(
                         text = "🔥 $currentStreak",

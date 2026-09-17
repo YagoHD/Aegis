@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -69,7 +70,7 @@ fun ExerciseAnalyticsHeader(
                     }
                 }
             },
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(Radius.md),
             singleLine = true,
             textStyle = TextStyle(color = MaterialTheme.colorScheme.onBackground, fontSize = 14.sp,
                 fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.2).sp),

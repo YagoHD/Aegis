@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -174,7 +175,7 @@ fun FriendsScreen(viewModel: SocialViewModel, onBack: () -> Unit) {
 @Composable
 private fun MyProfileCard(username: String, rank: MyRank, photo: Any?, onEdit: () -> Unit) {
     Surface(
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(Radius.xl),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -260,7 +261,7 @@ private fun SectionTitle(title: String, count: Int = 0) {
 @Composable
 private fun RequestCard(ref: FriendRef, onAccept: () -> Unit, onReject: () -> Unit) {
     Surface(
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(Radius.lg),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
     ) {
@@ -278,7 +279,7 @@ private fun RequestCard(ref: FriendRef, onAccept: () -> Unit, onReject: () -> Un
                 Button(
                     onClick = onAccept,
                     modifier = Modifier.weight(1f).height(42.dp),
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(Radius.md),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)
                 ) {
                     Text(stringResource(R.string.social_accept), fontWeight = FontWeight.Black, fontSize = 12.sp, letterSpacing = 0.5.sp)
@@ -286,7 +287,7 @@ private fun RequestCard(ref: FriendRef, onAccept: () -> Unit, onReject: () -> Un
                 OutlinedButton(
                     onClick = onReject,
                     modifier = Modifier.weight(1f).height(42.dp),
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(Radius.md),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f))
                 ) {
                     Text(stringResource(R.string.social_reject), color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold, fontSize = 12.sp, letterSpacing = 0.5.sp)
@@ -332,7 +333,7 @@ private fun UsernameField(value: String, hintRes: Int, onChange: (String) -> Uni
         placeholder = { Text(stringResource(hintRes), color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)) },
         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.None, imeAction = ImeAction.Done),
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(Radius.md),
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.background,
             unfocusedContainerColor = MaterialTheme.colorScheme.background,
@@ -350,7 +351,7 @@ private fun PrimaryButton(label: String, busy: Boolean, enabled: Boolean, onClic
         onClick = onClick,
         enabled = enabled && !busy,
         modifier = Modifier.fillMaxWidth().height(50.dp),
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(Radius.md),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,

@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
@@ -139,7 +140,7 @@ fun MetricsScreen(
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 disabledContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)
             ),
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(Radius.md),
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
         ) {
             Text(

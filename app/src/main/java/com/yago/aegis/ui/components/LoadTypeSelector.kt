@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
@@ -80,7 +81,7 @@ private fun LoadChip(
     Surface(
         onClick = onClick,
         modifier = modifier,
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(Radius.md),
         color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.Transparent,
         border = BorderStroke(
             width = 1.dp,

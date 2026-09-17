@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Radius
 
 import HistorySessionCard
 import androidx.compose.foundation.BorderStroke
@@ -176,7 +177,7 @@ fun ExerciseDetailScreen(
             itemsIndexed(history.takeLast(5).reversed()) { index, session ->
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant,
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(Radius.md),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f)),
                     modifier = Modifier.fillMaxWidth()
                 ) {

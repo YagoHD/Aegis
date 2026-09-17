@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -39,7 +40,7 @@ fun ExerciseCard(
         modifier = modifier
             .fillMaxWidth()
             .then(if (onEdit != null) Modifier.clickable { onEdit() } else Modifier),
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(Radius.md),
         color = MaterialTheme.colorScheme.surfaceVariant,
         border = BorderStroke(
             width = 1.dp,
@@ -56,9 +57,9 @@ fun ExerciseCard(
                     .size(44.dp)
                     .background(
                         color = MaterialTheme.colorScheme.background,
-                        shape = RoundedCornerShape(4.dp)
+                        shape = RoundedCornerShape(Radius.sm)
                     )
-                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), RoundedCornerShape(4.dp)),
+                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), RoundedCornerShape(Radius.sm)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(

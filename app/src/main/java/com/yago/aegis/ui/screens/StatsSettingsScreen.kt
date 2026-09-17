@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -52,7 +53,7 @@ fun StatsSettingsScreen(
 
         Surface(
             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(Radius.lg)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
@@ -73,7 +74,7 @@ fun StatsSettingsScreen(
                         Box(
                             modifier = Modifier
                                 .size(36.dp)
-                                .clip(RoundedCornerShape(8.dp))
+                                .clip(RoundedCornerShape(Radius.md))
                                 .background(
                                     if (isSelected) MaterialTheme.colorScheme.primary
                                     else MaterialTheme.colorScheme.surfaceVariant
@@ -100,7 +101,7 @@ fun StatsSettingsScreen(
 
         Surface(
             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(Radius.lg)
         ) {
             Column(modifier = Modifier.padding(8.dp)) {
                 SettingsRow(stringResource(R.string.volume_module_label), showVolume) { viewModel.toggleVolumeCard(it) }

@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Radius
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -87,7 +88,7 @@ fun AvatarCropDialog(
     }
 
     Dialog(onDismissRequest = onDismiss) {
-        Surface(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surface) {
+        Surface(shape = RoundedCornerShape(Radius.xl), color = MaterialTheme.colorScheme.surface) {
             Column(
                 modifier = Modifier.padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally

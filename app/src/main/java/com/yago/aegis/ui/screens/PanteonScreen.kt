@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -189,9 +190,9 @@ private fun BodyMapPlaceholder() {
         modifier = Modifier
             .fillMaxWidth()
             .height(240.dp)
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(Radius.xl))
             .background(MaterialTheme.colorScheme.surface)
-            .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f), RoundedCornerShape(16.dp)),
+            .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f), RoundedCornerShape(Radius.xl)),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -229,7 +230,7 @@ private fun SummaryCard(label: String, group: GroupRank?, modifier: Modifier = M
     // Sin altura fija: el contenido fluye para que el tag de rango se vea entero (antes se cortaba).
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(Radius.lg),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
     ) {
         val tier = group?.tier ?: RankTier.SIN_RANGO
@@ -264,7 +265,7 @@ private fun GroupRow(g: GroupRank) {
     val tierColor = Color(g.tier.colorHex)
 
     Surface(
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(Radius.lg),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -361,8 +362,8 @@ private fun RankBadge(tier: RankTier, small: Boolean = false, winner: Boolean = 
     Surface(
         modifier = Modifier
             .width(if (small) 78.dp else 96.dp)
-            .then(if (winner) Modifier.border(1.5.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(4.dp)) else Modifier),
-        shape = RoundedCornerShape(4.dp),
+            .then(if (winner) Modifier.border(1.5.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(Radius.sm)) else Modifier),
+        shape = RoundedCornerShape(Radius.sm),
         color = if (isRanked) Color(tier.colorHex) else MaterialTheme.colorScheme.surface
     ) {
         Text(
@@ -623,7 +624,7 @@ private fun PodiumPlace(row: RankRow, place: Int, filter: MuscleGroup?, selected
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(Radius.lg))
             .then(if (!row.isMe) Modifier.clickable { onClick() } else Modifier)
             .then(if (selected) Modifier.background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)) else Modifier)
             .padding(horizontal = 6.dp, vertical = 4.dp)
@@ -661,7 +662,7 @@ private fun RankingListRow(position: Int, row: RankRow, filter: MuscleGroup?, se
     val (tier, _) = rankOf(row, filter)
 
     Surface(
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(Radius.lg),
         color = if (row.isMe || selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.10f) else Color.Transparent
     ) {
         Row(
@@ -718,7 +719,7 @@ private fun RankingListRow(position: Int, row: RankRow, filter: MuscleGroup?, se
 
 @Composable
 private fun TuPill() {
-    Surface(shape = RoundedCornerShape(4.dp), color = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)) {
+    Surface(shape = RoundedCornerShape(Radius.sm), color = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)) {
         Text(
             text = stringResource(R.string.ranking_you),
             color = MaterialTheme.colorScheme.primary,
@@ -792,7 +793,7 @@ private fun RankDivisionBadge(rank: Rank) {
     val isRanked = rank.tier != RankTier.SIN_RANGO
     Surface(
         modifier = Modifier.width(78.dp),
-        shape = RoundedCornerShape(4.dp),
+        shape = RoundedCornerShape(Radius.sm),
         color = if (isRanked) Color(rank.tier.colorHex) else MaterialTheme.colorScheme.surface
     ) {
         Text(
@@ -811,7 +812,7 @@ private fun RankDivisionBadge(rank: Rank) {
 @Composable
 private fun RankingCta(text: String, button: String, onClick: () -> Unit) {
     Surface(
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(Radius.lg),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -829,7 +830,7 @@ private fun RankingCta(text: String, button: String, onClick: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(14.dp))
             Surface(
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(Radius.md),
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.clickable { onClick() }
             ) {

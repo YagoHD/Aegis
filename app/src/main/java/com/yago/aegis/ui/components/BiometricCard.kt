@@ -1,3 +1,4 @@
+import com.yago.aegis.ui.theme.Radius
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -34,12 +35,12 @@ fun BiometricCard(
     Column(
         modifier = Modifier
             .fillMaxWidth() // Dejamos que el Row superior controle el tamaño
-            .clip(RoundedCornerShape(8.dp)) // Esquinas más cerradas para un look más serio
+            .clip(RoundedCornerShape(Radius.md)) // Esquinas más cerradas para un look más serio
             .background(MaterialTheme.colorScheme.surface) // 30%: SurfaceDark
             .border(
                 width = 1.dp,
                 color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(Radius.md)
             ) // Borde técnico casi invisible
             .padding(12.dp)
     ) {

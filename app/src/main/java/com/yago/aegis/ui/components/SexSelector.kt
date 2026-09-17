@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -50,7 +51,7 @@ private fun SexOption(
     Surface(
         onClick = onClick,
         modifier = modifier.height(48.dp),
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(Radius.md),
         color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
         border = BorderStroke(
             1.dp,

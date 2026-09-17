@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -78,7 +79,7 @@ fun WorkoutSettingsScreen(
                 // Mostrar/ocultar temporizador
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(Radius.lg)
                 ) {
                     Column(modifier = Modifier.padding(8.dp)) {
                         SettingsRow(stringResource(R.string.show_timer_label), showTimer) {
@@ -113,7 +114,7 @@ fun WorkoutSettingsScreen(
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(56.dp)
-                                    .clip(RoundedCornerShape(8.dp))
+                                    .clip(RoundedCornerShape(Radius.md))
                                     .background(
                                         if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                                         else MaterialTheme.colorScheme.surfaceVariant
@@ -122,7 +123,7 @@ fun WorkoutSettingsScreen(
                                         if (isSelected) Modifier.then(
                                             Modifier.background(
                                                 MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                                                RoundedCornerShape(8.dp)
+                                                RoundedCornerShape(Radius.md)
                                             )
                                         ) else Modifier
                                     )
@@ -168,7 +169,7 @@ fun WorkoutSettingsScreen(
 
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(Radius.lg)
                 ) {
                     Column(modifier = Modifier.padding(8.dp)) {
                         SettingsRow(stringResource(R.string.vibration_label), vibrate) {
@@ -188,7 +189,7 @@ fun WorkoutSettingsScreen(
                 // Resumen visual
                 Surface(
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(Radius.lg),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(

@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Radius
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -157,7 +158,7 @@ fun IdentityScreen(
                 containerColor = MaterialTheme.colorScheme.primary,
                 disabledContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)
             ),
-            shape = RoundedCornerShape(8.dp)
+            shape = RoundedCornerShape(Radius.md)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(

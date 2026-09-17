@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -29,12 +30,12 @@ fun LastSessionCard(lastSetsText: String, suggestion: String? = null) {
             .padding(vertical = 8.dp)
             .background(
                 color = MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
-                shape = RoundedCornerShape(4.dp)
+                shape = RoundedCornerShape(Radius.sm)
             )
             .border(
                 width = 1.dp,
                 color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
-                shape = RoundedCornerShape(4.dp)
+                shape = RoundedCornerShape(Radius.sm)
             )
             .padding(12.dp)
     ) {
@@ -64,7 +65,7 @@ fun LastSessionCard(lastSetsText: String, suggestion: String? = null) {
                     modifier = Modifier
                         .background(
                             MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                            RoundedCornerShape(4.dp)
+                            RoundedCornerShape(Radius.sm)
                         )
                         .padding(horizontal = 8.dp, vertical = 3.dp)
                 ) {

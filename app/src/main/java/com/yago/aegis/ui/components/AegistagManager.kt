@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.background
 import com.yago.aegis.ui.screens.TagChip
@@ -85,7 +86,7 @@ fun AegisTagManager(
                 .fillMaxWidth()
                 .background(
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(Radius.md)
                 )
                 .padding(8.dp)
         ) {

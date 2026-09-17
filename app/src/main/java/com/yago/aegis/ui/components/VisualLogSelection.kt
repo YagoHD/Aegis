@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Radius
 
 import android.net.Uri
 import androidx.compose.foundation.background
@@ -104,12 +105,12 @@ fun ProgressPhotoCard(label: String, date: String, photoUri: Uri?) {
         modifier = Modifier
             .fillMaxWidth()
             .height(240.dp) // Un poco más alto para estilización vertical
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(Radius.md))
             .background(MaterialTheme.colorScheme.surface) // 30% SurfaceDark
             .border(
                 width = 1.dp,
                 color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(Radius.md)
             ),
         contentAlignment = Alignment.BottomCenter
     ) {

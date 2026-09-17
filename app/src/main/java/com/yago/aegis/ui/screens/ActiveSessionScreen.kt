@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Radius
 
 import android.Manifest
 import android.app.NotificationChannel
@@ -260,7 +261,7 @@ fun ActiveSessionScreen(
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary
                         ),
-                        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(Radius.md)
                     ) {
                         Text(
                             stringResource(R.string.btn_continue_training),
@@ -278,7 +279,7 @@ fun ActiveSessionScreen(
                             onBack()
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(Radius.md),
                         border = androidx.compose.foundation.BorderStroke(
                             1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)
                         )
@@ -500,7 +501,7 @@ fun ActiveSessionScreen(
                                 .padding(top = 8.dp)
                                 .height(52.dp),
                             color = Color.Transparent,
-                            shape = RoundedCornerShape(8.dp),
+                            shape = RoundedCornerShape(Radius.md),
                             border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
                         ) {
                             Row(
@@ -554,7 +555,7 @@ fun ActiveSessionScreen(
                                 disabledContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
                                 disabledContentColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)
                             ),
-                            shape = RoundedCornerShape(8.dp),
+                            shape = RoundedCornerShape(Radius.md),
                             elevation = ButtonDefaults.buttonElevation(defaultElevation = if (hasAnyData) 4.dp else 0.dp)
                         ) {
                             Text(

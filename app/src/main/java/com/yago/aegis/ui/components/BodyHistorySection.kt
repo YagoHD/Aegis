@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Radius
 
 import android.net.Uri
 import androidx.compose.foundation.Canvas
@@ -145,7 +146,7 @@ private fun MetricLineChart(
 
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant,
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(Radius.md),
         modifier = Modifier.fillMaxWidth(),
         border = androidx.compose.foundation.BorderStroke(
             1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f)
@@ -166,7 +167,7 @@ private fun MetricLineChart(
                 )
                 Surface(
                     color = bronzeColor.copy(alpha = 0.1f),
-                    shape = RoundedCornerShape(4.dp)
+                    shape = RoundedCornerShape(Radius.sm)
                 ) {
                     Text(
                         text = deltaTxt,
@@ -277,9 +278,9 @@ private fun PhotoHistoryThumb(record: PhotoRecord) {
     Box(
         modifier = Modifier
             .size(width = 110.dp, height = 160.dp)
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(Radius.md))
             .background(MaterialTheme.colorScheme.surface)
-            .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f), RoundedCornerShape(8.dp)),
+            .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f), RoundedCornerShape(Radius.md)),
         contentAlignment = Alignment.BottomCenter
     ) {
         AsyncImage(

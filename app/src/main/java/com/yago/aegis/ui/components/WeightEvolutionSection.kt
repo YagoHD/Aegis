@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -57,7 +58,7 @@ fun WeightEvolutionSection(
             Surface(
                 modifier = Modifier.clickable { onToggleRange() },
                 color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(4.dp),
+                shape = RoundedCornerShape(Radius.sm),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f))
             ) {
                 Text(
@@ -79,7 +80,7 @@ fun WeightEvolutionSection(
                 .fillMaxWidth()
                 .height(200.dp),
             color = MaterialTheme.colorScheme.surfaceVariant, // Fondo SurfaceDark
-            shape = RoundedCornerShape(8.dp), // Esquinas unificadas (8.dp)
+            shape = RoundedCornerShape(Radius.md), // Esquinas unificadas (8.dp)
             border = BorderStroke(
                 width = 1.dp,
                 color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f) // Borde acero
@@ -117,7 +118,7 @@ fun WeightEvolutionSection(
                             modifier = Modifier
                                 .width(38.dp)
                                 .fillMaxHeight(barHeightFraction * 0.75f)
-                                .clip(RoundedCornerShape(4.dp)) // Esquinas más rectas
+                                .clip(RoundedCornerShape(Radius.sm)) // Esquinas más rectas
                                 .background(
                                     if (isLastMonth) orangeAegis
                                     else orangeAegis.copy(alpha = 0.15f) // El mes pasado es un "fantasma" del actual

@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -103,7 +104,7 @@ fun ExercisesLibraryScreen(
                 Surface(
                     onClick = onNavigateToCreate,
                     modifier = Modifier.weight(1f).height(44.dp),
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(Radius.md),
                     color = MaterialTheme.colorScheme.surface,
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
                 ) {
@@ -146,7 +147,7 @@ fun ExercisesLibraryScreen(
                             }
                         }
                     },
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(Radius.md),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -163,7 +164,7 @@ fun ExercisesLibraryScreen(
                 val filterActive = routinesViewModel.selectedLibraryTag != "ALL"
                 Surface(
                     onClick = { showFilters = !showFilters },
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(Radius.md),
                     color = if (filterActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                             else MaterialTheme.colorScheme.surface,
                     border = BorderStroke(1.dp,

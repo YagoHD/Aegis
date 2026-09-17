@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Radius
 
 import android.graphics.Paint
 import android.graphics.Typeface
@@ -43,7 +44,7 @@ fun ProgressionChartSection(
 
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant,
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(Radius.md),
         modifier = Modifier.fillMaxWidth(),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f))
     ) {
@@ -84,7 +85,7 @@ fun ProgressionChartSection(
                 }
                 Surface(
                     color = bronzeColor.copy(alpha = 0.1f),
-                    shape = RoundedCornerShape(4.dp),
+                    shape = RoundedCornerShape(Radius.sm),
                     border = BorderStroke(1.dp, bronzeColor.copy(alpha = 0.5f))
                 ) {
                     Text(

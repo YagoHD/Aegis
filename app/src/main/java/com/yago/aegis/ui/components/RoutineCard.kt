@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -42,7 +43,7 @@ fun RoutineCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp),
-        shape = RoundedCornerShape(8.dp), // Esquinas más técnicas
+        shape = RoundedCornerShape(Radius.md), // Esquinas más técnicas
         color = MaterialTheme.colorScheme.surfaceVariant, // 161616 -> Ahora usa el tema
         border = BorderStroke(
             width = 1.dp,

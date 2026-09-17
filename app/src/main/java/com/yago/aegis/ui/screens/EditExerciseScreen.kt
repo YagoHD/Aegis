@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -100,7 +101,7 @@ fun EditExerciseScreen(
                     .fillMaxWidth()
                     .padding(24.dp)
                     .height(56.dp),
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(Radius.md),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary, // AegisBronze
                     contentColor = MaterialTheme.colorScheme.onPrimary
@@ -165,7 +166,7 @@ fun EditExerciseScreen(
                         color = MaterialTheme.colorScheme.onBackground,
                         fontSize = 13.sp
                     ),
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(Radius.md),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                         unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -232,7 +233,7 @@ fun EditInput(value: String, onValueChange: (String) -> Unit, placeholder: Strin
                 letterSpacing = 1.sp
             )
         },
-        shape = RoundedCornerShape(8.dp), // Consistencia con el resto de la app
+        shape = RoundedCornerShape(Radius.md), // Consistencia con el resto de la app
         textStyle = androidx.compose.ui.text.TextStyle(
             color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold,
@@ -255,7 +256,7 @@ fun EditIconBox(icon: ImageVector, isSelected: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .size(64.dp) // Un pelín más compacto para que quepan mejor en filas de 4
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(Radius.md))
             .background(
                 if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
                 else MaterialTheme.colorScheme.surfaceVariant
@@ -264,7 +265,7 @@ fun EditIconBox(icon: ImageVector, isSelected: Boolean, onClick: () -> Unit) {
                 width = if (isSelected) 1.5.dp else 1.dp,
                 color = if (isSelected) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f),
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(Radius.md)
             )
             .clickable { onClick() },
         contentAlignment = Alignment.Center

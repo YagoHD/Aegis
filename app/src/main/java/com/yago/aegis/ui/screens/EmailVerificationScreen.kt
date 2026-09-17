@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -81,7 +82,7 @@ fun EmailVerificationScreen(
 
         Surface(
             color = MaterialTheme.colorScheme.surface,
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(Radius.md),
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
@@ -108,7 +109,7 @@ fun EmailVerificationScreen(
             Spacer(modifier = Modifier.height(12.dp))
             Surface(
                 color = MaterialTheme.colorScheme.error.copy(alpha = 0.1f),
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(Radius.md)
             ) {
                 Text(
                     text = uiState.errorMessage!!,
@@ -127,7 +128,7 @@ fun EmailVerificationScreen(
             modifier = Modifier.fillMaxWidth().height(56.dp),
             enabled = !uiState.isLoading,
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-            shape = RoundedCornerShape(8.dp)
+            shape = RoundedCornerShape(Radius.md)
         ) {
             if (uiState.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.size(20.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
@@ -145,7 +146,7 @@ fun EmailVerificationScreen(
             },
             enabled = resendCooldown == 0 && !uiState.isLoading,
             modifier = Modifier.fillMaxWidth().height(48.dp),
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(Radius.md),
             border = androidx.compose.foundation.BorderStroke(
                 1.dp,
                 if (resendCooldown == 0) MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)

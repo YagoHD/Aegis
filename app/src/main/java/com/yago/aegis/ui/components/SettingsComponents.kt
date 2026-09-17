@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Radius
 
 import android.content.Context
 import android.content.Intent
@@ -180,9 +181,9 @@ fun SettingsMenu(
             Box(
                 modifier = Modifier
                     .size(64.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(Radius.lg))
                     .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), RoundedCornerShape(Radius.lg))
                     .clickable { avatarLauncher.launch("image/*") },
                 contentAlignment = Alignment.Center
             ) {
@@ -235,7 +236,7 @@ fun SettingsMenu(
 
             Surface(
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(Radius.lg)
             ) {
                 Column(modifier = Modifier.padding(8.dp)) {
                     // Email del usuario
@@ -305,7 +306,7 @@ fun SettingsMenu(
         if (onNavigateToPrivacy != null) {
             Surface(
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(Radius.lg)
             ) {
                 Row(
                     modifier = Modifier
@@ -328,7 +329,7 @@ fun SettingsMenu(
         val exportLabel = stringResource(R.string.export_data_label)
         Surface(
             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(Radius.lg)
         ) {
             Row(
                 modifier = Modifier
@@ -363,7 +364,7 @@ fun SettingsMenu(
 
         Surface(
             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(Radius.lg)
         ) {
             Column(modifier = Modifier.padding(8.dp)) {
                 SettingsRow(stringResource(R.string.settings_label_body_fat), state.showBodyFat) { viewModel.toggleBodyFat(it) }
@@ -383,7 +384,7 @@ fun SettingsMenu(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), RoundedCornerShape(Radius.md))
                     .padding(start = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -425,7 +426,7 @@ fun SettingsMenu(
                         newMeasureName = ""
                     }
                 },
-                modifier = Modifier.size(48.dp).background(MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
+                modifier = Modifier.size(48.dp).background(MaterialTheme.colorScheme.primary, RoundedCornerShape(Radius.md))
             ) {
                 Icon(Icons.Default.Add, contentDescription = null, tint = Color.Black)
             }
@@ -494,7 +495,7 @@ fun ChangePasswordDialog(
                         },
                         visualTransformation = if (currentVisible) VisualTransformation.None else PasswordVisualTransformation(),
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp),
+                        shape = RoundedCornerShape(Radius.md),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         colors = OutlinedTextFieldDefaults.colors(
@@ -521,7 +522,7 @@ fun ChangePasswordDialog(
                         },
                         visualTransformation = if (newVisible) VisualTransformation.None else PasswordVisualTransformation(),
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp),
+                        shape = RoundedCornerShape(Radius.md),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         colors = OutlinedTextFieldDefaults.colors(
@@ -543,7 +544,7 @@ fun ChangePasswordDialog(
                         leadingIcon = { Icon(Icons.Default.Lock, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(18.dp)) },
                         visualTransformation = PasswordVisualTransformation(),
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp),
+                        shape = RoundedCornerShape(Radius.md),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         colors = OutlinedTextFieldDefaults.colors(
@@ -641,7 +642,7 @@ fun DeleteAccountDialog(
                         },
                         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp),
+                        shape = RoundedCornerShape(Radius.md),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         colors = OutlinedTextFieldDefaults.colors(

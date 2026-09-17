@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Radius
 
 import android.content.Context
 import android.content.Intent
@@ -190,7 +191,7 @@ fun WorkoutCompleteScreen(
             // ─── TARJETA VOLUMEN TOTAL ───
             Surface(
                 color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(Radius.lg),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
@@ -285,7 +286,7 @@ fun WorkoutCompleteScreen(
             ) {
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant,
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(Radius.lg),
                     modifier = Modifier.weight(1f)
                 ) {
                     Column(
@@ -318,7 +319,7 @@ fun WorkoutCompleteScreen(
 
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant,
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(Radius.lg),
                     modifier = Modifier.weight(1f)
                 ) {
                     Column(
@@ -413,7 +414,7 @@ fun WorkoutCompleteScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(Radius.md),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
@@ -446,7 +447,7 @@ fun WorkoutCompleteScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultMinSize(minHeight = 80.dp),
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(Radius.md),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = MaterialTheme.colorScheme.surface,
                     unfocusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -505,7 +506,7 @@ fun WorkoutCompleteScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp),
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(Radius.md),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant,
                     contentColor = MaterialTheme.colorScheme.onBackground
@@ -541,9 +542,9 @@ private fun PRCelebrationBanner(prExercises: List<ExerciseSummary>, borderAlpha:
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.5.dp, gold.copy(alpha = borderAlpha), RoundedCornerShape(12.dp)),
+            .border(1.5.dp, gold.copy(alpha = borderAlpha), RoundedCornerShape(Radius.lg)),
         color = gold.copy(alpha = 0.07f),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(Radius.lg)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
@@ -612,8 +613,8 @@ private fun WorkoutShareCard(summary: WorkoutSummary, previousVolume: Double = 0
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(ShareCardBg, RoundedCornerShape(16.dp))
-            .border(1.dp, ShareBronze.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
+            .background(ShareCardBg, RoundedCornerShape(Radius.xl))
+            .border(1.dp, ShareBronze.copy(alpha = 0.3f), RoundedCornerShape(Radius.xl))
             .padding(22.dp)
     ) {
         // Header: AEGIS logo + fecha
@@ -746,7 +747,7 @@ private fun WorkoutShareCard(summary: WorkoutSummary, previousVolume: Double = 0
                     if (exercise.isNewPR) {
                         Surface(
                             color = ShareBronze.copy(alpha = 0.15f),
-                            shape = RoundedCornerShape(4.dp),
+                            shape = RoundedCornerShape(Radius.sm),
                             border = BorderStroke(0.5.dp, ShareAccent.copy(alpha = 0.7f))
                         ) {
                             Text(
@@ -823,7 +824,7 @@ private fun WorkoutShareCard(summary: WorkoutSummary, previousVolume: Double = 0
 private fun ShareStatChip(value: String, unit: String, label: String, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
-            .background(ShareCardSurface, RoundedCornerShape(8.dp))
+            .background(ShareCardSurface, RoundedCornerShape(Radius.md))
             .padding(horizontal = 10.dp, vertical = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -907,7 +908,7 @@ fun ExerciseSummaryRow(exercise: ExerciseSummary) {
             if (exercise.isNewPR) {
                 Surface(
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                    shape = RoundedCornerShape(4.dp),
+                    shape = RoundedCornerShape(Radius.sm),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
                 ) {
                     Text(

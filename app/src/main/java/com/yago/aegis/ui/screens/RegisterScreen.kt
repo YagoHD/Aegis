@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Radius
 
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -133,7 +134,7 @@ fun RegisterScreen(
             label = { Text(stringResource(R.string.email_label)) },
             leadingIcon = { Icon(Icons.Default.Email, null, tint = MaterialTheme.colorScheme.secondary) },
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(Radius.md),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             singleLine = true,
             colors = authTextFieldColors()
@@ -158,7 +159,7 @@ fun RegisterScreen(
             },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(Radius.md),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             singleLine = true,
             colors = authTextFieldColors()
@@ -174,7 +175,7 @@ fun RegisterScreen(
             leadingIcon = { Icon(Icons.Default.Lock, null, tint = MaterialTheme.colorScheme.secondary) },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(Radius.md),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             singleLine = true,
             colors = authTextFieldColors()
@@ -199,7 +200,7 @@ fun RegisterScreen(
             onClick = { validateAndRegister() },
             enabled = !uiState.isLoading,
             modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(Radius.md),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -229,7 +230,7 @@ fun RegisterScreen(
             onClick = { launchGoogleSignIn() },
             enabled = !uiState.isLoading,
             modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(Radius.md),
             border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f))
         ) {
             Text(

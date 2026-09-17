@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -47,13 +48,13 @@ fun GirthRow(label: String, value: String, onValueChange: (String) -> Unit) {
         Box(
             modifier = Modifier
                 .width(90.dp) // Un poco más de ancho para comodidad
-                .clip(RoundedCornerShape(4.dp))
+                .clip(RoundedCornerShape(Radius.sm))
                 // 30%: SurfaceDark pero un poco más profundo para el input
                 .background(MaterialTheme.colorScheme.background)
                 .border(
                     width = 1.dp,
                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
-                    shape = RoundedCornerShape(4.dp)
+                    shape = RoundedCornerShape(Radius.sm)
                 )
                 .padding(vertical = 8.dp, horizontal = 12.dp),
             contentAlignment = Alignment.Center

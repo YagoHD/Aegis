@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -80,7 +81,7 @@ fun PlateCalculatorScreen(
                         color = MaterialTheme.colorScheme.onBackground
                     ),
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(Radius.lg),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surface,
                         unfocusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -101,7 +102,7 @@ fun PlateCalculatorScreen(
                         Surface(
                             onClick = { viewModel.setBarWeight(option) },
                             modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(8.dp),
+                            shape = RoundedCornerShape(Radius.md),
                             color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surface,
                             border = BorderStroke(
                                 1.dp,
@@ -165,7 +166,7 @@ private fun PlateGrid(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .clip(RoundedCornerShape(8.dp))
+                            .clip(RoundedCornerShape(Radius.md))
                             .background(
                                 if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
                                 else MaterialTheme.colorScheme.surface
@@ -173,7 +174,7 @@ private fun PlateGrid(
                             .border(
                                 1.dp,
                                 if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
-                                RoundedCornerShape(8.dp)
+                                RoundedCornerShape(Radius.md)
                             )
                             .clickable { onToggle(plate) }
                             .padding(vertical = 12.dp),
@@ -208,13 +209,13 @@ private fun ResultCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(Radius.lg))
             .background(MaterialTheme.colorScheme.surface)
             .border(
                 1.dp,
                 if (remainder > 0.001) MaterialTheme.colorScheme.error.copy(alpha = 0.5f)
                 else MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                RoundedCornerShape(12.dp)
+                RoundedCornerShape(Radius.lg)
             )
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)

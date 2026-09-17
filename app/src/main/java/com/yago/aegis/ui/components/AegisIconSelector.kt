@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.components
+import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,7 +28,7 @@ fun AegisIconSelector(
     Box(
         modifier = Modifier
             .size(45.dp)
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(Radius.md))
             .background(
                 if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
                 else Color.Transparent
@@ -36,7 +37,7 @@ fun AegisIconSelector(
                 width = 1.dp,
                 color = if (isSelected) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(Radius.md)
             )
             .clickable { onClick() },
         contentAlignment = Alignment.Center

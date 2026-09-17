@@ -1,4 +1,5 @@
 package com.yago.aegis.ui.screens
+import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
@@ -125,7 +126,7 @@ fun EditRoutineScreen(
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp
                         ),
-                        shape = RoundedCornerShape(8.dp),
+                        shape = RoundedCornerShape(Radius.md),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -198,7 +199,7 @@ fun EditRoutineScreen(
                     val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp)
                     Surface(
                         shadowElevation = elevation,
-                        shape = RoundedCornerShape(8.dp),
+                        shape = RoundedCornerShape(Radius.md),
                         color = Color.Transparent
                     ) {
                         RoutineSlotCard(
@@ -218,7 +219,7 @@ fun EditRoutineScreen(
                 Surface(
                     onClick = { navController.navigate(com.yago.aegis.ui.navigation.Routes.addExercise(-1)) },
                     modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(Radius.md),
                     color = Color.Transparent,
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
                 ) {
@@ -263,7 +264,7 @@ fun EditRoutineScreen(
                         disabledContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f),
                         disabledContentColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)
                     ),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(Radius.md)
                 ) {
                     Icon(Icons.Default.Save, contentDescription = null)
                     Spacer(modifier = Modifier.width(12.dp))
@@ -297,7 +298,7 @@ private fun RoutineSlotCard(
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(Radius.md),
         color = MaterialTheme.colorScheme.surfaceVariant,
         border = BorderStroke(
             1.dp,
@@ -315,8 +316,8 @@ private fun RoutineSlotCard(
                 Box(
                     modifier = Modifier
                         .size(44.dp)
-                        .background(MaterialTheme.colorScheme.background, RoundedCornerShape(4.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), RoundedCornerShape(4.dp)),
+                        .background(MaterialTheme.colorScheme.background, RoundedCornerShape(Radius.sm))
+                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), RoundedCornerShape(Radius.sm)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
