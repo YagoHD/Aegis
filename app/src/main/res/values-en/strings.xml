@@ -549,6 +549,12 @@
     <string name="league_to_next">%1$s pts to promote</string>
     <string name="league_top_tier">Top league reached!</string>
     <string name="league_friend">FRIEND</string>
+    <string name="league_your_group">YOUR GROUP</string>
+    <string name="league_position">Position %1$d of %2$d</string>
+    <string name="league_you_promoting">In the PROMOTION zone!</string>
+    <string name="league_you_relegating">In the relegation zone</string>
+    <string name="league_you_safe">Safe zone</string>
+    <string name="league_medals">MEDALS</string>
     <string name="panteon_subtitle">LAST 30 DAYS</string>
     <string name="panteon_empty">Complete workouts to forge your ranks</string>
     <string name="highest_rank_label">TOP</string>

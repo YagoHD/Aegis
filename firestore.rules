@@ -60,19 +60,58 @@ service cloud.firestore {
       allow write: if request.auth != null && request.auth.uid == uid;
     }
 
-    // ---- Liga mensual global: tabla mundial legible por todos; cada quien escribe la SUYA ----
-    // Fase 1: el cliente calcula su puntuación. Topes de cordura anti-trampa (uid propio, puntos
-    // en rango). El recálculo en servidor y el cierre mensual llegan en Fase 2/3 (Cloud Functions).
-    // Ver docs/us-liga.md.
+    // ---- Liga mensual global (US-LIGA) ----
+    // El cliente escribe SU entrada (puntos calculados en cliente, con topes de cordura). Los
+    // campos `league` y `groupId` son del SERVIDOR (Cloud Functions): el cliente no los puede
+    // fijar ni cambiar. Grupos, temporadas y medallas los escriben SOLO las Functions (admin,
+    // que se salta estas reglas). Ver docs/us-liga.md y docs/us-liga-fase2-deploy.md.
     match /leagueMembers/{uid} {
       allow read: if request.auth != null;
-      allow create, update: if request.auth != null
+      // Alta: uid propio y puntos en rango. league/groupId aún no existen (los pone el trigger).
+      allow create: if request.auth != null
         && request.auth.uid == uid
         && request.resource.data.uid == uid
         && request.resource.data.points is number
         && request.resource.data.points >= 0
         && request.resource.data.points <= 1000000;
+      // Actualización (merge): puntos en rango y SIN tocar league/groupId (server-only).
+      allow update: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && request.resource.data.points is number
+        && request.resource.data.points >= 0
+        && request.resource.data.points <= 1000000
+        && (!('league' in request.resource.data) || request.resource.data.league == resource.data.get('league', null))
+        && (!('groupId' in request.resource.data) || request.resource.data.groupId == resource.data.get('groupId', null));
       allow delete: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Temporadas: legibles por autenticados; las escribe solo el cierre mensual (Function).
+    match /leagueSeasons/{sid} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // Grupos (~30) y su espejo de miembros: legibles por autenticados (ver tu grupo);
+    // los escribe solo el servidor (trigger / cierre mensual).
+    match /leagueGroups/{sid}/groups/{gid} {
+      allow read: if request.auth != null;
+      allow write: if false;
+      match /members/{uid} {
+        allow read: if request.auth != null;
+        allow write: if false;
+      }
+    }
+    // Doc-índice interno de grupos abiertos (lo usa el trigger para asignar hueco).
+    match /leagueGroups/{sid}/meta/{league} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // Medallas de temporada: cada quien lee SOLO las suyas; las escribe solo el cierre mensual.
+    match /leagueMedals/{uid}/seasons/{sid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
     }
 
     // Cualquier otra ruta: denegada por defecto.

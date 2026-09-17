@@ -26,8 +26,21 @@ data class LeagueEntry(
     val points: Long = 0,
     val sessions: Int = 0,
     val relativeWork: Double = 0.0,
-    val tier: String = RankTier.BRONCE.name,   // liga provisional (nombre de RankTier)
+    val tier: String = RankTier.BRONCE.name,   // liga provisional por umbrales (Fase 1)
+    // Fijados por el SERVIDOR en Fase 2 (Cloud Functions): liga real (ganada por ascenso) y grupo.
+    // Vacíos mientras las Functions no estén desplegadas → el cliente cae a la tabla mundial (Fase 1).
+    val league: String = "",
+    val groupId: String = "",
     val updatedAt: Long = 0L
+)
+
+/** Medalla de una temporada cerrada (doc `leagueMedals/{uid}/seasons/{seasonId}`). Solo la escribe el servidor. */
+data class LeagueMedal(
+    val seasonId: String = "",
+    val league: String = "",            // nombre de RankTier
+    val position: Int = 0,
+    val groupSize: Int = 0,
+    val movement: String = "stay"       // "up" | "down" | "stay"
 )
 
 /** Puntos de esfuerzo de una temporada + su desglose. */
@@ -124,4 +137,26 @@ object LeagueSystem {
         val span = (next - cur).coerceAtLeast(1)
         return ((points - cur).toFloat() / span).coerceIn(0f, 1f)
     }
+
+    // --- Zonas de ascenso/descenso del grupo (Fase 2). Debe COINCIDIR con functions/index.js. ---
+    const val GROUP_SIZE = 30
+    private const val PROMOTE_TOP = 7
+    private const val RELEGATE_BOTTOM = 5
+
+    /** Cuántos suben (arriba) y bajan (abajo) en un grupo de [size] de la liga [league]. */
+    private fun cutoffs(size: Int, league: RankTier): Pair<Int, Int> {
+        if (size <= 1) return 0 to 0
+        var promote = if (league == RankTier.TITAN) 0 else minOf(PROMOTE_TOP, size / 3)
+        var relegate = if (league == RankTier.BRONCE) 0 else minOf(RELEGATE_BOTTOM, size / 4)
+        while (promote + relegate > size - 1 && (promote > 0 || relegate > 0)) {
+            if (relegate >= promote && relegate > 0) relegate-- else if (promote > 0) promote-- else break
+        }
+        return promote to relegate
+    }
+
+    /** Nº de puestos de ascenso (los N primeros del grupo suben de liga). */
+    fun promoteCount(size: Int, league: RankTier): Int = cutoffs(size, league).first
+
+    /** Nº de puestos de descenso (los N últimos del grupo bajan de liga). */
+    fun relegateCount(size: Int, league: RankTier): Int = cutoffs(size, league).second
 }

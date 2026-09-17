@@ -878,10 +878,13 @@ private fun tierIndex(t: RankTier): Int =
     if (t == RankTier.SIN_RANGO) -1 else RankTier.ladder.indexOf(t)
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Pestaña LIGA: liga mensual global (esfuerzo del mes relativo al peso). Fase 1.
-// Tarjeta hero con mi liga + puntos + progreso, y tabla mundial (top-100) con mi
-// fila y mis amigos resaltados. Ver docs/us-liga.md.
+// Pestaña LIGA: liga mensual de esfuerzo (relativo al peso). Ver docs/us-liga.md.
+// - Modo GRUPO (Fase 2, Functions desplegadas): mi grupo de ~30 con zonas de
+//   ascenso (verde, arriba) / descenso (rojo, abajo) + medallas de temporadas.
+// - Modo GLOBAL (Fase 1, fallback): tabla mundial top-100 por puntos.
 // ─────────────────────────────────────────────────────────────────────────────
+
+private val LeaguePromoteColor = Color(0xFF7FB069)   // verde: zona de ascenso
 
 @Composable
 private fun LeagueSection(
@@ -912,12 +915,16 @@ private fun LeagueSection(
     val avatars = remember(state.board) {
         state.board.filter { it.uid != state.myUid }.associate { it.uid to AvatarImage.decode(it.avatar) }
     }
+    val isGroup = state.mode == LeagueViewModel.LeagueMode.GROUP
+    val size = state.board.size
 
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
         LeagueHeroCard(state)
 
+        if (state.medals.isNotEmpty()) LeagueMedalsStrip(state.medals)
+
         Text(
-            text = stringResource(R.string.league_world_table),
+            text = stringResource(if (isGroup) R.string.league_your_group else R.string.league_world_table),
             color = MaterialTheme.colorScheme.secondary,
             fontSize = 11.sp,
             fontWeight = FontWeight.Black,
@@ -936,11 +943,19 @@ private fun LeagueSection(
         } else {
             state.board.forEachIndexed { i, entry ->
                 val isMe = entry.uid == state.myUid
+                // -1 descenso · 0 nada · 1 ascenso (solo en modo grupo).
+                val zone = when {
+                    !isGroup -> 0
+                    i < state.promoteCount -> 1
+                    i >= size - state.relegateCount -> -1
+                    else -> 0
+                }
                 LeagueRow(
                     position = i + 1,
                     entry = entry,
                     isMe = isMe,
                     isFriend = entry.uid in state.friendUids,
+                    zone = zone,
                     photo = if (isMe) myAvatar else avatars[entry.uid]
                 )
             }
@@ -951,6 +966,7 @@ private fun LeagueSection(
 @Composable
 private fun LeagueHeroCard(state: LeagueViewModel.LeagueState) {
     val tierColor = Color(state.myTier.colorHex)
+    val isGroup = state.mode == LeagueViewModel.LeagueMode.GROUP
     Surface(
         shape = RoundedCornerShape(Radius.xl),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
@@ -991,23 +1007,88 @@ private fun LeagueHeroCard(state: LeagueViewModel.LeagueState) {
                 }
             }
             Spacer(Modifier.height(Spacing.md))
-            TierBar(state.progress, tierColor)
-            Spacer(Modifier.height(6.dp))
-            Text(
-                text = state.nextThreshold?.let {
-                    stringResource(R.string.league_to_next, formatPoints((it - state.myPoints).coerceAtLeast(0)))
-                } ?: stringResource(R.string.league_top_tier),
-                color = MaterialTheme.colorScheme.secondary,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Bold
-            )
+            if (isGroup) {
+                // Modo grupo: mi puesto + mi situación (ascenso/descenso/segura). Sin barra de umbral.
+                val size = state.board.size
+                val myPos = state.myPosition
+                val (statusRes, statusColor) = when {
+                    myPos in 1..state.promoteCount -> R.string.league_you_promoting to LeaguePromoteColor
+                    myPos > 0 && myPos > size - state.relegateCount -> R.string.league_you_relegating to MaterialTheme.colorScheme.error
+                    else -> R.string.league_you_safe to MaterialTheme.colorScheme.secondary
+                }
+                if (myPos > 0) {
+                    Text(
+                        text = stringResource(R.string.league_position, myPos, size),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Black
+                    )
+                    Spacer(Modifier.height(2.dp))
+                }
+                Text(
+                    text = stringResource(statusRes),
+                    color = statusColor,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            } else {
+                TierBar(state.progress, tierColor)
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = state.nextThreshold?.let {
+                        stringResource(R.string.league_to_next, formatPoints((it - state.myPoints).coerceAtLeast(0)))
+                    } ?: stringResource(R.string.league_top_tier),
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+
+/** Tira horizontal de medallas de temporadas cerradas (Fase 2). */
+@Composable
+private fun LeagueMedalsStrip(medals: List<com.yago.aegis.data.league.LeagueMedal>) {
+    Column {
+        Text(
+            text = stringResource(R.string.league_medals),
+            color = MaterialTheme.colorScheme.secondary,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 1.5.sp,
+            modifier = Modifier.padding(start = 6.dp, bottom = Spacing.xs)
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md)
+        ) {
+            medals.forEach { m ->
+                val tier = runCatching { RankTier.valueOf(m.league) }.getOrDefault(RankTier.BRONCE)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    RankMedal(tier, 34.dp)
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        text = seasonMonthShort(m.seasonId),
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun LeagueRow(position: Int, entry: LeagueEntry, isMe: Boolean, isFriend: Boolean, photo: Any?) {
+private fun LeagueRow(position: Int, entry: LeagueEntry, isMe: Boolean, isFriend: Boolean, zone: Int, photo: Any?) {
     val tier = runCatching { RankTier.valueOf(entry.tier) }.getOrDefault(RankTier.BRONCE)
+    val zoneColor = when (zone) {
+        1 -> LeaguePromoteColor
+        -1 -> MaterialTheme.colorScheme.error
+        else -> Color.Transparent
+    }
     Surface(
         shape = RoundedCornerShape(Radius.lg),
         color = if (isMe) MaterialTheme.colorScheme.primary.copy(alpha = 0.10f) else Color.Transparent
@@ -1018,13 +1099,26 @@ private fun LeagueRow(position: Int, entry: LeagueEntry, isMe: Boolean, isFriend
                 .padding(vertical = 10.dp, horizontal = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Acento de zona (verde asciende / rojo desciende) a la izquierda.
+            Box(
+                modifier = Modifier
+                    .width(3.dp)
+                    .height(34.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(zoneColor)
+            )
+            Spacer(Modifier.width(6.dp))
             Text(
                 text = "$position",
-                color = MaterialTheme.colorScheme.secondary,
+                color = when (zone) {
+                    1 -> LeaguePromoteColor
+                    -1 -> MaterialTheme.colorScheme.error
+                    else -> MaterialTheme.colorScheme.secondary
+                },
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Black,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.width(24.dp)
+                modifier = Modifier.width(22.dp)
             )
             Spacer(Modifier.width(Spacing.sm))
             AegisAvatar(
@@ -1091,3 +1185,13 @@ private fun seasonLabel(seasonId: String): String {
 }
 
 private fun formatPoints(p: Long): String = String.format(java.util.Locale.getDefault(), "%,d", p)
+
+/** "2026-09" → "SEP" (mes abreviado localizado, para la tira de medallas). */
+private fun seasonMonthShort(seasonId: String): String {
+    val parts = seasonId.split("-")
+    val y = parts.getOrNull(0)?.toIntOrNull()
+    val m = parts.getOrNull(1)?.toIntOrNull()
+    if (y == null || m == null) return seasonId
+    val cal = java.util.Calendar.getInstance().apply { set(y, m - 1, 1) }
+    return java.text.SimpleDateFormat("MMM", java.util.Locale.getDefault()).format(cal.time).uppercase()
+}

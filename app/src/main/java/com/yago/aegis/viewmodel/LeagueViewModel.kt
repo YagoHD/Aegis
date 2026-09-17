@@ -9,6 +9,7 @@ import com.yago.aegis.data.RankTier
 import com.yago.aegis.data.UserRepository
 import com.yago.aegis.data.league.LeagueDataSource
 import com.yago.aegis.data.league.LeagueEntry
+import com.yago.aegis.data.league.LeagueMedal
 import com.yago.aegis.data.league.LeagueSystem
 import com.yago.aegis.util.AvatarImage
 import kotlinx.coroutines.Dispatchers
@@ -34,9 +35,13 @@ class LeagueViewModel(
 
     private val myUid: String = league.currentUid() ?: ""
 
+    /** GROUP = liga real de 30 con ascenso/descenso (Functions desplegadas). GLOBAL = tabla mundial (Fase 1). */
+    enum class LeagueMode { GROUP, GLOBAL }
+
     data class LeagueState(
         val loading: Boolean = false,
         val hasUsername: Boolean = true,
+        val mode: LeagueMode = LeagueMode.GLOBAL,
         val seasonId: String = "",
         val myUid: String = "",
         val myPoints: Long = 0,
@@ -44,6 +49,12 @@ class LeagueViewModel(
         val mySessions: Int = 0,
         val nextThreshold: Long? = null,
         val progress: Float = 0f,
+        // Solo modo GROUP:
+        val groupId: String = "",
+        val myPosition: Int = 0,       // 1-based; 0 = desconocido
+        val promoteCount: Int = 0,     // los N primeros del grupo ascienden
+        val relegateCount: Int = 0,    // los N últimos descienden
+        val medals: List<LeagueMedal> = emptyList(),
         val board: List<LeagueEntry> = emptyList(),
         val friendUids: Set<String> = emptySet()
     )
@@ -73,7 +84,7 @@ class LeagueViewModel(
                 val av = repo.avatarUri.first()?.let { AvatarImage.encode(appContext, Uri.parse(it)) } ?: ""
                 sc to av
             }
-            val myTier = LeagueSystem.leagueFor(score.points)
+            val provisionalTier = LeagueSystem.leagueFor(score.points)
             val myEntry = LeagueEntry(
                 uid = myUid,
                 seasonId = seasonId,
@@ -82,35 +93,55 @@ class LeagueViewModel(
                 points = score.points,
                 sessions = score.sessions,
                 relativeWork = score.relativeWork,
-                tier = myTier.name,
+                tier = provisionalTier.name,
                 updatedAt = now
             )
             runCatching { league.uploadEntry(myEntry) }
 
-            // Baja el top mundial y lo filtra a la temporada actual (sin índice compuesto en Fase 1).
-            val fetched = runCatching { league.topEntries(150) }.getOrDefault(emptyList())
-                .filter { it.seasonId == seasonId }
-            // Sustituye mi doc remoto (puede venir cacheado/viejo) por el recién calculado y
-            // garantiza que yo salgo en la tabla aunque quede fuera del top.
-            val board = (fetched.filter { it.uid != myUid } + myEntry)
-                .sortedWith(compareByDescending<LeagueEntry> { it.points }.thenBy { it.username.lowercase() })
-                .take(100)
+            val medals = runCatching { league.getMedals(myUid, 6) }.getOrDefault(emptyList())
+            // ¿El servidor (Fase 2) me asignó grupo? → modo GRUPO. Si no, tabla mundial (Fase 1).
+            val myMember = runCatching { league.getEntry(myUid) }.getOrNull()
 
-            _state.value = LeagueState(
-                loading = false,
-                hasUsername = true,
-                seasonId = seasonId,
-                myUid = myUid,
-                myPoints = score.points,
-                myTier = myTier,
-                mySessions = score.sessions,
-                nextThreshold = LeagueSystem.nextThreshold(score.points),
-                progress = LeagueSystem.progressToNext(score.points),
-                board = board,
-                friendUids = friendUids
-            )
+            if (myMember != null && myMember.groupId.isNotBlank() && myMember.league.isNotBlank()) {
+                val serverLeague = tierOf(myMember.league)
+                val gid = myMember.groupId
+                val gseason = myMember.seasonId.ifBlank { seasonId }
+                val members = runCatching { league.getGroupMembers(gseason, gid) }.getOrDefault(emptyList())
+                // Mi fila fresca (el espejo del grupo lo escribe el trigger y puede ir un pelín retrasado).
+                val myGroupEntry = myEntry.copy(league = myMember.league, groupId = gid, tier = myMember.league, seasonId = gseason)
+                val board = (members.filter { it.uid != myUid } + myGroupEntry)
+                    .sortedWith(compareByDescending<LeagueEntry> { it.points }.thenBy { it.username.lowercase() })
+                    .take(LeagueSystem.GROUP_SIZE)
+                _state.value = LeagueState(
+                    loading = false, hasUsername = true, mode = LeagueMode.GROUP,
+                    seasonId = gseason, myUid = myUid,
+                    myPoints = score.points, myTier = serverLeague, mySessions = score.sessions,
+                    groupId = gid, myPosition = board.indexOfFirst { it.uid == myUid } + 1,
+                    promoteCount = LeagueSystem.promoteCount(board.size, serverLeague),
+                    relegateCount = LeagueSystem.relegateCount(board.size, serverLeague),
+                    medals = medals, board = board, friendUids = friendUids
+                )
+            } else {
+                // Tabla mundial (Fase 1): top-100 por puntos, filtrado a la temporada en cliente.
+                val fetched = runCatching { league.topEntries(150) }.getOrDefault(emptyList())
+                    .filter { it.seasonId == seasonId }
+                val board = (fetched.filter { it.uid != myUid } + myEntry)
+                    .sortedWith(compareByDescending<LeagueEntry> { it.points }.thenBy { it.username.lowercase() })
+                    .take(100)
+                _state.value = LeagueState(
+                    loading = false, hasUsername = true, mode = LeagueMode.GLOBAL,
+                    seasonId = seasonId, myUid = myUid,
+                    myPoints = score.points, myTier = provisionalTier, mySessions = score.sessions,
+                    nextThreshold = LeagueSystem.nextThreshold(score.points),
+                    progress = LeagueSystem.progressToNext(score.points),
+                    medals = medals, board = board, friendUids = friendUids
+                )
+            }
         }
     }
+
+    private fun tierOf(name: String): RankTier =
+        runCatching { RankTier.valueOf(name) }.getOrDefault(RankTier.BRONCE)
 
     class Factory(
         private val league: LeagueDataSource,

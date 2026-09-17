@@ -549,6 +549,12 @@
     <string name="league_to_next">%1$s pti per salire</string>
     <string name="league_top_tier">Lega massima raggiunta!</string>
     <string name="league_friend">AMICO</string>
+    <string name="league_your_group">IL TUO GRUPPO</string>
+    <string name="league_position">Posizione %1$d di %2$d</string>
+    <string name="league_you_promoting">In zona PROMOZIONE!</string>
+    <string name="league_you_relegating">In zona retrocessione</string>
+    <string name="league_you_safe">Zona sicura</string>
+    <string name="league_medals">MEDAGLIE</string>
     <string name="panteon_subtitle">ULTIMI 30 GIORNI</string>
     <string name="panteon_empty">Completa allenamenti per forgiare i tuoi ranghi</string>
     <string name="highest_rank_label">TOP</string>

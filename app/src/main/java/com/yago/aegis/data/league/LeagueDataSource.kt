@@ -4,6 +4,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.tasks.await
 
 /**
@@ -23,7 +24,11 @@ class LeagueDataSource {
 
     fun currentUid(): String? = myUid
 
-    /** Sube/actualiza MI entrada de la temporada (idempotente: un doc por usuario). */
+    /**
+     * Sube/actualiza MI entrada de la temporada (idempotente: un doc por usuario).
+     * Usa **merge** para NO pisar `league`/`groupId` que el servidor (Cloud Functions, Fase 2) haya
+     * fijado. En Fase 1 (sin Functions) esos campos no existen y el merge se comporta como un set.
+     */
     suspend fun uploadEntry(entry: LeagueEntry): Result<Unit> {
         val me = myUid ?: return Result.failure(IllegalStateException("no-session"))
         return runCatching {
@@ -38,8 +43,48 @@ class LeagueDataSource {
                     "relativeWork" to entry.relativeWork,
                     "tier" to entry.tier,
                     "updatedAt" to System.currentTimeMillis()
-                )
+                ),
+                SetOptions.merge()
             ).await()
+        }
+    }
+
+    /** Miembros del grupo (~30) de la temporada, para la tabla del grupo (Fase 2). */
+    suspend fun getGroupMembers(seasonId: String, groupId: String): List<LeagueEntry> {
+        val snap = db.collection("leagueGroups").document(seasonId)
+            .collection("groups").document(groupId)
+            .collection("members")
+            .get().await()
+        return snap.documents.map { d ->
+            LeagueEntry(
+                uid = d.getString("uid") ?: d.id,
+                seasonId = seasonId,
+                username = d.getString("username") ?: "",
+                avatar = d.getString("avatar") ?: "",
+                points = d.getLong("points") ?: 0L,
+                tier = d.getString("league") ?: "BRONCE",
+                league = d.getString("league") ?: "",
+                groupId = groupId,
+                updatedAt = d.getLong("updatedAt") ?: 0L
+            )
+        }
+    }
+
+    /** Mis medallas de temporadas cerradas (más recientes primero). */
+    suspend fun getMedals(uid: String, limit: Long = 6): List<LeagueMedal> {
+        val snap = db.collection("leagueMedals").document(uid)
+            .collection("seasons")
+            .orderBy("seasonId", Query.Direction.DESCENDING)
+            .limit(limit)
+            .get().await()
+        return snap.documents.map { d ->
+            LeagueMedal(
+                seasonId = d.getString("seasonId") ?: d.id,
+                league = d.getString("league") ?: "BRONCE",
+                position = (d.getLong("position") ?: 0L).toInt(),
+                groupSize = (d.getLong("groupSize") ?: 0L).toInt(),
+                movement = d.getString("movement") ?: "stay"
+            )
         }
     }
 
@@ -73,6 +118,8 @@ class LeagueDataSource {
             sessions = (getLong("sessions") ?: 0L).toInt(),
             relativeWork = getDouble("relativeWork") ?: 0.0,
             tier = getString("tier") ?: "BRONCE",
+            league = getString("league") ?: "",
+            groupId = getString("groupId") ?: "",
             updatedAt = getLong("updatedAt") ?: 0L
         )
     }

@@ -94,6 +94,21 @@ class LeagueSystemTest {
     }
 
     @Test
+    fun groupCutoffs_matchFunction() {
+        // Grupo lleno de 30: suben 7, bajan 5 (debe coincidir con functions/index.js).
+        assertEquals(7, LeagueSystem.promoteCount(30, RankTier.ORO))
+        assertEquals(5, LeagueSystem.relegateCount(30, RankTier.ORO))
+        // Bronce no desciende; Titán no asciende.
+        assertEquals(0, LeagueSystem.relegateCount(30, RankTier.BRONCE))
+        assertEquals(0, LeagueSystem.promoteCount(30, RankTier.TITAN))
+        // Grupos pequeños: sin solape (un usuario no sube y baja a la vez).
+        assertEquals(0, LeagueSystem.promoteCount(1, RankTier.ORO))
+        val p = LeagueSystem.promoteCount(6, RankTier.ORO)
+        val r = LeagueSystem.relegateCount(6, RankTier.ORO)
+        assertTrue(p + r <= 5)
+    }
+
+    @Test
     fun seasonIdFormat() {
         // seasonId del inicio del mes actual coincide con el de "ahora".
         assertEquals(LeagueSystem.seasonIdFor(now), LeagueSystem.seasonIdFor(inMonth))
