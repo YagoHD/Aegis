@@ -3,10 +3,16 @@ package com.yago.aegis.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.yago.aegis.data.BodyMeasure
 import com.yago.aegis.data.BodySnapshot
 import com.yago.aegis.data.Exercise
+import com.yago.aegis.data.ExerciseProgress
+import com.yago.aegis.data.ExerciseSet
+import com.yago.aegis.data.ExerciseSlot
+import com.yago.aegis.data.MuscleContribution
+import com.yago.aegis.data.Routine
 import com.yago.aegis.data.LevelState
 import com.yago.aegis.data.LevelSystem
 import com.yago.aegis.data.Rank
@@ -310,6 +316,103 @@ class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
         GsonBuilder().setPrettyPrinting().create().toJson(root)
     }
 
+    // --- IMPORTACIÓN / RESTAURACIÓN ---
+
+    /** Resumen de lo importado, para mostrar al usuario cuánto entró. */
+    data class ImportSummary(
+        val routines: Int,
+        val exercises: Int,
+        val sessions: Int,
+        val bodySnapshots: Int
+    )
+
+    /**
+     * Restaura datos desde un JSON generado por "Exportar datos".
+     *
+     * [replace] = true  → REEMPLAZA los datos actuales por los del fichero (restaurar un backup).
+     * [replace] = false → FUSIONA: añade lo que falta (ejercicios/rutinas/medidas nuevas por nombre;
+     *                      todo el historial de entrenos y corporal) sin tocar el perfil.
+     *
+     * Lanza excepción si el JSON no es válido; el llamador la captura y avisa al usuario.
+     * Corre en Default (el parseo Gson no debe bloquear el hilo principal).
+     */
+    suspend fun importFromJson(json: String, replace: Boolean): ImportSummary =
+        withContext(Dispatchers.Default) {
+            val root = Gson().fromJson(json, ExportRoot::class.java)
+                ?: throw IllegalArgumentException("JSON vacío o ilegible")
+
+            // Reconstruye el dominio desde el export (todo tolerante a nulos/campos ausentes).
+            val importedExercises = (root.exerciseLibrary ?: emptyList()).map { it.toDomainExercise() }
+            val importedMeasures = (root.currentMeasures ?: emptyList()).mapNotNull { it.toDomainMeasure() }
+            val importedSessions = (root.workoutHistory ?: emptyList()).map { it.toDomainSession() }
+            val importedBody = (root.bodyHistory ?: emptyList()).map { it.toDomainBody() }
+            val rawRoutines = root.routines ?: emptyList()
+
+            if (replace) {
+                repository.updateExerciseLibrary(importedExercises)
+                val routines = rawRoutines.mapIndexed { i, r -> r.toDomainRoutine(i + 1) }
+                repository.updateRoutines(routines)
+                repository.updateMeasures(importedMeasures)
+                repository.replaceWorkoutHistory(importedSessions)
+                repository.replaceBodyHistory(importedBody)
+                root.profile?.let { p ->
+                    p.name?.let { repository.updateName(it) }
+                    p.sex?.let { repository.updateSex(it) }
+                    p.heightCm?.let { repository.updateHeight(it) }
+                    p.bodyweightKg?.let { repository.updateMass(it) }
+                    p.bodyFatPct?.let { repository.updateBodyFat(it) }
+                    p.trainingDaysPerWeek?.let { repository.updateDisciplineDay(it) }
+                }
+                ImportSummary(routines.size, importedExercises.size, importedSessions.size, importedBody.size)
+            } else {
+                // FUSIÓN — no toca el perfil.
+                val curExercises = repository.exerciseLibrary.first()
+                val existingExNames = curExercises.map { normalizeName(it.name) }.toSet()
+                val newExercises = importedExercises.filter { normalizeName(it.name) !in existingExNames }
+                if (newExercises.isNotEmpty()) {
+                    repository.updateExerciseLibrary(curExercises + newExercises)
+                }
+
+                val curRoutines = repository.routines.first()
+                val existingRoutineNames = curRoutines.map { normalizeName(it.name) }.toSet()
+                val baseRoutineId = curRoutines.maxOfOrNull { it.id } ?: 0
+                val newRoutines = rawRoutines
+                    .filter { normalizeName(it.name ?: "") !in existingRoutineNames }
+                    .mapIndexed { i, r -> r.toDomainRoutine(baseRoutineId + i + 1) }
+                if (newRoutines.isNotEmpty()) {
+                    repository.updateRoutines(curRoutines + newRoutines)
+                }
+
+                val curMeasures = repository.customMeasures.first()
+                val existingMeasureIds = curMeasures.map { it.id }.toSet()
+                val newMeasures = importedMeasures.filter { it.id !in existingMeasureIds }
+                if (newMeasures.isNotEmpty()) {
+                    repository.updateMeasures(curMeasures + newMeasures)
+                }
+
+                if (importedSessions.isNotEmpty()) {
+                    val curSessions = repository.workoutHistory.first()
+                    val existingSessionKeys = curSessions.map { it.date to it.routineName }.toSet()
+                    val newSessions = importedSessions.filter { (it.date to it.routineName) !in existingSessionKeys }
+                    if (newSessions.isNotEmpty()) {
+                        repository.replaceWorkoutHistory(curSessions + newSessions)
+                    }
+                }
+                if (importedBody.isNotEmpty()) {
+                    val curBody = repository.bodyHistory.first()
+                    val existingBodyDates = curBody.map { it.date }.toSet()
+                    val newBody = importedBody.filter { it.date !in existingBodyDates }
+                    if (newBody.isNotEmpty()) {
+                        repository.replaceBodyHistory(curBody + newBody)
+                    }
+                }
+                ImportSummary(newRoutines.size, newExercises.size, importedSessions.size, importedBody.size)
+            }
+        }
+
+    /** Normaliza un nombre para comparar (quita el Zero-Width-Space de ejercicios base y espacios). */
+    private fun normalizeName(s: String) = s.replace("​", "").trim().uppercase()
+
     // --- ESCRITURA ---
 
     private var debounceJob: Job? = null
@@ -445,3 +548,144 @@ class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 }
+
+// ---------------------------------------------------------------------------
+// DTOs de importación: reflejan 1:1 el JSON de "Exportar datos" (buildExportJson).
+// Todos los campos nullable con default → Gson tolera claves ausentes y genera el
+// constructor sin argumentos que necesita para deserializar. Ver export-data-feature.
+// ---------------------------------------------------------------------------
+
+private data class ExportRoot(
+    val schemaVersion: Int? = null,
+    val profile: ExportProfile? = null,
+    val bodyHistory: List<ExportBody>? = null,
+    val currentMeasures: List<ExportMeasure>? = null,
+    val routines: List<ExportRoutine>? = null,
+    val exerciseLibrary: List<ExportExercise>? = null,
+    val workoutHistory: List<ExportSession>? = null
+)
+
+private data class ExportProfile(
+    val name: String? = null,
+    val sex: String? = null,
+    val heightCm: Double? = null,
+    val bodyweightKg: String? = null,
+    val bodyFatPct: String? = null,
+    val trainingDaysPerWeek: Int? = null
+)
+
+private data class ExportMeasure(
+    val id: String? = null,
+    val name: String? = null,
+    val value: String? = null
+)
+
+private data class ExportBody(
+    val date: Long? = null,
+    val massKg: String? = null,
+    val bodyFatPct: String? = null,
+    val measures: List<ExportMeasure>? = null
+)
+
+private data class ExportContribution(
+    val muscle: String? = null,
+    val percent: Int? = null
+)
+
+private data class ExportExercise(
+    val name: String? = null,
+    val muscleGroup: String? = null,
+    val type: String? = null,
+    val loadType: String? = null,
+    val oneRepMaxKg: Double? = null,
+    val bestSet: String? = null,
+    val tags: List<String>? = null,
+    val muscleContributions: List<ExportContribution>? = null
+)
+
+private data class ExportSlot(
+    val variants: List<ExportExercise>? = null
+)
+
+private data class ExportRoutine(
+    val name: String? = null,
+    val slots: List<ExportSlot>? = null
+)
+
+private data class ExportSet(
+    val weightKg: Double? = null,
+    val reps: Int? = null,
+    val completed: Boolean? = null
+)
+
+private data class ExportSessionExercise(
+    val name: String? = null,
+    val muscleGroup: String? = null,
+    val loadType: String? = null,
+    val sets: List<ExportSet>? = null
+)
+
+private data class ExportSession(
+    val date: Long? = null,
+    val routineName: String? = null,
+    val notes: String? = null,
+    val exercises: List<ExportSessionExercise>? = null
+)
+
+// --- Mappers DTO → dominio ---
+
+private fun ExportExercise.toDomainExercise(): Exercise = Exercise(
+    name = name ?: "",
+    type = type ?: "CUSTOM",          // 'type' es obligatorio en Exercise (no tiene default)
+    muscleGroup = muscleGroup ?: "",
+    tags = tags ?: emptyList(),
+    oneRepMax = oneRepMaxKg ?: 0.0,
+    bestSet = bestSet ?: "--",
+    muscleContributions = (muscleContributions ?: emptyList()).map {
+        MuscleContribution(muscle = it.muscle ?: "", percent = it.percent ?: 0)
+    },
+    loadType = loadType
+)
+
+private fun ExportMeasure.toDomainMeasure(): BodyMeasure? {
+    val n = name ?: return null
+    return BodyMeasure(id = id ?: n, name = n, value = value ?: "")
+}
+
+private fun ExportRoutine.toDomainRoutine(newId: Int): Routine = Routine(
+    id = newId,                        // Routine.id es Int obligatorio: se regenera al importar
+    name = name ?: "",
+    exerciseSlots = (slots ?: emptyList()).map { slot ->
+        ExerciseSlot(variants = (slot.variants ?: emptyList()).map { it.toDomainExercise() })
+    }
+)
+
+private fun ExportSession.toDomainSession(): WorkoutSession = WorkoutSession(
+    routineName = routineName ?: "",
+    date = date ?: System.currentTimeMillis(),
+    notes = notes ?: "",
+    exercisesProgress = (exercises ?: emptyList()).map { ex ->
+        ExerciseProgress(
+            exercise = Exercise(
+                name = ex.name ?: "",
+                type = "CUSTOM",
+                muscleGroup = ex.muscleGroup ?: "",
+                loadType = ex.loadType
+            ),
+            sets = (ex.sets ?: emptyList()).map { st ->
+                ExerciseSet(
+                    reps = st.reps ?: 0,
+                    weight = st.weightKg ?: 0.0,
+                    isCompleted = st.completed ?: false
+                )
+            }
+        )
+    }
+)
+
+private fun ExportBody.toDomainBody(): BodySnapshot = BodySnapshot(
+    date = date ?: System.currentTimeMillis(),
+    mass = massKg ?: "0.0",
+    bodyFat = bodyFatPct ?: "0.0",
+    customMeasures = (measures ?: emptyList()).mapNotNull { it.toDomainMeasure() }
+)

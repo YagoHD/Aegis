@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Person
@@ -118,6 +119,83 @@ fun SettingsMenu(
                 avatarCropUri = null
             }
         )
+    }
+
+    // --- IMPORTAR / RESTAURAR ---
+    // pendingImportJson != null → mostrar diálogo de modo (Fusionar/Reemplazar).
+    // confirmReplaceJson != null → segundo diálogo de confirmación fuerte (solo Reemplazar, destructivo).
+    var pendingImportJson by remember { mutableStateOf<String?>(null) }
+    var confirmReplaceJson by remember { mutableStateOf<String?>(null) }
+    var importBusy by remember { mutableStateOf(false) }
+
+    fun runImport(json: String, replace: Boolean) {
+        coroutineScope.launch {
+            importBusy = true
+            try {
+                val summary = viewModel.importFromJson(json, replace)
+                Toast.makeText(
+                    context,
+                    context.getString(
+                        R.string.import_data_success,
+                        summary.routines, summary.exercises, summary.sessions
+                    ),
+                    Toast.LENGTH_LONG
+                ).show()
+            } catch (e: Exception) {
+                Toast.makeText(context, R.string.import_data_error, Toast.LENGTH_SHORT).show()
+            } finally {
+                importBusy = false
+            }
+        }
+    }
+
+    val importPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            coroutineScope.launch {
+                try {
+                    val text = withContext(Dispatchers.IO) {
+                        context.contentResolver.openInputStream(uri)?.use {
+                            it.readBytes().toString(Charsets.UTF_8)
+                        }
+                    }
+                    if (text.isNullOrBlank()) {
+                        Toast.makeText(context, R.string.import_data_error, Toast.LENGTH_SHORT).show()
+                    } else {
+                        pendingImportJson = text
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(context, R.string.import_data_error, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    pendingImportJson?.let { json ->
+        ImportRestoreDialog(
+            onMerge = { pendingImportJson = null; runImport(json, replace = false) },
+            onReplace = { pendingImportJson = null; confirmReplaceJson = json },
+            onDismiss = { pendingImportJson = null }
+        )
+    }
+
+    confirmReplaceJson?.let { json ->
+        AegisAlertDialog(
+            title = stringResource(R.string.import_replace_confirm_title),
+            confirmText = stringResource(R.string.import_mode_replace),
+            dismissText = stringResource(R.string.btn_cancel),
+            confirmButtonColor = MaterialTheme.colorScheme.error,
+            onDismiss = { confirmReplaceJson = null },
+            onConfirm = { confirmReplaceJson = null; runImport(json, replace = true) }
+        ) {
+            Text(
+                stringResource(R.string.import_replace_confirm_body),
+                color = MaterialTheme.colorScheme.secondary,
+                fontSize = 14.sp,
+                lineHeight = 20.sp
+            )
+        }
     }
 
     // Diálogo de cambio de contraseña
@@ -353,6 +431,35 @@ fun SettingsMenu(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(exportLabel, color = MaterialTheme.colorScheme.onBackground, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     Text(stringResource(R.string.export_data_subtitle), color = MaterialTheme.colorScheme.secondary, fontSize = 11.sp)
+                }
+                Text("›", color = MaterialTheme.colorScheme.secondary, fontSize = 18.sp)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(Spacing.md))
+
+        // --- IMPORTAR / RESTAURAR (restaurar una copia propia) ---
+        val importLabel = stringResource(R.string.import_data_label)
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+            shape = RoundedCornerShape(Radius.lg)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(enabled = !importBusy) {
+                        importPickerLauncher.launch(
+                            arrayOf("application/json", "application/octet-stream", "text/plain")
+                        )
+                    }
+                    .padding(vertical = 14.dp, horizontal = Spacing.lg),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Default.FileUpload, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(Spacing.md))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(importLabel, color = MaterialTheme.colorScheme.onBackground, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.import_data_subtitle), color = MaterialTheme.colorScheme.secondary, fontSize = 11.sp)
                 }
                 Text("›", color = MaterialTheme.colorScheme.secondary, fontSize = 18.sp)
             }
@@ -709,6 +816,105 @@ fun VerticalDividerSection() {
     Spacer(modifier = Modifier.height(Spacing.xl))
     HorizontalDivider(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.05f), thickness = 1.dp)
     Spacer(modifier = Modifier.height(Spacing.xl))
+}
+
+/**
+ * Diálogo de Importar/Restaurar: dos modos explícitos.
+ * - FUSIONAR (primario): añade lo que falta, seguro, no toca el perfil.
+ * - REEMPLAZAR (borde rojo, destructivo): sustituye todo → dispara una 2ª confirmación fuerte.
+ * Mismo borde/forma que AegisAlertDialog (coherencia O6). Cancelar = descartar.
+ */
+@Composable
+private fun ImportRestoreDialog(
+    onMerge: () -> Unit,
+    onReplace: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+        modifier = Modifier.border(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+            shape = RoundedCornerShape(28.dp)
+        ),
+        title = {
+            Text(
+                text = stringResource(R.string.import_data_label),
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 2.sp
+            )
+        },
+        text = {
+            Column {
+                Text(
+                    stringResource(R.string.import_data_dialog_body),
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp
+                )
+                Spacer(modifier = Modifier.height(Spacing.lg))
+
+                // FUSIONAR — acción segura (recomendada)
+                Button(
+                    onClick = onMerge,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(Radius.md),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                ) {
+                    Text(
+                        stringResource(R.string.import_mode_merge),
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.sp
+                    )
+                }
+                Text(
+                    stringResource(R.string.import_mode_merge_desc),
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 11.sp,
+                    lineHeight = 15.sp,
+                    modifier = Modifier.padding(top = Spacing.xs, bottom = Spacing.md)
+                )
+
+                // REEMPLAZAR — destructivo (borde rojo)
+                OutlinedButton(
+                    onClick = onReplace,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(Radius.md),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.6f))
+                ) {
+                    Text(
+                        stringResource(R.string.import_mode_replace),
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.sp
+                    )
+                }
+                Text(
+                    stringResource(R.string.import_mode_replace_desc),
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 11.sp,
+                    lineHeight = 15.sp,
+                    modifier = Modifier.padding(top = Spacing.xs)
+                )
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(
+                    stringResource(R.string.btn_cancel).uppercase(),
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
+            }
+        }
+    )
 }
 
 @Composable

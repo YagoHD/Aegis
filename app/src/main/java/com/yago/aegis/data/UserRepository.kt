@@ -291,6 +291,20 @@ class UserRepository(
         pushInBackground { firestore.appendWorkoutSession(session) }
     }
 
+    /** Restaura (reemplaza) TODO el historial de entrenos. Usado por Importar/Restaurar. */
+    suspend fun replaceWorkoutHistory(list: List<WorkoutSession>) {
+        ensureMigrated()
+        database.workoutSessionDao().replaceAll(list.map { it.toEntity() })
+        pushInBackground { firestore.saveWorkoutHistory(list) }
+    }
+
+    /** Restaura (reemplaza) TODO el historial corporal. Usado por Importar/Restaurar. */
+    suspend fun replaceBodyHistory(list: List<BodySnapshot>) {
+        ensureMigrated()
+        database.bodySnapshotDao().replaceAll(list.map { it.toEntity() })
+        pushInBackground { firestore.saveBodyHistory(list) }
+    }
+
     suspend fun updateTimerVibrate(enabled: Boolean) {
         settingsStore.saveTimerVibrate(enabled)
         syncSettingsToCloud()

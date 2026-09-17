@@ -554,6 +554,17 @@
     <string name="export_data_label">EXPORTAR DATOS</string>
     <string name="export_data_subtitle">Descarga tus rutinas, historial y métricas en JSON para analizarlos con una IA</string>
     <string name="export_data_error">No se pudieron exportar los datos</string>
+    <string name="import_data_label">IMPORTAR / RESTAURAR</string>
+    <string name="import_data_subtitle">Restaura una copia (JSON) que exportaste antes de Aegis</string>
+    <string name="import_data_dialog_body">Elige cómo importar los datos del fichero:</string>
+    <string name="import_mode_merge">FUSIONAR</string>
+    <string name="import_mode_merge_desc">Añade lo que falte (ejercicios, rutinas, medidas e historial nuevos) sin borrar lo que ya tienes. No toca tu perfil.</string>
+    <string name="import_mode_replace">REEMPLAZAR</string>
+    <string name="import_mode_replace_desc">Sustituye TODOS tus datos actuales por los del fichero.</string>
+    <string name="import_replace_confirm_title">¿Reemplazar todo?</string>
+    <string name="import_replace_confirm_body">Esto borra tus rutinas, ejercicios, medidas e historial actuales y los sustituye por los del fichero. No se puede deshacer.</string>
+    <string name="import_data_success">Importado: %1$d rutinas, %2$d ejercicios, %3$d entrenos</string>
+    <string name="import_data_error">No se pudo importar. ¿El fichero es un export válido de Aegis?</string>
     <!-- Aviso de permiso de notificaciones (O14) -->
     <string name="notif_rationale_title">ACTIVAR AVISOS</string>
     <string name="notif_rationale_body">Permite las notificaciones para avisarte cuando acabe el descanso, aunque salgas de la app.</string>

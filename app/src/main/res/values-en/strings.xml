@@ -525,6 +525,17 @@
     <string name="export_data_label">EXPORT DATA</string>
     <string name="export_data_subtitle">Download your routines, history and metrics as JSON to analyze with an AI</string>
     <string name="export_data_error">Couldn\'t export the data</string>
+    <string name="import_data_label">IMPORT / RESTORE</string>
+    <string name="import_data_subtitle">Restore a backup (JSON) you exported earlier from Aegis</string>
+    <string name="import_data_dialog_body">Choose how to import the data from the file:</string>
+    <string name="import_mode_merge">MERGE</string>
+    <string name="import_mode_merge_desc">Adds what\'s missing (new exercises, routines, measures and history) without deleting what you already have. Leaves your profile untouched.</string>
+    <string name="import_mode_replace">REPLACE</string>
+    <string name="import_mode_replace_desc">Replaces ALL your current data with the file\'s.</string>
+    <string name="import_replace_confirm_title">Replace everything?</string>
+    <string name="import_replace_confirm_body">This deletes your current routines, exercises, measures and history and replaces them with the file\'s. This can\'t be undone.</string>
+    <string name="import_data_success">Imported: %1$d routines, %2$d exercises, %3$d workouts</string>
+    <string name="import_data_error">Couldn\'t import. Is the file a valid Aegis export?</string>
     <!-- Panteón / competitivo (Y13) -->
     <string name="panteon_my_ranks">MY RANKS</string>
     <string name="panteon_friends">FRIENDS</string>
