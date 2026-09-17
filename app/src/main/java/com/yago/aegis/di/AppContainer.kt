@@ -6,6 +6,7 @@ import com.yago.aegis.data.SettingsStore
 import com.yago.aegis.data.UserRepository
 import com.yago.aegis.data.db.AegisDatabase
 import com.yago.aegis.data.db.RoomMigrator
+import com.yago.aegis.data.league.LeagueDataSource
 import com.yago.aegis.data.social.SocialDataSource
 
 /**
@@ -21,6 +22,7 @@ interface AppContainer {
     val database: AegisDatabase
     val roomMigrator: RoomMigrator
     val socialDataSource: SocialDataSource
+    val leagueDataSource: LeagueDataSource
 }
 
 /** Implementación real, respaldada por DataStore/Room/Firebase. */
@@ -34,4 +36,5 @@ class DefaultAppContainer(context: Context) : AppContainer {
     override val userRepository: UserRepository by lazy { UserRepository(settingsStore, database, roomMigrator) }
     override val authRepository: FirebaseAuthRepository by lazy { FirebaseAuthRepository() }
     override val socialDataSource: SocialDataSource by lazy { SocialDataSource() }
+    override val leagueDataSource: LeagueDataSource by lazy { LeagueDataSource() }
 }

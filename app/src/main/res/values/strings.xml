@@ -430,6 +430,15 @@
     <string name="panteon_my_ranks">MIS RANGOS</string>
     <string name="panteon_friends">AMIGOS</string>
     <string name="panteon_league">LIGA</string>
+    <string name="league_need_username">Necesitas un @usuario para competir en la liga mundial. Créalo en Amigos.</string>
+    <string name="league_world_table">TABLA MUNDIAL</string>
+    <string name="league_season">TEMPORADA · %1$s</string>
+    <string name="league_tier_name">LIGA %1$s</string>
+    <string name="league_points">%1$s pts</string>
+    <string name="league_sessions_month">%1$d entrenos este mes</string>
+    <string name="league_to_next">%1$s pts para ascender</string>
+    <string name="league_top_tier">¡Liga máxima alcanzada!</string>
+    <string name="league_friend">AMIGO</string>
     <string name="panteon_subtitle">ÚLTIMOS 30 DÍAS</string>
     <string name="highest_rank_label">TOP</string>
     <string name="to_improve_label">A MEJORAR</string>

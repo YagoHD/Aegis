@@ -75,7 +75,8 @@ fun AegisNavigation(
     routinesViewModel: RoutinesViewModel,
     userRepository: UserRepository,
     authRepository: FirebaseAuthRepository,
-    socialDataSource: com.yago.aegis.data.social.SocialDataSource
+    socialDataSource: com.yago.aegis.data.social.SocialDataSource,
+    leagueDataSource: com.yago.aegis.data.league.LeagueDataSource
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -115,6 +116,8 @@ fun AegisNavigation(
     val socialAppContext = androidx.compose.ui.platform.LocalContext.current.applicationContext
     val socialViewModel: com.yago.aegis.viewmodel.SocialViewModel =
         viewModel(factory = com.yago.aegis.viewmodel.SocialViewModel.Factory(socialDataSource, userRepository, socialAppContext))
+    val leagueViewModel: com.yago.aegis.viewmodel.LeagueViewModel =
+        viewModel(factory = com.yago.aegis.viewmodel.LeagueViewModel.Factory(leagueDataSource, userRepository, socialAppContext))
 
     val showBottomBar = currentRoute != Routes.SETTINGS &&
             !onboardingRoutes.contains(currentRoute) &&
@@ -313,6 +316,7 @@ fun AegisNavigation(
                 PanteonScreen(
                     viewModel = panteonViewModel,
                     socialViewModel = socialViewModel,
+                    leagueViewModel = leagueViewModel,
                     onOpenFriends = { navController.navigate(Routes.FRIENDS) }
                 )
             }

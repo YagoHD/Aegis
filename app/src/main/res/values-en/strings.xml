@@ -540,6 +540,15 @@
     <string name="panteon_my_ranks">MY RANKS</string>
     <string name="panteon_friends">FRIENDS</string>
     <string name="panteon_league">LEAGUE</string>
+    <string name="league_need_username">You need a @username to compete in the world league. Create one in Friends.</string>
+    <string name="league_world_table">WORLD TABLE</string>
+    <string name="league_season">SEASON · %1$s</string>
+    <string name="league_tier_name">%1$s LEAGUE</string>
+    <string name="league_points">%1$s pts</string>
+    <string name="league_sessions_month">%1$d workouts this month</string>
+    <string name="league_to_next">%1$s pts to promote</string>
+    <string name="league_top_tier">Top league reached!</string>
+    <string name="league_friend">FRIEND</string>
     <string name="panteon_subtitle">LAST 30 DAYS</string>
     <string name="panteon_empty">Complete workouts to forge your ranks</string>
     <string name="highest_rank_label">TOP</string>

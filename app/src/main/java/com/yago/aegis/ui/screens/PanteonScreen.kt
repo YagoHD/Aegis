@@ -61,15 +61,18 @@ import com.yago.aegis.ui.components.AegisAvatar
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.RankMedal
 import com.yago.aegis.ui.theme.AegisGoldAccent
+import com.yago.aegis.data.league.LeagueEntry
+import com.yago.aegis.viewmodel.LeagueViewModel
 import com.yago.aegis.viewmodel.PanteonViewModel
 import com.yago.aegis.viewmodel.SocialViewModel
 
-private enum class PanteonTab { MINE, FRIENDS }
+private enum class PanteonTab { MINE, FRIENDS, LEAGUE }
 
 @Composable
 fun PanteonScreen(
     viewModel: PanteonViewModel,
     socialViewModel: SocialViewModel,
+    leagueViewModel: LeagueViewModel,
     onOpenFriends: () -> Unit = {}
 ) {
     val result by viewModel.result.collectAsState()
@@ -136,6 +139,15 @@ fun PanteonScreen(
                         )
                     }
                 }
+                PanteonTab.LEAGUE -> {
+                    item {
+                        LeagueSection(
+                            leagueViewModel = leagueViewModel,
+                            socialViewModel = socialViewModel,
+                            onManageFriends = onOpenFriends
+                        )
+                    }
+                }
             }
 
             item { Spacer(modifier = Modifier.height(60.dp)) }
@@ -151,7 +163,7 @@ private fun PanteonTabs(selected: PanteonTab, onSelect: (PanteonTab) -> Unit) {
     ) {
         TabItem(stringResource(R.string.panteon_my_ranks), active = selected == PanteonTab.MINE, locked = false) { onSelect(PanteonTab.MINE) }
         TabItem(stringResource(R.string.panteon_friends), active = selected == PanteonTab.FRIENDS, locked = false) { onSelect(PanteonTab.FRIENDS) }
-        TabItem(stringResource(R.string.panteon_league), active = false, locked = true) {}
+        TabItem(stringResource(R.string.panteon_league), active = selected == PanteonTab.LEAGUE, locked = false) { onSelect(PanteonTab.LEAGUE) }
     }
 }
 
@@ -864,3 +876,218 @@ private fun groupOf(name: String): MuscleGroup? =
 
 private fun tierIndex(t: RankTier): Int =
     if (t == RankTier.SIN_RANGO) -1 else RankTier.ladder.indexOf(t)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Pestaña LIGA: liga mensual global (esfuerzo del mes relativo al peso). Fase 1.
+// Tarjeta hero con mi liga + puntos + progreso, y tabla mundial (top-100) con mi
+// fila y mis amigos resaltados. Ver docs/us-liga.md.
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun LeagueSection(
+    leagueViewModel: LeagueViewModel,
+    socialViewModel: SocialViewModel,
+    onManageFriends: () -> Unit
+) {
+    val username = socialViewModel.myUsername.collectAsState().value
+    val buckets = socialViewModel.buckets.collectAsState().value   // mantiene vivo el listener de amistades
+    val myAvatar = socialViewModel.myAvatarUri.collectAsState().value
+    val state = leagueViewModel.state.collectAsState().value
+
+    // Recalcula mis puntos y refresca la tabla al abrir la pestaña y al cambiar amigos/@usuario.
+    LaunchedEffect(username, buckets.friends) {
+        leagueViewModel.load(buckets.friends.map { it.uid }.toSet(), username)
+    }
+
+    if (username == null) {
+        RankingCta(
+            text = stringResource(R.string.league_need_username),
+            button = stringResource(R.string.ranking_manage_friends),
+            onClick = onManageFriends
+        )
+        return
+    }
+
+    // Decodifica una vez los avatares (base64) de los demás competidores.
+    val avatars = remember(state.board) {
+        state.board.filter { it.uid != state.myUid }.associate { it.uid to AvatarImage.decode(it.avatar) }
+    }
+
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+        LeagueHeroCard(state)
+
+        Text(
+            text = stringResource(R.string.league_world_table),
+            color = MaterialTheme.colorScheme.secondary,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 1.5.sp,
+            modifier = Modifier.padding(top = Spacing.sm, start = 6.dp)
+        )
+
+        if (state.loading && state.board.isEmpty()) {
+            Box(Modifier.fillMaxWidth().padding(Spacing.lg), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.primary,
+                    strokeWidth = 2.dp,
+                    modifier = Modifier.size(26.dp)
+                )
+            }
+        } else {
+            state.board.forEachIndexed { i, entry ->
+                val isMe = entry.uid == state.myUid
+                LeagueRow(
+                    position = i + 1,
+                    entry = entry,
+                    isMe = isMe,
+                    isFriend = entry.uid in state.friendUids,
+                    photo = if (isMe) myAvatar else avatars[entry.uid]
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LeagueHeroCard(state: LeagueViewModel.LeagueState) {
+    val tierColor = Color(state.myTier.colorHex)
+    Surface(
+        shape = RoundedCornerShape(Radius.xl),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(Modifier.padding(Spacing.lg)) {
+            Text(
+                text = stringResource(R.string.league_season, seasonLabel(state.seasonId)),
+                color = MaterialTheme.colorScheme.secondary,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 1.5.sp
+            )
+            Spacer(Modifier.height(Spacing.md))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RankMedal(state.myTier, 72.dp)
+                Spacer(Modifier.width(Spacing.lg))
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.league_tier_name, state.myTier.display.uppercase()),
+                        color = tierColor,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.sp
+                    )
+                    Text(
+                        text = stringResource(R.string.league_points, formatPoints(state.myPoints)),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Black
+                    )
+                    Text(
+                        text = stringResource(R.string.league_sessions_month, state.mySessions),
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+            Spacer(Modifier.height(Spacing.md))
+            TierBar(state.progress, tierColor)
+            Spacer(Modifier.height(6.dp))
+            Text(
+                text = state.nextThreshold?.let {
+                    stringResource(R.string.league_to_next, formatPoints((it - state.myPoints).coerceAtLeast(0)))
+                } ?: stringResource(R.string.league_top_tier),
+                color = MaterialTheme.colorScheme.secondary,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+private fun LeagueRow(position: Int, entry: LeagueEntry, isMe: Boolean, isFriend: Boolean, photo: Any?) {
+    val tier = runCatching { RankTier.valueOf(entry.tier) }.getOrDefault(RankTier.BRONCE)
+    Surface(
+        shape = RoundedCornerShape(Radius.lg),
+        color = if (isMe) MaterialTheme.colorScheme.primary.copy(alpha = 0.10f) else Color.Transparent
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp, horizontal = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "$position",
+                color = MaterialTheme.colorScheme.secondary,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Black,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.width(24.dp)
+            )
+            Spacer(Modifier.width(Spacing.sm))
+            AegisAvatar(
+                entry.username.ifBlank { "?" }, 44.dp,
+                borderColor = when {
+                    isMe -> MaterialTheme.colorScheme.primary
+                    isFriend -> AegisGoldAccent.copy(alpha = 0.7f)
+                    else -> MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)
+                },
+                borderWidth = if (isMe || isFriend) 2.dp else 1.dp,
+                photo = photo
+            )
+            Spacer(Modifier.width(Spacing.md))
+            Column(Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "@${entry.username}",
+                        color = if (isMe) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Black,
+                        maxLines = 1
+                    )
+                    if (isMe) {
+                        Spacer(Modifier.width(6.dp)); TuPill()
+                    } else if (isFriend) {
+                        Spacer(Modifier.width(6.dp)); FriendPill()
+                    }
+                }
+                Text(
+                    text = stringResource(R.string.league_points, formatPoints(entry.points)),
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp
+                )
+            }
+            RankMedal(tier, 34.dp)
+        }
+    }
+}
+
+@Composable
+private fun FriendPill() {
+    Surface(shape = RoundedCornerShape(Radius.sm), color = AegisGoldAccent.copy(alpha = 0.20f)) {
+        Text(
+            text = stringResource(R.string.league_friend),
+            color = AegisGoldAccent,
+            fontSize = 9.sp,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 1.sp,
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+        )
+    }
+}
+
+/** "2026-09" → "SEP 2026" (nombre de mes localizado). */
+private fun seasonLabel(seasonId: String): String {
+    val parts = seasonId.split("-")
+    val y = parts.getOrNull(0)?.toIntOrNull()
+    val m = parts.getOrNull(1)?.toIntOrNull()
+    if (y == null || m == null) return seasonId
+    val cal = java.util.Calendar.getInstance().apply { set(y, m - 1, 1) }
+    return java.text.SimpleDateFormat("MMM yyyy", java.util.Locale.getDefault()).format(cal.time).uppercase()
+}
+
+private fun formatPoints(p: Long): String = String.format(java.util.Locale.getDefault(), "%,d", p)

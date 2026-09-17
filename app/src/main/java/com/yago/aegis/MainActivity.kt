@@ -41,7 +41,8 @@ class MainActivity : ComponentActivity() {
                     workoutViewModel = workoutViewModel,
                     userRepository = container.userRepository,
                     authRepository = container.authRepository,
-                    socialDataSource = container.socialDataSource
+                    socialDataSource = container.socialDataSource,
+                    leagueDataSource = container.leagueDataSource
                 )
             }
         }
