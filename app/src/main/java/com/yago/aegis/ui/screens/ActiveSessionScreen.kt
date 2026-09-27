@@ -455,7 +455,7 @@ fun ActiveSessionScreen(
                         .padding(horizontal = 20.dp)
                         .imePadding(),
                     verticalArrangement = Arrangement.spacedBy(Spacing.lg),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 120.dp)
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = Spacing.xl)
                 ) {
                     item { Spacer(modifier = Modifier.height(Spacing.sm)) }
 
@@ -565,7 +565,7 @@ fun ActiveSessionScreen(
                             enabled = hasAnyData && !isFinishing,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = Spacing.lg, bottom = 100.dp)
+                                .padding(top = Spacing.lg, bottom = Spacing.md)
                                 .height(60.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = if (hasAnyData) MaterialTheme.colorScheme.primary

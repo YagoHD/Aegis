@@ -100,7 +100,9 @@ class StatsViewModel(private val repository: UserRepository) : ViewModel() {
     var searchQuery by mutableStateOf("")
     var selectedTag by mutableStateOf("ALL")
     // Filtro: mostrar solo ejercicios con datos (algún set completado en el historial)
-    var showOnlyWithData by mutableStateOf(false)
+    // Por defecto ocultamos los ejercicios sin datos: en Análisis de rendimiento solo interesan
+    // los que se han entrenado. El usuario puede activar "ver todos" desde el toggle de la cabecera.
+    var showOnlyWithData by mutableStateOf(true)
     // Filtro: ejercicios de una rutina concreta (null = todas)
     var selectedRoutineId by mutableStateOf<Int?>(null)
 
