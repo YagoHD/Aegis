@@ -9,6 +9,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.navigation.NavBackStackEntry
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material3.Scaffold
 import android.app.Application
@@ -136,7 +137,10 @@ fun AegisNavigation(
         NavHost(
             navController = navController,
             startDestination = startDest,
-            modifier = Modifier.padding(paddingValues).imePadding()
+            // consumeWindowInsets evita que el imePadding se SUME al padding de la barra inferior:
+            // sin esto, al abrir el teclado quedaba una franja negra (altura de la barra) entre el
+            // contenido y el teclado. Con consume, el teclado solo añade lo que falta.
+            modifier = Modifier.padding(paddingValues).consumeWindowInsets(paddingValues).imePadding()
         ) {
             composable(
                 route = Routes.LOGIN,
