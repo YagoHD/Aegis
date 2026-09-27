@@ -28,6 +28,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -104,6 +107,8 @@ fun ActiveSessionScreen(
     val density = LocalDensity.current
     val view = LocalView.current
     val haptic = LocalHapticFeedback.current
+    val listState = rememberLazyListState()
+    val scrollHaptics by workoutViewModel.scrollHaptics.collectAsState()
 
     // O15: sin sesión (arranque o rutina inexistente) mostramos un loader, no una pantalla
     // en blanco sin salida. Si la rutina ya no existe, el gesto de atrás del sistema sale.
@@ -430,7 +435,21 @@ fun ActiveSessionScreen(
                     SessionProgressHeader(currentSession)
                 }
 
+                // Micro-vibración al saltar de ejercicio scrolleando (toggle en Ajustes del entreno).
+                val exerciseCount = currentSession.exercisesProgress.size
+                LaunchedEffect(listState, scrollHaptics, exerciseCount) {
+                    if (!scrollHaptics || exerciseCount == 0) return@LaunchedEffect
+                    snapshotFlow {
+                        // item 0 = Spacer; los ejercicios ocupan los items 1..exerciseCount.
+                        (listState.firstVisibleItemIndex - 1).coerceIn(0, exerciseCount - 1)
+                    }
+                        .distinctUntilChanged()
+                        .drop(1)   // no vibrar al abrir la pantalla
+                        .collect { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove) }
+                }
+
                 LazyColumn(
+                    state = listState,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 20.dp)

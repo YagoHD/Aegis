@@ -38,11 +38,13 @@ fun WorkoutSettingsScreen(
     val currentVibrate by workoutViewModel.timerVibrate.collectAsState()
     val currentSound by workoutViewModel.timerSound.collectAsState()
     val currentShow by workoutViewModel.showRestTimer.collectAsState()
+    val currentScrollHaptics by workoutViewModel.scrollHaptics.collectAsState()
 
     var timerSeconds by remember(currentSeconds) { mutableStateOf(currentSeconds) }
     var vibrate by remember(currentVibrate) { mutableStateOf(currentVibrate) }
     var sound by remember(currentSound) { mutableStateOf(currentSound) }
     var showTimer by remember(currentShow) { mutableStateOf(currentShow) }
+    var scrollHaptics by remember(currentScrollHaptics) { mutableStateOf(currentScrollHaptics) }
 
     val scrollState = rememberScrollState()
 
@@ -181,6 +183,11 @@ fun WorkoutSettingsScreen(
                         SettingsRow(stringResource(R.string.sound_label), sound) {
                             sound = it
                             scope.launch { onSave(timerSeconds, vibrate, it, showTimer) }
+                        }
+                        HorizontalDivider(color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f))
+                        SettingsRow(stringResource(R.string.scroll_haptics_label), scrollHaptics) {
+                            scrollHaptics = it
+                            workoutViewModel.setScrollHaptics(it)
                         }
                     }
                 }

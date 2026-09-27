@@ -341,6 +341,7 @@
     <string name="seconds_format">%1$ds</string>
     <string name="alert_section_title">ALARM BEI ABLAUF</string>
     <string name="vibration_label">VIBRATION</string>
+    <string name="scroll_haptics_label">Bei Übungswechsel vibrieren</string>
     <string name="sound_label">TON</string>
     <string name="current_config_label">AKTUELLE KONFIGURATION</string>
     <string name="vibration_enabled_badge">· Vibration ein</string>

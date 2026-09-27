@@ -53,6 +53,7 @@ class SettingsStore(private val context: Context) {
         private val SHOW_REST_TIMER = booleanPreferencesKey("show_rest_timer")
         private val TIMER_POS_X = floatPreferencesKey("timer_pos_x")
         private val TIMER_POS_Y = floatPreferencesKey("timer_pos_y")
+        private val SCROLL_HAPTICS = booleanPreferencesKey("scroll_haptics")
         private val AVAILABLE_PLATES = stringPreferencesKey("available_plates")
         private val BAR_WEIGHT = floatPreferencesKey("bar_weight")
         private val BODY_HISTORY_KEY = stringPreferencesKey("body_history")
@@ -139,6 +140,8 @@ class SettingsStore(private val context: Context) {
     val timerVibrate: Flow<Boolean> = context.dataStore.data.map { it[TIMER_VIBRATE] ?: true }
     val timerSound: Flow<Boolean> = context.dataStore.data.map { it[TIMER_SOUND] ?: true }
     val showRestTimer: Flow<Boolean> = context.dataStore.data.map { it[SHOW_REST_TIMER] ?: true }
+    // Micro-vibración al saltar de ejercicio scrolleando durante el entreno (activada por defecto).
+    val scrollHaptics: Flow<Boolean> = context.dataStore.data.map { it[SCROLL_HAPTICS] ?: true }
     // -1f significa "usar posición por defecto (esquina inferior derecha)"
     val timerPosX: Flow<Float> = context.dataStore.data.map { it[TIMER_POS_X] ?: -1f }
     val timerPosY: Flow<Float> = context.dataStore.data.map { it[TIMER_POS_Y] ?: -1f }
@@ -353,6 +356,9 @@ class SettingsStore(private val context: Context) {
     }
     suspend fun saveShowRestTimer(show: Boolean) {
         context.dataStore.edit { it[SHOW_REST_TIMER] = show }
+    }
+    suspend fun saveScrollHaptics(enabled: Boolean) {
+        context.dataStore.edit { it[SCROLL_HAPTICS] = enabled }
     }
     suspend fun saveTimerPosition(x: Float, y: Float) {
         context.dataStore.edit {

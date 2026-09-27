@@ -341,6 +341,7 @@
     <string name="seconds_format">%1$ds</string>
     <string name="alert_section_title">ALERTA AO TERMINAR</string>
     <string name="vibration_label">VIBRAÇÃO</string>
+    <string name="scroll_haptics_label">Vibrar ao mudar de exercício</string>
     <string name="sound_label">SOM</string>
     <string name="current_config_label">CONFIGURAÇÃO ATUAL</string>
     <string name="vibration_enabled_badge">· Vibração ativa</string>

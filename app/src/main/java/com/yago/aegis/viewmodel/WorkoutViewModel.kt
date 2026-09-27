@@ -122,6 +122,10 @@ class WorkoutViewModel(
     val showRestTimer: StateFlow<Boolean> = repository.showRestTimer
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
+    /** Micro-vibración al saltar de ejercicio scrolleando durante el entreno. */
+    val scrollHaptics: StateFlow<Boolean> = repository.scrollHaptics
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
     val timerPosX: StateFlow<Float> = repository.timerPosX
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), -1f)
 
@@ -160,6 +164,10 @@ class WorkoutViewModel(
 
     fun saveTimerPosition(x: Float, y: Float) {
         viewModelScope.launch { repository.updateTimerPosition(x, y) }
+    }
+
+    fun setScrollHaptics(enabled: Boolean) {
+        viewModelScope.launch { repository.updateScrollHaptics(enabled) }
     }
 
     // ─────────────────────────────────────────────

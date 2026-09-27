@@ -91,6 +91,7 @@ class UserRepository(
     val timerVibrate = settingsStore.timerVibrate
     val timerSound = settingsStore.timerSound
     val showRestTimer = settingsStore.showRestTimer
+    val scrollHaptics = settingsStore.scrollHaptics
     val timerPosX = settingsStore.timerPosX
     val timerPosY = settingsStore.timerPosY
     val availablePlates = settingsStore.availablePlates
@@ -316,6 +317,10 @@ class UserRepository(
     suspend fun updateShowRestTimer(show: Boolean) {
         settingsStore.saveShowRestTimer(show)
         syncSettingsToCloud()
+    }
+    /** Preferencia LOCAL del dispositivo (no se sincroniza a la nube). */
+    suspend fun updateScrollHaptics(enabled: Boolean) {
+        settingsStore.saveScrollHaptics(enabled)
     }
     suspend fun updateTimerPosition(x: Float, y: Float) {
         settingsStore.saveTimerPosition(x, y)
