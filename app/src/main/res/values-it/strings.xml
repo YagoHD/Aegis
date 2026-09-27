@@ -545,7 +545,7 @@
     <string name="league_season">STAGIONE · %1$s</string>
     <string name="league_tier_name">LEGA %1$s</string>
     <string name="league_points">%1$s pti</string>
-    <string name="league_sessions_month">%1$d allenamenti questo mese</string>
+    <string name="league_sessions_month">%1$d giorni di allenamento questo mese</string>
     <string name="league_to_next">%1$s pti per salire</string>
     <string name="league_top_tier">Lega massima raggiunta!</string>
     <string name="league_friend">AMICO</string>

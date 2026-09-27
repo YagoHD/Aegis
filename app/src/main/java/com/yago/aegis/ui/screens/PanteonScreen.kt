@@ -999,7 +999,7 @@ private fun LeagueHeroCard(state: LeagueViewModel.LeagueState) {
                         fontWeight = FontWeight.Black
                     )
                     Text(
-                        text = stringResource(R.string.league_sessions_month, state.mySessions),
+                        text = stringResource(R.string.league_sessions_month, state.myDaysTrained),
                         color = MaterialTheme.colorScheme.secondary,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold

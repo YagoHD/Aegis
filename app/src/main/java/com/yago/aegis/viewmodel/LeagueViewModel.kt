@@ -46,7 +46,7 @@ class LeagueViewModel(
         val myUid: String = "",
         val myPoints: Long = 0,
         val myTier: RankTier = RankTier.BRONCE,
-        val mySessions: Int = 0,
+        val myDaysTrained: Int = 0,
         val nextThreshold: Long? = null,
         val progress: Float = 0f,
         // Solo modo GROUP:
@@ -78,9 +78,8 @@ class LeagueViewModel(
             val seasonId = LeagueSystem.seasonIdFor(now)
             val (score, avatarB64) = withContext(Dispatchers.Default) {
                 val history = repo.workoutHistory.first()
-                val bw = repo.currentMass.first().replace(",", ".").toDoubleOrNull() ?: 0.0
                 val streak = repo.computeCurrentStreak()
-                val sc = LeagueSystem.computeSeason(history, bw, streak, now)
+                val sc = LeagueSystem.computeSeason(history, streak, now)
                 val av = repo.avatarUri.first()?.let { AvatarImage.encode(appContext, Uri.parse(it)) } ?: ""
                 sc to av
             }
@@ -91,8 +90,7 @@ class LeagueViewModel(
                 username = myUsername,
                 avatar = avatarB64,
                 points = score.points,
-                sessions = score.sessions,
-                relativeWork = score.relativeWork,
+                daysTrained = score.daysTrained,
                 tier = provisionalTier.name,
                 updatedAt = now
             )
@@ -115,7 +113,7 @@ class LeagueViewModel(
                 _state.value = LeagueState(
                     loading = false, hasUsername = true, mode = LeagueMode.GROUP,
                     seasonId = gseason, myUid = myUid,
-                    myPoints = score.points, myTier = serverLeague, mySessions = score.sessions,
+                    myPoints = score.points, myTier = serverLeague, myDaysTrained = score.daysTrained,
                     groupId = gid, myPosition = board.indexOfFirst { it.uid == myUid } + 1,
                     promoteCount = LeagueSystem.promoteCount(board.size, serverLeague),
                     relegateCount = LeagueSystem.relegateCount(board.size, serverLeague),
@@ -131,7 +129,7 @@ class LeagueViewModel(
                 _state.value = LeagueState(
                     loading = false, hasUsername = true, mode = LeagueMode.GLOBAL,
                     seasonId = seasonId, myUid = myUid,
-                    myPoints = score.points, myTier = provisionalTier, mySessions = score.sessions,
+                    myPoints = score.points, myTier = provisionalTier, myDaysTrained = score.daysTrained,
                     nextThreshold = LeagueSystem.nextThreshold(score.points),
                     progress = LeagueSystem.progressToNext(score.points),
                     medals = medals, board = board, friendUids = friendUids

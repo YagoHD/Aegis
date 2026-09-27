@@ -4,7 +4,6 @@ import com.yago.aegis.data.RankTier
 import com.yago.aegis.data.WorkoutSession
 import java.util.Calendar
 import java.util.TimeZone
-import kotlin.math.roundToLong
 
 /**
  * LIGA mensual global (US-LIGA, Fase 1).
@@ -24,8 +23,7 @@ data class LeagueEntry(
     val username: String = "",
     val avatar: String = "",            // thumbnail JPEG en base64 (<=128px); vacío = sin foto
     val points: Long = 0,
-    val sessions: Int = 0,
-    val relativeWork: Double = 0.0,
+    val daysTrained: Int = 0,                  // días distintos entrenados este mes (fórmula de frecuencia)
     val tier: String = RankTier.BRONCE.name,   // liga provisional por umbrales (Fase 1)
     // Fijados por el SERVIDOR en Fase 2 (Cloud Functions): liga real (ganada por ascenso) y grupo.
     // Vacíos mientras las Functions no estén desplegadas → el cliente cae a la tabla mundial (Fase 1).
@@ -46,28 +44,28 @@ data class LeagueMedal(
 /** Puntos de esfuerzo de una temporada + su desglose. */
 data class LeagueScore(
     val points: Long,
-    val sessions: Int,
-    val relativeWork: Double
+    val daysTrained: Int,
+    val completedSets: Int
 )
 
 object LeagueSystem {
 
-    // Reutiliza la filosofía de LevelSystem (50/sesión, 30/semana de racha), pero el trabajo es
-    // RELATIVO al peso corporal (justo entre un usuario de 60 kg y otro de 100 kg), no absoluto.
-    private const val PTS_PER_SESSION = 50.0
-    private const val PTS_PER_STREAK_WEEK = 30.0
+    // Filosofía: premiar IR A ENTRENAR. Manda la FRECUENCIA (días distintos entrenados), no la
+    // fuerza ni el volumen: ni kilos, ni 1RM, ni % graso, ni peso corporal entran en la cuenta.
+    // Un día bestia de 1.000.000 kg NO puede con varios días constantes.
+    private const val PTS_PER_DAY = 100          // lo que MÁS pesa: cada día distinto entrenado
+    private const val PTS_PER_STREAK_WEEK = 30   // constancia semana a semana
+    private const val PTS_PER_SET = 2            // "ganas" (series completadas)...
+    private const val SETS_CAP_PER_SESSION = 10  // ...pero topadas por sesión (un día no se dispara)
 
-    /** Peso del trabajo relativo. PROVISIONAL: se calibrará con datos reales (Fase 2). */
-    const val K = 1.0
-
-    /** Umbrales de liga por puntos (Fase 1). En Fase 2 lo sustituye el ascenso/descenso real. */
+    /** Umbrales de liga por puntos (solo para el display del fallback Fase 1; en grupo manda el servidor). */
     private val THRESHOLDS: List<Pair<Long, RankTier>> = listOf(
         0L to RankTier.BRONCE,
-        1000L to RankTier.PLATA,
-        2500L to RankTier.ORO,
-        5000L to RankTier.PLATINO,
-        9000L to RankTier.DIAMANTE,
-        15000L to RankTier.TITAN
+        700L to RankTier.PLATA,
+        1400L to RankTier.ORO,
+        2200L to RankTier.PLATINO,
+        3200L to RankTier.DIAMANTE,
+        4500L to RankTier.TITAN
     )
 
     /** seasonId (mes natural, UTC) de una fecha: "2026-09". */
@@ -92,30 +90,32 @@ object LeagueSystem {
     }
 
     /**
-     * Puntos de esfuerzo de la temporada que contiene [now], desde el historial.
-     * Solo cuentan sesiones DENTRO del mes natural y **series completadas**. Trabajo relativo al peso.
+     * Puntos de la temporada que contiene [now], desde el historial. Premia la FRECUENCIA:
+     * días distintos entrenados (con al menos una serie completada) + racha + series completadas
+     * (topadas por sesión). NO usa peso, 1RM, % graso ni peso corporal.
      */
     fun computeSeason(
         history: List<WorkoutSession>,
-        bodyweightKg: Double,
         streakWeeks: Int,
         now: Long = System.currentTimeMillis()
     ): LeagueScore {
         val (start, end) = seasonBounds(now)
-        // Evita dividir por ~0 si el usuario no ha rellenado su peso todavía.
-        val bw = bodyweightKg.takeIf { it > 1.0 } ?: 1.0
         val monthSessions = history.filter { it.date in start until end }
-        var relWork = 0.0
+        // Un día cuenta solo si tuvo al menos una serie completada (no premia abrir sesiones vacías).
+        val daysTrained = monthSessions
+            .filter { s -> s.exercisesProgress.any { p -> p.sets.any { it.isCompleted } } }
+            .map { it.date / 86_400_000L }   // índice de día (UTC)
+            .toSet().size
+        // "Ganas": series completadas por sesión, con tope para que un día no se dispare.
+        var cappedSets = 0
         for (s in monthSessions) {
-            for (p in s.exercisesProgress) {
-                for (set in p.sets) {
-                    if (set.isCompleted) relWork += (set.weight * set.reps) / bw
-                }
-            }
+            val completed = s.exercisesProgress.sumOf { p -> p.sets.count { it.isCompleted } }
+            cappedSets += completed.coerceAtMost(SETS_CAP_PER_SESSION)
         }
-        val n = monthSessions.size
-        val pts = PTS_PER_SESSION * n + K * relWork + PTS_PER_STREAK_WEEK * streakWeeks.coerceAtLeast(0)
-        return LeagueScore(pts.roundToLong(), n, relWork)
+        val pts = PTS_PER_DAY * daysTrained +
+                  PTS_PER_STREAK_WEEK * streakWeeks.coerceAtLeast(0) +
+                  PTS_PER_SET * cappedSets
+        return LeagueScore(pts.toLong(), daysTrained, cappedSets)
     }
 
     /** Liga (tier) provisional a partir de los puntos, por umbrales (Fase 1). */

@@ -545,7 +545,7 @@
     <string name="league_season">SEASON · %1$s</string>
     <string name="league_tier_name">%1$s LEAGUE</string>
     <string name="league_points">%1$s pts</string>
-    <string name="league_sessions_month">%1$d workouts this month</string>
+    <string name="league_sessions_month">%1$d days trained this month</string>
     <string name="league_to_next">%1$s pts to promote</string>
     <string name="league_top_tier">Top league reached!</string>
     <string name="league_friend">FRIEND</string>

@@ -435,7 +435,7 @@
     <string name="league_season">TEMPORADA · %1$s</string>
     <string name="league_tier_name">LIGA %1$s</string>
     <string name="league_points">%1$s pts</string>
-    <string name="league_sessions_month">%1$d entrenos este mes</string>
+    <string name="league_sessions_month">%1$d días entrenados este mes</string>
     <string name="league_to_next">%1$s pts para ascender</string>
     <string name="league_top_tier">¡Liga máxima alcanzada!</string>
     <string name="league_friend">AMIGO</string>
