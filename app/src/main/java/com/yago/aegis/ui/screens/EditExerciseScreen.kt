@@ -66,54 +66,6 @@ fun EditExerciseScreen(
                     }
                 }
             )
-        },
-        bottomBar = {
-            // ✅ Botón "CREATE" en Bronce brillante
-            Button(
-                onClick = {
-                    if (exerciseName.isNotBlank()) {
-                        // Anti-trampas: si era un ejercicio BASE, conserva su BASE_TAG al editar.
-                        // Sin esto, editar (p.ej. el tipo de carga) lo saca de la base -> se va a
-                        // "Mis ejercicios" y deja de contar para el Panteón.
-                        val wasBase = exerciseToEdit?.tags?.contains(DefaultExercises.BASE_TAG) == true
-                        val finalTags = if (wasBase) selectedTags.toList() + DefaultExercises.BASE_TAG
-                                        else selectedTags.toList()
-                        val updatedExercise = Exercise(
-                            id = exerciseToEdit?.id ?: System.currentTimeMillis(),
-                            name = exerciseName,
-                            tags = finalTags,
-                            iconName = selectedIconName,
-                            muscleGroup = if (wasBase) (exerciseToEdit?.muscleGroup ?: "") else (selectedTags.firstOrNull() ?: ""),
-                            type = "",
-                            notes = notes.trim(),
-                            isBodyweight = loadType == com.yago.aegis.data.LoadType.BODYWEIGHT,
-                            loadType = loadType.name,
-                            lastPerformance = exerciseToEdit?.lastPerformance ?: "",
-                            oneRepMax = exerciseToEdit?.oneRepMax ?: 0.0,
-                            bestSet = exerciseToEdit?.bestSet,
-                            history = exerciseToEdit?.history ?: emptyList(),
-                            muscleContributions = exerciseToEdit?.muscleContributions ?: emptyList()
-                        )
-                        routinesViewModel.saveOrUpdateExercise(updatedExercise)
-                        onNavigateBack()
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(Spacing.xl)
-                    .height(56.dp),
-                shape = RoundedCornerShape(Radius.md),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary, // AegisBronze
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            ) {
-                Text(
-                    text = if (exerciseToEdit == null) stringResource(R.string.btn_create) else stringResource(R.string.btn_edit),
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.sp
-                )
-            }
         }
     ) { padding ->
         LazyColumn(
@@ -212,7 +164,55 @@ fun EditExerciseScreen(
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(100.dp)) }
+            // BOTÓN CREAR / GUARDAR dentro del scroll (evita el hueco negro sobre el teclado
+            // que dejaba el bottomBar fijo al abrirse el teclado).
+            item {
+                Button(
+                    onClick = {
+                        if (exerciseName.isNotBlank()) {
+                            // Anti-trampas: si era un ejercicio BASE, conserva su BASE_TAG al editar.
+                            val wasBase = exerciseToEdit?.tags?.contains(DefaultExercises.BASE_TAG) == true
+                            val finalTags = if (wasBase) selectedTags.toList() + DefaultExercises.BASE_TAG
+                                            else selectedTags.toList()
+                            val updatedExercise = Exercise(
+                                id = exerciseToEdit?.id ?: System.currentTimeMillis(),
+                                name = exerciseName,
+                                tags = finalTags,
+                                iconName = selectedIconName,
+                                muscleGroup = if (wasBase) (exerciseToEdit?.muscleGroup ?: "") else (selectedTags.firstOrNull() ?: ""),
+                                type = "",
+                                notes = notes.trim(),
+                                isBodyweight = loadType == com.yago.aegis.data.LoadType.BODYWEIGHT,
+                                loadType = loadType.name,
+                                lastPerformance = exerciseToEdit?.lastPerformance ?: "",
+                                oneRepMax = exerciseToEdit?.oneRepMax ?: 0.0,
+                                bestSet = exerciseToEdit?.bestSet,
+                                history = exerciseToEdit?.history ?: emptyList(),
+                                muscleContributions = exerciseToEdit?.muscleContributions ?: emptyList()
+                            )
+                            routinesViewModel.saveOrUpdateExercise(updatedExercise)
+                            onNavigateBack()
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = Spacing.md)
+                        .height(56.dp),
+                    shape = RoundedCornerShape(Radius.md),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary, // AegisBronze
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                ) {
+                    Text(
+                        text = if (exerciseToEdit == null) stringResource(R.string.btn_create) else stringResource(R.string.btn_edit),
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.sp
+                    )
+                }
+            }
+
+            item { Spacer(modifier = Modifier.height(Spacing.xl)) }
         }
     }
 }
