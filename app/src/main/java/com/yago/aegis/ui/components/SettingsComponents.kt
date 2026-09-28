@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PrivacyTip
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -85,7 +86,8 @@ fun SettingsMenu(
     authViewModel: AuthViewModel? = null,
     onLogout: (() -> Unit)? = null,
     onAccountDeleted: (() -> Unit)? = null,
-    onNavigateToPrivacy: (() -> Unit)? = null
+    onNavigateToPrivacy: (() -> Unit)? = null,
+    onResetTutorials: (() -> Unit)? = null
 ) {
     val state by viewModel.uiState.collectAsState()
     val user = state.user
@@ -433,6 +435,34 @@ fun SettingsMenu(
                     Text(stringResource(R.string.export_data_subtitle), color = MaterialTheme.colorScheme.secondary, fontSize = 11.sp)
                 }
                 Text("›", color = MaterialTheme.colorScheme.secondary, fontSize = 18.sp)
+            }
+        }
+
+        // --- REINICIAR TUTORIALES ---
+        if (onResetTutorials != null) {
+            Spacer(modifier = Modifier.height(Spacing.md))
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(Radius.lg)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onResetTutorials()
+                            Toast.makeText(context, R.string.tut_reset_done, Toast.LENGTH_SHORT).show()
+                        }
+                        .padding(vertical = 14.dp, horizontal = Spacing.lg),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Default.Refresh, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(Spacing.md))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(stringResource(R.string.tut_reset_label), color = MaterialTheme.colorScheme.onBackground, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.tut_reset_subtitle), color = MaterialTheme.colorScheme.secondary, fontSize = 11.sp)
+                    }
+                    Text("›", color = MaterialTheme.colorScheme.secondary, fontSize = 18.sp)
+                }
             }
         }
 

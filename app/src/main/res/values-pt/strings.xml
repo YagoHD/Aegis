@@ -165,6 +165,29 @@
     <!-- Add / Edit exercise -->
     <string name="title_new_exercise">NOVO EXERCÍCIO</string>
     <string name="tab_create_exercise">Criar exercício</string>
+    <!-- Tutoriais (coach-marks) -->
+    <string name="tut_badge">TUTORIAL</string>
+    <string name="tut_next">Seguinte</string>
+    <string name="tut_got_it">Entendi</string>
+    <string name="tut_skip">Ignorar</string>
+    <string name="tut_reset_label">Reiniciar tutoriais</string>
+    <string name="tut_reset_subtitle">Mostrar novamente os guias de cada ecrã</string>
+    <string name="tut_reset_done">Tutoriais reiniciados</string>
+    <string name="tut_profile_title">O teu perfil</string>
+    <string name="tut_profile_1">Edita o teu peso, gordura e medidas: guardam-se sozinhos, sem botão. A tua evolução é registada automaticamente.</string>
+    <string name="tut_profile_2">Toca na engrenagem ⚙ no topo para definições, exportar/importar dados e reiniciar estes tutoriais.</string>
+    <string name="tut_routine_title">Rotinas e exercícios</string>
+    <string name="tut_routine_1">Cria as tuas rotinas e organiza a tua biblioteca de exercícios com o seletor no topo.</string>
+    <string name="tut_routine_2">Ao adicionar exercícios, alterna entre EXERCÍCIOS (biblioteca) e CRIAR EXERCÍCIO com os separadores.</string>
+    <string name="tut_train_title">Treinar</string>
+    <string name="tut_train_1">Escolhe uma rotina para começar uma sessão ou treina livremente. Podes pausar e voltar sem perder os dados.</string>
+    <string name="tut_panteon_title">Panteão</string>
+    <string name="tut_panteon_1">Compete na Liga mensal, vê o teu ranking mundial e adiciona amigos por @utilizador.</string>
+    <string name="tut_stats_title">Estatísticas</string>
+    <string name="tut_stats_1">Consulta o teu volume, consistência e progressão por exercício. Personaliza que cartões mostrar nas definições.</string>
+    <string name="tut_session_title">Sessão em curso</string>
+    <string name="tut_session_1">Marca cada série ao concluí-la. Toca no nome de um exercício para ver o histórico e o teu recorde.</string>
+    <string name="tut_session_2">O temporizador de descanso é arrastável. Podes adicionar exercícios na hora com o botão +.</string>
     <string name="title_edit_exercise">EDITAR EXERCÍCIO</string>
     <string name="title_add_variant">ADICIONAR VARIANTE</string>
     <string name="hint_exercise_name">ex. Press inclinado</string>

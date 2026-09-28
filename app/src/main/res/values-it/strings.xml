@@ -165,6 +165,29 @@
     <!-- Add / Edit exercise -->
     <string name="title_new_exercise">NUOVO ESERCIZIO</string>
     <string name="tab_create_exercise">Crea esercizio</string>
+    <!-- Tutorial (coach-marks) -->
+    <string name="tut_badge">TUTORIAL</string>
+    <string name="tut_next">Avanti</string>
+    <string name="tut_got_it">Ho capito</string>
+    <string name="tut_skip">Salta</string>
+    <string name="tut_reset_label">Reimposta tutorial</string>
+    <string name="tut_reset_subtitle">Mostra di nuovo le guide di ogni schermata</string>
+    <string name="tut_reset_done">Tutorial reimpostati</string>
+    <string name="tut_profile_title">Il tuo profilo</string>
+    <string name="tut_profile_1">Modifica peso, massa grassa e misure: si salvano da sole, senza pulsante. I tuoi progressi vengono registrati.</string>
+    <string name="tut_profile_2">Tocca l\'ingranaggio ⚙ in alto per impostazioni, esporta/importa dati e reimpostare questi tutorial.</string>
+    <string name="tut_routine_title">Routine ed esercizi</string>
+    <string name="tut_routine_1">Crea le tue routine e organizza la libreria di esercizi con il selettore in alto.</string>
+    <string name="tut_routine_2">Quando aggiungi esercizi, passa tra ESERCIZI (libreria) e CREA ESERCIZIO con le schede.</string>
+    <string name="tut_train_title">Allenati</string>
+    <string name="tut_train_1">Scegli una routine per iniziare una sessione o allenati liberamente. Puoi mettere in pausa e tornare senza perdere i dati.</string>
+    <string name="tut_panteon_title">Pantheon</string>
+    <string name="tut_panteon_1">Competi nella Lega mensile, guarda la tua classifica mondiale e aggiungi amici tramite @username.</string>
+    <string name="tut_stats_title">Statistiche</string>
+    <string name="tut_stats_1">Controlla volume, costanza e progressione per esercizio. Personalizza quali schede mostrare dalle impostazioni.</string>
+    <string name="tut_session_title">Sessione in corso</string>
+    <string name="tut_session_1">Segna ogni serie quando la completi. Tocca il nome di un esercizio per vedere lo storico e il tuo record.</string>
+    <string name="tut_session_2">Il timer di recupero è trascinabile. Puoi aggiungere esercizi al volo con il pulsante +.</string>
     <string name="title_edit_exercise">MODIFICA ESERCIZIO</string>
     <string name="title_add_variant">AGGIUNGI VARIANTE</string>
     <string name="hint_exercise_name">es. Panca inclinata</string>

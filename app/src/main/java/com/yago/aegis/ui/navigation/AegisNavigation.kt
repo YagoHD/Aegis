@@ -7,10 +7,14 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.navigation.NavBackStackEntry
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.navigationBarsPadding
+import com.yago.aegis.ui.components.TutorialOverlay
+import com.yago.aegis.ui.components.tutorialForRoute
 import androidx.compose.material3.Scaffold
 import android.app.Application
 import androidx.compose.runtime.Composable
@@ -111,6 +115,8 @@ fun AegisNavigation(
             }
         }
     }
+    val tutorialViewModel: com.yago.aegis.viewmodel.TutorialViewModel =
+        viewModel(factory = com.yago.aegis.viewmodel.TutorialViewModel.Factory(userRepository))
     val sharedStatsViewModel: StatsViewModel = viewModel(factory = StatsViewModel.Factory(userRepository))
     val plateCalculatorViewModel: PlateCalculatorViewModel = viewModel(factory = PlateCalculatorViewModel.Factory(userRepository))
     val panteonViewModel: PanteonViewModel = viewModel(factory = PanteonViewModel.Factory(userRepository))
@@ -131,6 +137,9 @@ fun AegisNavigation(
             currentRoute != Routes.PRIVACY_POLICY &&
             currentRoute != Routes.FRIENDS
 
+    val seenTutorials by tutorialViewModel.seenTutorials.collectAsState()
+
+    Box(modifier = Modifier.fillMaxSize()) {
     Scaffold(
         bottomBar = { if (showBottomBar) AegisBottomBar(navController) }
     ) { paddingValues ->
@@ -357,7 +366,8 @@ fun AegisNavigation(
                     onAccountDeleted = {
                         navController.navigate(Routes.WELCOME) { popUpTo(0) { inclusive = true } }
                     },
-                    onNavigateToPrivacy = { navController.navigate(Routes.PRIVACY_POLICY) }
+                    onNavigateToPrivacy = { navController.navigate(Routes.PRIVACY_POLICY) },
+                    onResetTutorials = { tutorialViewModel.resetAll() }
                 )
             }
 
@@ -571,6 +581,21 @@ fun AegisNavigation(
             ) {
                 PrivacyPolicyScreen(onBack = { navController.popBackStack() })
             }
+        }
+    }
+
+        // --- TUTORIAL (coach-marks) ---
+        // Se muestra sobre la pantalla la PRIMERA vez que se entra a cada sección.
+        // seenTutorials == null significa "aún cargando" → no mostramos nada para evitar parpadeo.
+        val activeTutorial = tutorialForRoute(currentRoute)
+        if (activeTutorial != null && seenTutorials != null &&
+            !seenTutorials!!.contains(activeTutorial.key)
+        ) {
+            TutorialOverlay(
+                titleRes = activeTutorial.titleRes,
+                stepRes = activeTutorial.stepRes,
+                onFinish = { tutorialViewModel.markSeen(activeTutorial.key) }
+            )
         }
     }
 }

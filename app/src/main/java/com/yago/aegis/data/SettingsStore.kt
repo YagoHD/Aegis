@@ -66,6 +66,8 @@ class SettingsStore(private val context: Context) {
         private val ROOM_MIGRATED = booleanPreferencesKey("room_migrated")
         // Social: mi @usuario reclamado (fuente de verdad = Firestore; copia local para la UI).
         private val USERNAME = stringPreferencesKey("username")
+        // Tutoriales de coach-marks ya vistos (una vez por pantalla). Reiniciable desde Ajustes.
+        private val SEEN_TUTORIALS = stringSetPreferencesKey("seen_tutorials")
     }
 
     // --- LECTURA (READ) ---
@@ -123,6 +125,8 @@ class SettingsStore(private val context: Context) {
     val onboardingCompleted: Flow<Boolean> = context.dataStore.data.map { it[ONBOARDING_COMPLETED] ?: false }
     val roomMigrated: Flow<Boolean> = context.dataStore.data.map { it[ROOM_MIGRATED] ?: false }
     val username: Flow<String?> = context.dataStore.data.map { it[USERNAME] }
+    // Conjunto de claves de pantalla cuyo tutorial ya se mostró.
+    val seenTutorials: Flow<Set<String>> = context.dataStore.data.map { it[SEEN_TUTORIALS] ?: emptySet() }
     val workoutHistory: Flow<List<WorkoutSession>> = context.dataStore.data.map { prefs ->
         val json = prefs[WORKOUT_HISTORY_KEY] ?: ""
         if (json.isEmpty()) emptyList()
@@ -236,6 +240,18 @@ class SettingsStore(private val context: Context) {
 
     suspend fun saveUsername(value: String) {
         context.dataStore.edit { it[USERNAME] = value }
+    }
+
+    /** Marca el tutorial de una pantalla como visto (no se volverá a mostrar). */
+    suspend fun markTutorialSeen(key: String) {
+        context.dataStore.edit { prefs ->
+            prefs[SEEN_TUTORIALS] = (prefs[SEEN_TUTORIALS] ?: emptySet()) + key
+        }
+    }
+
+    /** Reinicia todos los tutoriales para que vuelvan a aparecer. */
+    suspend fun resetTutorials() {
+        context.dataStore.edit { it.remove(SEEN_TUTORIALS) }
     }
 
     val customMeasures: Flow<List<BodyMeasure>> = context.dataStore.data.map { preferences ->
