@@ -63,6 +63,7 @@ import androidx.core.content.ContextCompat
 import com.yago.aegis.MainActivity
 import com.yago.aegis.R
 import com.yago.aegis.ui.components.AegisAlertDialog
+import com.yago.aegis.ui.components.AegisDialog
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.ExerciseQuickSheet
 import com.yago.aegis.ui.components.ExerciseSessionCard
@@ -235,14 +236,8 @@ fun ActiveSessionScreen(
 
     if (showCancelDialog) {
         // Diálogo personalizado con 3 opciones: Continuar / Pausar / Cancelar
-        AlertDialog(
+        AegisDialog(
             onDismissRequest = { showCancelDialog = false },
-            containerColor = MaterialTheme.colorScheme.surface,
-            modifier = Modifier.border( // O6: mismo borde/forma que AegisAlertDialog
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
-                shape = RoundedCornerShape(28.dp)
-            ),
             title = {
                 Text(
                     stringResource(R.string.exit_session_dialog_title),

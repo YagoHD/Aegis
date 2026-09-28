@@ -10,6 +10,35 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * Primitivo de diálogo del design system: única fuente del "chrome" (fondo surface + borde
+ * técnico de 1dp + esquinas de 28dp). Todos los diálogos de la app deben construirse sobre este
+ * en vez de repetir el mismo `containerColor` + `Modifier.border(...)` a mano.
+ */
+@Composable
+fun AegisDialog(
+    onDismissRequest: () -> Unit,
+    confirmButton: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    dismissButton: (@Composable () -> Unit)? = null,
+    title: (@Composable () -> Unit)? = null,
+    text: (@Composable () -> Unit)? = null
+) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        containerColor = MaterialTheme.colorScheme.surface,
+        modifier = modifier.border(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+            shape = RoundedCornerShape(28.dp)
+        ),
+        confirmButton = confirmButton,
+        dismissButton = dismissButton,
+        title = title,
+        text = text
+    )
+}
+
 @Composable
 fun AegisAlertDialog(
     title: String,
@@ -21,15 +50,8 @@ fun AegisAlertDialog(
     confirmEnabled: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    AlertDialog(
+    AegisDialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
-
-        modifier = Modifier.border(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
-            shape = RoundedCornerShape(28.dp)
-        ),
 
         title = {
             Text(

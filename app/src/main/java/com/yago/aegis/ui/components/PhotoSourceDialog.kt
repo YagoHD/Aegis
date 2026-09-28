@@ -20,16 +20,8 @@ fun PhotoSourceDialog(
     onDismiss: () -> Unit,
     onConfirm: (PhotoType) -> Unit
 ) {
-    AlertDialog(
+    AegisDialog(
         onDismissRequest = onDismiss,
-        // 30%: SurfaceDark para el contenedor
-        containerColor = MaterialTheme.colorScheme.surface,
-        // Borde fino de 1.dp para mantener el lenguaje técnico
-        modifier = Modifier.border(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
-            shape = RoundedCornerShape(28.dp) // Radio estándar de M3 AlertDialog
-        ),
         title = {
             Text(
                 text = stringResource(R.string.visual_log_title),

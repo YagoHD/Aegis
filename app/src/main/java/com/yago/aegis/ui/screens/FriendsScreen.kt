@@ -60,6 +60,7 @@ import com.yago.aegis.R
 import com.yago.aegis.data.RankTier
 import com.yago.aegis.data.social.FriendRef
 import com.yago.aegis.ui.components.AegisAvatar
+import com.yago.aegis.ui.components.AegisDialog
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.RankMedal
 import com.yago.aegis.util.AvatarImage
@@ -367,9 +368,8 @@ private fun PrimaryButton(label: String, busy: Boolean, enabled: Boolean, onClic
 @Composable
 private fun ChangeUsernameDialog(current: String, busy: Boolean, onConfirm: (String) -> Unit, onDismiss: () -> Unit) {
     var text by remember { mutableStateOf("") }
-    AlertDialog(
+    AegisDialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
         title = {
             Text(
                 stringResource(R.string.social_change_username),

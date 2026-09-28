@@ -33,6 +33,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.yago.aegis.R
+import com.yago.aegis.ui.components.AegisDialog
 import com.yago.aegis.viewmodel.AuthViewModel
 
 @Composable
@@ -56,18 +57,12 @@ fun LoginScreen(
 
     // Diálogo de recuperar contraseña
     if (showForgotDialog) {
-        AlertDialog(
+        AegisDialog(
             onDismissRequest = {
                 showForgotDialog = false
                 forgotEmail = ""
                 authViewModel.clearState()
             },
-            containerColor = MaterialTheme.colorScheme.surface,
-            modifier = Modifier.border( // O6: mismo borde/forma que AegisAlertDialog
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
-                shape = RoundedCornerShape(28.dp)
-            ),
             title = {
                 Text(
                     stringResource(R.string.forgot_password_title),

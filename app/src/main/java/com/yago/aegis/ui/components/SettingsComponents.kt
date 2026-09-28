@@ -610,9 +610,8 @@ fun ChangePasswordDialog(
         }
     }
 
-    AlertDialog(
+    AegisDialog(
         onDismissRequest = { onDismiss(); authViewModel.clearState() },
-        containerColor = MaterialTheme.colorScheme.surface,
         title = {
             Text(stringResource(R.string.change_password_dialog_title), color = MaterialTheme.colorScheme.onBackground, fontSize = 16.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
         },
@@ -747,9 +746,8 @@ fun DeleteAccountDialog(
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
-    AlertDialog(
+    AegisDialog(
         onDismissRequest = { onDismiss(); authViewModel.clearState() },
-        containerColor = MaterialTheme.colorScheme.surface,
         title = {
             Text(
                 stringResource(R.string.delete_account_dialog_title),
@@ -860,14 +858,8 @@ private fun ImportRestoreDialog(
     onReplace: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    AlertDialog(
+    AegisDialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
-        modifier = Modifier.border(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
-            shape = RoundedCornerShape(28.dp)
-        ),
         title = {
             Text(
                 text = stringResource(R.string.import_data_label),
