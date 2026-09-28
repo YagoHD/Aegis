@@ -75,12 +75,12 @@ class StatsViewModel(private val repository: UserRepository) : ViewModel() {
         Pair(thisWeekVol, diff)
     }.flowOn(Dispatchers.Default)
 
-    // Rango de la evolución de volumen: 3 meses o 12 (último año). Se alterna tocando la etiqueta.
+    // Rango de la evolución de volumen: 3 o 6 meses. Se alterna tocando la etiqueta.
     private val _evolutionMonths = MutableStateFlow(3)
     val evolutionMonths: StateFlow<Int> = _evolutionMonths
-    fun toggleEvolutionRange() { _evolutionMonths.value = if (_evolutionMonths.value == 3) 12 else 3 }
+    fun toggleEvolutionRange() { _evolutionMonths.value = if (_evolutionMonths.value == 3) 6 else 3 }
 
-    // Evolución de volumen mensual (últimos 3 meses o último año, según evolutionMonths).
+    // Evolución de volumen mensual (últimos 3 o 6 meses, según evolutionMonths).
     val monthlyVolumeEvolution: Flow<List<Pair<String, Double>>> =
         combine(workoutHistory, _evolutionMonths) { history, months ->
             ((months - 1) downTo 0).map { i ->

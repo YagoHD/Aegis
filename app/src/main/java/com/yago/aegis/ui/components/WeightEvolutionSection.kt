@@ -63,7 +63,7 @@ fun WeightEvolutionSection(
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f))
             ) {
                 Text(
-                    text = stringResource(if (rangeMonths >= 12) R.string.last_year else R.string.last_3_months),
+                    text = stringResource(if (rangeMonths >= 6) R.string.last_6_months else R.string.last_3_months),
                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f),
                     fontSize = 8.sp,

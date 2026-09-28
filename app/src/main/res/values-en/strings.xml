@@ -444,6 +444,7 @@
     <string name="session_progress_label">PROGRESS</string>
     <string name="percent_completed_format">%1$d%% COMPLETED</string>
     <string name="last_3_months">LAST 3 MONTHS</string>
+    <string name="last_6_months">LAST 6 MONTHS</string>
     <string name="last_year">LAST YEAR</string>
     <string name="temporal_progress_title">PROGRESS OVER TIME</string>
     <string name="history_col_weight">WEIGHT</string>
