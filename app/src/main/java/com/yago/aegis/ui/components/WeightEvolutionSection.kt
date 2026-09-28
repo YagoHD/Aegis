@@ -105,11 +105,13 @@ fun WeightEvolutionSection(
                     ) {
                         // VALOR: Estilo numérico pesado
                         Text(
-                            text = formatVolume(volume),
+                            text = formatBarVolume(volume),
                             color = if (isLastMonth) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.secondary.copy(alpha = 0.7f),
                             fontSize = 10.sp,
                             fontWeight = if (isLastMonth) FontWeight.ExtraBold else FontWeight.Bold,
-                            letterSpacing = (-0.2).sp
+                            letterSpacing = (-0.2).sp,
+                            maxLines = 1,
+                            softWrap = false   // nunca partir la etiqueta en vertical
                         )
 
                         Spacer(Modifier.height(Spacing.sm))
@@ -148,4 +150,15 @@ fun formatVolume(volume: Double): String {
         volume >= 1000 -> "%.1fK KG".format(volume / 1000)
         else -> "${volume.toInt()} KG"
     }
+}
+
+/**
+ * Etiqueta COMPACTA para las barras del gráfico (sin " KG", que ya se sobreentiende por el módulo
+ * "Evolución de carga"). Evita que el texto se parta en vertical en columnas estrechas.
+ */
+private fun formatBarVolume(volume: Double): String = when {
+    volume <= 0.0 -> "0"
+    volume >= 1_000_000 -> "%.1fM".format(volume / 1_000_000)
+    volume >= 1_000 -> "%.0fK".format(volume / 1_000)
+    else -> volume.toInt().toString()
 }
