@@ -164,6 +164,7 @@
 
     <!-- Add / Edit exercise -->
     <string name="title_new_exercise">NUOVO ESERCIZIO</string>
+    <string name="tab_create_exercise">Crea esercizio</string>
     <string name="title_edit_exercise">MODIFICA ESERCIZIO</string>
     <string name="title_add_variant">AGGIUNGI VARIANTE</string>
     <string name="hint_exercise_name">es. Panca inclinata</string>

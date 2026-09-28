@@ -164,6 +164,7 @@
 
     <!-- Add / Edit exercise -->
     <string name="title_new_exercise">NEUE ÜBUNG</string>
+    <string name="tab_create_exercise">Übung erstellen</string>
     <string name="title_edit_exercise">ÜBUNG BEARBEITEN</string>
     <string name="title_add_variant">VARIANTE HINZUFÜGEN</string>
     <string name="hint_exercise_name">z. B. Schrägbankdrücken</string>

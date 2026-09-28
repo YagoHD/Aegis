@@ -60,15 +60,16 @@ fun SessionExercisePickerSheet(
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var query by remember { mutableStateOf("") }
+    var createTab by remember { mutableStateOf(false) }
+    var newName by remember { mutableStateOf("") }
     val filtered = remember(exercises, query) {
         exercises
             .filter { query.isBlank() || it.name.contains(query, ignoreCase = true) }
             .sortedBy { it.name.uppercase() }
     }
-    // Si el texto no coincide exactamente con ningún ejercicio, se puede crear al vuelo.
-    val trimmedQuery = query.trim()
-    val canCreate = trimmedQuery.isNotEmpty() &&
-        exercises.none { it.name.trim().equals(trimmedQuery, ignoreCase = true) }
+    val trimmedName = newName.trim()
+    val canCreate = trimmedName.isNotEmpty() &&
+        exercises.none { it.name.trim().equals(trimmedName, ignoreCase = true) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -91,6 +92,75 @@ fun SessionExercisePickerSheet(
 
             Spacer(modifier = Modifier.height(Spacing.md))
 
+            AegisSegmentedToggle(
+                options = listOf(
+                    stringResource(R.string.nav_exercices),
+                    stringResource(R.string.tab_create_exercise)
+                ),
+                selectedIndex = if (createTab) 1 else 0,
+                onSelect = { createTab = it == 1 }
+            )
+
+            Spacer(modifier = Modifier.height(Spacing.md))
+
+            if (createTab) {
+                // --- PESTAÑA CREAR EJERCICIO ---
+                OutlinedTextField(
+                    value = newName,
+                    onValueChange = { newName = it },
+                    placeholder = { Text(stringResource(R.string.exercise_name_placeholder), fontSize = 13.sp) },
+                    leadingIcon = { Icon(Icons.Default.Add, null, tint = MaterialTheme.colorScheme.secondary) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(Radius.md),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.background,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.background,
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
+                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                        cursorColor = MaterialTheme.colorScheme.primary
+                    )
+                )
+                Spacer(modifier = Modifier.height(Spacing.md))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(Radius.md))
+                        .background(
+                            if (canCreate) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                        )
+                        .then(if (canCreate) Modifier.clickable { onCreateExercise(trimmedName) } else Modifier)
+                        .padding(horizontal = Spacing.md, vertical = Spacing.md),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.Add, null,
+                        tint = if (canCreate) MaterialTheme.colorScheme.primary
+                               else MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f),
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(Spacing.md))
+                    Text(
+                        text = if (trimmedName.isEmpty())
+                            stringResource(R.string.title_new_exercise)
+                        else
+                            stringResource(R.string.create_exercise_named, trimmedName.uppercase()),
+                        color = if (canCreate) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 0.5.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                return@Column
+            }
+
+            // --- PESTAÑA EJERCICIOS (biblioteca) ---
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
@@ -111,32 +181,6 @@ fun SessionExercisePickerSheet(
             )
 
             Spacer(modifier = Modifier.height(Spacing.md))
-
-            // Crear un ejercicio nuevo con el texto escrito (para improvisar en el gym)
-            if (canCreate) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(Radius.md))
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
-                        .clickable { onCreateExercise(trimmedQuery) }
-                        .padding(horizontal = Spacing.md, vertical = Spacing.md),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.Default.Add, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-                    Spacer(modifier = Modifier.width(Spacing.md))
-                    Text(
-                        text = stringResource(R.string.create_exercise_named, trimmedQuery.uppercase()),
-                        color = MaterialTheme.colorScheme.primary,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 0.5.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                Spacer(modifier = Modifier.height(Spacing.sm))
-            }
 
             LazyColumn(
                 modifier = Modifier

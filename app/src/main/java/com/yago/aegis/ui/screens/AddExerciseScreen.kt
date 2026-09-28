@@ -30,6 +30,7 @@ import com.yago.aegis.data.DefaultExercises
 import com.yago.aegis.data.Exercise
 import com.yago.aegis.ui.globalExerciseIcons
 import com.yago.aegis.ui.components.AegisAlertDialog
+import com.yago.aegis.ui.components.AegisSegmentedToggle
 import com.yago.aegis.ui.components.TagFilterRow
 import com.yago.aegis.ui.components.AegisTagManager
 import com.yago.aegis.ui.components.AegisTopBar
@@ -57,6 +58,8 @@ fun AddExerciseScreen(
 
     var searchQuery by remember { mutableStateOf("") }
     var selectedTag by remember { mutableStateOf("ALL") }
+    // Pestañas: EJERCICIOS (biblioteca) por defecto | CREAR EJERCICIO
+    var createTab by remember { mutableStateOf(false) }
 
     // Tags canónicos de la app (fijos)
     val availableTags = AppTags.ALL
@@ -86,15 +89,28 @@ fun AddExerciseScreen(
         },
         containerColor = MaterialTheme.colorScheme.background // 050505
     ) { paddingValues ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = Spacing.xl),
-            verticalArrangement = Arrangement.spacedBy(Spacing.xl)
+                .padding(horizontal = Spacing.xl)
         ) {
-            item { Spacer(modifier = Modifier.height(Spacing.sm)) }
+            Spacer(modifier = Modifier.height(Spacing.sm))
+            AegisSegmentedToggle(
+                options = listOf(
+                    stringResource(R.string.nav_exercices),
+                    stringResource(R.string.tab_create_exercise)
+                ),
+                selectedIndex = if (createTab) 1 else 0,
+                onSelect = { createTab = it == 1 }
+            )
+            Spacer(modifier = Modifier.height(Spacing.lg))
 
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(Spacing.xl)
+            ) {
+              if (createTab) {
             // 1. SECCIÓN: CREACIÓN DE EJERCICIO
             item {
                 Column {
@@ -226,30 +242,7 @@ fun AddExerciseScreen(
                 }
             }
 
-            // 3. SECCIÓN: LIBRERÍA (Separador visual táctico)
-            item {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(vertical = Spacing.md)
-                ) {
-                    HorizontalDivider(
-                        modifier = Modifier.weight(1f),
-                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
-                    )
-                    Text(
-                        text = "  ${stringResource(R.string.label_or_select_library)}  ",
-                        color = MaterialTheme.colorScheme.secondary,
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 1.sp
-                    )
-                    HorizontalDivider(
-                        modifier = Modifier.weight(1f),
-                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
-                    )
-                }
-            }
-
+              } else {
             // BUSCADOR LIBRERÍA (Look Obsidiana)
             item {
                 OutlinedTextField(
@@ -309,6 +302,8 @@ fun AddExerciseScreen(
             }
 
             item { Spacer(modifier = Modifier.height(32.dp)) }
+              }
+            }
         }
     }
 }

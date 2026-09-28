@@ -164,6 +164,7 @@
 
     <!-- Add / Edit exercise -->
     <string name="title_new_exercise">NUEVO EJERCICIO</string>
+    <string name="tab_create_exercise">Crear ejercicio</string>
     <string name="title_edit_exercise">EDITAR EJERCICIO</string>
     <string name="title_add_variant">AÑADIR VARIANTE</string>
     <string name="hint_exercise_name">ej. Press de Banca Inclinado</string>
