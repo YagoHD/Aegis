@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.R
+import com.yago.aegis.ui.components.AegisPrimaryButton
 import com.yago.aegis.ui.components.AegisStepProgress
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.ui.components.MetricInput
@@ -127,28 +128,14 @@ fun MetricsScreen(
         // --- 4. BOTÓN DE FINALIZACIÓN (10% Bronce) ---
         val isEnabled = height.isNotEmpty() && mass.isNotEmpty() && sex.isNotEmpty()
 
-        Button(
+        AegisPrimaryButton(
+            text = stringResource(R.string.btn_finalize_setup),
             onClick = {
                 val h = height.toDoubleOrNull() ?: 0.0
                 if (h > 0.0 && mass.isNotEmpty() && sex.isNotEmpty()) onComplete(h, mass, sex)
             },
             enabled = isEnabled,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary, // AegisBronze
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                disabledContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)
-            ),
-            shape = RoundedCornerShape(Radius.md),
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.btn_finalize_setup),
-                fontWeight = FontWeight.Black,
-                letterSpacing = 1.sp
-            )
-        }
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }

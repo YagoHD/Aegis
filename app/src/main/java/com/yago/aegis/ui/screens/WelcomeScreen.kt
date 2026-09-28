@@ -24,6 +24,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yago.aegis.R
+import com.yago.aegis.ui.components.AegisPrimaryButton
+import com.yago.aegis.ui.components.AegisSecondaryButton
 import com.yago.aegis.ui.theme.AegisBrandFamily
 import com.yago.aegis.ui.theme.AegisCream
 
@@ -94,48 +96,24 @@ fun WelcomeScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             // Botón principal: registrarse (nuevo usuario)
-            Button(
+            AegisPrimaryButton(
+                text = stringResource(R.string.btn_create_account),
                 onClick = onRegister,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                ),
-                shape = RoundedCornerShape(Radius.md),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.btn_create_account),
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontWeight = FontWeight.Black,
-                    fontSize = 14.sp,
-                    letterSpacing = 2.sp
-                )
-            }
+                modifier = Modifier.fillMaxWidth(),
+                fontSize = 14,
+                letterSpacing = 2
+            )
 
             Spacer(modifier = Modifier.height(Spacing.md))
 
-            // Botón secundario: ya tengo cuenta
-            OutlinedButton(
+            // Botón secundario: ya tengo cuenta (contorno neutro blanco)
+            AegisSecondaryButton(
+                text = stringResource(R.string.btn_already_have_account),
                 onClick = onLogin,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(Radius.md),
-                border = androidx.compose.foundation.BorderStroke(
-                    1.dp,
-                    MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
-                )
-            ) {
-                Text(
-                    text = stringResource(R.string.btn_already_have_account),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontWeight = FontWeight.Black,
-                    fontSize = 14.sp,
-                    letterSpacing = 2.sp
-                )
-            }
+                modifier = Modifier.fillMaxWidth(),
+                contentColor = MaterialTheme.colorScheme.onBackground,
+                fontSize = 14
+            )
 
             Spacer(modifier = Modifier.height(32.dp))
         }

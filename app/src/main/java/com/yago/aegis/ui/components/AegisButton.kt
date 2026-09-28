@@ -2,16 +2,23 @@ package com.yago.aegis.ui.components
 import com.yago.aegis.ui.theme.Radius
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,7 +34,9 @@ fun AegisPrimaryButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     containerColor: Color = MaterialTheme.colorScheme.primary,
-    fontSize: Int = 13
+    fontSize: Int = 13,
+    letterSpacing: Int = 1,
+    trailingIcon: ImageVector? = null
 ) {
     Button(
         onClick = onClick,
@@ -37,17 +46,24 @@ fun AegisPrimaryButton(
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor,
             contentColor = MaterialTheme.colorScheme.onPrimary,
-            disabledContainerColor = containerColor.copy(alpha = 0.3f),
+            disabledContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
             disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
         ),
+        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
     ) {
-        Text(
-            text = text.uppercase(),
-            fontWeight = FontWeight.Black,
-            fontSize = fontSize.sp,
-            letterSpacing = 1.sp
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = text.uppercase(),
+                fontWeight = FontWeight.Black,
+                fontSize = fontSize.sp,
+                letterSpacing = letterSpacing.sp
+            )
+            if (trailingIcon != null) {
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(trailingIcon, contentDescription = null, modifier = Modifier.size(20.dp))
+            }
+        }
     }
 }
 

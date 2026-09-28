@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.yago.aegis.R
+import com.yago.aegis.ui.components.AegisPrimaryButton
 import com.yago.aegis.ui.components.AegisTextField
 import com.yago.aegis.ui.components.AegisTopBar
 import com.yago.aegis.viewmodel.ProfileViewModel
@@ -149,28 +150,12 @@ fun IdentityScreen(
 
         Spacer(modifier = Modifier.height(Spacing.lg))
 
-        Button(
+        AegisPrimaryButton(
+            text = stringResource(R.string.btn_continue),
             onClick = { if (name.isNotBlank()) onContinue(name) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
             enabled = name.isNotBlank(),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                disabledContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)
-            ),
-            shape = RoundedCornerShape(Radius.md)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    stringResource(R.string.btn_continue),
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.sp
-                )
-                Spacer(modifier = Modifier.width(Spacing.md))
-                Icon(Icons.Default.ArrowForward, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(20.dp))
-            }
-        }
+            modifier = Modifier.fillMaxWidth(),
+            trailingIcon = Icons.Default.ArrowForward
+        )
     }
 }
