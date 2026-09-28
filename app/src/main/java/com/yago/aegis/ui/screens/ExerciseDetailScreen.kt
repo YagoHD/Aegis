@@ -15,8 +15,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.yago.aegis.R
 import com.yago.aegis.ui.components.AegisTopBar
-import com.yago.aegis.ui.components.ExerciseAnimationCard
-import com.yago.aegis.ui.components.exerciseSlugFor
 import com.yago.aegis.ui.components.ProgressionChartSection
 import com.yago.aegis.ui.components.SectionHeader
 import com.yago.aegis.ui.components.StatCard
@@ -142,11 +140,6 @@ fun ExerciseDetailScreen(
             verticalArrangement = Arrangement.spacedBy(28.dp)
         ) {
             item { Spacer(Modifier.height(Spacing.sm)) }
-
-            // Ilustración animada (solo si el ejercicio tiene una mapeada).
-            if (exerciseSlugFor(exercise?.name) != null) {
-                item { ExerciseAnimationCard(exercise?.name) }
-            }
 
             item {
                 ProgressionChartSection(
