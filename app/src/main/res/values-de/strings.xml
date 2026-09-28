@@ -196,6 +196,16 @@
     <string name="theme_esmeralda">Smaragd</string>
     <string name="theme_rubi">Rubin</string>
     <string name="theme_zafiro">Saphir</string>
+    <string name="theme_name_aegis">Aegis</string>
+    <string name="settings_theme_accent">Akzent</string>
+    <string name="settings_theme_background">Hintergrund</string>
+    <string name="settings_theme_gray">Grau</string>
+    <string name="bg_medianoche">Mitternacht</string>
+    <string name="bg_grafito">Graphit</string>
+    <string name="bg_ebano">Ebenholz</string>
+    <string name="gray_acero">Stahl</string>
+    <string name="gray_arena">Sand</string>
+    <string name="gray_humo">Rauch</string>
     <string name="title_edit_exercise">ÜBUNG BEARBEITEN</string>
     <string name="title_add_variant">VARIANTE HINZUFÜGEN</string>
     <string name="hint_exercise_name">z. B. Schrägbankdrücken</string>

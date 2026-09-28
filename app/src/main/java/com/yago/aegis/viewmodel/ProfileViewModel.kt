@@ -76,10 +76,16 @@ class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
     val syncState: StateFlow<com.yago.aegis.data.SyncState> = repository.syncState
     fun retrySync() = viewModelScope.launch { repository.retrySync() }
 
-    // Tema de acento elegido (id de AppTheme). "bronce" por defecto.
+    // Temas elegidos (acento / negro / gris). "aegis" = base.
     val appThemeId: StateFlow<String> = repository.appTheme
-        .stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), "bronce")
+        .stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), "aegis")
+    val bgThemeId: StateFlow<String> = repository.bgTheme
+        .stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), "aegis")
+    val grayThemeId: StateFlow<String> = repository.grayTheme
+        .stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), "aegis")
     fun setAppTheme(id: String) = viewModelScope.launch { repository.saveAppTheme(id) }
+    fun setBgTheme(id: String) = viewModelScope.launch { repository.saveBgTheme(id) }
+    fun setGrayTheme(id: String) = viewModelScope.launch { repository.saveGrayTheme(id) }
 
     // Estado para recalcular nivel/XP cuando cambian historial o racha (llegan por vías distintas)
     private var latestHistory: List<WorkoutSession> = emptyList()

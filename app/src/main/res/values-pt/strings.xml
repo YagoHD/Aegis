@@ -196,6 +196,16 @@
     <string name="theme_esmeralda">Esmeralda</string>
     <string name="theme_rubi">Rubi</string>
     <string name="theme_zafiro">Safira</string>
+    <string name="theme_name_aegis">Aegis</string>
+    <string name="settings_theme_accent">Acento</string>
+    <string name="settings_theme_background">Fundo</string>
+    <string name="settings_theme_gray">Cinzento</string>
+    <string name="bg_medianoche">Meia-noite</string>
+    <string name="bg_grafito">Grafite</string>
+    <string name="bg_ebano">Ébano</string>
+    <string name="gray_acero">Aço</string>
+    <string name="gray_arena">Areia</string>
+    <string name="gray_humo">Fumo</string>
     <string name="title_edit_exercise">EDITAR EXERCÍCIO</string>
     <string name="title_add_variant">ADICIONAR VARIANTE</string>
     <string name="hint_exercise_name">ex. Press inclinado</string>

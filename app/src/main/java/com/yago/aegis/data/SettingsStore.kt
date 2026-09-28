@@ -68,8 +68,10 @@ class SettingsStore(private val context: Context) {
         private val USERNAME = stringPreferencesKey("username")
         // Tutoriales de coach-marks ya vistos (una vez por pantalla). Reiniciable desde Ajustes.
         private val SEEN_TUTORIALS = stringSetPreferencesKey("seen_tutorials")
-        // Tema de acento elegido (id de AppTheme; "bronce" por defecto).
+        // Temas (3 dimensiones): acento, negro base y gris. "aegis" por defecto en cada uno.
         private val APP_THEME = stringPreferencesKey("app_theme")
+        private val BG_THEME = stringPreferencesKey("bg_theme")
+        private val GRAY_THEME = stringPreferencesKey("gray_theme")
     }
 
     // --- LECTURA (READ) ---
@@ -129,8 +131,10 @@ class SettingsStore(private val context: Context) {
     val username: Flow<String?> = context.dataStore.data.map { it[USERNAME] }
     // Conjunto de claves de pantalla cuyo tutorial ya se mostró.
     val seenTutorials: Flow<Set<String>> = context.dataStore.data.map { it[SEEN_TUTORIALS] ?: emptySet() }
-    // Id del tema de acento elegido.
-    val appTheme: Flow<String> = context.dataStore.data.map { it[APP_THEME] ?: "bronce" }
+    // Ids de tema elegidos (acento / negro / gris). "aegis" = base.
+    val appTheme: Flow<String> = context.dataStore.data.map { it[APP_THEME] ?: "aegis" }
+    val bgTheme: Flow<String> = context.dataStore.data.map { it[BG_THEME] ?: "aegis" }
+    val grayTheme: Flow<String> = context.dataStore.data.map { it[GRAY_THEME] ?: "aegis" }
     val workoutHistory: Flow<List<WorkoutSession>> = context.dataStore.data.map { prefs ->
         val json = prefs[WORKOUT_HISTORY_KEY] ?: ""
         if (json.isEmpty()) emptyList()
@@ -261,6 +265,12 @@ class SettingsStore(private val context: Context) {
     /** Guarda el tema de acento elegido (id de AppTheme). */
     suspend fun saveAppTheme(id: String) {
         context.dataStore.edit { it[APP_THEME] = id }
+    }
+    suspend fun saveBgTheme(id: String) {
+        context.dataStore.edit { it[BG_THEME] = id }
+    }
+    suspend fun saveGrayTheme(id: String) {
+        context.dataStore.edit { it[GRAY_THEME] = id }
     }
 
     val customMeasures: Flow<List<BodyMeasure>> = context.dataStore.data.map { preferences ->

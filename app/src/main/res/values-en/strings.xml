@@ -196,6 +196,16 @@
     <string name="theme_esmeralda">Emerald</string>
     <string name="theme_rubi">Ruby</string>
     <string name="theme_zafiro">Sapphire</string>
+    <string name="theme_name_aegis">Aegis</string>
+    <string name="settings_theme_accent">Accent</string>
+    <string name="settings_theme_background">Background</string>
+    <string name="settings_theme_gray">Gray</string>
+    <string name="bg_medianoche">Midnight</string>
+    <string name="bg_grafito">Graphite</string>
+    <string name="bg_ebano">Ebony</string>
+    <string name="gray_acero">Steel</string>
+    <string name="gray_arena">Sand</string>
+    <string name="gray_humo">Smoke</string>
     <string name="title_edit_exercise">EDIT EXERCISE</string>
     <string name="title_add_variant">ADD VARIANT</string>
     <string name="hint_exercise_name">e.g. Incline Bench Press</string>

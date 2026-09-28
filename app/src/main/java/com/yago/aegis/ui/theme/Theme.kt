@@ -55,6 +55,8 @@ fun AegisTheme(
     darkTheme: Boolean = true,
     dynamicColor: Boolean = false,
     appTheme: AppTheme = AppTheme.DEFAULT,
+    background: BackgroundTheme = BackgroundTheme.DEFAULT,
+    gray: GrayTheme = GrayTheme.DEFAULT,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -63,9 +65,15 @@ fun AegisTheme(
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
         darkTheme -> DarkColorScheme.copy(
-            // El acento (primary) es lo que define cada tema; el resto del lujo negro se mantiene.
+            // Acento
             primary = appTheme.primary,
-            onPrimary = appTheme.onPrimary
+            onPrimary = appTheme.onPrimary,
+            // Negro base + capas de superficie coherentes
+            background = background.background,
+            surface = background.bars,
+            surfaceVariant = background.surfaceVariant,
+            // Gris secundario
+            secondary = gray.color
         )
         else -> LightColorScheme
     }

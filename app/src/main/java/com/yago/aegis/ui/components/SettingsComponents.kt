@@ -503,9 +503,18 @@ fun SettingsMenu(
         SectionHeader(text = stringResource(R.string.settings_title_interface))
         Spacer(modifier = Modifier.height(Spacing.md))
 
-        // Selector de tema de acento
-        val selectedThemeId by viewModel.appThemeId.collectAsState()
-        ThemePickerSection(selectedId = selectedThemeId, onSelect = { viewModel.setAppTheme(it) })
+        // Selector de temas (acento / negro / gris)
+        val accentId by viewModel.appThemeId.collectAsState()
+        val bgId by viewModel.bgThemeId.collectAsState()
+        val grayId by viewModel.grayThemeId.collectAsState()
+        ThemePickerSection(
+            accentId = accentId,
+            bgId = bgId,
+            grayId = grayId,
+            onAccent = { viewModel.setAppTheme(it) },
+            onBg = { viewModel.setBgTheme(it) },
+            onGray = { viewModel.setGrayTheme(it) }
+        )
         Spacer(modifier = Modifier.height(Spacing.md))
 
         Surface(
@@ -973,79 +982,146 @@ fun SettingsRow(label: String, checked: Boolean, onCheckedChange: (Boolean) -> U
     }
 }
 
-@Composable
-private fun themeDisplayName(theme: AppTheme): String = stringResource(
-    when (theme) {
-        AppTheme.BRONCE -> R.string.theme_bronce
-        AppTheme.ORO -> R.string.theme_oro
-        AppTheme.PLATINO -> R.string.theme_platino
-        AppTheme.ESMERALDA -> R.string.theme_esmeralda
-        AppTheme.RUBI -> R.string.theme_rubi
-        AppTheme.ZAFIRO -> R.string.theme_zafiro
-    }
+/** Un color seleccionable en una fila de temas. */
+private data class SwatchItem(
+    val id: String,
+    val swatch: androidx.compose.ui.graphics.Color,
+    val check: androidx.compose.ui.graphics.Color,
+    val nameRes: Int
 )
 
-/** Selector horizontal de temas de acento (muestras de color). */
 @Composable
-fun ThemePickerSection(selectedId: String, onSelect: (String) -> Unit) {
+private fun accentName(t: AppTheme): Int = when (t) {
+    AppTheme.AEGIS -> R.string.theme_name_aegis
+    AppTheme.ORO -> R.string.theme_oro
+    AppTheme.PLATINO -> R.string.theme_platino
+    AppTheme.ESMERALDA -> R.string.theme_esmeralda
+    AppTheme.RUBI -> R.string.theme_rubi
+    AppTheme.ZAFIRO -> R.string.theme_zafiro
+}
+
+@Composable
+private fun bgName(t: com.yago.aegis.ui.theme.BackgroundTheme): Int = when (t) {
+    com.yago.aegis.ui.theme.BackgroundTheme.AEGIS -> R.string.theme_name_aegis
+    com.yago.aegis.ui.theme.BackgroundTheme.MEDIANOCHE -> R.string.bg_medianoche
+    com.yago.aegis.ui.theme.BackgroundTheme.GRAFITO -> R.string.bg_grafito
+    com.yago.aegis.ui.theme.BackgroundTheme.EBANO -> R.string.bg_ebano
+}
+
+@Composable
+private fun grayName(t: com.yago.aegis.ui.theme.GrayTheme): Int = when (t) {
+    com.yago.aegis.ui.theme.GrayTheme.AEGIS -> R.string.theme_name_aegis
+    com.yago.aegis.ui.theme.GrayTheme.ACERO -> R.string.gray_acero
+    com.yago.aegis.ui.theme.GrayTheme.ARENA -> R.string.gray_arena
+    com.yago.aegis.ui.theme.GrayTheme.HUMO -> R.string.gray_humo
+}
+
+/** Fila horizontal de muestras de color con título. */
+@Composable
+private fun ColorSwatchRow(
+    title: String,
+    items: List<SwatchItem>,
+    selectedId: String,
+    onSelect: (String) -> Unit
+) {
+    Text(
+        text = title.uppercase(),
+        color = MaterialTheme.colorScheme.secondary,
+        fontSize = 10.sp,
+        fontWeight = FontWeight.Black,
+        letterSpacing = 1.5.sp
+    )
+    Spacer(modifier = Modifier.height(Spacing.sm))
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.lg)
+    ) {
+        items.forEach { item ->
+            val selected = item.id == selectedId
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.clickable { onSelect(item.id) }
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(RoundedCornerShape(percent = 50))
+                        .background(item.swatch)
+                        .border(
+                            width = if (selected) 2.5.dp else 1.dp,
+                            color = if (selected) MaterialTheme.colorScheme.onBackground
+                                    else MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
+                            shape = RoundedCornerShape(percent = 50)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (selected) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            tint = item.check,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(Spacing.xs))
+                Text(
+                    text = stringResource(item.nameRes),
+                    color = if (selected) MaterialTheme.colorScheme.onBackground
+                            else MaterialTheme.colorScheme.secondary,
+                    fontSize = 10.sp,
+                    fontWeight = if (selected) FontWeight.Black else FontWeight.Medium
+                )
+            }
+        }
+    }
+}
+
+/** Selector de temas en 3 dimensiones: acento, negro base y gris. */
+@Composable
+fun ThemePickerSection(
+    accentId: String,
+    bgId: String,
+    grayId: String,
+    onAccent: (String) -> Unit,
+    onBg: (String) -> Unit,
+    onGray: (String) -> Unit
+) {
+    val white = androidx.compose.ui.graphics.Color.White
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
         shape = RoundedCornerShape(Radius.lg)
     ) {
         Column(modifier = Modifier.padding(Spacing.md)) {
-            Text(
-                text = stringResource(R.string.settings_theme_title).uppercase(),
-                color = MaterialTheme.colorScheme.secondary,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Black,
-                letterSpacing = 1.5.sp
+            // Acento
+            ColorSwatchRow(
+                title = stringResource(R.string.settings_theme_accent),
+                items = AppTheme.entries.map { SwatchItem(it.id, it.primary, it.onPrimary, accentName(it)) },
+                selectedId = accentId,
+                onSelect = onAccent
             )
-            Spacer(modifier = Modifier.height(Spacing.md))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(Spacing.lg)
-            ) {
-                AppTheme.entries.forEach { theme ->
-                    val selected = theme.id == selectedId
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.clickable { onSelect(theme.id) }
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(44.dp)
-                                .clip(RoundedCornerShape(percent = 50))
-                                .background(theme.primary)
-                                .border(
-                                    width = if (selected) 2.5.dp else 1.dp,
-                                    color = if (selected) MaterialTheme.colorScheme.onBackground
-                                            else MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
-                                    shape = RoundedCornerShape(percent = 50)
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (selected) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = null,
-                                    tint = theme.onPrimary,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(Spacing.xs))
-                        Text(
-                            text = themeDisplayName(theme),
-                            color = if (selected) MaterialTheme.colorScheme.onBackground
-                                    else MaterialTheme.colorScheme.secondary,
-                            fontSize = 10.sp,
-                            fontWeight = if (selected) FontWeight.Black else FontWeight.Medium
-                        )
-                    }
-                }
-            }
+            Spacer(modifier = Modifier.height(Spacing.lg))
+            // Negro base
+            ColorSwatchRow(
+                title = stringResource(R.string.settings_theme_background),
+                items = com.yago.aegis.ui.theme.BackgroundTheme.entries.map {
+                    SwatchItem(it.id, it.background, white, bgName(it))
+                },
+                selectedId = bgId,
+                onSelect = onBg
+            )
+            Spacer(modifier = Modifier.height(Spacing.lg))
+            // Gris secundario
+            ColorSwatchRow(
+                title = stringResource(R.string.settings_theme_gray),
+                items = com.yago.aegis.ui.theme.GrayTheme.entries.map {
+                    SwatchItem(it.id, it.color, androidx.compose.ui.graphics.Color.Black, grayName(it))
+                },
+                selectedId = grayId,
+                onSelect = onGray
+            )
         }
     }
 }
