@@ -5,8 +5,11 @@ import androidx.core.view.WindowCompat
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import com.yago.aegis.ui.navigation.AegisNavigation
 import com.yago.aegis.ui.theme.AegisTheme
+import com.yago.aegis.ui.theme.AppTheme
 import com.yago.aegis.viewmodel.ProfileViewModel
 import com.yago.aegis.viewmodel.RoutinesViewModel
 import com.yago.aegis.viewmodel.WorkoutViewModel
@@ -34,7 +37,8 @@ class MainActivity : ComponentActivity() {
         // compatible con adjustResize en el Manifest
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
-            AegisTheme {
+            val themeId by container.userRepository.appTheme.collectAsState(initial = "bronce")
+            AegisTheme(appTheme = AppTheme.fromId(themeId)) {
                 AegisNavigation(
                     profileViewModel = profileViewModel,
                     routinesViewModel = routinesViewModel,

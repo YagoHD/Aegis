@@ -68,6 +68,8 @@ class SettingsStore(private val context: Context) {
         private val USERNAME = stringPreferencesKey("username")
         // Tutoriales de coach-marks ya vistos (una vez por pantalla). Reiniciable desde Ajustes.
         private val SEEN_TUTORIALS = stringSetPreferencesKey("seen_tutorials")
+        // Tema de acento elegido (id de AppTheme; "bronce" por defecto).
+        private val APP_THEME = stringPreferencesKey("app_theme")
     }
 
     // --- LECTURA (READ) ---
@@ -127,6 +129,8 @@ class SettingsStore(private val context: Context) {
     val username: Flow<String?> = context.dataStore.data.map { it[USERNAME] }
     // Conjunto de claves de pantalla cuyo tutorial ya se mostró.
     val seenTutorials: Flow<Set<String>> = context.dataStore.data.map { it[SEEN_TUTORIALS] ?: emptySet() }
+    // Id del tema de acento elegido.
+    val appTheme: Flow<String> = context.dataStore.data.map { it[APP_THEME] ?: "bronce" }
     val workoutHistory: Flow<List<WorkoutSession>> = context.dataStore.data.map { prefs ->
         val json = prefs[WORKOUT_HISTORY_KEY] ?: ""
         if (json.isEmpty()) emptyList()
@@ -252,6 +256,11 @@ class SettingsStore(private val context: Context) {
     /** Reinicia todos los tutoriales para que vuelvan a aparecer. */
     suspend fun resetTutorials() {
         context.dataStore.edit { it.remove(SEEN_TUTORIALS) }
+    }
+
+    /** Guarda el tema de acento elegido (id de AppTheme). */
+    suspend fun saveAppTheme(id: String) {
+        context.dataStore.edit { it[APP_THEME] = id }
     }
 
     val customMeasures: Flow<List<BodyMeasure>> = context.dataStore.data.map { preferences ->

@@ -54,6 +54,7 @@ private val LightColorScheme = lightColorScheme(
 fun AegisTheme(
     darkTheme: Boolean = true,
     dynamicColor: Boolean = false,
+    appTheme: AppTheme = AppTheme.DEFAULT,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -61,7 +62,11 @@ fun AegisTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-        darkTheme -> DarkColorScheme
+        darkTheme -> DarkColorScheme.copy(
+            // El acento (primary) es lo que define cada tema; el resto del lujo negro se mantiene.
+            primary = appTheme.primary,
+            onPrimary = appTheme.onPrimary
+        )
         else -> LightColorScheme
     }
 

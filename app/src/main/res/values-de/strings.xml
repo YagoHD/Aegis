@@ -188,6 +188,14 @@
     <string name="tut_session_title">Laufende Einheit</string>
     <string name="tut_session_1">Hake jeden Satz ab, sobald du ihn beendet hast. Tippe auf einen Übungsnamen für Verlauf und Rekord.</string>
     <string name="tut_session_2">Der Pausen-Timer ist verschiebbar. Mit dem +-Knopf fügst du spontan Übungen hinzu.</string>
+    <!-- Akzent-Themes -->
+    <string name="settings_theme_title">Thema</string>
+    <string name="theme_bronce">Bronze</string>
+    <string name="theme_oro">Gold</string>
+    <string name="theme_platino">Platin</string>
+    <string name="theme_esmeralda">Smaragd</string>
+    <string name="theme_rubi">Rubin</string>
+    <string name="theme_zafiro">Saphir</string>
     <string name="title_edit_exercise">ÜBUNG BEARBEITEN</string>
     <string name="title_add_variant">VARIANTE HINZUFÜGEN</string>
     <string name="hint_exercise_name">z. B. Schrägbankdrücken</string>

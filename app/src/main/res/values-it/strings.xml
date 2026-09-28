@@ -188,6 +188,14 @@
     <string name="tut_session_title">Sessione in corso</string>
     <string name="tut_session_1">Segna ogni serie quando la completi. Tocca il nome di un esercizio per vedere lo storico e il tuo record.</string>
     <string name="tut_session_2">Il timer di recupero è trascinabile. Puoi aggiungere esercizi al volo con il pulsante +.</string>
+    <!-- Temi accento -->
+    <string name="settings_theme_title">Tema</string>
+    <string name="theme_bronce">Bronzo</string>
+    <string name="theme_oro">Oro</string>
+    <string name="theme_platino">Platino</string>
+    <string name="theme_esmeralda">Smeraldo</string>
+    <string name="theme_rubi">Rubino</string>
+    <string name="theme_zafiro">Zaffiro</string>
     <string name="title_edit_exercise">MODIFICA ESERCIZIO</string>
     <string name="title_add_variant">AGGIUNGI VARIANTE</string>
     <string name="hint_exercise_name">es. Panca inclinata</string>

@@ -188,6 +188,14 @@
     <string name="tut_session_title">Séance en cours</string>
     <string name="tut_session_1">Coche chaque série une fois terminée. Touche le nom d\'un exercice pour voir son historique et ton record.</string>
     <string name="tut_session_2">Le minuteur de repos est déplaçable. Tu peux ajouter des exercices à la volée avec le bouton +.</string>
+    <!-- Thèmes d'accent -->
+    <string name="settings_theme_title">Thème</string>
+    <string name="theme_bronce">Bronze</string>
+    <string name="theme_oro">Or</string>
+    <string name="theme_platino">Platine</string>
+    <string name="theme_esmeralda">Émeraude</string>
+    <string name="theme_rubi">Rubis</string>
+    <string name="theme_zafiro">Saphir</string>
     <string name="title_edit_exercise">MODIFIER L\'EXERCICE</string>
     <string name="title_add_variant">AJOUTER UNE VARIANTE</string>
     <string name="hint_exercise_name">ex. Développé incliné</string>

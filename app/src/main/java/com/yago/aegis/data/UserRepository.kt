@@ -71,6 +71,9 @@ class UserRepository(
     val seenTutorials: Flow<Set<String>> = settingsStore.seenTutorials
     suspend fun markTutorialSeen(key: String) = settingsStore.markTutorialSeen(key)
     suspend fun resetTutorials() = settingsStore.resetTutorials()
+    // Tema de acento
+    val appTheme: Flow<String> = settingsStore.appTheme
+    suspend fun saveAppTheme(id: String) = settingsStore.saveAppTheme(id)
     // US-03 fase 3: estas 5 colecciones se leen de ROOM (off-main por Room; escritura granular).
     // onStart { ensureMigrated() } asegura el volcado DataStore->Room antes de la 1ª emisión.
     val routines: Flow<List<Routine>> = database.routineDao().observeAll()

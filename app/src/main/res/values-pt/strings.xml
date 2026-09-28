@@ -188,6 +188,14 @@
     <string name="tut_session_title">Sessão em curso</string>
     <string name="tut_session_1">Marca cada série ao concluí-la. Toca no nome de um exercício para ver o histórico e o teu recorde.</string>
     <string name="tut_session_2">O temporizador de descanso é arrastável. Podes adicionar exercícios na hora com o botão +.</string>
+    <!-- Temas de acento -->
+    <string name="settings_theme_title">Tema</string>
+    <string name="theme_bronce">Bronze</string>
+    <string name="theme_oro">Ouro</string>
+    <string name="theme_platino">Platina</string>
+    <string name="theme_esmeralda">Esmeralda</string>
+    <string name="theme_rubi">Rubi</string>
+    <string name="theme_zafiro">Safira</string>
     <string name="title_edit_exercise">EDITAR EXERCÍCIO</string>
     <string name="title_add_variant">ADICIONAR VARIANTE</string>
     <string name="hint_exercise_name">ex. Press inclinado</string>

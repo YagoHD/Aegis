@@ -32,6 +32,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
@@ -74,6 +75,11 @@ class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
     // US-01: estado de sincronización observable para la UI + acción de reintento
     val syncState: StateFlow<com.yago.aegis.data.SyncState> = repository.syncState
     fun retrySync() = viewModelScope.launch { repository.retrySync() }
+
+    // Tema de acento elegido (id de AppTheme). "bronce" por defecto.
+    val appThemeId: StateFlow<String> = repository.appTheme
+        .stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), "bronce")
+    fun setAppTheme(id: String) = viewModelScope.launch { repository.saveAppTheme(id) }
 
     // Estado para recalcular nivel/XP cuando cambian historial o racha (llegan por vías distintas)
     private var latestHistory: List<WorkoutSession> = emptyList()

@@ -10,6 +10,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import com.yago.aegis.ui.theme.AppTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,6 +19,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.FileDownload
@@ -500,6 +503,11 @@ fun SettingsMenu(
         SectionHeader(text = stringResource(R.string.settings_title_interface))
         Spacer(modifier = Modifier.height(Spacing.md))
 
+        // Selector de tema de acento
+        val selectedThemeId by viewModel.appThemeId.collectAsState()
+        ThemePickerSection(selectedId = selectedThemeId, onSelect = { viewModel.setAppTheme(it) })
+        Spacer(modifier = Modifier.height(Spacing.md))
+
         Surface(
             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
             shape = RoundedCornerShape(Radius.lg)
@@ -962,5 +970,82 @@ fun SettingsRow(label: String, checked: Boolean, onCheckedChange: (Boolean) -> U
                 uncheckedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
             )
         )
+    }
+}
+
+@Composable
+private fun themeDisplayName(theme: AppTheme): String = stringResource(
+    when (theme) {
+        AppTheme.BRONCE -> R.string.theme_bronce
+        AppTheme.ORO -> R.string.theme_oro
+        AppTheme.PLATINO -> R.string.theme_platino
+        AppTheme.ESMERALDA -> R.string.theme_esmeralda
+        AppTheme.RUBI -> R.string.theme_rubi
+        AppTheme.ZAFIRO -> R.string.theme_zafiro
+    }
+)
+
+/** Selector horizontal de temas de acento (muestras de color). */
+@Composable
+fun ThemePickerSection(selectedId: String, onSelect: (String) -> Unit) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        shape = RoundedCornerShape(Radius.lg)
+    ) {
+        Column(modifier = Modifier.padding(Spacing.md)) {
+            Text(
+                text = stringResource(R.string.settings_theme_title).uppercase(),
+                color = MaterialTheme.colorScheme.secondary,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 1.5.sp
+            )
+            Spacer(modifier = Modifier.height(Spacing.md))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.lg)
+            ) {
+                AppTheme.entries.forEach { theme ->
+                    val selected = theme.id == selectedId
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.clickable { onSelect(theme.id) }
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .clip(RoundedCornerShape(percent = 50))
+                                .background(theme.primary)
+                                .border(
+                                    width = if (selected) 2.5.dp else 1.dp,
+                                    color = if (selected) MaterialTheme.colorScheme.onBackground
+                                            else MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
+                                    shape = RoundedCornerShape(percent = 50)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (selected) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    tint = theme.onPrimary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(Spacing.xs))
+                        Text(
+                            text = themeDisplayName(theme),
+                            color = if (selected) MaterialTheme.colorScheme.onBackground
+                                    else MaterialTheme.colorScheme.secondary,
+                            fontSize = 10.sp,
+                            fontWeight = if (selected) FontWeight.Black else FontWeight.Medium
+                        )
+                    }
+                }
+            }
+        }
     }
 }

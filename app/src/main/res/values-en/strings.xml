@@ -188,6 +188,14 @@
     <string name="tut_session_title">Live session</string>
     <string name="tut_session_1">Tick off each set as you finish it. Tap an exercise name to see its history and your PR.</string>
     <string name="tut_session_2">The rest timer is draggable. You can add exercises on the fly with the + button.</string>
+    <!-- Accent themes -->
+    <string name="settings_theme_title">Theme</string>
+    <string name="theme_bronce">Bronze</string>
+    <string name="theme_oro">Gold</string>
+    <string name="theme_platino">Platinum</string>
+    <string name="theme_esmeralda">Emerald</string>
+    <string name="theme_rubi">Ruby</string>
+    <string name="theme_zafiro">Sapphire</string>
     <string name="title_edit_exercise">EDIT EXERCISE</string>
     <string name="title_add_variant">ADD VARIANT</string>
     <string name="hint_exercise_name">e.g. Incline Bench Press</string>
