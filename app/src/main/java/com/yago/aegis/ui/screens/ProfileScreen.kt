@@ -43,6 +43,7 @@ import com.yago.aegis.data.PhotoType
 import com.yago.aegis.data.XpEntry
 import com.yago.aegis.data.SyncState
 import com.yago.aegis.ui.components.*
+import kotlinx.coroutines.flow.collectLatest
 import com.yago.aegis.util.PhotoStore
 import com.yago.aegis.viewmodel.ProfileViewModel
 import java.text.SimpleDateFormat
@@ -198,41 +199,18 @@ fun ProfileContent(viewModel: ProfileViewModel, onNavigateToTrain: () -> Unit = 
             }
         }
 
-        // ── BOTÓN GUARDAR MEDIDAS + CHECK ✓ 3s ──────────────────────────────
-        var snapshotSaved by remember { mutableStateOf(false) }
-        // Cada vez que se guarda, el check aparece 3 s y luego vuelve a "Guardar".
-        LaunchedEffect(snapshotSaved) {
-            if (snapshotSaved) {
-                delay(3000)
-                snapshotSaved = false
-            }
-        }
-        val savedGreen = com.yago.aegis.ui.theme.AegisSuccess
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
-        ) {
-            TextButton(
-                onClick = {
-                    viewModel.saveBodySnapshot()
-                    snapshotSaved = true
-                }
-            ) {
-                Icon(
-                    imageVector = if (snapshotSaved) Icons.Default.CheckCircle else Icons.Default.Save,
-                    contentDescription = null,
-                    tint = if (snapshotSaved) savedGreen else MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(14.dp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    text = if (snapshotSaved) stringResource(R.string.saved_today_label) else stringResource(R.string.save_today_btn),
-                    color = if (snapshotSaved) savedGreen else MaterialTheme.colorScheme.primary,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.sp
-                )
+        // ── AUTO-GUARDADO del snapshot de evolución (sin botón), al dejar de editar ──
+        // Debounce manual con collectLatest: cada cambio cancela el anterior y solo guarda ~1,2 s
+        // después de que dejes de tocar. El primer valor (la carga inicial) se ignora. El dedupe
+        // (uno por día + saltar si no cambió) lo hace autoSaveBodySnapshot en el ViewModel.
+        LaunchedEffect(Unit) {
+            var first = true
+            snapshotFlow {
+                Triple(state.user.currentMass, state.user.bodyFat, state.customMeasures.map { it.id to it.value })
+            }.collectLatest {
+                if (first) { first = false; return@collectLatest }
+                delay(1200)
+                viewModel.autoSaveBodySnapshot()
             }
         }
 

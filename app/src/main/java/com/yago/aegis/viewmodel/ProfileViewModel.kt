@@ -506,6 +506,37 @@ class ProfileViewModel(private val repository: UserRepository) : ViewModel() {
         viewModelScope.launch { repository.saveBodySnapshot(snapshot) }
     }
 
+    /**
+     * Auto-guardado del snapshot de evolución (sin botón). Reglas para que la gráfica NO acumule
+     * puntos repetidos: un único punto por día (se reemplaza el de hoy), y solo se añade uno nuevo
+     * si algo cambió respecto al último. Además limpia duplicados consecutivos que hubiera de antes.
+     */
+    fun autoSaveBodySnapshot() {
+        viewModelScope.launch {
+            val state = _uiState.value
+            val current = BodySnapshot(
+                date = System.currentTimeMillis(),
+                mass = state.user.currentMass,
+                bodyFat = state.user.bodyFat,
+                customMeasures = state.customMeasures
+            )
+            val day = 86_400_000L
+            val today = current.date / day
+            val history = repository.bodyHistory.first().sortedBy { it.date }.toMutableList()
+            // Quita el punto de hoy (lo re-añadimos con los valores actuales si procede).
+            history.removeAll { it.date / day == today }
+            val last = history.lastOrNull()
+            if (last == null || !sameMetrics(last, current)) history.add(current)
+            // Colapsa duplicados consecutivos (los "montones" de puntos iguales de antes).
+            val cleaned = history.filterIndexed { i, s -> i == 0 || !sameMetrics(history[i - 1], s) }
+            repository.replaceBodyHistory(cleaned)
+        }
+    }
+
+    private fun sameMetrics(a: BodySnapshot, b: BodySnapshot): Boolean =
+        a.mass == b.mass && a.bodyFat == b.bodyFat &&
+        a.customMeasures.map { it.id to it.value } == b.customMeasures.map { it.id to it.value }
+
     /** Recalcula y actualiza la racha tras finalizar un entreno. */
     fun refreshStreak() {
         viewModelScope.launch {
