@@ -174,7 +174,7 @@
     <string name="tut_reset_subtitle">Show every screen\'s guide again</string>
     <string name="tut_reset_done">Tutorials reset</string>
     <string name="tut_profile_title">Your profile</string>
-    <string name="tut_profile_1">Edit your weight, body fat and measurements: they save automatically, no button. Your progress is logged for you.</string>
+    <string name="tut_profile_1">Edit your weight, body fat and key measurements. Your progress is logged automatically so you can track it.</string>
     <string name="tut_profile_2">Tap the gear ⚙ at the top for settings, export/import data and to reset these tutorials.</string>
     <string name="tut_routine_title">Routines &amp; exercises</string>
     <string name="tut_routine_1">Create your routines and organize your exercise library with the toggle at the top.</string>

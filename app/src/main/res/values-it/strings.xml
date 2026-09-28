@@ -174,7 +174,7 @@
     <string name="tut_reset_subtitle">Mostra di nuovo le guide di ogni schermata</string>
     <string name="tut_reset_done">Tutorial reimpostati</string>
     <string name="tut_profile_title">Il tuo profilo</string>
-    <string name="tut_profile_1">Modifica peso, massa grassa e misure: si salvano da sole, senza pulsante. I tuoi progressi vengono registrati.</string>
+    <string name="tut_profile_1">Modifica peso, massa grassa e misure chiave. I tuoi progressi vengono registrati automaticamente per monitorarli.</string>
     <string name="tut_profile_2">Tocca l\'ingranaggio ⚙ in alto per impostazioni, esporta/importa dati e reimpostare questi tutorial.</string>
     <string name="tut_routine_title">Routine ed esercizi</string>
     <string name="tut_routine_1">Crea le tue routine e organizza la libreria di esercizi con il selettore in alto.</string>

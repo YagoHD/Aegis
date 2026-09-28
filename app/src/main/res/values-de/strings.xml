@@ -174,7 +174,7 @@
     <string name="tut_reset_subtitle">Zeigt die Anleitungen jedes Bildschirms erneut</string>
     <string name="tut_reset_done">Tutorials zurückgesetzt</string>
     <string name="tut_profile_title">Dein Profil</string>
-    <string name="tut_profile_1">Bearbeite Gewicht, Körperfett und Maße: Sie werden automatisch gespeichert, ohne Knopf. Dein Fortschritt wird protokolliert.</string>
+    <string name="tut_profile_1">Bearbeite Gewicht, Körperfett und wichtige Maße. Dein Fortschritt wird automatisch protokolliert, damit du ihn verfolgen kannst.</string>
     <string name="tut_profile_2">Tippe oben auf das Zahnrad ⚙ für Einstellungen, Export/Import und zum Zurücksetzen dieser Tutorials.</string>
     <string name="tut_routine_title">Routinen &amp; Übungen</string>
     <string name="tut_routine_1">Erstelle deine Routinen und organisiere deine Übungsbibliothek mit dem Umschalter oben.</string>

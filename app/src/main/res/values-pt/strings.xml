@@ -174,7 +174,7 @@
     <string name="tut_reset_subtitle">Mostrar novamente os guias de cada ecrã</string>
     <string name="tut_reset_done">Tutoriais reiniciados</string>
     <string name="tut_profile_title">O teu perfil</string>
-    <string name="tut_profile_1">Edita o teu peso, gordura e medidas: guardam-se sozinhos, sem botão. A tua evolução é registada automaticamente.</string>
+    <string name="tut_profile_1">Edita o teu peso, gordura corporal e medidas principais. A tua evolução é registada automaticamente para acompanhares o progresso.</string>
     <string name="tut_profile_2">Toca na engrenagem ⚙ no topo para definições, exportar/importar dados e reiniciar estes tutoriais.</string>
     <string name="tut_routine_title">Rotinas e exercícios</string>
     <string name="tut_routine_1">Cria as tuas rotinas e organiza a tua biblioteca de exercícios com o seletor no topo.</string>
