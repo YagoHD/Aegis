@@ -64,11 +64,13 @@ import com.yago.aegis.MainActivity
 import com.yago.aegis.R
 import com.yago.aegis.ui.components.AegisAlertDialog
 import com.yago.aegis.ui.components.AegisTopBar
+import com.yago.aegis.ui.components.ExerciseQuickSheet
 import com.yago.aegis.ui.components.ExerciseSessionCard
 import com.yago.aegis.ui.components.SessionExercisePickerSheet
 import com.yago.aegis.ui.components.SessionProgressHeader
 import com.yago.aegis.viewmodel.ProfileViewModel
 import com.yago.aegis.viewmodel.RoutinesViewModel
+import com.yago.aegis.viewmodel.StatsViewModel
 import com.yago.aegis.viewmodel.WorkoutViewModel
 import kotlin.math.roundToInt
 
@@ -82,6 +84,7 @@ fun ActiveSessionScreen(
     onFinishWorkout: () -> Unit,
     onBack: () -> Unit = {},
     profileViewModel: ProfileViewModel,
+    statsViewModel: StatsViewModel,
     onNavigateToSettings: () -> Unit = {},
     onNavigateToPlateCalculator: () -> Unit = {}
 ) {
@@ -100,6 +103,8 @@ fun ActiveSessionScreen(
 
     var showCancelDialog by remember { mutableStateOf(false) }
     var showExercisePicker by remember { mutableStateOf(false) }
+    // #1: ficha de ejercicio como panel sobre el entreno (al tocar el título).
+    var detailExerciseId by remember { mutableStateOf<Long?>(null) }
     // C2: evita guardar la sesión dos veces por un doble toque rápido en "Finalizar".
     var isFinishing by remember { mutableStateOf(false) }
     val libraryExercises by routinesViewModel.allExercises.collectAsState()
@@ -374,6 +379,15 @@ fun ActiveSessionScreen(
         )
     }
 
+    // #1: ficha del ejercicio como panel superpuesto (histórico de pesos + PR).
+    detailExerciseId?.let { exId ->
+        ExerciseQuickSheet(
+            exerciseId = exId,
+            viewModel = statsViewModel,
+            onDismiss = { detailExerciseId = null }
+        )
+    }
+
     // Box raíz para medir el tamaño disponible y posicionar el FAB con offset absoluto
     Box(
         modifier = Modifier
@@ -484,7 +498,8 @@ fun ActiveSessionScreen(
                                 } else null,
                                 onRemoveExercise = if (progress.addedInSession) {
                                     { workoutViewModel.removeExerciseFromSession(progress.exercise.id) }
-                                } else null
+                                } else null,
+                                onTitleClick = { detailExerciseId = progress.exercise.id }
                             )
                             if (index < currentSession.exercisesProgress.lastIndex) {
                                 HorizontalDivider(

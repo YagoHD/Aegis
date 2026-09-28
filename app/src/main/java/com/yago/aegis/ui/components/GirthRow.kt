@@ -31,19 +31,20 @@ fun GirthRow(label: String, value: String, onValueChange: (String) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = Spacing.md, horizontal = Spacing.xs), // Un poco más de aire vertical
-        horizontalArrangement = Arrangement.SpaceBetween,
+            .padding(vertical = Spacing.md, horizontal = Spacing.md),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // --- ETIQUETA: AegisWhite con peso medio ---
+        // Etiqueta en columna de ancho fijo → el número queda JUNTO a ella (antes SpaceBetween
+        // dejaba un hueco enorme entre el texto y el valor).
         Text(
-            text = label.uppercase(), // Consistencia en mayúsculas
+            text = label.uppercase(),
             color = MaterialTheme.colorScheme.onBackground,
             fontSize = 13.sp,
             fontWeight = FontWeight.Bold,
             letterSpacing = 1.sp,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.width(120.dp)
         )
+        Spacer(modifier = Modifier.width(Spacing.lg))
 
         // --- CONTENEDOR DE ENTRADA (Módulo Técnico) ---
         Box(
@@ -81,5 +82,6 @@ fun GirthRow(label: String, value: String, onValueChange: (String) -> Unit) {
                 modifier = Modifier.fillMaxWidth()
             )
         }
+        Spacer(modifier = Modifier.weight(1f))
     }
 }

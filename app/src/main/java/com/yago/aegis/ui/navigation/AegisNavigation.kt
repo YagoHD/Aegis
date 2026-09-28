@@ -456,6 +456,7 @@ fun AegisNavigation(
                     workoutViewModel = workoutViewModel,
                     routinesViewModel = routinesViewModel,
                     profileViewModel = profileViewModel,
+                    statsViewModel = sharedStatsViewModel,
                     onFinishWorkout = {
                         navController.navigate(Routes.WORKOUT_COMPLETE) {
                             popUpTo(Routes.ACTIVE_SESSION) { inclusive = true }
@@ -473,6 +474,7 @@ fun AegisNavigation(
                     workoutViewModel = workoutViewModel,
                     routinesViewModel = routinesViewModel,
                     profileViewModel = profileViewModel,
+                    statsViewModel = sharedStatsViewModel,
                     onFinishWorkout = {
                         navController.navigate(Routes.WORKOUT_COMPLETE) {
                             popUpTo(Routes.CUSTOM_SESSION) { inclusive = true }

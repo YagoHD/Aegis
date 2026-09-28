@@ -1,6 +1,7 @@
 package com.yago.aegis.ui.components
 import com.yago.aegis.ui.theme.Spacing
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -46,7 +47,8 @@ fun ExerciseSessionCard(
     onToggleExercise: () -> Unit,
     onSwitchVariant: ((Int) -> Unit)? = null,  // newVariantIndex
     onRemoveExercise: (() -> Unit)? = null,     // solo para ejercicios añadidos en caliente
-    bodyweight: Double = 0.0
+    bodyweight: Double = 0.0,
+    onTitleClick: (() -> Unit)? = null          // abre la ficha del ejercicio como panel sobre el entreno
 ) {
     val loadType = progress.exercise.resolveLoadType()
     val isExerciseDone = progress.sets.isNotEmpty() && progress.sets.all { it.isCompleted }
@@ -101,7 +103,9 @@ fun ExerciseSessionCard(
                         letterSpacing = 1.sp,
                         color = if (isExerciseDone) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                     ),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier
+                        .weight(1f)
+                        .then(if (onTitleClick != null) Modifier.clickable { onTitleClick() } else Modifier)
                 )
                 if (hasVariants) {
                     Spacer(modifier = Modifier.width(2.dp))
