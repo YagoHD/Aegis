@@ -150,8 +150,9 @@ fun AegisNavigation(
                 LoginScreen(
                     authViewModel = authViewModel,
                     onNavigateToRegister = {
-                        // Volver a welcome para iniciar el flujo de registro completo
-                        navController.navigate(Routes.WELCOME) {
+                        // Ir DIRECTO al flujo de registro (identidad → métricas → registro),
+                        // no al selector welcome (bug: "registrarme" desde login iba al selector).
+                        navController.navigate(Routes.IDENTITY) {
                             popUpTo(Routes.LOGIN) { inclusive = true }
                         }
                     },
