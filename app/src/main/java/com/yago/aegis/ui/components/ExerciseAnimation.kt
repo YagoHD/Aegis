@@ -1,7 +1,5 @@
 package com.yago.aegis.ui.components
 
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import coil3.svg.SvgDecoder
 import com.yago.aegis.ui.theme.Radius
 import com.yago.aegis.ui.theme.Spacing
@@ -85,7 +84,24 @@ fun ExerciseAnimationCard(exerciseName: String?, modifier: Modifier = Modifier) 
             .build()
     }
 
-    // Alterna 1→2→3→2 en bucle para dar sensación de repetición.
+    // Petición Coil para el frame [i], leyendo los bytes del SVG del asset. memoryCacheKey estable
+    // → una vez cargado, el cambio de fotograma es un acierto de caché INSTANTÁNEO (sin parpadeo).
+    fun request(i: Int): ImageRequest {
+        val bytes = runCatching {
+            context.assets.open("exercise_anim/$slug/frame-$i.svg").use { it.readBytes() }
+        }.getOrNull()
+        return ImageRequest.Builder(context)
+            .data(bytes)
+            .memoryCacheKey("exanim-$slug-$i")
+            .build()
+    }
+
+    // Precarga los 3 fotogramas en la caché para que el flipbook no parpadee en la primera vuelta.
+    LaunchedEffect(slug) {
+        for (i in 1..3) loader.execute(request(i))
+    }
+
+    // Cambio DURO entre fotogramas (sin fundido: el fundido mezclaba dos poses y se veía "movido").
     var frame by remember(slug) { mutableIntStateOf(1) }
     LaunchedEffect(slug) {
         val seq = listOf(1, 2, 3, 2)
@@ -93,7 +109,7 @@ fun ExerciseAnimationCard(exerciseName: String?, modifier: Modifier = Modifier) 
         while (true) {
             frame = seq[i % seq.size]
             i++
-            delay(650)
+            delay(480)
         }
     }
 
@@ -106,24 +122,15 @@ fun ExerciseAnimationCard(exerciseName: String?, modifier: Modifier = Modifier) 
             modifier = Modifier.padding(Spacing.md),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Crossfade(targetState = frame, animationSpec = tween(300), label = "exercise_frame") { f ->
-                // Leemos los bytes del SVG desde assets y se los pasamos a Coil: así no dependemos
-                // del esquema de URI de assets; SvgDecoder reconoce el contenido SVG por sí solo.
-                val bytes = remember(slug, f) {
-                    runCatching {
-                        context.assets.open("exercise_anim/$slug/frame-$f.svg").use { it.readBytes() }
-                    }.getOrNull()
-                }
-                AsyncImage(
-                    model = bytes,
-                    imageLoader = loader,
-                    contentDescription = exerciseName,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                )
-            }
+            AsyncImage(
+                model = request(frame),
+                imageLoader = loader,
+                contentDescription = exerciseName,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+            )
             // Atribución mínima (CC BY-SA). Pendiente: pantalla de créditos formal.
             Text(
                 text = "Ilustración: Everkinetic · CC BY-SA",
