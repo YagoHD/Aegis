@@ -479,10 +479,23 @@ fun ActiveSessionScreen(
                         // el usuario tenga el mismo ejercicio en dos slots por error
                         key = { index, progress -> "${index}_${progress.exercise.id}" }
                     ) { index, progress ->
-                        Column {
+                        // Cada ejercicio en su propia card gris sobre el fondo negro, para
+                        // distinguirlos mejor que con un simple divisor.
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = Spacing.sm),
+                            color = MaterialTheme.colorScheme.surface,
+                            shape = RoundedCornerShape(Radius.lg),
+                            border = androidx.compose.foundation.BorderStroke(
+                                0.5.dp,
+                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f)
+                            )
+                        ) {
                             ExerciseSessionCard(
                                 progress = progress,
                                 bodyweight = bodyweight,
+                                modifier = Modifier.padding(horizontal = Spacing.md),
                                 onAddSet = { workoutViewModel.addSet(progress.exercise.id) },
                                 onUpdateSet = { setId, w, r, c, m ->
                                     workoutViewModel.updateSet(progress.exercise.id, setId, w, r, c, m)
@@ -501,13 +514,6 @@ fun ActiveSessionScreen(
                                 } else null,
                                 onTitleClick = { detailExerciseId = progress.exercise.id }
                             )
-                            if (index < currentSession.exercisesProgress.lastIndex) {
-                                HorizontalDivider(
-                                    modifier = Modifier.padding(top = Spacing.lg, start = Spacing.sm, end = Spacing.sm),
-                                    thickness = 0.5.dp,
-                                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
-                                )
-                            }
                         }
                     }
 

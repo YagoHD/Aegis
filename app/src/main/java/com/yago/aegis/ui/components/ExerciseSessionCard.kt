@@ -41,6 +41,7 @@ import com.yago.aegis.data.resolveLoadType
 @Composable
 fun ExerciseSessionCard(
     progress: ExerciseProgress,
+    modifier: Modifier = Modifier,
     onAddSet: () -> Unit,
     onUpdateSet: (String, Double, Int, Boolean, Double) -> Unit,
     onDeleteSet: (String) -> Unit,
@@ -62,7 +63,7 @@ fun ExerciseSessionCard(
     }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = Spacing.md)
     ) {
